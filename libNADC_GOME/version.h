@@ -1,0 +1,3 @@
+#define NADC_VERS_MAJOR 1
+#define NADC_VERS_MINOR 6
+#define NADC_VERS_RELEASE 0

@@ -1,0 +1,68 @@
+; compile all necessary modules
+@setup_nadc.idl
+
+data_dir = '/SCIA/LV2_01/2003/01/12/'
+flname = 'SCI_OL__2PUDPA20030112_060835_000035332012_00478_04540_9230.N1'
+
+; open file
+SCIA_HL_OPEN, data_dir + flname, dsd, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Summary of Quality Flags per State
+SCIA_OL2_RD_SQADS, dsd, sqads, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Geolocation of the States
+SCIA_RD_LADS, dsd, lads, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read States of the Product
+SCIA_LV2_RD_STATE, dsd, state, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Nadir Geolocation of State
+SCIA_OL2_RD_NGEO, dsd, ngeo, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Nadir Geolocation of State
+SCIA_OL2_RD_LGEO, dsd, lgeo, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Cloud and Aerosol data set
+SCIA_OL2_RD_CLD, dsd, cld, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+; --- use the CLD data and then release memory...
+SCIA_OL2_FREE_CLD, cld
+
+; read Nadir fitting window application data sets
+indx = WHERE( STRING(dsd[*].name[0:3]) EQ 'NAD_' $
+              and dsd[*].num_dsr GT 0, count )
+FOR ii = 0, count-1 DO BEGIN &$
+    dsd_name = STRCOMPRESS(STRING(dsd[indx[ii]].name), /REMOVE) &$
+   print, dsd_name &$
+    SCIA_OL2_RD_NFIT, dsd_name, dsd, nfit, status=status &$
+    IF status NE 0 THEN NADC_ERR_TRACE &$
+; --- use the NFIT MDS data and then release memory...
+    IF SIZE(nfit, /TNAME) EQ 'STRUCT' THEN SCIA_OL2_FREE_NFIT, nfit &$
+ENDFOR
+
+indx = WHERE( STRING(dsd[*].name[0:3]) EQ 'LIM_' $
+              and dsd[*].num_dsr GT 0, count )
+FOR ii = 0, count-1 DO BEGIN &$
+    dsd_name = STRCOMPRESS(STRING(dsd[indx[ii]].name), /REMOVE) &$
+   print, dsd_name &$
+    SCIA_OL2_RD_LFIT, dsd_name, dsd, nlfit, status=status &$
+    IF status NE 0 THEN NADC_ERR_TRACE &$
+; --- use the LFIT MDS data and then release memory...
+    IF SIZE(lfit, /TNAME) EQ 'STRUCT' THEN SCIA_OL2_FREE_LFIT, lfit &$
+ENDFOR
+
+; read Cloud and Aerosol data set
+SCIA_OL2_RD_LCLD, dsd, lcld, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+; --- use the CLD data and then release memory...
+;SCIA_OL2_FREE_LCLD, lcld
+
+
+; close file
+stat = SCIA_FCLOSE()

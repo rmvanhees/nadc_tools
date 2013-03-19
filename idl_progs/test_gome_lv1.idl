@@ -1,0 +1,66 @@
+; compile all necessary modules
+@setup_nadc.idl
+
+; open file
+data_dir = '/GOME/LV1_01/1999/01/03/'
+flname = '199901031004_19372.lv1'
+
+; -- file with Moon records
+;data_dir = '/GOME/LV1_01/1996/12/01/'
+;flname = '199612010943_08450.lv1'
+
+IF SCIA_FOPEN( data_dir + flname ) NE 0 THEN $
+  MESSAGE, 'FATAL error has occurred in SCIA_FOPEN'
+
+; read File Structure Record
+GOME_LV1_RD_FSR, fsr, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Specific Product Header
+GOME_LV1_RD_SPH, fsr, sph, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Fixed Calibration Data Record
+GOME_LV1_RD_FCD, fsr, fcd, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; To obtain wavelength grid for Solar spectrum, do:
+;solar_grid = POLY( FINDGEN(1024), (*fcd.spec)[fcd.indx_spec].coeffs[*,nchan]) 
+
+; read Pixel Specific Calibration Record
+GOME_LV1_RD_PCD, fsr, sph, pcd, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read spectra
+indx_pcd = WHERE( pcd.indx_bands[0] NE (-1), nr_pcd )
+
+; read Sun Calibration Record
+GOME_LV1_RD_SMCD, 'sun', fsr, sph, scd, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; read Moon Calibration Record
+GOME_LV1_RD_SMCD, 'moon', fsr, sph, mcd, status=status
+IF status NE 0 THEN NADC_ERR_TRACE
+
+;wave = 1
+;data = GET_LV1_GOME_SPEC( nr_pcd/2, fsr, fcd, pcd, calib='LAFSNPI', $
+;                          wave=wave, status=status )
+;IF status NE 0 THEN NADC_ERR_TRACE
+;help, wave, data
+
+; collect Earth PMD data (including geolocation)
+GOME_LV1_PCD_PMD, fsr, pcd, status=status, calibration='LPI'
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; collect Sun PMD data (no geolocation)
+GOME_LV1_SMCD_PMD, fsr, scd, status=status, calibration='LI'
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; collect Sun PMD data (no geolocation)
+GOME_LV1_SMCD_PMD, fsr, mcd, status=status, calibration='LI'
+IF status NE 0 THEN NADC_ERR_TRACE
+
+; close file
+;stat = SCIA_FCLOSE()
+
+;GOME_LV1_RD_SMBDR, 1, fsr, mcd, rec

@@ -1,0 +1,3 @@
+#define version_major	1
+#define version_minor	8
+#define version_release	7
