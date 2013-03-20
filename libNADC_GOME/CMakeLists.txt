@@ -13,7 +13,7 @@ set (LIB_VERS "${GOME_VERS_MAJOR}.${GOME_VERS_MINOR}.${GOME_VERS_RELEASE}")
 ## define pre-compiler flags
 if (PGSQL_FOUND)
    add_definitions (-D_WITH_SQL)
-endif
+endif (PGSQL_FOUND)
 
 TEST_BIG_ENDIAN(BIGENDIAN)
 if (NOT ${BIGENDIAN})

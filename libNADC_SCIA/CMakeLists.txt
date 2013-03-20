@@ -15,7 +15,7 @@ add_definitions (-DDATA_DIR="${NADC_TOOLS_DATADIR}")
 
 if (PGSQL_FOUND)
    add_definitions (-D_WITH_SQL)
-endif
+endif (PGSQL_FOUND)
 
 TEST_BIG_ENDIAN(BIGENDIAN)
 if (NOT ${BIGENDIAN})
