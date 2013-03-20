@@ -138,7 +138,7 @@ PRO SCIA_WR_H5_NLCORR2
   nlcorr[60000:-1, 14] = nlcorr[59999, 14]
 
   ; write the updated values
-  stat = call_external( lib_name('libIDL_NADC'), '_SCIA_WR_H5_NLCORR', $
+  stat = call_external( lib_name('libnadc_idl'), '_SCIA_WR_H5_NLCORR', $
                         CurveIndex, nlcorr, /CDECL )
   PRINT, stat
   RETURN

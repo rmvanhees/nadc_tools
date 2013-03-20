@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_SIP, dsd, sip, status=status
   num_sip = dsd[indx_dsd].num_dsr
   IF num_sip GT 0 THEN BEGIN
      sip = replicate( {sip_scia}, num_sip )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_SIP', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_SIP', $
                           num_dsd, dsd, sip, /CDECL )
 ; check error status
      IF num NE num_sip THEN status = -1

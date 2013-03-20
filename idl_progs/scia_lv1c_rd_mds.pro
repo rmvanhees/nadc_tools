@@ -339,7 +339,7 @@ PRO SCIA_LV1C_RD_ONE_MDS, dsd, state_in, calopt, mds, status=status, $
      !nadc.sciaOccult : geoL = REPLICATE( {geoL_scia}, total_dsr )
      !nadc.sciaMonitor: geoC = REPLICATE( {geoC_scia}, total_dsr )
   ENDCASE
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1C_RD_MDS', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1C_RD_MDS', $
                        clus_mask, state, mds, pixel_ids, pixel_wv, $
                        pixel_wv_err, pixel_val, pixel_err, $
                        geoC, geoL, geoN, /CDECL )
@@ -421,7 +421,7 @@ PRO SCIA_LV1C_RD_ONE_PMD, state_in, mds_pmd, status=status
      !nadc.sciaLimb   : geoL = REPLICATE( {geoL_scia}, num_geo )
      !nadc.sciaOccult : geoL = REPLICATE( {geoL_scia}, num_geo )
   ENDCASE
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1C_RD_MDS_PMD', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1C_RD_MDS_PMD', $
                        state, mds_pmd, int_pmd, geoL, geoN, /CDECL )
   IF num LT 1 THEN BEGIN
      IF num LT 0 THEN status = -1
@@ -478,7 +478,7 @@ PRO SCIA_LV1C_RD_ONE_POLV, state_in, mds_polV, status=status
      !nadc.sciaLimb   : geoL = REPLICATE( {geoL_scia}, num_geo )
      !nadc.sciaOccult : geoL = REPLICATE( {geoL_scia}, num_geo )
   ENDCASE
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1C_RD_MDS_POLV', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1C_RD_MDS_POLV', $
                        state, mds_polV, polV, geoL, geoN, /CDECL )
   IF num LT 1 THEN BEGIN
      IF num LT 0 THEN status = -1

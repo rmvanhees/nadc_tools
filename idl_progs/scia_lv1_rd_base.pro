@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_BASE, dsd, base, status=status
   num_base = dsd[indx_dsd].num_dsr
   IF num_base GT 0 THEN BEGIN
      base = replicate( {base_scia}, num_base )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_BASE', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_BASE', $
                           num_dsd, dsd, base, /CDECL )
 
 ; check error status

@@ -78,7 +78,7 @@ PRO SCIA_LV2_RD_CLD, dsd, cld, status=status
   IF num_cld GT 0 THEN BEGIN
      cld = REPLICATE( {cld_scia}, num_cld )
      data = FLTARR( num_cld * MAX_PMD_READ )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV2_RD_CLD', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV2_RD_CLD', $
                           num_dsd, dsd, cld, data, /CDECL )
 
 ; check error status

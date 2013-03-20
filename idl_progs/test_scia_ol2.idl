@@ -2,7 +2,7 @@
 @setup_nadc.idl
 
 data_dir = '/SCIA/LV2_01/2003/01/12/'
-flname = 'SCI_OL__2PUDPA20030112_060835_000035332012_00478_04540_9230.N1'
+flname = 'SCI_OL__2PWDPA20030112_092947_000035332012_00480_04542_3435.N1'
 
 ; open file
 SCIA_HL_OPEN, data_dir + flname, dsd, status=status
@@ -38,23 +38,24 @@ SCIA_OL2_FREE_CLD, cld
 indx = WHERE( STRING(dsd[*].name[0:3]) EQ 'NAD_' $
               and dsd[*].num_dsr GT 0, count )
 FOR ii = 0, count-1 DO BEGIN &$
-    dsd_name = STRCOMPRESS(STRING(dsd[indx[ii]].name), /REMOVE) &$
+   dsd_name = STRCOMPRESS(STRING(dsd[indx[ii]].name), /REMOVE) &$
    print, dsd_name &$
-    SCIA_OL2_RD_NFIT, dsd_name, dsd, nfit, status=status &$
-    IF status NE 0 THEN NADC_ERR_TRACE &$
+   SCIA_OL2_RD_NFIT, dsd_name, dsd, nfit, status=status &$
+   print, status &$
+   IF status NE 0 THEN NADC_ERR_TRACE &$
 ; --- use the NFIT MDS data and then release memory...
-    IF SIZE(nfit, /TNAME) EQ 'STRUCT' THEN SCIA_OL2_FREE_NFIT, nfit &$
+   IF SIZE(nfit, /TNAME) EQ 'STRUCT' THEN SCIA_OL2_FREE_NFIT, nfit &$
 ENDFOR
 
 indx = WHERE( STRING(dsd[*].name[0:3]) EQ 'LIM_' $
               and dsd[*].num_dsr GT 0, count )
 FOR ii = 0, count-1 DO BEGIN &$
-    dsd_name = STRCOMPRESS(STRING(dsd[indx[ii]].name), /REMOVE) &$
+   dsd_name = STRCOMPRESS(STRING(dsd[indx[ii]].name), /REMOVE) &$
    print, dsd_name &$
-    SCIA_OL2_RD_LFIT, dsd_name, dsd, nlfit, status=status &$
-    IF status NE 0 THEN NADC_ERR_TRACE &$
+   SCIA_OL2_RD_LFIT, dsd_name, dsd, nlfit, status=status &$
+   IF status NE 0 THEN NADC_ERR_TRACE &$
 ; --- use the LFIT MDS data and then release memory...
-    IF SIZE(lfit, /TNAME) EQ 'STRUCT' THEN SCIA_OL2_FREE_LFIT, lfit &$
+   IF SIZE(lfit, /TNAME) EQ 'STRUCT' THEN SCIA_OL2_FREE_LFIT, lfit &$
 ENDFOR
 
 ; read Cloud and Aerosol data set
@@ -62,7 +63,6 @@ SCIA_OL2_RD_LCLD, dsd, lcld, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
 ; --- use the CLD data and then release memory...
 ;SCIA_OL2_FREE_LCLD, lcld
-
 
 ; close file
 stat = SCIA_FCLOSE()

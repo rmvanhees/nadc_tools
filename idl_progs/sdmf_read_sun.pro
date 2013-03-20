@@ -92,25 +92,25 @@ PRO SDMF_READ_SUN, absOrbit, state_id, clus_id, mtbl, mds1c, $
 
 ; get cluster definitions from SDMF Sun database
   ClusDef = REPLICATE( {clusdef_scia}, 40 )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_CLUSDEF', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_CLUSDEF', $
                        SDMF_H5_DB, ClusDef, /CDECL )
 
 ; get cluster attributes for given state and cluster
   coaddf = 0b & num_pixels = 0us & num_obs = 0us & pet = 0.
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_CLUS_ATTR', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_CLUS_ATTR', $
                        SDMF_H5_DB, state_id, clus_id, coaddf, num_pixels, $
                        num_obs, pet, /CDECL )
 
 ; get indices to rows in SDMF database for given state and orbit number
   numIndx = 10ul
   metaIndx = ULONARR( numIndx )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_GET_PT_ORBITINDEX', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_GET_PT_ORBITINDEX', $
                        SDMF_H5_DB, state_id, absOrbit, numIndx, metaIndx, $
                        /CDECL )
 
 ; read pointing information for cluster data
   num_obs_geo = 0us
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_GEO_ATTR', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_GEO_ATTR', $
                        SDMF_H5_DB, state_id, num_obs_geo, /CDECL )
   prod = num_obs_geo * numIndx
   IF prod EQ 0 THEN BEGIN
@@ -118,7 +118,7 @@ PRO SDMF_READ_SUN, absOrbit, state_id, clus_id, mtbl, mds1c, $
      RETURN
   ENDIF
   pointing = REPLICATE( {sdmf_pt_geo}, prod )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_POINTING', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_POINTING', $
                        SDMF_H5_DB, state_id, numIndx, metaIndx, $
                        pointing, /CDECL )
 
@@ -126,7 +126,7 @@ PRO SDMF_READ_SUN, absOrbit, state_id, clus_id, mtbl, mds1c, $
   total_pixels = LONG(num_pixels) * num_obs
   mtbl = REPLICATE( {sdmf_pt_meta}, numIndx )
   pixel_val = FLTARR( total_pixels * numIndx )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_CLUSTER', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_CLUSTER', $
                        SDMF_H5_DB, state_id, clus_id, numIndx, metaIndx, $
                        mtbl, pixel_val, /CDECL )
 

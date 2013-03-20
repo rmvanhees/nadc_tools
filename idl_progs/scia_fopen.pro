@@ -58,5 +58,5 @@
 FUNCTION SCIA_FOPEN, flname
   compile_opt idl2,hidden
 
-  RETURN, call_external( lib_name('libIDL_NADC'), 'OpenFile', flname, /CDECL )
+  RETURN, call_external( lib_name('libnadc_idl'), 'OpenFile', flname, /CDECL )
 END

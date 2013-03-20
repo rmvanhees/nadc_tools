@@ -110,7 +110,7 @@ PRO SCIA_LV0_RD_PMD, info_all, mds_pmd, category=category, $
   mds_pmd = replicate( {mds0_pmd}, num_pmd )
 
 ; process PMD source packets
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV0_RD_PMD', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_PMD', $
                        info_pmd, ULONG(num_pmd), mds_pmd, /CDECL )
 
 ; check error status

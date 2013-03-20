@@ -88,7 +88,7 @@ PRO SCIA_WR_H5_MEMCORR, memcorr_fl=memcorr_fl
   FOR nc = 0, memDimY-1 DO $
      Table[*,nc] = SPLINE( xx[*,nc], TableBinned[*,nc], tt )
 
-  stat = call_external( lib_name('libIDL_NADC'), '_SCIA_WR_H5_MEMCORR', $
+  stat = call_external( lib_name('libnadc_idl'), '_SCIA_WR_H5_MEMCORR', $
                         memDimX, memDimY, Table, /CDECL )
 
   RETURN

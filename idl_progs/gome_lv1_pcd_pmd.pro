@@ -118,7 +118,7 @@ PRO GOME_LV1_PCD_PMD, fsr, pcd, status=status, $
   status = 0
 
 ; collect PMD records
-  num = call_external( lib_name('libIDL_NADC'), '_GOME_LV1_PCD_PMD', $
+  num = call_external( lib_name('libnadc_idl'), '_GOME_LV1_PCD_PMD', $
                        calib_mask, fsr, nr_pcd, indx_pcd, pcd, /CDECL )
 
 ; check error status

@@ -68,7 +68,7 @@ PRO GOME_LV1_RD_SMCD, source, fsr, sph, smcd, status=status
   IF nr_smcd EQ 0 THEN RETURN
 
   smcd = replicate( {smcd_gome}, nr_smcd )
-  num = call_external( lib_name('libIDL_NADC'), '_GOME_LV1_RD_SMCD', $
+  num = call_external( lib_name('libnadc_idl'), '_GOME_LV1_RD_SMCD', $
                        source_flag, fsr, sph, smcd, /CDECL )
 
 ; check error status

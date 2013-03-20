@@ -58,7 +58,7 @@ PRO GET_SCIA_ROE_INFO, eclipseMode, jday, absOrbit, saaFlag, orbitPhase
   saaFlag     = 0B
   orbitPhase  = 0.
   
-  result = call_external( lib_name('libIDL_NADC'), '_GET_SCIA_ROE_INFO', $
+  result = call_external( lib_name('libnadc_idl'), '_GET_SCIA_ROE_INFO', $
                           eclipseMode, jday, absOrbit, saaFlag, orbitPhase, $
                           /CDECL )
   RETURN

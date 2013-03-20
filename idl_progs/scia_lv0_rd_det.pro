@@ -268,7 +268,7 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
   data = ULONARR( sz_data )
 
 ; read Detector source packets
-  count = call_external( lib_name('libIDL_NADC'), '_SCIA_LV0_RD_DET', $
+  count = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_DET', $
                          info_det, ULONG(num_det), chan_mask, $
                          mds_det, data, /CDECL )
 ; check error status

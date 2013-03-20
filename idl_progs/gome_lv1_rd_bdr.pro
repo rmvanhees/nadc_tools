@@ -162,7 +162,7 @@ PRO GOME_LV1_RD_BDR, nband, fsr, pcd, rec, status=status, $
 ;read Spectral Band Records
   nr_rec = nr_pcd
   rec = replicate( {rec_gome}, nr_rec )
-  num = call_external( lib_name('libIDL_NADC'), '_GOME_LV1_RD_BDR', $
+  num = call_external( lib_name('libnadc_idl'), '_GOME_LV1_RD_BDR', $
                        nband, calib_mask, fsr, nr_pcd, indx_pcd, pcd, $
                        rec, /CDECL )
 

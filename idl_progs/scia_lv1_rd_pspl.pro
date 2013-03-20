@@ -70,7 +70,7 @@ PRO SCIA_LV1_RD_PSPL, dsd, pspl, status=status
   num_pspl = dsd[indx_dsd].num_dsr
   IF num_pspl GT 0 THEN BEGIN
      pspl = replicate( {psplo_scia}, num_pspl )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_PSPL', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_PSPL', $
                           num_dsd, dsd, pspl, /CDECL )
 
 ; check error status

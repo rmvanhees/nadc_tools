@@ -70,7 +70,7 @@ PRO SCIA_LV2_RD_STATE, dsd, state, status=status
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
   num_state = dsd[indx_dsd].num_dsr
   state = replicate( {state2_scia}, num_state )
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV2_RD_STATE', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV2_RD_STATE', $
                        num_dsd, dsd, state, /CDECL )
 
 ; check error status

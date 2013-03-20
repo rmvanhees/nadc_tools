@@ -69,7 +69,7 @@ PRO SCIA_WR_H5_STRAYLIGHT, grid_in, grid_out, strayCorr, $
   dimX = N_ELEMENTS( grid_in )
   dimY = N_ELEMENTS( grid_out )
 
-  stat = call_external( lib_name('libIDL_NADC'), '_SCIA_WR_H5_STRAYLIGHT', $
+  stat = call_external( lib_name('libnadc_idl'), '_SCIA_WR_H5_STRAYLIGHT', $
                         dimX, dimY, grid_in, grid_out, strayCorr, /CDECL )
   RETURN
 END

@@ -75,7 +75,7 @@ FAILED:
   ibuff[WHERE(ibuff GE 7)] -= 2
 
   CurveLegend = BYTE( ibuff )
-  stat = call_external( lib_name('libIDL_NADC'), '_SCIA_WR_H5_NLCORR', $
+  stat = call_external( lib_name('libnadc_idl'), '_SCIA_WR_H5_NLCORR', $
                         nLinDimX, curveDimY, CurveLegend, Data, /CDECL )
 
   RETURN

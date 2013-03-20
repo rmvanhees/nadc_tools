@@ -52,7 +52,7 @@ PRO SCIA_RD_DSD, mph, dsd, status=status
 
 ;read Data Set Descriptor records
   dsd = replicate( {dsd_scia}, mph.num_dsd-1 )
-  num = call_external( lib_name('libIDL_NADC'), '_ENVI_RD_DSD', $
+  num = call_external( lib_name('libnadc_idl'), '_ENVI_RD_DSD', $
                        mph, dsd, /CDECL )
 ; check error status
   IF num NE mph.num_dsd-1 THEN $

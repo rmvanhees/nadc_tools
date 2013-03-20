@@ -82,7 +82,7 @@ PRO SCIA_OL2_RD_LCLD, dsd, lcld, status=status
   para = FLTARR( num_lcld * MAX_PARA )
 
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_OL2_RD_LCLD', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_OL2_RD_LCLD', $
                        num_dsd, dsd, lcld, tanh, cir, para, /CDECL )
 
 ; check error status

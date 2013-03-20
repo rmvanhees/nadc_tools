@@ -116,7 +116,7 @@ PRO SCIA_LV0_RD_AUX, info_all, mds_aux, category=category, $
   mds_aux = replicate( {mds0_aux}, num_aux )
 
 ; read Auxiliary source packets
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV0_RD_AUX', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_AUX', $
                        info_aux, ULONG(num_aux), mds_aux, /CDECL )
 
 ; check error status

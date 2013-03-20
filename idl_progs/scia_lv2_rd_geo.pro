@@ -69,7 +69,7 @@ PRO SCIA_LV2_RD_GEO, dsd, geo, status=status
   num_geo = dsd[indx_dsd].num_dsr
   IF num_geo GT 0 THEN BEGIN
      geo = replicate( {geo_scia}, num_geo )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV2_RD_GEO', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV2_RD_GEO', $
                           num_dsd, dsd, geo, /CDECL )
 ; check error status
      IF num NE num_geo THEN status = -1

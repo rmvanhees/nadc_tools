@@ -90,14 +90,6 @@
 ;                    more checks build in for corrupted/in-complete products
 ;-
 ;---------------------------------------------------------------------------
-FUNCTION Set_SCIA_Calib, calib_str
-  compile_opt idl2,hidden
-
-  RETURN, call_external( lib_name('libIDL_NADC'), '_NADC_SCIA_CalibMask', $
-                         calib_str, /UL_VALUE, /CDECL )
-END
-
-;---------------------------------------------------------------------------
 FUNCTION GET_SCIA_MDS1_DATA, dsd, stateID, chanID, status=status, $
                              calib=calib, stateIndex=stateIndex, $
                              meta=meta, norm=norm, noPMD=noPMD
@@ -163,7 +155,8 @@ FUNCTION GET_SCIA_MDS1_DATA, dsd, stateID, chanID, status=status, $
 ; obtain calibration mask
   calib_mask = '0'xu
   IF N_ELEMENTS( calib ) GT 0 THEN BEGIN
-     calib_mask = Set_SCIA_Calib( calib )
+     calib_mask = call_external( lib_name('libnadc_idl'), '_SCIA_SET_CALIB', $
+                                 calib, /UL_VALUE, /CDECL )
   ENDIF
 
 ; set up structs for geolocation data
@@ -199,7 +192,7 @@ FUNCTION GET_SCIA_MDS1_DATA, dsd, stateID, chanID, status=status, $
 
      data =  FLTARR( dim_X * dim_Y * dim_Z )
      data_glr = REPLICATE( {meta_rec}, (dim_Y * dim_Z) )
-     num = call_external( lib_name('libIDL_NADC'), '_GET_SCIA_MDS1_DATA', $
+     num = call_external( lib_name('libnadc_idl'), '_GET_SCIA_MDS1_DATA', $
                           is_level_1c, pmdScaling, state[ns], clus_mask, $
                           calib_mask, data, data_glr, /CDECL )
      IF num NE (dim_Y * dim_Z) THEN BEGIN

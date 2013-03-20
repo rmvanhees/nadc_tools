@@ -92,7 +92,7 @@ PRO SCIA_OL2_RD_NFIT, nfit_name, dsd, nfit, status=status
   nlincorrm = FLTARR( num_nfit * MAX_NLIN_CROSS )
 
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_OL2_RD_NFIT', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_OL2_RD_NFIT', $
                        nfit_name, num_dsd, dsd, nfit, vcd, errvcd, $
                        linpars, errlinpars, lincorrm, $
                        nlinpars, errnlinpars, nlincorrm, /CDECL )

@@ -86,7 +86,7 @@ PRO SCIA_LV0_RD_MDS_INFO, flname, dsd, info, info_fl=info_fl, status=status
   num_dsr = dsd[indx_dsd].num_dsr
   info = REPLICATE( {mds0_info}, num_dsr )
 
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV0_RD_MDS_INFO', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_MDS_INFO', $
                        num_dsd, dsd, info, /CDECL )
 
 ; check error status

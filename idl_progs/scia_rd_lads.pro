@@ -70,7 +70,7 @@ PRO SCIA_RD_LADS, dsd, lads, status=status
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
   num_lads = dsd[indx_dsd].num_dsr
   lads = replicate( {lads_scia}, num_lads )
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_RD_LADS', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_RD_LADS', $
                        num_dsd, dsd, lads, /CDECL )
 ; check error status
   IF num EQ num_lads THEN status = 0

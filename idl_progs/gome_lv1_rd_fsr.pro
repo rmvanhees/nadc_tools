@@ -54,7 +54,7 @@ PRO GOME_LV1_RD_FSR, fsr, status=status
 
 ;read File Structure Record
   fsr = {fsr1_gome}
-  num = call_external( lib_name('libIDL_NADC'), $
+  num = call_external( lib_name('libnadc_idl'), $
                        '_GOME_LV1_RD_FSR', fsr, /CDECL )
 
 ; check error status

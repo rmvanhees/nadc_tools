@@ -56,7 +56,7 @@ PRO SCIA_LV1_RD_SPH, mph, sph, status=status
 
 ;read Specific Product Header
   sph = {sph1_scia}
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_SPH', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_SPH', $
                        mph, sph, /CDECL )
 ; check error status
   IF num NE 1 THEN status = -1

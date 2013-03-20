@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_SCP, dsd, scp, status=status
   num_scp = dsd[indx_dsd].num_dsr
   IF num_scp GT 0 THEN BEGIN
      scp = replicate( {scp_scia}, num_scp )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_SCP', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_SCP', $
                           num_dsd, dsd, scp, /CDECL )
 ; check error status
      IF num NE num_scp THEN status = -1

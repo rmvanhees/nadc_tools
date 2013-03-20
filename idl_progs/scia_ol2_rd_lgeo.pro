@@ -67,7 +67,7 @@ PRO SCIA_OL2_RD_LGEO, dsd, lgeo, status=status
   num_geo = dsd[indx_dsd].num_dsr
   IF num_geo GT 0 THEN BEGIN
      lgeo = replicate( {lgeo_scia}, num_geo )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_OL2_RD_LGEO', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_OL2_RD_LGEO', $
                           num_dsd, dsd, lgeo, /CDECL )
 
 ; check error status

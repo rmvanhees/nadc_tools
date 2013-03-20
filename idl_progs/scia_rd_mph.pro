@@ -49,7 +49,7 @@ PRO SCIA_RD_MPH, mph, status=status
 
 ; read Main Product Header
   mph = {mph_scia}
-  num = call_external( lib_name('libIDL_NADC'), '_ENVI_RD_MPH', $
+  num = call_external( lib_name('libnadc_idl'), '_ENVI_RD_MPH', $
                        mph, /CDECL )
 
 ; check error status

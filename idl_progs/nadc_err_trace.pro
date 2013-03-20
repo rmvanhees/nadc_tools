@@ -48,7 +48,7 @@ PRO NADC_ERR_TRACE, No_Exit=No_Exit
    log_name = '/tmp/nadc_log.XXXXXX'
    
    ; write error messages to this logfile
-   void = call_external( LIB_NAME('libIDL_NADC'), 'Err_Trace', $
+   void = call_external( lib_name('libnadc_idl'), 'Err_Trace', $
       log_name, /CDECL )
       
    ; read and display error massages using IDL interface

@@ -95,19 +95,19 @@ PRO SDMF_READ_LL, absOrbit, state_id, clus_id, mtbl, mds1c, $
 
 ; get cluster definitions from SDMF last-limb database
   ClusDef = REPLICATE( {clusdef_scia}, 40 )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_CLUSDEF', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_CLUSDEF', $
                        SDMF_H5_DB, ClusDef, /CDECL )
 
 ; get cluster attributes for given state and cluster
   coaddf = 0b & num_pixels = 0us & num_obs = 0us & pet = 0.
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_CLUS_ATTR', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_CLUS_ATTR', $
                        SDMF_H5_DB, state_id, clus_id, coaddf, num_pixels, $
                        num_obs, pet, /CDECL )
 
 ; get indices to rows in SDMF database for given state and orbit number
   numIndx = 10u
   metaIndx = ULONARR( numIndx )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_GET_PT_ORBITINDEX', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_GET_PT_ORBITINDEX', $
                        SDMF_H5_DB, state_id, absOrbit, numIndx, metaIndx, $
                        /CDECL )
 
@@ -116,7 +116,7 @@ PRO SDMF_READ_LL, absOrbit, state_id, clus_id, mtbl, mds1c, $
   if numIndx eq 0 then return
   mtbl = REPLICATE( {sdmf_pt_meta}, numIndx )
   pixel_val = FLTARR( total_pixels * numIndx )
-  num = call_external( lib_name('libIDL_NADC'), '_SDMF_RD_PT_CLUSTER', $
+  num = call_external( lib_name('libnadc_idl'), '_SDMF_RD_PT_CLUSTER', $
                        SDMF_H5_DB, state_id, clus_id, numIndx, metaIndx, $
                        mtbl, pixel_val, /CDECL )
 

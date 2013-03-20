@@ -70,7 +70,7 @@ PRO GOME_LV1_RD_FCD, fsr, fcd, status=status
   hot   = REPLICATE({lv1_hot}, MAX_ALLOC )
   spec  = REPLICATE({lv1_spec}, MAX_ALLOC )
   calib = REPLICATE({lv1_calib}, MAX_ALLOC )
-  num = call_external( lib_name('libIDL_NADC'), '_GOME_LV1_RD_FCD', $
+  num = call_external( lib_name('libnadc_idl'), '_GOME_LV1_RD_FCD', $
                        fsr, fcd, leak, hot, spec, calib, /CDECL )
 ; check error status
   IF num NE 1 THEN BEGIN

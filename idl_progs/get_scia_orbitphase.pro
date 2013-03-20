@@ -68,7 +68,7 @@ FUNCTION GET_SCIA_ORBITPHASE, julianDay, eclipse_mode=eclipse_mode, $
 ;read ROE-records and determine orbitPhase
   number = N_ELEMENTS( julianDay )
   orbitPhase = FLTARR( number )
-  num = call_external( lib_name('libIDL_NADC'), '_GET_SCIA_ROE_ORBITPHASE', $
+  num = call_external( lib_name('libnadc_idl'), '_GET_SCIA_ROE_ORBITPHASE', $
                        eclipse_mode, number, julianDay, orbitPhase, /CDECL )
 
 ; check error status

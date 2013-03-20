@@ -71,7 +71,7 @@ PRO SCIA_LV1_RD_PMD, dsd, pmd, status=status
   num_pmd = dsd[indx_dsd].num_dsr
   IF num_pmd GT 0 THEN BEGIN
      pmd = replicate( {pmd_scia}, num_pmd )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_PMD', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_PMD', $
                           num_dsd, dsd, pmd, /CDECL )
 
 ; check error status

@@ -56,7 +56,7 @@ FUNCTION GET_SCIA_QUALITY, orbit, period=period
 ; obtain Sciamachy data quality
   orbit  = LONG( orbit )
   period_out = LONARR( 2 )
-  result = call_external( lib_name('libIDL_NADC'), '_GET_SCIA_QUALITY', $
+  result = call_external( lib_name('libnadc_idl'), '_GET_SCIA_QUALITY', $
                           orbit, period_out, /CDECL, /UI_VAL )
 
   IF N_ELEMENTS(period) GT 0 THEN period = period_out

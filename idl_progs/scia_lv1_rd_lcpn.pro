@@ -70,7 +70,7 @@ PRO SCIA_LV1_RD_LCPN, dsd, lcpn, status=status
   num_lcpn = dsd[indx_dsd].num_dsr
   IF num_lcpn GT 0 THEN BEGIN
      lcpn = replicate( {lcpn_scia}, num_lcpn )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_LCPN', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_LCPN', $
                           num_dsd, dsd, lcpn, /CDECL )
 
 ; check error status

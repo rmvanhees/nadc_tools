@@ -225,14 +225,6 @@
 ;                    put the different procedures in seperate modules
 ;-
 ;---------------------------------------------------------------------------
-FUNCTION Set_SCIA_Calib, calib_str
-  compile_opt idl2,hidden
-
-  RETURN, call_external( lib_name('libIDL_NADC'), '_NADC_SCIA_CalibMask', $
-                         calib_str, /UL_VALUE, /CDECL )
-END
-
-;---------------------------------------------------------------------------
 FUNCTION Set_SCIA_ClusMask, state, channels=channels, clusters=clusters
   compile_opt idl2,logical_predicate,hidden
 
@@ -293,7 +285,8 @@ PRO SCIA_LV1_RD_ONE_MDS, state, mds, status=status, channels=channels, $
 ; obtain calibration mask
   calib_mask = '0'xu
   IF N_ELEMENTS( calibration ) GT 0 THEN BEGIN
-     calib_mask = Set_SCIA_Calib( calibration )
+     calib_mask = call_external( lib_name('libnadc_idl'), '_SCIA_SET_CALIB', $
+                                 calibration, /UL_VALUE, /CDECL )
   ENDIF
 
 ; obtain cluster mask
@@ -347,7 +340,7 @@ PRO SCIA_LV1_RD_ONE_MDS, state, mds, status=status, channels=channels, $
   ENDCASE
 
 ; read MDS data
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_MDS', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_MDS', $
                        state, clus_mask, calib_mask, mds, $
                        pixel_ids, pixel_wv, pixel_wv_err, pixel_val, $
                        pixel_err, geoC, geoL, geoN, /CDECL )
@@ -438,7 +431,7 @@ PRO SCIA_LV1_RD_ONE_PMD, state_in, mds_pmd, status=status
      !nadc.sciaOccult : geoL = REPLICATE( {geoL_scia}, num_geo )
      ELSE: RETURN
   ENDCASE
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_MDS_PMD', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_MDS_PMD', $
                        state, mds_pmd, int_pmd, geoL, geoN, /CDECL )
   IF num LT 1 THEN BEGIN
      status = -1
@@ -495,7 +488,7 @@ PRO SCIA_LV1_RD_ONE_POLV, state_in, mds_polV, status=status
      !nadc.sciaOccult : geoL = REPLICATE( {geoL_scia}, num_geo )
      ELSE: RETURN
   ENDCASE
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_MDS_POLV', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_MDS_POLV', $
                        state, mds_polV, polV, geoL, geoN, /CDECL )
   IF num LT 1 THEN BEGIN
      status = -1

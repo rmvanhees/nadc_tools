@@ -86,7 +86,7 @@ PRO SCIA_LV2_RD_DOAS, doas_name, dsd, doas, status=status
   data = FLTARR( num_doas * MAX_COEFS_CROSS )
 
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV2_RD_DOAS', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV2_RD_DOAS', $
                        doas_name, num_dsd, dsd, doas, data, /CDECL )
 
 ; check error status

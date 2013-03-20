@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_CLCP, dsd, clcp, status=status
   num_clcp = dsd[indx_dsd].num_dsr
   IF num_clcp GT 0 THEN BEGIN
      clcp = replicate( {clcp_scia}, num_clcp )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_CLCP', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_CLCP', $
                           num_dsd, dsd, clcp, /CDECL )
 
 ; check error status

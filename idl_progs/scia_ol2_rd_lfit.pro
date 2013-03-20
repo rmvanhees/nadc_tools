@@ -99,7 +99,7 @@ PRO SCIA_OL2_RD_LFIT, lfit_name, dsd, lfit, status=status
   statevec = replicate( {state_vec}, num_lfit * MAX_STVEC )
 
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_OL2_RD_LFIT', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_OL2_RD_LFIT', $
                        lfit_name, num_dsd, dsd, lfit, tangh, tangp, tangt, $
                        corrmatrix, residuals, addiag, mainrec, scaledrec, $
                        mgrid, statevec, /CDECL )

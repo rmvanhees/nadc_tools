@@ -163,7 +163,7 @@ PRO GOME_LV1_RD_SMBDR, nband, fsr, smcd, rec, status=status, $
   nr_rec = nr_smcd
   rec = replicate( {rec_gome}, nr_rec )
   print, nband, nr_rec, nr_smcd
-  num = call_external( lib_name('libIDL_NADC'), '_GOME_LV1_RD_SMBDR', $
+  num = call_external( lib_name('libnadc_idl'), '_GOME_LV1_RD_SMBDR', $
                        nband, calib_mask, fsr, nr_smcd, indx_smcd, $
                        smcd, rec, /CDECL )
 

@@ -57,7 +57,7 @@ PRO GOME_LV1_RD_SPH, fsr, sph, status=status
 
 ;read Specific Product Header
   sph = {sph1_gome}
-  num = call_external( lib_name('libIDL_NADC'), $
+  num = call_external( lib_name('libnadc_idl'), $
                        '_GOME_LV1_RD_SPH', fsr, sph, /CDECL )
 
 ; check error status

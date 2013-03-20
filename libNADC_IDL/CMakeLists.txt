@@ -20,10 +20,14 @@ include_directories(
   ${IDL_INCLUDE_DIR}
 )
 
+## Linker instructions
+set (CMAKE_LINKER_FLAGS "-Wl,-Bsymbolic")
+set (CMAKE_EXE_LINKER_FLAGS "-Wl,-Bsymbolic")
+set (CMAKE_MODULE_LINKER_FLAGS "-Wl,-Bsymbolic")
+
 ## define source-files
 set (NADC_IDL_SRCS
     gome_lv1_idl.c
-    scia_cfi_idl.c
     scia_gen_idl.c
     scia_h5_idl.c
     scia_lv0_idl.c
@@ -32,15 +36,30 @@ set (NADC_IDL_SRCS
     sdmf_h5_idl.c
 )
 
+if (PPF_FOUND)
+   list (APPEND NADC_IDL_SRCS scia_cfi_idl.c)
+endif (PPF_FOUND)
+
+#-----------------------------------------------------------------------------
+# Set-up for NADC_IDL
+#-----------------------------------------------------------------------------
 ## Compiler instructions
 add_library (${NADC_IDL_LIB_TARGET} ${LIB_TYPE} ${NADC_IDL_SRCS})
 
-## Linker instructions
-set (CMAKE_LINKER_FLAGS "-Wl,-Bsymbolic")
-set (CMAKE_EXE_LINKER_FLAGS "-Wl,-Bsymbolic")
-set (CMAKE_MODULE_LINKER_FLAGS "-Wl,-Bsymbolic")
-
-target_link_libraries (${NADC_IDL_LIB_TARGET} ${HSD5_LIBRARIES})
+if (PPF_FOUND)
+   target_link_libraries (${NADC_IDL_LIB_TARGET}
+   		      	 ${NADC_SCIA_CAL_LIB_TARGET}
+		      	 ${NADC_GOME_LIB_TARGET}
+		      	 ${NADC_LIB_TARGET}
+			 ${PPF_LIBRARIES}
+		      	 )
+else ()
+   target_link_libraries (${NADC_IDL_LIB_TARGET}
+   		      	 ${NADC_SCIA_CAL_LIB_TARGET}
+		      	 ${NADC_GOME_LIB_TARGET}
+		      	 ${NADC_LIB_TARGET}
+		      	 )
+endif()
 
 NADC_SET_LIB_OPTIONS (${NADC_IDL_LIB_TARGET} ${NADC_IDL_LIB_NAME} 
 		     ${LIB_TYPE} ${LIB_VERS})

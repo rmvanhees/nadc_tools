@@ -160,7 +160,6 @@ set (NADC_IDL_EXMPL
     test_scia_lv0.idl
     test_scia_lv1c.idl
     test_scia_lv1.idl
-    test_scia_lv2.idl
     test_scia_ol2.idl
 )
 

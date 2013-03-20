@@ -81,6 +81,7 @@ foreach (_extraPath
     $ENV{NADC_EXTERN}
     $ENV{HDF5_DIR}
     $ENV{IDL_DIR}
+    $ENV{PPF_DIR}
     )
   list (INSERT CMAKE_PREFIX_PATH  0 ${_extraPath}         )
   list (INSERT CMAKE_INCLUDE_PATH 0 ${_extraPath}/include )
@@ -94,6 +95,7 @@ foreach (_externalPackage
   PGSQL
   NetCDF
   IDL
+  PPF
   )
   ## Convert module name to upper-case
   string (TOUPPER ${_externalPackage} _externalPackageVar)
@@ -217,6 +219,13 @@ if (IDL_FOUND)
    message ( " .. IDL includes ................. = ${IDL_INCLUDE_DIR}"   )
 else ()
    message ( " .. IDL full path ................ = not installed"    )
+endif ()
+if (PPF_FOUND)
+   message ( " .. PPF libraries ................ = ${PPF_LIBRARIES}"    )
+   message ( " .. PPF includes ................. = ${PPF_INCLUDE_DIR}"   )
+   message ( " .. PPF library version .......... = ${PPF_VERSION}"    )
+else ()
+   message ( " .. PPF libraries ................ = not installed"    )
 endif ()
 message ( " ========================================================"   )
 endif (CONFIGURE_SUMMARY)

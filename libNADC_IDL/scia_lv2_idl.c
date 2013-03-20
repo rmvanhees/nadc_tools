@@ -941,14 +941,17 @@ int IDL_STDCALL _SCIA_OL2_RD_NFIT ( int argc, void *argv[] )
                          C_nfit[nr].numvcd * sizeof(float) );
           errvcd += C_nfit[nr].numvcd;
           free( C_nfit[nr].errvcd );
-	  (void) memcpy( linpars, C_nfit[nr].linpars, 
-                         C_nfit[nr].num_fitp * sizeof(float) );
-          linpars += C_nfit[nr].num_fitp;
-          free( C_nfit[nr].linpars );
-	  (void) memcpy( errlinpars, C_nfit[nr].errlinpars, 
-                         C_nfit[nr].num_fitp * sizeof(float) );
-          errlinpars += C_nfit[nr].num_fitp;
-          free( C_nfit[nr].errlinpars );
+	  if ( C_nfit[nr].num_fitp > 0 ) {
+	       (void) memcpy( linpars, C_nfit[nr].linpars, 
+			      C_nfit[nr].num_fitp * sizeof(float) );
+	       linpars += C_nfit[nr].num_fitp;
+	       free( C_nfit[nr].linpars );
+
+	       (void) memcpy( errlinpars, C_nfit[nr].errlinpars, 
+			      C_nfit[nr].num_fitp * sizeof(float) );
+	       errlinpars += C_nfit[nr].num_fitp;
+	       free( C_nfit[nr].errlinpars );
+	  }
 	  n_cross = (C_nfit[nr].num_fitp * (C_nfit[nr].num_fitp-1)) / 2;
 	  if ( n_cross > 0 ) {
 	       (void) memcpy( lincorrm, C_nfit[nr].lincorrm, 

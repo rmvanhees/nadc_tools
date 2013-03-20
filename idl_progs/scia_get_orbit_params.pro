@@ -124,7 +124,7 @@ pro scia_get_orbit_params, mjds, esms=esms, lats=lats, lons=lons, $
                                 ;
                                 ; call the binary
                                 ;
-  ret = call_external(lib_name('libIDL_NADC'), '_SCIA_GET_ORBIT_PARAMS', $
+  ret = call_external(lib_name('libnadc_idl'), '_SCIA_GET_ORBIT_PARAMS', $
                       mjds_srt, esms_srt, n_points, lats, lons, sunels, $ 
                       sunazs, /CDECL)
 

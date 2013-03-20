@@ -66,7 +66,7 @@ PRO SCIA_OL2_RD_SQADS, dsd, sqads, status=status
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
   num_sqads = dsd[indx_dsd].num_dsr
   sqads = replicate( {sqads_scia_ol}, num_sqads )
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_OL2_RD_SQADS', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_OL2_RD_SQADS', $
                        num_dsd, dsd, sqads, /CDECL )
 ; check error status
   IF num NE num_sqads THEN status = -1

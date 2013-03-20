@@ -80,7 +80,7 @@ PRO SCIA_OL2_RD_CLD, dsd, cld, status=status
   ENDIF
   cld = REPLICATE( {cld_scia_ol}, num_cld )
   data = FLTARR( num_cld * MAX_AEROPAR_READ )
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_OL2_RD_CLD', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_OL2_RD_CLD', $
                        num_dsd, dsd, cld, data, /CDECL )
 
 ; check error status

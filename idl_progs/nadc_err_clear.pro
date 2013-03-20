@@ -42,7 +42,7 @@ PRO NADC_ERR_CLEAR
    COMPILE_OPT idl2, logical_predicate, hidden
    
    ; write error messages to this logfile
-   void = call_external( LIB_NAME('libIDL_NADC'), 'Err_Clear', /CDECL )
+   void = call_external( lib_name('libnadc_idl'), 'Err_Clear', /CDECL )
    
    RETURN
 END

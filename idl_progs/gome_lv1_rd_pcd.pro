@@ -58,7 +58,7 @@ PRO GOME_LV1_RD_PCD, fsr, sph, pcd, status=status
 
 ;read Pixel Specific Calibration Records
   pcd = replicate( {pcd_gome}, fsr.nr_pcd )
-  num = call_external( lib_name('libIDL_NADC'), $
+  num = call_external( lib_name('libnadc_idl'), $
                        '_GOME_LV1_RD_PCD', fsr, sph, pcd, /CDECL )
 
 ; check error status

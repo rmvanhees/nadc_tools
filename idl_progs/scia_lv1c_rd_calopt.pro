@@ -66,7 +66,7 @@ PRO SCIA_LV1C_RD_CALOPT, dsd, calopt, status=status
   num_calopt = dsd[indx_dsd].num_dsr
   calopt = replicate( {calopt_scia}, num_calopt )
   IF num_calopt GT 0 THEN BEGIN
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1C_RD_CALOPT', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1C_RD_CALOPT', $
                           num_dsd, dsd, calopt, /CDECL )
 ; check error status
      IF num NE num_calopt THEN status = -1

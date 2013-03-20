@@ -3,7 +3,7 @@
 
 ; open file
 data_dir = '/SCIA/LV0_04/P/'
-flname = 'SCI_NL__0PPLRA20050922_102131_000059922041_00037_18628_1390.N1'
+flname = 'SCI_NL__0PPLRA20070727_193804_000057182060_00157_28267_6316.N1'
 
 SCIA_HL_OPEN, data_dir + flname, dsd, status=status
 IF status NE 0 THEN NADC_ERR_TRACE

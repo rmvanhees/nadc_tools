@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_DARK, dsd, dark, status=status
   num_dark = dsd[indx_dsd].num_dsr
   IF num_dark GT 0 THEN BEGIN
      dark = replicate( {dark_scia}, num_dark )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_DARK', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_DARK', $
                           num_dsd, dsd, dark, /CDECL )
 ; check error status
      IF num NE num_dark THEN status = -1 

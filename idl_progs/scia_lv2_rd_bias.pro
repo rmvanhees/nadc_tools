@@ -85,7 +85,7 @@ PRO SCIA_LV2_RD_BIAS, bias_name, dsd, bias, status=status
   data = FLTARR( num_bias * MAX_COEFS_CROSS )
 
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
-  num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV2_RD_BIAS', $
+  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV2_RD_BIAS', $
                        bias_name, num_dsd, dsd, bias, data, /CDECL )
 
 ; check error status

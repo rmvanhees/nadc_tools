@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_PSPN, dsd, pspn, status=status
   num_pspn = dsd[indx_dsd].num_dsr
   IF num_pspn GT 0 THEN BEGIN
      pspn = replicate( {pspn_scia}, num_pspn )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_PSPN', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_PSPN', $
                           num_dsd, dsd, pspn, /CDECL )
 ; check error status
      IF num NE num_pspn THEN status = -1

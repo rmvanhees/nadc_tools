@@ -58,5 +58,5 @@
 FUNCTION SCIA_FCLOSE
   compile_opt idl2,hidden
 
-  RETURN, call_external( lib_name('libIDL_NADC'), 'CloseFile' )
+  RETURN, call_external( lib_name('libnadc_idl'), 'CloseFile' )
 END

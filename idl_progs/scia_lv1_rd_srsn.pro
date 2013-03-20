@@ -69,7 +69,7 @@ PRO SCIA_LV1_RD_SRSN, dsd, srsn, status=status
   num_srsn = dsd[indx_dsd].num_dsr
   IF num_srsn GT 0 THEN BEGIN
      srsn = replicate( {srsn_scia}, num_srsn )
-     num = call_external( lib_name('libIDL_NADC'), '_SCIA_LV1_RD_SRSN', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_SRSN', $
                           num_dsd, dsd, srsn, /CDECL )
 ; check error status
      IF num NE num_srsn THEN status = -1

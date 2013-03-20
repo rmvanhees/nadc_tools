@@ -12,7 +12,7 @@ PRO SCIA_RD_MFACTOR, mftype, sensing_start, mfactor
 
  mfactor = FLTARR(8192)
 
- result = call_external( lib_name('libIDL_NADC'), '_SCIA_RD_MFACTOR', $
+ result = call_external( lib_name('libnadc_idl'), '_SCIA_RD_MFACTOR', $
                          mftype, sensing_start, mfactor, /CDECL )
  print, result
 
