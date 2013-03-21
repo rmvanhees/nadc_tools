@@ -70,7 +70,7 @@ will help us to improve our software. We will relay to ESA all\n\
 information to improve the official data processor.\n"
 
 #define GPL_COPY \
-"Copyright (C) 1999 - 2011 by Space Research Organization Netherlands\n\
+"Copyright (C) 1999 - 2013 by Space Research Organization Netherlands\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 

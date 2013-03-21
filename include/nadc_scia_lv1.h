@@ -34,8 +34,6 @@
 extern "C" {
 #endif
 
-#define MAX_DiffOrbitNumber 21
-
 #define NUM_LV0_PMD       6820
 #define NUM_LV0_AUX       1666
 

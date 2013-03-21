@@ -453,20 +453,6 @@ extern void SCIA_WR_ASCII_LADS( struct param_record, unsigned int,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
-extern void SCIA_RD_H5_MEM( /*@out@*/ struct scia_memcorr *mem )
-       /*@globals nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void SCIA_FREE_H5_MEM( struct scia_memcorr *mem );
-extern void SCIA_RD_H5_NLIN( /*@null@*/ const char *file, 
-			     /*@out@*/ struct scia_nlincorr *nlin )
-       /*@globals nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void SCIA_FREE_H5_NLIN( struct scia_nlincorr *nlin );
-extern void SCIA_RD_H5_STRAY( /*@out@*/ struct scia_straycorr *stray )
-       /*@globals nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void SCIA_FREE_H5_STRAY( struct scia_straycorr *stray );
-
 #ifdef _HDF5_H
 extern void SCIA_WR_H5_VERSION( hid_t )
        /*@globals  nadc_stat, nadc_err_stack;@*/

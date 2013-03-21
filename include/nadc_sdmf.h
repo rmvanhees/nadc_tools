@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <nadc_scia.h>
+#include <nadc_scia_cal.h>
 
 enum sdmf24_db {
      SDMF24_STATE, SDMF24_FITTED, SDMF24_ORBITAL,

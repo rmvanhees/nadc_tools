@@ -123,13 +123,13 @@ bool SDMF_get_BDPM_30( unsigned short absOrbit, /*@out@*/ unsigned char *bdpm )
 {
      const char prognm[] = "SDMF_get_BDPM_30";
 
+     const int  MAX_DiffOrbitNumber = 14;
+     const int  orbit = (int) absOrbit;
+
      const char msg_found[] =
           "\n\tapplied SDMF Bad Dead pixel mask (v3.0) of Orbit: %-d";
      const char msg_notfound[] =
           "\n\tno applicable Bad Dead pixel mask (v3.0) found for Orbit: %-d";
-
-     const int  MAX_DiffOrbitNumber = 14;
-     const int  orbit = (int) absOrbit;
 
      register int delta = 0;
 

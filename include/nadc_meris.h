@@ -51,8 +51,8 @@ struct sph_meris
      bool   ecmwf_type;
      bool   proc_mode;
      bool   offset_comp;
-     char   start_time[MAX_UTC_STRING];
-     char   stop_time[MAX_UTC_STRING];
+     char   start_time[UTC_STRING_LENGTH];
+     char   stop_time[UTC_STRING_LENGTH];
      char   descriptor[29];
      char   band_wavelen[166];
      char   bandwidth[90];
@@ -250,13 +250,14 @@ struct mds_rr2_20_meris
 /*
  * prototype declaration of Meris functions
  */
-extern void MERISget_Version( /*@out@*/ unsigned int *, 
-			      /*@out@*/ unsigned int *, 
-			      /*@out@*/ unsigned int *, 
-			      /*@out@*/ char * );
+extern void MERIS_SET_PARAM( int, char **, int,
+                             /*@out@*/ struct param_record *param )
+     /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
+     /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
+extern void MERIS_SHOW_PARAM( int, struct param_record );
 
 #if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
-extern void MERISshow_Version( FILE *stream, const char * )
+extern void MERIS_SHOW_VERSION( FILE *stream, const char * )
      /*@modifies stream@*/;
 
 extern void MERIS_RD_SPH( FILE *fp, const struct mph_envi,
@@ -333,6 +334,18 @@ extern void MERIS_WR_ASCII_TIE( struct param_record, unsigned int,
 				const struct tie_meris * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
+
+#ifdef _HDF5_H
+extern void MERIS_WR_H5_VERSION( hid_t )
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack@*/;
+extern hid_t MERIS_CRE_H5_FILE( int instrument, const struct param_record * );
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack@*/;
+extern void MERIS_WR_H5_MPH( struct param_record, const struct mph_envi * )
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack@*/;
+#endif /* _HDF5_H */
 
 #ifdef __cplusplus
   }

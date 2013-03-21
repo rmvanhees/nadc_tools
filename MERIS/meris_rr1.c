@@ -44,13 +44,10 @@
 #include <string.h>
 
 #include <hdf5.h>
-#ifdef _WITH_SQL
-#include <libpq-fe.h>
-#endif
 
 /*+++++ Local Headers +++++*/
 #define _MERIS_COMMON
-#include <defs_nadc.h>
+#include <nadc_meris.h>
 
 /*+++++ Global Variables +++++*/
 /* 
@@ -80,21 +77,21 @@ int main( int argc, char *argv[] )
 /*
  * initialization of command-line parameters
  */
-     NADC_SET_PARAM( argc, argv, MERIS_LEVEL_1, &param );
+     MERIS_SET_PARAM( argc, argv, MERIS_LEVEL_1, &param );
      if ( IS_ERR_STAT_FATAL ) 
           NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "" );
 /*
  * check if we have to display version and exit
  */
      if ( param.flag_version == PARAM_SET ) {
-	  MERISshow_Version( stdout, prognm );
+	  MERIS_SHOW_VERSION( stdout, prognm );
 	  exit( EXIT_SUCCESS );
      }
 /*
  * dump command-line parameters
  */
      if ( param.flag_show == PARAM_SET ) {
-          NADC_SHOW_PARAM( MERIS_LEVEL_1, param );
+          MERIS_SHOW_PARAM( MERIS_LEVEL_1, param );
           exit( EXIT_SUCCESS );
      }
 /*
@@ -103,19 +100,13 @@ int main( int argc, char *argv[] )
      if ( (fp = fopen( param.infile, "r" )) == NULL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, param.infile );
 /*
- * create output HDF5 file
+ * create output file
  */
      if ( param.write_hdf5 == PARAM_SET ) {
-	  Create_HDF5_NADC_FILE( MERIS_LEVEL_1, &param );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
-/* 	  SCIA_WR_H5_VERSION( param.hdf_file_id ); */
-/*
- * create for data structures for MERIS level 1 data
- */
-/* 	  CRE_SCIA_OL2_H5_STRUCTS( param ); */
-/* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "STRUCTS" ); */
+          param.hdf_file_id = MERIS_CRE_H5_FILE( MERIS_LEVEL_1, &param );
+          if ( IS_ERR_STAT_FATAL )
+               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
+          MERIS_WR_H5_VERSION( param.hdf_file_id );
      }
 /*
  * -------------------------

@@ -1,6 +1,7 @@
 #ifndef  __DEFS_SCIA_CAL                        /* Avoid redefinitions */
 #define  __DEFS_SCIA_CAL
 
+#define _SCIA_LEVEL_1
 #include <nadc_scia.h>
 
 #ifdef __cplusplus
@@ -68,6 +69,20 @@ struct RadSens_rec {
 /*
  * prototype declarations of Sciamachy calibration functions
  */
+extern void SCIA_RD_H5_MEM( /*@out@*/ struct scia_memcorr *mem )
+       /*@globals nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack@*/;
+extern void SCIA_FREE_H5_MEM( struct scia_memcorr *mem );
+extern void SCIA_RD_H5_NLIN( /*@null@*/ const char *file, 
+			     /*@out@*/ struct scia_nlincorr *nlin )
+       /*@globals nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack@*/;
+extern void SCIA_FREE_H5_NLIN( struct scia_nlincorr *nlin );
+extern void SCIA_RD_H5_STRAY( /*@out@*/ struct scia_straycorr *stray )
+       /*@globals nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack@*/;
+extern void SCIA_FREE_H5_STRAY( struct scia_straycorr *stray );
+
 /* #if defined _STDIO_INCLUDED || defined __STDIO_H__ */
 #if defined _STDIO_H || defined S_SPLINT_S
 extern void SCIA_LV1_CAL( FILE *fp, unsigned int,

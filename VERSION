@@ -1,4 +1,4 @@
 #define nadc_vers_major		2
 #define nadc_vers_minor		0
 #define nadc_vers_release	0
-#define nadc_vers_extra		b1
+#define nadc_vers_extra		b2

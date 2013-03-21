@@ -30,20 +30,22 @@ if (NOT PPF_FOUND)
       HINTS ${PPF_ROOT_DIR}
       PATH_SUFFIXES lib
       )
+    if (PPF_POINTING_LIBRARY)
+      list (APPEND PPF_LIBRARIES ${PPF_POINTING_LIBRARY})
+    endif ()
+
     find_library(PPF_ORBIT_LIBRARY ppf_orbit
       HINTS ${PPF_ROOT_DIR}
       PATH_SUFFIXES lib
       )
+    if (PPF_ORBIT_LIBRARY)
+      list (APPEND PPF_LIBRARIES ${PPF_ORBIT_LIBRARY})
+    endif ()
+
     find_library(PPF_LIB_LIBRARY ppf_lib
       HINTS ${PPF_ROOT_DIR}
       PATH_SUFFIXES lib
       )
-    if (PPF_POINTING_LIBRARY)
-      list (APPEND PPF_LIBRARIES ${PPF_POINTING_LIBRARY})
-    endif (PPF_ORBIT_LIBRARY)
-    if (PPF_ORBIT_LIBRARY)
-      list (APPEND PPF_LIBRARIES ${PPF_ORBIT_LIBRARY})
-    endif ()
     if (PPF_LIB_LIBRARY)
       list (APPEND PPF_LIBRARIES ${PPF_LIB_LIBRARY})
     endif ()
