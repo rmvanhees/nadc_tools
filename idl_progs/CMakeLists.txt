@@ -59,6 +59,7 @@ set (IDL_LEVEL0_SRCS
 )
 
 set (IDL_LEVEL1_SRCS
+    cmp_scia_cal.pro
     get_lv1_gome_spec.pro
     get_lv1_mds_data.pro
     get_lv1_mds_state.pro

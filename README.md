@@ -6,8 +6,7 @@ The software package "nadc_tools" contains a number of tools to access the offic
 ### Purpose and Limitations ###
 The probably most important part of "nadc_tools" are the C-libraries, which contain functions to read Sciamachy data products into memory, dump the data as ASCII output or write the data in PDS or HDF5 format. The software is written in ANSI-C (and even assembler), and coded in such a way that you (an experienced (C-) programmer) can easily understand the code. The data extractors, included in this software package, should give a good example of how to use the libraries.
 
-The software distributed in this package contains libraries, written in ANSI-C (mostly POSIX compliant except for 
-some ISO C99 extensions) and an IDL wrapper library (using _CALL_EXTERNAL_) with IDL functions to read GOME and Sciamachy data. 
+The software distributed in this package contains libraries, written in ANSI-C (mostly POSIX compliant except for some ISO C99 extensions) and an IDL wrapper library (using _CALL_EXTERNAL_) with IDL functions to read GOME and Sciamachy data.
 The IDL interface requires sharable object libraries. Building shared libraries is easy on the supported platforms, however, do not forget to set the environment variable _LD_LIBRARY_PATH_.
 
 This software package is written and maintained by Richard van Hees (SRON), and distributed under the GNU General Public License (version 2).
@@ -31,8 +30,7 @@ In order to retrieve a working copy or clone into a local bare Git repository:
 
     git clone git@github.com:rmvanhees/nadc_tools.git [<local>]
 
-It is adviced though that in order to push back changes, your are working off a fork from the original repository and then issue a pull request once you think your code is ready to be merged back into the main repositorys' master
-branch.
+It is adviced though that in order to push back changes, your are working off a fork from the original repository and then issue a pull request once you think your code is ready to be merged back into the main repositorys' master branch.
 
 ## Organization of files and directories ##
 After checking out a working copy, you will be left with the following directory structure:
@@ -136,4 +134,3 @@ such that header files, libraries, program executables and documentation will be
          `-- idl_nadc             ...  IDL programs
              |-- Examples
              `-- StructDefs
-

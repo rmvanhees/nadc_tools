@@ -99,9 +99,7 @@ extern "C" {
 #define BAND_TWO_B          ((unsigned char) 0x1U)
 #define BAND_THREE          ((unsigned char) 0x4U)
 #define BAND_FOUR           ((unsigned char) 0x8U)
-#define BAND_ALL            (BAND_ONE_A|BAND_ONE_B|\
-			     BAND_TWO_A|BAND_TWO_B|\
-			     BAND_THREE|BAND_FOUR)
+#define BAND_ALL            ((unsigned char) ~0x0U)
 
 /* flags for ground pixel selection */
 #define SUBSET_NONE         ((unsigned char) 0x0U)

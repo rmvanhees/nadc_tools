@@ -74,8 +74,7 @@ extern "C" {
 #define BAND_SIX      ((unsigned char) 0x20U)
 #define BAND_SEVEN    ((unsigned char) 0x40U)
 #define BAND_EIGHT    ((unsigned char) 0x80U)
-#define BAND_ALL      (BAND_ONE|BAND_TWO|BAND_THREE|BAND_FOUR|\
-                       BAND_FIVE|BAND_SIX|BAND_SEVEN|BAND_EIGHT)
+#define BAND_ALL      ((unsigned char) ~0x0U)
 
 /* Scia Lv0 calibration options (avoid conflicts with Lv1b options!) */
 #define DO_CORR_COADDF   (0x10000000U)

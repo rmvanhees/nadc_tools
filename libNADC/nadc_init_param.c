@@ -166,7 +166,7 @@ void NADC_INIT_PARAM( struct param_record *param )
      param->stateID_nr    = PARAM_UNSET;        /* default: write all states */
      param->clusID_nr     = PARAM_UNSET;      /* default: write all clusters */
 
-     param->chan_mask    = 0x0U;
+     param->chan_mask    = (unsigned char) ~0U;
 
      param->patch_scia   = 0x0U;
      param->calib_earth  = 0x0U;
@@ -178,7 +178,7 @@ void NADC_INIT_PARAM( struct param_record *param )
 
      param->hdf_file_id = -1;
 
-     param->clus_mask  = ~0ULL;            /* default: extract all clusters */
+     param->clus_mask  = ~0ULL;             /* default: extract all clusters */
 
      (void) memset( param->catID, 0u, MAX_NUM_STATE );
      (void) memset( param->stateID, 0u, MAX_NUM_STATE );

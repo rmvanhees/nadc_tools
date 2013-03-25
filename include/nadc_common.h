@@ -28,14 +28,11 @@
 #define  __NADC_COMMON
 
 /*+++++ Additional include files +++++*/
+#include <errno.h>
 #include <stdbool.h>
 
 #if !defined(_SIZE_T) && !defined(_SIZE_T_)
 #include <stddef.h>
-#endif
-
-#ifndef ESUCCESS
-#include <errno.h>
 #endif
 
 #ifdef __cplusplus

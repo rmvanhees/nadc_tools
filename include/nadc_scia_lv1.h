@@ -37,8 +37,6 @@ extern "C" {
 #define NUM_LV0_PMD       6820
 #define NUM_LV0_AUX       1666
 
-#define LV1_Clcon_LENGTH    17
-
 #define MaxBoundariesSIP    13
 
 /*+++++ Structures & Unions +++++*/
@@ -47,20 +45,6 @@ enum cluster_type { RSIG = 1, RSIGC, ESIG, ESIGC };
 /*
  * compound data types
  */
-struct Clcon_scia
-{
-     unsigned char id;
-     unsigned char channel;
-     unsigned char type;
-/*      unsigned char dummy; */
-     unsigned short pixel_nr;
-     unsigned short length;
-     unsigned short intg_time;
-     unsigned short coaddf;
-     unsigned short n_read;
-     float pet;
-};
-
 union det_signal
 {
      struct signal_breakout
@@ -295,6 +279,22 @@ struct asfp_scia
      unsigned char  type_slit_fun;
      float          fwhm_slit_fun;
      float          f_voi_fwhm_gauss;
+};
+
+#define LV1_Clcon_LENGTH    17     /* size on disk */
+
+struct Clcon_scia
+{
+     unsigned char id;
+     unsigned char channel;
+     unsigned char type;
+/*      unsigned char dummy; */
+     unsigned short pixel_nr;
+     unsigned short length;
+     unsigned short intg_time;
+     unsigned short coaddf;
+     unsigned short n_read;
+     float pet;
 };
 
 struct state1_scia

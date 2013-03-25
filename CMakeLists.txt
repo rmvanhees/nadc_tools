@@ -156,7 +156,7 @@ set (CMAKE_C_FLAGS_RELEASE "-march=native -O3")
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${HDF5_INCLUDE_DIRS}
-  ${PGSQL_INCLUDES}
+  ${PGSQL_INCLUDE_DIR}
   )
 
 add_subdirectory (libNADC)
