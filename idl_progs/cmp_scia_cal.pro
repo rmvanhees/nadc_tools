@@ -105,7 +105,6 @@ PRO CMP_SCIA_CAL, scia_1b_fl, calib=calib, MDStype=MDStype, $
 ;iindx = STRPOS( calib, ',8' ) 
 ;iindx = STRPOS( calib, ',9' ) 
   envi_calib += envi_extra
-  PRINT, SciaL1C_bin + ' -cal ' + envi_calib
 
 ; read headers of the level 1b file
   SCIA_HL_OPEN, scia_1b_fl, dsd_1b, status=status
@@ -139,18 +138,20 @@ PRO CMP_SCIA_CAL, scia_1b_fl, calib=calib, MDStype=MDStype, $
 ; create level 1c product
         IF (~ KEYWORD_SET( NoSciaL1C )) THEN BEGIN
            FILE_DELETE, scia_1c_fl, /QUIET
-           IF calib NE '' THEN BEGIN
-              SPAWN, SciaL1C_bin $
-                     + ' -type ' + str_type_mds[ids_type_mds[ni]] $
-                     + ' -out ' + temp_dir $
-                     + ' -cal ' + envi_calib  $
-                     + ' ' + scia_1b_fl, EXIT_STATUS=status
+           IF envi_calib NE '' THEN BEGIN
+              SciaL1C_command = SciaL1C_bin $
+                                + ' -type ' + str_type_mds[ids_type_mds[ni]] $
+                                + ' -out ' + temp_dir $
+                                + ' -cal ' + envi_calib  $
+                                + ' ' + scia_1b_fl
            ENDIF ELSE BEGIN
-              SPAWN, SciaL1C_bin $
-                     + ' -type ' + str_type_mds[ids_type_mds[ni]] $
-                     + ' -out ' + temp_dir $
-                     + ' ' + scia_1b_fl, EXIT_STATUS=status
+              SciaL1C_command = SciaL1C_bin $
+                                + ' -type ' + str_type_mds[ids_type_mds[ni]] $
+                                + ' -out ' + temp_dir $
+                                + ' ' + scia_1b_fl
            ENDELSE
+           PRINT, SciaL1C_command
+           SPAWN, SciaL1C_command, EXIT_STATUS=status
            IF status NE 0 THEN MESSAGE, 'Fatal error occurred during SciaL1C'
         ENDIF
 

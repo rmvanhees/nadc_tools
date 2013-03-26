@@ -29,7 +29,9 @@
  in/output:  
             struct mds1_scia *mds     :  structure holding level 1b MDS records
 .RETURNS     nothing
-.COMMENTS    None
+.COMMENTS    ToDo: handle MONITOR states correctly
+                   handle PET < 1/32 correctly
+		   handle spikes in the PMD readouts correctly
 .ENVIRONment None
 .VERSION     5.1     11-Jan-2013   fixed memory corruption bug which occured
                                    when not all channels where processed, RvH
@@ -86,30 +88,26 @@
 				 CHANNEL_SIZE * ((int) Clcon.channel - 1))))
 
 /*+++++ Static Variables +++++*/
- /* science channel 2 PMD mapping: 1-A, 2-A, 3-B, 4-C, 5-D, 6-E, 7-F, 8-F */
-static const unsigned short Chan2PmdIndx[SCIENCE_CHANNELS] = { 
-     0, 0, 1, 2, 3, 4, 5, 5 
-};
-
 struct scia_cal_rec {
      unsigned char    state_id;
      unsigned char    state_index;
      unsigned short   abs_orbit;
      unsigned short   limb_scans;       /* zero for non-Limb states */
+     unsigned short   state_pet_min;
      int              type_mds;
      size_t           num_obs;          /* observation at pet_min */
      size_t           num_channels;     /* SCIENCE_CHANNELS */
      size_t           num_xpixels;      /* SCIENCE_PIXELS */
      size_t           num_ypixels;      /* zero */
-     float            pet_min;
      float            orbit_phase;
+     unsigned char    *coadd_min;       /* [num_channels] */
      unsigned char    *coaddf;          /* [num_xpixels] co-adding factor */
      unsigned char    *chan_id;         /* [num_xpixels] channel ID [1..8] */
-     unsigned char    *coadd_chan_min;  /* [num_channels] */
      unsigned char    *quality_flag;    /* [num_xpixels] zero is ok */
+     unsigned short   *pet_min;         /* [num_channels] in BCPS */
+     unsigned short   *num_pet;         /* [num_channels] per State execution */
      float            *dark_signal;     /* [num_xpixels] dark at PET[chan] */
      float            *pet;             /* [num_xpixels] 6-8 not corrected */
-     float            *pet_chan_min;    /* [num_channels] */
      double           **chan_mean;      /* [num_channels][num_obs] */
      double           **spectra;        /* [num_xpixels][num_obs] */
      float            **correction;     /* [num_xpixels][num_obs] */
@@ -168,8 +166,8 @@ void SCIA_WR_CAL_REC( unsigned short patch_flag,
      (void) H5LTset_attribute_uint( fileID, "/", "numPixelsX", &ubuff, 1 );
      ubuff = (unsigned int) scia_cal->num_ypixels;
      (void) H5LTset_attribute_uint( fileID, "/", "numPixelsY", &ubuff, 1 );
-     (void) H5LTset_attribute_float( fileID, "/", "PET_min", 
-				      &scia_cal->pet_min, 1 );
+     (void) H5LTset_attribute_ushort( fileID, "/", "PET_min", 
+				      &scia_cal->state_pet_min, 1 );
      (void) H5LTset_attribute_float( fileID, "/", "orbitPhase;", 
 				      &scia_cal->orbit_phase, 1 );
 
@@ -195,11 +193,11 @@ void SCIA_WR_CAL_REC( unsigned short patch_flag,
      (void) H5LTset_attribute_double( fileID, "channelMean", "_FillValue", 
 				      &dbuff, 1 );
      (void) H5LTset_attribute_uchar( fileID, "channelMean", "coaddf_min", 
-				     scia_cal->coadd_chan_min, 
-				     SCIENCE_CHANNELS );
-     (void) H5LTset_attribute_float( fileID, "channelMean", "pet_min", 
-				     scia_cal->pet_chan_min, 
-				     SCIENCE_CHANNELS );
+				     scia_cal->coadd_min, SCIENCE_CHANNELS );
+     (void) H5LTset_attribute_ushort( fileID, "channelMean", "pet_min", 
+				      scia_cal->pet_min, SCIENCE_CHANNELS );
+     (void) H5LTset_attribute_ushort( fileID, "channelMean", "num_pet", 
+				      scia_cal->num_pet, SCIENCE_CHANNELS );
      dims[0] = (hsize_t) scia_cal->num_xpixels;
      dims[1] = (hsize_t) scia_cal->num_obs;
      (void) H5LTmake_dataset_double( fileID, "spectra", 2, dims, 
@@ -255,14 +253,26 @@ void SCIA_CAL_GET_DARK( FILE *fp, unsigned int calib_flag,
 	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_FittedDark");
      }
 
-     for ( np = 0; np < scia_cal->num_xpixels; np++ ) {
-	  float pet = scia_cal->pet[np];
+     if ( (calib_flag & DO_CORR_DARK) == UINT_ZERO ) {
+	  for ( np = 0; np < scia_cal->num_xpixels; np++ ) {
+	       if ( isnormal(analogOffs[np]) )
+		    scia_cal->dark_signal[np] = analogOffs[np];
+	  }
+     } else {
+	  for ( np = 0; np < scia_cal->num_xpixels; np++ ) {
+	       float pet = scia_cal->pet[np];
 
-	  if ( pet < FLT_EPSILON ) continue;
-	  if ( np >= (VIS_CHANNELS * CHANNEL_SIZE) 
-	       && pet >= (PET_noHotMode - FLT_EPSILON) ) pet -= PET_Offset;
-	       
-	  scia_cal->dark_signal[np] = analogOffs[np] + pet * darkCurrent[np];
+	       if ( ! (isnormal(analogOffs[np]) && isnormal(darkCurrent[np])) )
+		    continue;
+
+	       if ( pet < FLT_EPSILON ) continue;
+
+	       if ( np >= (VIS_CHANNELS * CHANNEL_SIZE) 
+		    && pet >= (PET_noHotMode - FLT_EPSILON) ) pet -= PET_Offset;
+
+	       scia_cal->dark_signal[np] = 
+		    analogOffs[np] + pet * darkCurrent[np];
+	  }
      }
 }
 
@@ -296,48 +306,42 @@ void SCIA_FILL_SPECTRA( const struct state1_scia *state,
      }
 
      do {
-	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->pet_min);
-
 	  np = 0;
 	  do {
 	       register unsigned short nr;
 	       register unsigned short nd = 0;
-	       register size_t nobs = fillings - 1;
+	       register size_t nobs = 0;
 
 	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
 
 	       const double dark = 
 		    state->Clcon[ncl].coaddf * scia_cal->dark_signal[ipx];
-	  
 	       do {
-		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
-			 register size_t nb = np;
+		    register size_t nb = np;
 
+		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      scia_cal->spectra[ipx][nobs] =
 				   mds_1b[nd].clus[ncl].sig[nb].sign - dark;
+			      nobs++;
 			      nb += state->Clcon[ncl].length;
-			      nobs += fillings;
 			 }
 		    }
 		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
-			 register size_t nb = np;
-
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      register unsigned short nc = 0;
+			      register double val = -dark +
+				   mds_1b[nd].clus[ncl].sigc[nb].det.field.sign;
 			      do {
-				   scia_cal->spectra[ipx][nobs] = 
-					mds_1b[nd].clus[ncl].sigc[nb].det.field.sign
-					- dark;
-				   nobs += fillings;
+				   scia_cal->spectra[ipx][nobs] = val;
+				   nobs++;
 			      } while ( ++nc < state->Clcon[ncl].coaddf );
 			      nb += state->Clcon[ncl].length;
 			 }
 		    }
 	       } while ( ++nd < state->num_dsr );
 	  } while ( ++np < (size_t) state->Clcon[ncl].length );
-      } while ( ++ncl < state->num_clus );
+     } while ( ++ncl < state->num_clus );
 }
 
 /*+++++++++++++++++++++++++
@@ -359,34 +363,42 @@ void SCIA_CALC_CHAN_MEAN( const struct state1_scia *state,
 			  const struct mds1_scia *mds_1b, 
 			  struct scia_cal_rec *scia_cal )
 {
-     register size_t nch = 0;
-     register size_t no;
+     register size_t nch;
 
-     size_t NumPmdPet;
-     size_t offs;
+     /* science channel 2 PMD mapping: 1-A, 2-A, 3-B, 4-C, 5-D, 6-E, 7-F, 8-F */
+     static const unsigned short Chan2PmdIndx[SCIENCE_CHANNELS] = { 
+	  0, 0, 1, 2, 3, 4, 5, 5 
+     };
 
+     /* initialize channel average to zero (or one for Monitoring states */ 
      if ( scia_cal->type_mds == SCIA_MONITOR ) {
+	  nch = 0;
 	  do { 
-	       no = 0;
+	       register size_t no = 0;
 	       do {
 		    scia_cal->chan_mean[nch][no] = 1.;
 	       } while ( ++no < scia_cal->num_obs );
 	  } while ( ++nch < scia_cal->num_channels );
-	  return;
+	  return;                                      /* nothing left todo */
+     } else {
+	  nch = 0;
+	  do { 
+	       register size_t no = 0;
+	       do {
+		    scia_cal->chan_mean[nch][no] = 0.;
+	       } while ( ++no < scia_cal->num_obs );
+	  } while ( ++nch < scia_cal->num_channels );
      }
 
-     /* initialize channel mean to zero */
-     (void) memset( scia_cal->chan_mean[0], 0, sizeof(double) 
-		    * scia_cal->num_obs * scia_cal->num_channels );
+     nch = 0;
      do {
 	  register unsigned short nd  = 0;
+	  register size_t no = 0;
 
-	  if ( scia_cal->pet_chan_min[nch] <= FLT_EPSILON ) continue;
+	  const size_t NumPmdPet = 2 * (size_t) scia_cal->pet_min[nch];
 
-          NumPmdPet = NINT( 32. * scia_cal->pet_chan_min[nch] );
-	  offs = NINT( scia_cal->pet_chan_min[nch] / scia_cal->pet_min );
+	  if ( scia_cal->pet_min[nch] == USHRT_MAX ) continue;
 
-	  no = offs-1;
 	  do {
 	       register unsigned short indx = Chan2PmdIndx[nch];
 
@@ -402,9 +414,10 @@ void SCIA_CALC_CHAN_MEAN( const struct state1_scia *state,
 			 }
 			 indx += PMD_NUMBER;
 		    } while ( ++np < NumPmdPet );
+
 		    if ( num_valid > 0 ) 
 			 scia_cal->chan_mean[nch][no] /= num_valid;
-		    no += offs;
+		    no++;
 	       }
 	  } while ( ++nd < state->num_dsr );
      } while ( ++nch < scia_cal->num_channels );
@@ -431,6 +444,13 @@ void SCIA_SET_FLAG_QUALITY( struct scia_cal_rec *scia_cal )
 	  register unsigned short num_valid = 0;
 	  register double mean = 0.;
 
+	  const short nchan = (short) scia_cal->chan_id[np] - 1;
+
+	  if ( nchan < 0 ) {
+	       scia_cal->quality_flag[np] = FLAG_UNUSED;
+	       continue;
+	  }
+
 	  if ( (np % CHANNEL_SIZE) < 10 
 	       || (np % CHANNEL_SIZE) >= (CHANNEL_SIZE - 10) ) {
 	       scia_cal->quality_flag[np] = FLAG_BLINDED;
@@ -438,20 +458,20 @@ void SCIA_SET_FLAG_QUALITY( struct scia_cal_rec *scia_cal )
 	  }
 	       
 	  for ( no = 0; no < scia_cal->num_obs; no++ ) {
-	       if ( fpclassify( scia_cal->spectra[np][no] ) != FP_NAN ) {
+	       if ( isnormal( scia_cal->spectra[np][no] ) ) {
 		    mean += scia_cal->spectra[np][no];
 		    num_valid++;
 	       }
 	  }
 	  if ( num_valid == 0 ) {
-	       scia_cal->quality_flag[np] = FLAG_UNUSED;
+	       scia_cal->quality_flag[np] = FLAG_DEAD;
 	  } else if ( (mean /= num_valid) > (scia_cal->coaddf[np] * 60000.) ) {
 	       scia_cal->quality_flag[np] = FLAG_SATURATE;
 	  } else {
 	       register double adev = 0.;
 
 	       for ( no = 0; no < scia_cal->num_obs; no++ ) {
-		    if ( fpclassify( scia_cal->spectra[np][no] ) != FP_NAN )
+		    if ( isnormal( scia_cal->spectra[np][no] ) )
 			 adev += fabs( scia_cal->spectra[np][no] - mean );
 	       }
 	       adev /= num_valid;
@@ -479,39 +499,40 @@ static
 void SCIA_CAL_DE_COADD( struct scia_cal_rec *scia_cal )
        /*@modifies scia_cal->spectra@*/
 {
-     register size_t no, np;
+     register size_t np = 0;
 
-     size_t offs;
+     do {
+	  register unsigned short no = 0;
 
-     for ( np = 0; np < scia_cal->num_xpixels; np++ ) {
 	  const short nchan = (short) scia_cal->chan_id[np] - 1;
 
-	  if ( nchan < 0 || scia_cal->pet_chan_min[nchan] <= FLT_EPSILON )
-	       continue;
+	  if ( nchan < 0 ) continue;                         /* unused pixel */
+	  if ( scia_cal->coaddf[np] <= 1 ) continue;      /* only coaddf > 1 */
 
-	  offs  = NINT( scia_cal->pet_chan_min[nchan] / scia_cal->pet_min );
-
-	  no = offs-1;
 	  do {
 	       register unsigned char nc;
 
-	       register size_t noo  = no;
+	       register unsigned short noo = no;
+
 	       register double wght = 0.;
 
 	       for ( nc = 0; nc < scia_cal->coaddf[np]; nc++ ) {
 		    wght += scia_cal->chan_mean[nchan][noo];
-		    noo += offs;
+		    noo++;
 	       }
 
 	       for ( nc = 0; nc < scia_cal->coaddf[np]; nc++ ) {
-		    /* scia_cal->spectra[np][no] *=  */
-		    /* 	 (1. / scia_cal->coaddf[np]); */
-		    scia_cal->spectra[np][no] *= 
-			 (scia_cal->chan_mean[nchan][no] / wght);
-		    no += offs;
+		    if ( wght > 100. ) {
+			 scia_cal->spectra[np][no] *= 
+			      (scia_cal->chan_mean[nchan][no] / wght);
+		    } else {
+			 scia_cal->spectra[np][no] *= 
+			      (1. / scia_cal->coaddf[np]);
+		    }
+		    no++;
 	       }
-	  } while ( no < scia_cal->num_obs );
-     }
+	  } while ( no < scia_cal->num_pet[nchan] );
+     } while ( ++np < scia_cal->num_xpixels );
 }
 
 /*+++++++++++++++++++++++++
@@ -532,7 +553,7 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 {
      const char prognm[] = "SCIA_CALC_MEM_CORR";
 
-     register size_t         no, np;
+     register unsigned short np = 0;
      register unsigned short signNorm;
      register double         sign_before, sign_after;
 
@@ -560,10 +581,10 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
      if ( IS_ERR_STAT_FATAL )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
 
-     for ( np = 0; np < (VIS_CHANNELS * CHANNEL_SIZE); np++ ) {
+     do {
+	  register unsigned short no = 0;
+
 	  const short nchan = (short) scia_cal->chan_id[np] - 1;
-	  const size_t offs = (nchan < 0) ? 0 :
-	       NINT( scia_cal->pet[np] / scia_cal->pet_min );
 
 	  /* before reset */
 	  const double scale_before = 3 * (0.5 - (np % 1024) / 6138.)
@@ -576,10 +597,7 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	       setup_it[scia_cal->state_id] / (1000. * scia_cal->pet[np]);
 
 	  /* skip un-used pixels */
-	  if ( offs == 0 ) continue;
-
-	  /* set index to first readout */
-	  no = offs - 1;
+	  if ( nchan < 0 ) continue;
 
 	  /* calculate memory correction for the first readout of a state */
 	  signNorm = __ROUND_us( scia_cal->dark_signal[np]
@@ -587,21 +605,24 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	  scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
 
 	  /* use previous readout to calculate correction next readout */
-	  while ( (no += offs) < scia_cal->num_obs ) {
+	  while ( ++no < scia_cal->num_pet[nchan] ) {
+	       if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
+
 	       if ( scia_cal->limb_scans != 0 
-		    && ((no - (offs-1)) % num_tan_h) == 0 ) {
-		    sign_before = scale_before * scia_cal->spectra[np][no-offs];
+		    && ((no - 1) % num_tan_h) == 0 ) {
+		    sign_before = scale_before * scia_cal->spectra[np][no-1];
 		    sign_after  = scale_after * scia_cal->spectra[np][no];
 
 		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
 					   + sign_before + sign_after );
 	       } else {
 		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
-					   + scia_cal->spectra[np][no-offs] );
+					   + scia_cal->spectra[np][no-1] );
 	       }
 	       scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
 	  }
-     }
+     } while ( ++np < (VIS_CHANNELS * CHANNEL_SIZE) );
+
      SCIA_FREE_H5_MEM( &memcorr );
 }
 
@@ -623,7 +644,8 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
 {
      const char prognm[] = "SCIA_CALC_NLIN_CORR";
 
-     register size_t         no, np;
+     register unsigned short np = (VIS_CHANNELS * CHANNEL_SIZE);
+
      register unsigned short signNorm;
      register unsigned short curveIndx;
 
@@ -633,27 +655,29 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
      if ( IS_ERR_STAT_FATAL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
 
-     for ( np = (VIS_CHANNELS * CHANNEL_SIZE); np < SCIENCE_PIXELS; np++ ) {
-	  const size_t offs = NINT( scia_cal->pet[np] / scia_cal->pet_min );
-	  
+     do {
+	  register size_t no = 0;
+
+	  const short nchan = (short) scia_cal->chan_id[np] - 1;
+
 	  /* skip un-used pixels */
-	  if ( offs == 0 ) continue;
+	  if ( nchan < 0 ) continue;
 
 	  /* get index to curve to be used */
 	  curveIndx = (unsigned short) nlcorr.curve[np];
 
 	  /* set index to first readout */
-	  no = offs-1;
 	  do {
+	       if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
+
 	       signNorm = __ROUND_us( scia_cal->spectra[np][no] 
 				      + scia_cal->dark_signal[np] );
 
 	       scia_cal->correction[np][no] = 
 		    nlcorr.matrix[curveIndx][signNorm];
+	  } while ( ++no < scia_cal->num_pet[nchan] );
+     } while ( ++np < SCIENCE_PIXELS );
 
-	       no += offs;
-	  } while ( no < scia_cal->num_obs );
-     }
 done:
      SCIA_FREE_H5_NLIN( &nlcorr );
 }
@@ -705,33 +729,31 @@ void SCIA_PATCH_MEM_CORR( struct scia_cal_rec *scia_cal,
      register unsigned short ncl = 0;
 
      do {
-	  register size_t np = 0;
-
-	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->pet_min);
+	  register unsigned short np = 0;
 
 	  do {
 	       register unsigned short nr;
 	       register unsigned short nd = 0;
-	       register size_t nobs = fillings - 1;
+	       register size_t nobs = 0;
 
 	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
+	       const unsigned short coaddf = state->Clcon[ncl].coaddf;
 
 	       if ( state->Clcon[ncl].channel > VIS_CHANNELS ) continue;
 	       do {
 		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
-			 register size_t nb = np;
+			 register unsigned short nb = np;
 
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      mds_1b[nd].clus[ncl].sig[nb].corr =
 				   MemNlin2Byte( state->Clcon[ncl].channel, 
 						 scia_cal->correction[ipx][nobs] );
+			      nobs++;
 			      nb += state->Clcon[ncl].length;
-			      nobs += fillings;
 			 }
 		    }
 		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
-			 register size_t nb = np;
+			 register unsigned short nb = np;
 
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      register unsigned short nc = 0;
@@ -739,17 +761,18 @@ void SCIA_PATCH_MEM_CORR( struct scia_cal_rec *scia_cal,
 
 			      do {
 				   corrval += scia_cal->correction[ipx][nobs];
-				   nobs += fillings;
-			      } while ( ++nc < state->Clcon[ncl].coaddf );
+				   nobs++;
+			      } while ( ++nc < coaddf );
+
 			      mds_1b[nd].clus[ncl].sigc[nb].det.field.corr =
 				   MemNlin2Byte( state->Clcon[ncl].channel, 
-						 corrval / state->Clcon[ncl].coaddf );
+						 corrval / coaddf );
 			      
 			      nb += state->Clcon[ncl].length;
 			 }
 		    }
 	       } while ( ++nd < state->num_dsr );
-	  } while ( ++np < (size_t) state->Clcon[ncl].length );
+	  } while ( ++np < state->Clcon[ncl].length );
       } while ( ++ncl < state->num_clus );
 }
 
@@ -762,33 +785,33 @@ void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
      register unsigned short ncl = 0;
 
      do {
-	  register size_t np = 0;
-
-	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->pet_min);
+	  register unsigned short np = 0;
 
 	  do {
 	       register unsigned short nr;
 	       register unsigned short nd = 0;
-	       register size_t nobs = fillings - 1;
+	       register size_t nobs = 0;
 
 	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
+	       const unsigned short coaddf = state->Clcon[ncl].coaddf;
 
 	       if ( state->Clcon[ncl].channel <= VIS_CHANNELS ) continue;
+	       if ( scia_cal->quality_flag[ipx] > FLAG_BLINDED ) continue;
+
 	       do {
 		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
-			 register size_t nb = np;
+			 register unsigned short nb = np;
 
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      mds_1b[nd].clus[ncl].sig[nb].corr =
 				   MemNlin2Byte( state->Clcon[ncl].channel, 
 						 scia_cal->correction[ipx][nobs] );
+			      nobs++;
 			      nb += state->Clcon[ncl].length;
-			      nobs += fillings;
 			 }
 		    }
 		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
-			 register size_t nb = np;
+			 register unsigned short nb = np;
 
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      register unsigned short nc = 0;
@@ -796,17 +819,18 @@ void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
 
 			      do {
 				   corrval += scia_cal->correction[ipx][nobs];
-				   nobs += fillings;
-			      } while ( ++nc < state->Clcon[ncl].coaddf );
+				   nobs++;
+			      } while ( ++nc < coaddf );
+
 			      mds_1b[nd].clus[ncl].sigc[nb].det.field.corr =
-				   MemNlin2Byte( state->Clcon[ncl].channel,
-						 corrval / state->Clcon[ncl].coaddf );
+				   MemNlin2Byte( state->Clcon[ncl].channel, 
+						 corrval / coaddf );
 			      
 			      nb += state->Clcon[ncl].length;
 			 }
 		    }
 	       } while ( ++nd < state->num_dsr );
-	  } while ( ++np < (size_t) state->Clcon[ncl].length );
+	  } while ( ++np < state->Clcon[ncl].length );
       } while ( ++ncl < state->num_clus );
 }
 
@@ -818,9 +842,9 @@ void SCIA_APPLY_CORR( struct scia_cal_rec *scia_cal )
      do {
 	  register size_t no = 0;
 
-	  if ( scia_cal->quality_flag[np] != 0 ) continue;
+	  if ( scia_cal->quality_flag[np] != FLAG_VALID ) continue;
 	  do {
-	       if ( fpclassify( scia_cal->spectra[np][no] ) != FP_NAN )
+	       if ( isnormal( scia_cal->spectra[np][no] ) )
 		    scia_cal->spectra[np][no] += scia_cal->correction[np][no];
 	  } while ( ++no < scia_cal->num_obs );
      } while ( ++np < scia_cal->num_xpixels );
@@ -944,7 +968,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 
 	  /* recontruct full spectra (8192 pixels) */
 	  do {
-	       fillings = NINT(scia_cal->pet[np] / scia_cal->pet_min);
+	       fillings = NINT(scia_cal->pet[np] / scia_cal->state_pet_min);
 
 	       if ( fillings > 1 ) {
 		    nobs = (fillings - 1) + fillings * (no / fillings);
@@ -1041,7 +1065,7 @@ void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
 	  register size_t nf;
 
 	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->pet_min);
+		NINT(state->Clcon[ncl].pet / scia_cal->state_pet_min);
 
 	  do {
 	       register unsigned short nd = 0;
@@ -1117,7 +1141,7 @@ void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
 	  register size_t nf;
 
 	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->pet_min);
+		NINT(state->Clcon[ncl].pet / scia_cal->state_pet_min);
 
 	  do {
 	       register unsigned short nd = 0;
@@ -1184,7 +1208,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 
      char *write_h5_scia_cal = getenv( "SCIA_WR_PATCH_INTERIM" );
 
-     unsigned int      calib_flag;
+     const unsigned int calib_flag = (DO_CORR_AO);
 
      struct mph_envi   mph;
      struct scia_cal_rec scia_cal = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.f, 0.f, 
@@ -1215,22 +1239,30 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      scia_cal.num_ypixels  = 0;
      scia_cal.orbit_phase  = state->orbit_phase;
 /*
- * obtain minimum PET and maximum number of read-outs
+ * obtain maximum number of read-outs
  */
      scia_cal.num_obs = 0;
-     scia_cal.pet_min = 1000.f;
      for ( ncl = 0; ncl < state->num_clus; ncl++ ) {
-	  if ( state->Clcon[ncl].pet >= 0.0624f
-	       && scia_cal.pet_min > state->Clcon[ncl].pet ) {
-               scia_cal.pet_min = state->Clcon[ncl].pet;
-	       scia_cal.num_obs = 
-		    state->Clcon[ncl].n_read * state->Clcon[ncl].coaddf;
-	  }
+	  size_t nobs = state->Clcon[ncl].n_read * state->Clcon[ncl].coaddf;
+
+	  if ( nobs > scia_cal.num_obs ) scia_cal.num_obs = nobs;
      }
      scia_cal.num_obs *= state->num_dsr;
 /*
  * allocate space for the SCIA spectra
  */
+     scia_cal.coadd_min = (unsigned char *)
+	  calloc( sizeof( char ), scia_cal.num_channels );
+     if ( scia_cal.coadd_min == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.coadd_min" );
+     scia_cal.pet_min = (unsigned short *)
+	  calloc( sizeof( short ), scia_cal.num_channels );
+     if ( scia_cal.pet_min == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.pet_min" );
+     scia_cal.num_pet = (unsigned short *)
+	  calloc( sizeof( short ), scia_cal.num_channels );
+     if ( scia_cal.num_pet == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.num_pet" );
      scia_cal.coaddf = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_xpixels );
      if ( scia_cal.coaddf == NULL )
@@ -1250,14 +1282,6 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      scia_cal.pet = (float *) calloc( sizeof( float ), scia_cal.num_xpixels );
      if ( scia_cal.pet == NULL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.pet" );
-     scia_cal.coadd_chan_min = (unsigned char *)
-	  calloc( sizeof( char ), scia_cal.num_channels );
-     if ( scia_cal.coadd_chan_min == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.coadd_chan_min" );
-     scia_cal.pet_chan_min = (float *)
-	  calloc( sizeof( float ), scia_cal.num_channels );
-     if ( scia_cal.pet_chan_min == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.pet_chan_min" );
      scia_cal.chan_mean = 
 	  ALLOC_D2D( scia_cal.num_channels, scia_cal.num_obs );
      if ( scia_cal.chan_mean == NULL ) 
@@ -1282,27 +1306,34 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 	  }
      }
      /* obtain per channel: minimum coadding-factor and PET */
+     scia_cal.state_pet_min = USHRT_MAX;
      for ( nch = 0; nch < SCIENCE_CHANNELS; nch++ ) {
-	  unsigned char coaddf_chan_min = UCHAR_MAX;
-	  float pet_chan_min = 999.f;
+	  unsigned char  coaddf_min = UCHAR_MAX;
+	  unsigned short pet_min    = USHRT_MAX;
 
 	  for ( ncl = 0; ncl < state->num_clus; ncl++ ) {
 	       if ( nch == (state->Clcon[ncl].channel-1) ) {
-		    if ( coaddf_chan_min > state->Clcon[ncl].coaddf )
-			 coaddf_chan_min = state->Clcon[ncl].coaddf;
-		    if ( pet_chan_min > state->Clcon[ncl].pet )
-			 pet_chan_min = state->Clcon[ncl].pet;
+		    unsigned short pet = 
+			 __ROUNDf_us( 16 * state->Clcon[ncl].pet );
+
+		    if ( pet_min > pet ) pet_min = pet;
+		    if ( coaddf_min > state->Clcon[ncl].coaddf )
+			 coaddf_min = state->Clcon[ncl].coaddf;
 	       }
 	  }
-	  scia_cal.coadd_chan_min[nch] = 
-	       (coaddf_chan_min == UCHAR_MAX) ? 0 : coaddf_chan_min;
-	  scia_cal.pet_chan_min[nch]   = 
-	       (pet_chan_min < 999.f) ? pet_chan_min : -1.f;
+	  scia_cal.coadd_min[nch] = coaddf_min;
+	  scia_cal.pet_min[nch]   = pet_min;
+	  if ( scia_cal.pet_min[nch] < scia_cal.state_pet_min )
+	       scia_cal.state_pet_min = scia_cal.pet_min[nch];
+     }
+
+     for ( nch = 0; nch < SCIENCE_CHANNELS; nch++ ) {
+	  scia_cal.num_pet[nch] = (scia_cal.num_obs * scia_cal.state_pet_min)
+	       / scia_cal.pet_min[nch];
      }
      /* 
       * read darkcurrent parameters
       */
-     calib_flag = (DO_CORR_AO | DO_CORR_DARK | DO_SRON_DARK);
      SCIA_CAL_GET_DARK( fp, calib_flag, &scia_cal );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
@@ -1315,7 +1346,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      if ( verbose )
 	  (void) fprintf( stderr, "Wrote data to calibration structure\n" );
      /*
-      * compute estimates of channel averages at PET_chan_min 
+      * compute estimates of channel averages at PET_min 
       * based on PMD read-outs
       */
      SCIA_CALC_CHAN_MEAN( state, mds_1b, &scia_cal );
@@ -1385,11 +1416,11 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 done:
      if ( scia_cal.coaddf != NULL ) free( scia_cal.coaddf );
      if ( scia_cal.chan_id != NULL ) free( scia_cal.chan_id );
-     if ( scia_cal.coadd_chan_min != NULL ) free( scia_cal.coadd_chan_min );
+     if ( scia_cal.coadd_min != NULL ) free( scia_cal.coadd_min );
      if ( scia_cal.quality_flag != NULL ) free( scia_cal.quality_flag );
+     if ( scia_cal.pet_min != NULL ) free( scia_cal.pet_min );
      if ( scia_cal.dark_signal != NULL ) free( scia_cal.dark_signal );
      if ( scia_cal.pet != NULL ) free( scia_cal.pet );
-     if ( scia_cal.pet_chan_min != NULL ) free( scia_cal.pet_chan_min );
      if ( scia_cal.chan_mean != NULL ) FREE_2D( (void **)scia_cal.chan_mean );
      if ( scia_cal.spectra != NULL ) FREE_2D( (void **) scia_cal.spectra );
      if ( scia_cal.correction != NULL ) FREE_2D((void **) scia_cal.correction);

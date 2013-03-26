@@ -455,9 +455,9 @@ void SCIA_get_AtbdDark( FILE *fp, unsigned int calib_flag, float orbit_phase,
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "OrbitDARK" );
      }
      (void) memcpy( analogOffs, DarkData.AnalogOffs, nr_byte );
+     (void) memcpy( darkCurrent, DarkData.DarkCurrent, nr_byte );
      if ( analogOffsError != NULL )
 	  (void) memcpy( analogOffsError, DarkData.AnalogOffsError, nr_byte );
-     (void) memcpy( darkCurrent, DarkData.DarkCurrent, nr_byte );
      if ( darkCurrentError != NULL )
 	  (void) memcpy( darkCurrentError, DarkData.DarkCurrentError, nr_byte );
      if ( meanNoise != NULL )
