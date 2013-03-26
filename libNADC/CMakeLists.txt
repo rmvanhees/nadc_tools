@@ -1,5 +1,3 @@
-include (SetSoVersion)
-
 ## set version of library
 file (READ VERSION _version_contents)
 string (REGEX REPLACE ".*#define[ \t]+version_major[ \t]+([0-9]*).*$"
@@ -57,16 +55,20 @@ set (NADC_SRCS
     ${NADC_COMMON_SRCS}
 )
 
+#-----------------------------------------------------------------------------
+# Set-up for NADC_LIB
+#-----------------------------------------------------------------------------
+## Compiler instructions
 add_library (${NADC_LIB_TARGET} ${LIB_TYPE} ${NADC_SRCS})
 
+## Linker instructions
 target_link_libraries(${NADC_LIB_TARGET} ${HDF5_C_LIBRARIES})
 
-NADC_SET_LIB_OPTIONS (${NADC_LIB_TARGET} ${NADC_LIB_NAME} 
-		     ${LIB_TYPE} ${LIB_VERS})
-SET_TARGET_PROPERTIES (${NADC_LIB_TARGET} PROPERTIES FOLDER libraries)
+IF (${LIB_TYPE} MATCHES "SHARED")
+   SET_TARGET_PROPERTIES (${NADC_LIB_TARGET} PROPERTIES SOVERSION ${LIB_VERS})
+ENDIF (${LIB_TYPE} MATCHES "SHARED")
 
 ## Installation instructions
-message (STATUS ${NADC_LIB_TARGET})
 install (
   TARGETS ${NADC_LIB_TARGET}
   LIBRARY DESTINATION lib COMPONENT libraries

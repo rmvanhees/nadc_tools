@@ -1,5 +1,3 @@
-include (SetSoVersion)
-
 ## set version of library
 file (READ VERSION _version_contents)
 string (REGEX REPLACE ".*#define[ \t]+version_major[ \t]+([0-9]*).*$"
@@ -48,9 +46,10 @@ add_library (${NADC_MERIS_LIB_TARGET} ${LIB_TYPE} ${NADC_MERIS_SRCS})
 ## Linker instructions
 target_link_libraries (${NADC_MERIS_LIB_TARGET} ${NADC_LIB_TARGET})
 
-NADC_SET_LIB_OPTIONS (${NADC_MERIS_LIB_TARGET} ${NADC_MERIS_LIB_NAME} 
-		     ${LIB_TYPE} ${LIB_VERS})
-SET_TARGET_PROPERTIES (${NADC_MERIS_LIB_TARGET} PROPERTIES FOLDER libraries)
+IF (${LIB_TYPE} MATCHES "SHARED")
+   SET_TARGET_PROPERTIES (${NADC_MERIS_LIB_TARGET} PROPERTIES 
+   			 SOVERSION ${LIB_VERS})
+ENDIF (${LIB_TYPE} MATCHES "SHARED")
 
 ## Installation instructions
 install (

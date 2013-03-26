@@ -1,5 +1,3 @@
-include (SetSoVersion)
-
 ## set version of library
 file (READ VERSION _version_contents)
 string (REGEX REPLACE ".*#define[ \t]+version_major[ \t]+([0-9]*).*$"
@@ -61,9 +59,10 @@ else ()
 		      	 )
 endif()
 
-NADC_SET_LIB_OPTIONS (${NADC_IDL_LIB_TARGET} ${NADC_IDL_LIB_NAME} 
-		     ${LIB_TYPE} ${LIB_VERS})
-SET_TARGET_PROPERTIES (${NADC_IDL_LIB_TARGET} PROPERTIES FOLDER libraries)
+IF (${LIB_TYPE} MATCHES "SHARED")
+   SET_TARGET_PROPERTIES (${NADC_IDL_LIB_TARGET} PROPERTIES 
+   			 SOVERSION ${LIB_VERS})
+ENDIF (${LIB_TYPE} MATCHES "SHARED")
 
 ## Installation instructions
 install (
