@@ -117,104 +117,139 @@ struct scia_cal_rec {
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_WR_CAL_REC
-.PURPOSE     write intermediate results to HDF5 file
+.IDENTifer   SCIA_FILL_SPECTRA
+.PURPOSE     convert level 1b readouts to spectral grid
 .INPUT/OUTPUT
-  call as    SCIA_WR_CAL_REC( patch_flag, scia_cal );
+  call as    SCIA_FILL_SPECTRA( state, mds_1b, scia_cal );
      input:
-            unsigned int patch_flag  :  bit-flag which defines what to patch
+            struct state1_scia *state     :  structure with State definition
+	    struct mds1_scia *mds_1b      :
+ in/output:
 	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
 
-.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_WR_CAL_REC( unsigned short patch_flag,
-		      const struct scia_cal_rec *scia_cal )
+void SCIA_FILL_SPECTRA( const struct state1_scia *state, 
+			const struct mds1_scia *mds_1b,
+			struct scia_cal_rec *scia_cal )
+       /*@modifies scia_cal->spectra@*/
 {
-     const char prognm[] = "SCIA_WR_CAL_REC";
+     register unsigned short ncl = 0;
+     register unsigned short np;
+     register size_t nobs;
 
-     hid_t   fileID = 0;
-     hsize_t dims[2];
+     /* initialize spectra with NaN values */
+     for ( np = 0; np < SCIENCE_PIXELS; np++ ) {
+	  for ( nobs = 0; nobs < scia_cal->num_obs; nobs++ )
+	       scia_cal->spectra[np][nobs] = NAN;
+     }
 
-     char flname[29];
-     unsigned int ubuff;
+     do {
+	  np = 0;
+	  do {
+	       register unsigned short nr;
+	       register unsigned short nd = 0;
 
-     const unsigned char  ucbuff = 0;
-     const float          rbuff = 0.f;
-     const double         dbuff = 0.;
-     const double         nanbuff = NAN;
+	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
 
-     (void) snprintf( flname, 29, "scia_cal_rec_%05hu_%02hhu_%03hhu.h5",
-		      scia_cal->abs_orbit,  scia_cal->state_id,  
-		      scia_cal->state_index );
-     fileID = H5Fcreate( flname, H5F_ACC_TRUNC, 
-			 H5P_DEFAULT, H5P_DEFAULT );
-     if ( fileID < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, flname );
+	       nobs = 0;
+	       do {
+		    register size_t nb = np;
 
-     (void) H5LTset_attribute_ushort( fileID, "/", "PatchFlag", 
-				      &patch_flag, 1 );
-     (void) H5LTset_attribute_uchar( fileID, "/", "stateID", 
-				      &scia_cal->state_id, 1 );
-     (void) H5LTset_attribute_uchar( fileID, "/", "stateIndex", 
-				      &scia_cal->state_index, 1 );
-     ubuff = (unsigned int) scia_cal->num_obs;
-     (void) H5LTset_attribute_uint( fileID, "/", "numObs", &ubuff, 1 );
-     ubuff = (unsigned int) VIRTUAL_CHANNELS;
-     (void) H5LTset_attribute_uint( fileID, "/", "numChannels", &ubuff, 1 );
-     ubuff = (unsigned int) SCIENCE_PIXELS;
-     (void) H5LTset_attribute_uint( fileID, "/", "numPixels", &ubuff, 1 );
-     (void) H5LTset_attribute_ushort( fileID, "/", "PET_min", 
-				      &scia_cal->state_pet_min, 1 );
-     (void) H5LTset_attribute_float( fileID, "/", "orbitPhase;", 
-				      &scia_cal->orbit_phase, 1 );
-
-     dims[0] = (hsize_t) SCIENCE_PIXELS;
-     (void) H5LTmake_dataset( fileID, "channelID", 1, dims, 
-			      H5T_NATIVE_UCHAR, scia_cal->chan_id );
-     (void) H5LTmake_dataset( fileID, "clusterID", 1, dims, 
-			      H5T_NATIVE_UCHAR, scia_cal->clus_id );
-     (void) H5LTmake_dataset( fileID, "coaddFactor", 1, dims, 
-			      H5T_NATIVE_UCHAR, scia_cal->coaddf );
-     (void) H5LTset_attribute_uchar( fileID, "coaddFactor", "_FillValue", 
-				     &ucbuff, 1 );
-     (void) H5LTmake_dataset( fileID, "qualityFlags", 1, dims, 
-			      H5T_NATIVE_UCHAR, scia_cal->quality_flag );
-     (void) H5LTset_attribute_uchar( fileID, "qualityFlags", "_FillValue", 
-				     &ucbuff, 1 );
-     (void) H5LTmake_dataset_float( fileID, "PET", 1, dims, scia_cal->pet );
-     (void) H5LTset_attribute_float( fileID, "PET", "_FillValue", &rbuff, 1 );
-     (void) H5LTmake_dataset_float( fileID, "darkSignal", 1, dims, 
-				    scia_cal->dark_signal );
-     (void) H5LTset_attribute_float( fileID, "darkSignal", "_FillValue", 
-				     &rbuff, 1 );
-     dims[0] = (hsize_t) VIRTUAL_CHANNELS;
-     dims[1] = (hsize_t) scia_cal->num_obs;
-     (void) H5LTmake_dataset_double( fileID, "channelMean", 2, dims, 
-				     scia_cal->chan_mean[0] );
-     (void) H5LTset_attribute_double( fileID, "channelMean", "_FillValue", 
-				      &dbuff, 1 );
-     (void) H5LTset_attribute_ushort( fileID, "channelMean", "channelPET", 
-				      scia_cal->chan_pet, VIRTUAL_CHANNELS );
-     (void) H5LTset_attribute_ushort( fileID, "channelMean", "channelObs", 
-				      scia_cal->chan_obs, VIRTUAL_CHANNELS );
-     dims[0] = (hsize_t) SCIENCE_PIXELS;
-     dims[1] = (hsize_t) scia_cal->num_obs;
-     (void) H5LTmake_dataset_double( fileID, "spectra", 2, dims, 
-				     scia_cal->spectra[0] );
-     (void) H5LTset_attribute_double( fileID, "spectra", "_FillValue", 
-				      &nanbuff, 1 );
-     (void) H5LTmake_dataset_float( fileID, "correction", 2, dims, 
-				    scia_cal->correction[0] );
-done:
-     if ( fileID > 0 ) (void) H5Fclose( fileID );
+		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
+			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
+			      scia_cal->spectra[ipx][nobs] =
+				   mds_1b[nd].clus[ncl].sig[nb].sign;
+			      nobs++;
+			      nb += state->Clcon[ncl].length;
+			 }
+		    }
+		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
+			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
+			      register unsigned short nc = 0;
+			      register double val =
+				   mds_1b[nd].clus[ncl].sigc[nb].det.field.sign;
+			      do {
+				   scia_cal->spectra[ipx][nobs] = val;
+				   nobs++;
+			      } while ( ++nc < state->Clcon[ncl].coaddf );
+			      nb += state->Clcon[ncl].length;
+			 }
+		    }
+	       } while ( ++nd < state->num_dsr );
+	  } while ( ++np < state->Clcon[ncl].length );
+     } while ( ++ncl < state->num_clus );
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_CAL_GET_DARK
-.PURPOSE     obtain dark correction values 
+.IDENTifer   SCIA_SET_FLAG_QUALITY
+.PURPOSE     set quality flags for spectral data
 .INPUT/OUTPUT
-  call as    SCIA_CAL_GET_DARK( fp, calib_flag, scia_cal );
+  call as    SCIA_SET_FLAG_QUALITY( scia_cal );
+ in/output:
+	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+static
+void SCIA_SET_FLAG_QUALITY( struct scia_cal_rec *scia_cal )
+       /*@modifies scia_cal->quality_flag@*/
+{
+     register unsigned short np = 0;
+     register size_t nobs;
+
+     do {
+	  register unsigned short num_valid = 0;
+	  register double mean = 0.;
+
+	  const short nchan = (short) scia_cal->chan_id[np] - 1;
+
+	  if ( nchan < 0 ) {
+	       scia_cal->quality_flag[np] = FLAG_UNUSED;
+	       continue;
+	  }
+
+	  if ( (np % CHANNEL_SIZE) < 10 
+	       || (np % CHANNEL_SIZE) >= (CHANNEL_SIZE - 10) ) {
+	       scia_cal->quality_flag[np] = FLAG_BLINDED;
+	       continue;
+	  }
+	       
+	  for ( nobs = 0; nobs < scia_cal->num_obs; nobs++ ) {
+	       if ( isnormal( scia_cal->spectra[np][nobs] ) ) {
+		    mean += scia_cal->spectra[np][nobs];
+		    num_valid++;
+	       }
+	  }
+	  if ( num_valid == 0 ) {
+	       scia_cal->quality_flag[np] = FLAG_DEAD;
+	  } else if ( (mean /= num_valid) > (scia_cal->coaddf[np] * 60000.) ) {
+	       scia_cal->quality_flag[np] = FLAG_SATURATE;
+	  } else {
+	       register double adev = 0.;
+
+	       for ( nobs = 0; nobs < scia_cal->num_obs; nobs++ ) {
+		    if ( isnormal( scia_cal->spectra[np][nobs] ) )
+			 adev += fabs( scia_cal->spectra[np][nobs] - mean );
+	       }
+	       adev /= num_valid;
+
+	       if ( mean <= DBL_EPSILON || adev <= DBL_EPSILON )
+		    scia_cal->quality_flag[np] = FLAG_DEAD;
+	       else
+		    scia_cal->quality_flag[np] = FLAG_VALID;
+	  }
+     } while ( ++np < SCIENCE_PIXELS );
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_APPLY_DARK
+.PURPOSE     apply dark correction on (non-limb) spectra
+.INPUT/OUTPUT
+  call as    SCIA_APPLY_DARK( fp, calib_flag, scia_cal );
      input:
             FILE *fp                      : file pointer to SCIA L1b product
 	    unsigned int calib_flag       : calibration flags (bitfield)
@@ -225,11 +260,11 @@ done:
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_CAL_GET_DARK( FILE *fp, unsigned int calib_flag, 
-			struct scia_cal_rec *scia_cal )
+void SCIA_APPLY_DARK( FILE *fp, unsigned int calib_flag, 
+		      struct scia_cal_rec *scia_cal )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, 
-	 scia_cal->dark_signal@*/
+	 scia_cal->dark_signal, scia_cal->spectra@*/
 {
      const char prognm[] = "SCIA_CAL_GET_DARK";
 
@@ -274,76 +309,105 @@ void SCIA_CAL_GET_DARK( FILE *fp, unsigned int calib_flag,
 		    analogOffs[np] + pet * darkCurrent[np];
 	  } while ( ++np < SCIENCE_PIXELS );
      }
+
+     np = 0;
+     do {
+	  register size_t nobs = 0;
+	  register double dark =
+	       scia_cal->coaddf[np] * scia_cal->dark_signal[np];
+
+	  do {
+	       if ( isnormal( scia_cal->spectra[np][nobs] ) )
+		    scia_cal->spectra[np][nobs] -= dark;
+	  } while ( ++nobs < scia_cal->num_obs );
+     } while ( ++np < SCIENCE_PIXELS );
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_FILL_SPECTRA
-.PURPOSE     convert level 1b readouts to spectral grid
+.IDENTifer   SCIA_APPLY_DARK_LIMB
+.PURPOSE     apply dark correction on (limb) spectra
 .INPUT/OUTPUT
-  call as    SCIA_FILL_SPECTRA( state, mds_1b, scia_cal );
-     input:
-            struct state1_scia *state     :  structure with State definition
-	    struct mds1_scia *mds_1b      :
+  call as    SCIA_APPLY_DARK_LIMB( scia_cal );
  in/output:
 	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
 
-.RETURNS     nothing
+.RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_FILL_SPECTRA( const struct state1_scia *state, 
-			const struct mds1_scia *mds_1b,
-			struct scia_cal_rec *scia_cal )
-       /*@modifies scia_cal->spectra@*/
+void SCIA_APPLY_DARK_LIMB( struct scia_cal_rec *scia_cal )
+       /*@modifies scia_cal->dark_signal, scia_cal->spectra@*/
 {
-     register unsigned short ncl = 0;
-     register unsigned short np;
-     register size_t nobs;
+     register unsigned short nr, np = 0;
 
-     /* initialize spectra with NaN values */
-     for ( np = 0; np < SCIENCE_PIXELS; np++ ) {
-	  for ( nobs = 0; nobs < scia_cal->num_obs; nobs++ )
-	       scia_cal->spectra[np][nobs] = NAN;
-     }
+     unsigned short num_ll_obs, vchan;
 
+     np = 0;
      do {
-	  np = 0;
+	  register unsigned short nobs = 0;
+	  register unsigned short num_valid = 0;
+	  register double dark = 0.;
+
+	  switch ( (int) scia_cal->chan_id[np] ) {
+	  case 1:
+	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
+	       break;
+	  case 2:
+	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
+	       break;
+	  case 3:
+	       vchan = 4;
+	       break;
+	  case 4:
+	       vchan = 5;
+	       break;
+	  case 5:
+	       vchan = 6;
+	       break;
+	  case 6:
+	       vchan = 7;
+	       break;
+	  case 7:
+	       vchan = 8;
+	       break;
+	  case 8:
+	       vchan = 9;
+	       break;
+	  default:         /* skip un-used pixels */
+	       continue;
+	  }
+
+	  num_ll_obs = 24 / scia_cal->chan_pet[vchan];
+	  if ( num_ll_obs == 0 ) num_ll_obs = 1;
+
+	  if ( scia_cal->state_id == 27 ) {
+	       for ( nr = 0; nr < num_ll_obs; nr++ ) {
+		    if ( isnormal( scia_cal->spectra[np][nr] ) ) {
+			 dark += scia_cal->spectra[np][nr];
+			 num_valid++;
+		    }
+	       }
+	  } else {
+	       for ( nr = 1; nr <= num_ll_obs; nr++ ) {
+		    register unsigned short nrr = 
+			 scia_cal->chan_obs[vchan] - nr;
+
+		    if ( isnormal( scia_cal->spectra[np][nrr] ) ) {
+			 dark += scia_cal->spectra[np][nrr];
+			 num_valid++;
+		    }
+	       }
+	  }
+	  if ( num_valid == 0 ) continue;
+
+	  dark /= num_valid;
+
 	  do {
-	       register unsigned short nr;
-	       register unsigned short nd = 0;
-
-	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
-
-	       const double dark = 
-		    state->Clcon[ncl].coaddf * scia_cal->dark_signal[ipx];
-
-	       nobs = 0;
-	       do {
-		    register size_t nb = np;
-
-		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
-			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
-			      scia_cal->spectra[ipx][nobs] =
-				   mds_1b[nd].clus[ncl].sig[nb].sign - dark;
-			      nobs++;
-			      nb += state->Clcon[ncl].length;
-			 }
-		    }
-		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
-			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
-			      register unsigned short nc = 0;
-			      register double val = -dark +
-				   mds_1b[nd].clus[ncl].sigc[nb].det.field.sign;
-			      do {
-				   scia_cal->spectra[ipx][nobs] = val;
-				   nobs++;
-			      } while ( ++nc < state->Clcon[ncl].coaddf );
-			      nb += state->Clcon[ncl].length;
-			 }
-		    }
-	       } while ( ++nd < state->num_dsr );
-	  } while ( ++np < state->Clcon[ncl].length );
-     } while ( ++ncl < state->num_clus );
+	       if ( isnormal( scia_cal->spectra[np][nobs] ) )
+		    scia_cal->spectra[np][nobs] -= dark;
+	  } while ( ++nobs < scia_cal->chan_obs[vchan] );
+	  scia_cal->dark_signal[np] = dark / scia_cal->coaddf[np];
+     } while ( ++np < SCIENCE_PIXELS );
 }
 
 /*+++++++++++++++++++++++++
@@ -423,68 +487,6 @@ void SCIA_CALC_CHAN_MEAN( const struct state1_scia *state,
 	       }
 	  } while ( ++nd < state->num_dsr );
      } while ( ++nch < VIRTUAL_CHANNELS );
-}
-
-/*+++++++++++++++++++++++++
-.IDENTifer   SCIA_SET_FLAG_QUALITY
-.PURPOSE     set quality flags for spectral data
-.INPUT/OUTPUT
-  call as    SCIA_SET_FLAG_QUALITY( scia_cal );
- in/output:
-	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
-
-.RETURNS     nothing
-.COMMENTS    static function
--------------------------*/
-static
-void SCIA_SET_FLAG_QUALITY( struct scia_cal_rec *scia_cal )
-       /*@modifies scia_cal->quality_flag@*/
-{
-     register unsigned short np = 0;
-     register size_t nobs;
-
-     do {
-	  register unsigned short num_valid = 0;
-	  register double mean = 0.;
-
-	  const short nchan = (short) scia_cal->chan_id[np] - 1;
-
-	  if ( nchan < 0 ) {
-	       scia_cal->quality_flag[np] = FLAG_UNUSED;
-	       continue;
-	  }
-
-	  if ( (np % CHANNEL_SIZE) < 10 
-	       || (np % CHANNEL_SIZE) >= (CHANNEL_SIZE - 10) ) {
-	       scia_cal->quality_flag[np] = FLAG_BLINDED;
-	       continue;
-	  }
-	       
-	  for ( nobs = 0; nobs < scia_cal->num_obs; nobs++ ) {
-	       if ( isnormal( scia_cal->spectra[np][nobs] ) ) {
-		    mean += scia_cal->spectra[np][nobs];
-		    num_valid++;
-	       }
-	  }
-	  if ( num_valid == 0 ) {
-	       scia_cal->quality_flag[np] = FLAG_DEAD;
-	  } else if ( (mean /= num_valid) > (scia_cal->coaddf[np] * 60000.) ) {
-	       scia_cal->quality_flag[np] = FLAG_SATURATE;
-	  } else {
-	       register double adev = 0.;
-
-	       for ( nobs = 0; nobs < scia_cal->num_obs; nobs++ ) {
-		    if ( isnormal( scia_cal->spectra[np][nobs] ) )
-			 adev += fabs( scia_cal->spectra[np][nobs] - mean );
-	       }
-	       adev /= num_valid;
-
-	       if ( mean <= DBL_EPSILON || adev <= DBL_EPSILON )
-		    scia_cal->quality_flag[np] = FLAG_DEAD;
-	       else
-		    scia_cal->quality_flag[np] = FLAG_VALID;
-	  }
-     } while ( ++np < SCIENCE_PIXELS );
 }
 
 /*+++++++++++++++++++++++++
@@ -768,7 +770,7 @@ done:
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_PATCH_MEM_CORR
-.PURPOSE     convert level 1b readouts to spectral grid
+.PURPOSE     patch memory correction values in SCIA L1b MDS
 .INPUT/OUTPUT
   call as    SCIA_PATCH_MEM_CORR( scia_cal, state, mds_1b );
      input:
@@ -860,6 +862,20 @@ void SCIA_PATCH_MEM_CORR( struct scia_cal_rec *scia_cal,
       } while ( ++ncl < state->num_clus );
 }
 
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_PATCH_NL_CORR
+.PURPOSE     patch non-linearity correction values in SCIA L1b MDS
+.INPUT/OUTPUT
+  call as    SCIA_PATCH_NL_CORR( scia_cal, state, mds_1b );
+     input:
+	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
+            struct state1_scia *state     :  structure with State definition
+ in/output:
+	    struct mds1_scia *mds_1b      :  structure holding level 1b MDS
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
 static
 void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
 			const struct state1_scia *state, 
@@ -918,8 +934,20 @@ void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
       } while ( ++ncl < state->num_clus );
 }
 
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_APPLY_MEMCORR
+.PURPOSE     apply memory/non-linearity correction
+.INPUT/OUTPUT
+  call as    SCIA_APPLY_MEMCORR( struct scia_cal_rec *scia_cal )
+ in/output:
+	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
 static
-void SCIA_APPLY_CORR( struct scia_cal_rec *scia_cal )
+void SCIA_APPLY_MEMCORR( struct scia_cal_rec *scia_cal )
+       /*@modifies scia_cal->spectra, scia_cal->correction@*/
 {
      register unsigned short np = 0;
 
@@ -932,6 +960,9 @@ void SCIA_APPLY_CORR( struct scia_cal_rec *scia_cal )
 		    scia_cal->spectra[np][no] += scia_cal->correction[np][no];
 	  } while ( ++no < scia_cal->num_obs );
      } while ( ++np < SCIENCE_PIXELS );
+     
+     (void) memset( scia_cal->correction[0], 0,
+		    sizeof(float) * scia_cal->num_obs * scia_cal->num_pixels );
 }
 
 /*+++++++++++++++++++++++++
@@ -947,14 +978,15 @@ void SCIA_APPLY_CORR( struct scia_cal_rec *scia_cal )
 -------------------------*/
 static
 void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack, scia_cal->correction@*/
 {
      const char prognm[] = "SCIA_CALC_STRAY_CORR";
 
      register unsigned short nch, ng, nr;
      register size_t ni;
 
-     register size_t no = 0;
-     register size_t fillings, nobs;
+     register size_t nobs;
 
      float grid_f[SCIENCE_PIXELS], spec_f[SCIENCE_PIXELS], 
 	  stray_f[SCIENCE_PIXELS];
@@ -971,13 +1003,13 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 #endif
      struct scia_straycorr stray = {{0,0}, NULL, NULL, NULL};
 
-     /* set each element of the array equal to its subscript */
-     for ( nr = 0; nr < SCIENCE_PIXELS; nr++ ) grid_f[nr] = (float) nr;
-
      /* read straylight correction matrix */
      SCIA_RD_H5_STRAY( &stray );
      if ( IS_ERR_STAT_FATAL )
      	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_STRAY" );
+
+     /* set each element of the array equal to its subscript */
+     for ( nr = 0; nr < SCIENCE_PIXELS; nr++ ) grid_f[nr] = (float) nr;
 
      /* calculate derivative of stray.grid_out */
      deriv_out = (float *) malloc( stray.dims[0] * sizeof(float) );
@@ -1013,7 +1045,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 
 	       if ( ! found ) {
 		    grid_in_ll[nr] = ipix_ch_mn;
-		    if ( (nr+1 ) < stray.dims[1] ) {
+		    if ( (nr+1u) < stray.dims[1] ) {
 			 grid_in_ul[nr] = 
 			      __ROUNDf_us( (stray.grid_in[nr] 
 					    + stray.grid_in[nr+1]) / 2 ) - 1;
@@ -1025,7 +1057,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 		    grid_in_ll[nr] = 
 			 __ROUNDf_us( (stray.grid_in[nr-1] 
 				       + stray.grid_in[nr]) / 2 );
-		    if ( (nr+1) < stray.dims[1]
+		    if ( (nr+1u) < stray.dims[1]
 			 && stray.grid_in[nr+1] <= ipix_ch_mx ) {
 			 grid_in_ul[nr] = 
 			      __ROUNDf_us( (stray.grid_in[nr] 
@@ -1042,27 +1074,59 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      fp_corr_full = fopen( "tmp_correction_full.dat", "w" );
      fp_corr_grid = fopen( "tmp_correction_grid.dat", "w" );
 #endif
-     /* loop over spectra*/
      spec_r = (float *) malloc( stray.dims[1] * sizeof(float) );
      if ( spec_r == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "spec_r" );
      stray_r = (float *) malloc( stray.dims[0] * sizeof(float) );
      if ( stray_r == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stray_r");
+
+     /* loop over spectra*/
+     nobs = 0;
      do {
 	  register unsigned short np = 0;
 
+	  unsigned short vchan, fillings;
+
 	  /* recontruct full spectra (8192 pixels) */
 	  do {
-	       fillings = NINT(scia_cal->pet[np] / scia_cal->state_pet_min);
-
-	       if ( fillings > 1 ) {
-		    nobs = (fillings - 1) + fillings * (no / fillings);
-
-		    spec_f[np] = (float) scia_cal->spectra[np][nobs] / fillings;
-	       } else if ( fillings == 1 ) {
-		    spec_f[np] = (float) scia_cal->spectra[np][no];
-	       } else {
-		    spec_f[np] = 0.f;
+	       switch ( (int) scia_cal->chan_id[np] ) {
+	       case 1:
+		    vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
+		    break;
+	       case 2:
+		    vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
+		    break;
+	       case 3:
+		    vchan = 4;
+		    break;
+	       case 4:
+		    vchan = 5;
+		    break;
+	       case 5:
+		    vchan = 6;
+		    break;
+	       case 6:
+		    vchan = 7;
+		    break;
+	       case 7:
+		    vchan = 8;
+		    break;
+	       case 8:
+		    vchan = 9;
+		    break;
+	       default:         /* skip un-used pixels */
+		    vchan = USHRT_MAX;
+		    break;
 	       }
+	       fillings = (vchan == USHRT_MAX) ? 0 :
+		    NINT(scia_cal->chan_pet[vchan] / scia_cal->state_pet_min);
+
+	       if ( fillings > 1 )
+		    spec_f[np] = (float) 
+			 scia_cal->spectra[np][nobs/fillings] / fillings;
+	       else if ( fillings == 1 )
+		    spec_f[np] = (float) scia_cal->spectra[np][nobs];
+	       else
+		    spec_f[np] = 0.f;
 	  } while ( ++np < SCIENCE_PIXELS );
 #ifdef DEBUG
 	  (void) fwrite( spec_f, sizeof(float), SCIENCE_PIXELS, fp_full );
@@ -1111,11 +1175,11 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	  np = 0;
 	  do { 
 	       if ( scia_cal->quality_flag[np] == FLAG_BLINDED )
-		    scia_cal->correction[np][no] = 0;
+		    scia_cal->correction[np][nobs] = 0;
 	       else
-		    scia_cal->correction[np][no] = stray_f[np];
+		    scia_cal->correction[np][nobs] = stray_f[np];
 	  } while ( ++np < SCIENCE_PIXELS );
-     } while ( ++no < scia_cal->num_obs );
+     } while ( ++nobs < scia_cal->num_obs );
 #ifdef DEBUG
      (void) fclose( fp_full );
      (void) fclose( fp_grid );
@@ -1132,154 +1196,285 @@ done:
 }
 
 static
+void SCIA_CALC_STRAY_SCALE( struct scia_cal_rec *scia_cal,
+			    /*@out@*/ unsigned char *scale_factor )
+{
+     /*  const char prognm[] = "SCIA_CALC_STRAY_SCALE"; */
+
+     register unsigned short np = 0;
+
+     unsigned short vchan;
+
+     double corrMax[SCIENCE_CHANNELS] = { 0., 0., 0., 0., 0., 0., 0., 0. };
+
+     do {
+	  register unsigned short nobs = 0;
+
+	  const unsigned short ichan = scia_cal->chan_id[np];
+
+	  switch ( (int) scia_cal->chan_id[np] ) {
+	  case 1:
+	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
+	       break;
+	  case 2:
+	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
+	       break;
+	  case 3:
+	       vchan = 4;
+	       break;
+	  case 4:
+	       vchan = 5;
+	       break;
+	  case 5:
+	       vchan = 6;
+	       break;
+	  case 6:
+	       vchan = 7;
+	       break;
+	  case 7:
+	       vchan = 8;
+	       break;
+	  case 8:
+	       vchan = 9;
+	       break;
+	  default:         /* skip un-used pixels */
+	       continue;
+	  }
+	  if ( ichan == 0 ) continue;
+	  if ( scia_cal->quality_flag[np] != FLAG_VALID ) continue;
+
+	  do {
+	       register unsigned char nc = 0;
+
+	       register double corrval = 0.;
+
+	       do {
+		    corrval += scia_cal->correction[np][nobs];
+		    nobs++;
+	       } while ( ++nc < scia_cal->coaddf[np] );
+	       if ( corrMax[ichan] < corrval ) corrMax[ichan] = corrval;
+
+	  } while ( nobs < scia_cal->chan_obs[vchan] );
+     } while ( ++np < SCIENCE_PIXELS );
+
+     scale_factor[1] = (unsigned char) ceil(10 * corrMax[1] / UCHAR_MAX );
+     scale_factor[2] = (unsigned char) ceil(10 * corrMax[2] / UCHAR_MAX );
+     scale_factor[3] = (unsigned char) ceil(10 * corrMax[3] / UCHAR_MAX );
+     scale_factor[4] = (unsigned char) ceil(10 * corrMax[4] / UCHAR_MAX );
+     scale_factor[5] = (unsigned char) ceil(10 * corrMax[5] / UCHAR_MAX );
+     scale_factor[6] = (unsigned char) ceil(10 * corrMax[6] / UCHAR_MAX );
+     scale_factor[7] = (unsigned char) ceil(10 * corrMax[7] / UCHAR_MAX );
+
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     2, corrMax[1], scale_factor[1] ); */
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     3, corrMax[2], scale_factor[2] ); */
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     4, corrMax[3], scale_factor[3] ); */
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     5, corrMax[4], scale_factor[4] ); */
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     6, corrMax[5], scale_factor[5] ); */
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     7, corrMax[6], scale_factor[6] ); */
+     /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
+     /* 		     8, corrMax[7], scale_factor[7] ); */
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_PATCH_STRAY_CORR
+.PURPOSE     patch straylight correction values in SCIA L1b MDS
+.INPUT/OUTPUT
+  call as    SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
+			const struct state1_scia *state, 
+			struct mds1_scia *mds_1b )
+     input:
+            struct scia_cal_rec *scia_cal :  record with SCIA data of one state
+            struct state1_scia *state     :  structure with State definition
+ in/output:
+	    struct mds1_scia *mds_1b      :  structure holding level 1b MDS
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+static
 void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
 			const struct state1_scia *state, 
 			struct mds1_scia *mds_1b )
        /*@modifies mds_1b@*/
 {
      register unsigned short ncl = 0;
+     register unsigned short nd;
 
-     float corr[SCIENCE_CHANNELS];
+
+     unsigned char scale_factor[SCIENCE_CHANNELS];
 
      /*
       * calculate new scaleFactors
       */
-     (void) memset( corr, 0, SCIENCE_CHANNELS * sizeof(float) );
+     SCIA_CALC_STRAY_SCALE( scia_cal, scale_factor );
+     nd = 0;
      do {
-	  register size_t np = 0;
-	  register size_t nf;
+	  /* mds_1b[nd].scale_factor[0] = scale_factor[0]; skip channel 1 */
+	  mds_1b[nd].scale_factor[1] = scale_factor[1];
+	  mds_1b[nd].scale_factor[2] = scale_factor[2];
+	  mds_1b[nd].scale_factor[3] = scale_factor[3];
+	  mds_1b[nd].scale_factor[4] = scale_factor[4];
+	  mds_1b[nd].scale_factor[5] = scale_factor[5];
+	  mds_1b[nd].scale_factor[6] = scale_factor[6];
+	  mds_1b[nd].scale_factor[7] = scale_factor[7];
+     } while ( ++nd < state->num_dsr );
 
-	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->state_pet_min);
-
-	  do {
-	       register unsigned short nd = 0;
-
-	       const unsigned short ich = state->Clcon[ncl].channel - 1;
-	       const unsigned short ipx = absPixelID(state->Clcon[ncl], np);
-
-	       do {
-		    register unsigned short nr;
-
-		    register size_t nobs = 0;
-
-		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
-			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
-			      register float corrval = 0.f;
-
-			      for ( nf = 0; nf < fillings; nf++ ) {
-				   corrval += scia_cal->correction[ipx][nobs];
-				   nobs++;
-			      }
-			      if ( corr[ich] < corrval ) corr[ich] = corrval;
-			 }
-		    }
-		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
-			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
-			      register unsigned short nc = 0;
-			      register float corrval = 0.f;
-
-			      do {
-				   for ( nf = 0; nf < fillings; nf++ ) {
-					corrval += 
-					     scia_cal->correction[ipx][nobs];
-					nobs++;
-				   }
-			      } while ( ++nc < state->Clcon[ncl].coaddf );
-			      if ( corr[ich] < corrval ) corr[ich] = corrval;
-			 }
-		    }
-	       } while ( ++nd < state->num_dsr );
-	  } while ( ++np < (size_t) state->Clcon[ncl].length );
-      } while ( ++ncl < state->num_clus );
-     /*
-      * store new scaleFactors
-      */
-     {
-	  register unsigned short nd = 0;
-
-	  do {
-	       mds_1b[nd].scale_factor[0] = 
-		    (unsigned char) ceilf(10 * corr[0] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[1] = 
-		    (unsigned char) ceilf(10 * corr[1] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[2] = 
-		    (unsigned char) ceilf(10 * corr[2] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[3] = 
-		    (unsigned char) ceilf(10 * corr[3] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[4] = 
-		    (unsigned char) ceilf(10 * corr[4] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[5] = 
-		    (unsigned char) ceilf(10 * corr[5] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[6] = 
-		    (unsigned char) ceilf(10 * corr[6] / UCHAR_MAX);
-	       mds_1b[nd].scale_factor[7] = 
-		    (unsigned char) ceilf(10 * corr[7] / UCHAR_MAX);
-	  } while ( ++nd < state->num_dsr );
-     }
      /*
       * store new straylight correction factors
       */
      ncl = 0;
      do {
-	  register size_t np = 0;
-	  register size_t nf;
-
-	  const size_t fillings = 
-		NINT(state->Clcon[ncl].pet / scia_cal->state_pet_min);
+	  register unsigned short np = 0;
 
 	  do {
 	       register unsigned short nd = 0;
+	       register size_t nobs = 0;
+
+	       register unsigned short nr;
 
 	       const unsigned short ich = state->Clcon[ncl].channel - 1;
 	       const unsigned short ipx = absPixelID(state->Clcon[ncl], np);
-	       const float scaleFactor = mds_1b[nd].scale_factor[ich] / 10.f;
+
+	       const float scaleFactor = scale_factor[ich] / 10.f;
 
 	       /* do not patch straylight of channel 1 */
 	       if ( ich == 0 ) continue;
+	       if ( scia_cal->quality_flag[ipx] != FLAG_VALID ) continue;
 
 	       do {
-		    register unsigned short nr;
-
-		    register size_t nobs = 0;
-
 		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
-			 register size_t nb = np;
+			 register unsigned short nb = np;
 
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
-			      register float corrval = 0.f;
-
-			      for ( nf = 0; nf < fillings; nf++ ) {
-				   corrval += scia_cal->correction[ipx][nobs];
-				   nobs++;
-			      }
 			      mds_1b[nd].clus[ncl].sig[nb].stray =
-				   __ROUNDf_uc( corrval / scaleFactor );
+				   __ROUNDf_uc( scia_cal->correction[ipx][nobs]
+						/ scaleFactor );
+			      nobs++;
+
 			      nb += state->Clcon[ncl].length;
 			 }
 		    }
 		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
-			 register size_t nb = np;
+			 register unsigned short nb = np;
 
 			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
 			      register unsigned short nc = 0;
-			      register float corrval = 0.f;
+			      register float corrval = 0.;
 
 			      do {
-				   for ( nf = 0; nf < fillings; nf++ ) {
-					corrval += 
-					     scia_cal->correction[ipx][nobs];
-					nobs++;
-				   }
+				   corrval += (float) 
+					scia_cal->correction[ipx][nobs];
+				   nobs++;
 			      } while ( ++nc < state->Clcon[ncl].coaddf );
 			      mds_1b[nd].clus[ncl].sigc[nb].stray =
 				  __ROUNDf_uc( corrval / scaleFactor );
+
 			      nb += state->Clcon[ncl].length;
 			 }
 		    }
 	       } while ( ++nd < state->num_dsr );
-	  } while ( ++np < (size_t) state->Clcon[ncl].length );
+	  } while ( ++np < state->Clcon[ncl].length );
       } while ( ++ncl < state->num_clus );
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_WR_CAL_REC
+.PURPOSE     write intermediate results to HDF5 file
+.INPUT/OUTPUT
+  call as    SCIA_WR_CAL_REC( patch_flag, scia_cal );
+     input:
+            unsigned int patch_flag  :  bit-flag which defines what to patch
+	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
+
+.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    static function
+-------------------------*/
+static
+void SCIA_WR_CAL_REC( unsigned short patch_flag,
+		      const struct scia_cal_rec *scia_cal )
+{
+     const char prognm[] = "SCIA_WR_CAL_REC";
+
+     hid_t   fileID = 0;
+     hsize_t dims[2];
+
+     char flname[29];
+     unsigned int ubuff;
+
+     const unsigned char  ucbuff = 0;
+     const float          rbuff = 0.f;
+     const double         dbuff = 0.;
+     const double         nanbuff = NAN;
+
+     (void) snprintf( flname, 29, "scia_cal_rec_%05hu_%02hhu_%03hhu.h5",
+		      scia_cal->abs_orbit,  scia_cal->state_id,  
+		      scia_cal->state_index );
+     fileID = H5Fcreate( flname, H5F_ACC_TRUNC, 
+			 H5P_DEFAULT, H5P_DEFAULT );
+     if ( fileID < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, flname );
+
+     (void) H5LTset_attribute_ushort( fileID, "/", "PatchFlag", 
+				      &patch_flag, 1 );
+     (void) H5LTset_attribute_uchar( fileID, "/", "stateID", 
+				      &scia_cal->state_id, 1 );
+     (void) H5LTset_attribute_uchar( fileID, "/", "stateIndex", 
+				      &scia_cal->state_index, 1 );
+     ubuff = (unsigned int) scia_cal->num_obs;
+     (void) H5LTset_attribute_uint( fileID, "/", "numObs", &ubuff, 1 );
+     ubuff = (unsigned int) VIRTUAL_CHANNELS;
+     (void) H5LTset_attribute_uint( fileID, "/", "numChannels", &ubuff, 1 );
+     ubuff = (unsigned int) SCIENCE_PIXELS;
+     (void) H5LTset_attribute_uint( fileID, "/", "numPixels", &ubuff, 1 );
+     (void) H5LTset_attribute_ushort( fileID, "/", "PET_min", 
+				      &scia_cal->state_pet_min, 1 );
+     (void) H5LTset_attribute_float( fileID, "/", "orbitPhase;", 
+				      &scia_cal->orbit_phase, 1 );
+
+     dims[0] = (hsize_t) SCIENCE_PIXELS;
+     (void) H5LTmake_dataset( fileID, "channelID", 1, dims, 
+			      H5T_NATIVE_UCHAR, scia_cal->chan_id );
+     (void) H5LTmake_dataset( fileID, "clusterID", 1, dims, 
+			      H5T_NATIVE_UCHAR, scia_cal->clus_id );
+     (void) H5LTmake_dataset( fileID, "coaddFactor", 1, dims, 
+			      H5T_NATIVE_UCHAR, scia_cal->coaddf );
+     (void) H5LTset_attribute_uchar( fileID, "coaddFactor", "_FillValue", 
+				     &ucbuff, 1 );
+     (void) H5LTmake_dataset( fileID, "qualityFlags", 1, dims, 
+			      H5T_NATIVE_UCHAR, scia_cal->quality_flag );
+     (void) H5LTset_attribute_uchar( fileID, "qualityFlags", "_FillValue", 
+				     &ucbuff, 1 );
+     (void) H5LTmake_dataset_float( fileID, "PET", 1, dims, scia_cal->pet );
+     (void) H5LTset_attribute_float( fileID, "PET", "_FillValue", &rbuff, 1 );
+     (void) H5LTmake_dataset_float( fileID, "darkSignal", 1, dims, 
+				    scia_cal->dark_signal );
+     (void) H5LTset_attribute_float( fileID, "darkSignal", "_FillValue", 
+				     &rbuff, 1 );
+     dims[0] = (hsize_t) VIRTUAL_CHANNELS;
+     dims[1] = (hsize_t) scia_cal->num_obs;
+     (void) H5LTmake_dataset_double( fileID, "channelMean", 2, dims, 
+				     scia_cal->chan_mean[0] );
+     (void) H5LTset_attribute_double( fileID, "channelMean", "_FillValue", 
+				      &dbuff, 1 );
+     (void) H5LTset_attribute_ushort( fileID, "channelMean", "channelPET", 
+				      scia_cal->chan_pet, VIRTUAL_CHANNELS );
+     (void) H5LTset_attribute_ushort( fileID, "channelMean", "channelObs", 
+				      scia_cal->chan_obs, VIRTUAL_CHANNELS );
+     dims[0] = (hsize_t) SCIENCE_PIXELS;
+     dims[1] = (hsize_t) scia_cal->num_obs;
+     (void) H5LTmake_dataset_double( fileID, "spectra", 2, dims, 
+				     scia_cal->spectra[0] );
+     (void) H5LTset_attribute_double( fileID, "spectra", "_FillValue", 
+				      &nanbuff, 1 );
+     (void) H5LTmake_dataset_float( fileID, "correction", 2, dims, 
+				    scia_cal->correction[0] );
+done:
+     if ( fileID > 0 ) (void) H5Fclose( fileID );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -1293,7 +1488,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 
      char *write_h5_scia_cal = getenv( "SCIA_WR_PATCH_INTERIM" );
 
-     const unsigned int calib_flag = (DO_CORR_AO);
+     unsigned int calib_flag;
 
      struct mph_envi   mph;
      struct scia_cal_rec scia_cal = { 0, 0, 0, 0, 0, 0, 0, 0, 0.f, 0.f, 
@@ -1378,6 +1573,8 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
           NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.correction" );
      if ( verbose )
 	  (void) fprintf(stderr,"Allocated memory for calibration structure\n");
+     (void) memset( scia_cal.correction[0], 0,
+		    sizeof(float) * scia_cal.num_obs * scia_cal.num_pixels );
 
      /* write for each pixel: channel ID, coadding-factor, PET */
      for ( ncl = 0; ncl < state->num_clus; ncl++ ) {
@@ -1435,14 +1632,6 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 	  scia_cal.chan_obs[nch] = (scia_cal.num_obs * scia_cal.state_pet_min)
 	       / scia_cal.chan_pet[nch];
      }
-     /* 
-      * read darkcurrent parameters
-      */
-     SCIA_CAL_GET_DARK( fp, calib_flag, &scia_cal );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
-     if ( verbose )
-	  (void) fprintf( stderr, "Read Dark current parameters\n" );
      /*
       * fill spectra array...
       */
@@ -1450,18 +1639,31 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      if ( verbose )
 	  (void) fprintf( stderr, "Wrote data to calibration structure\n" );
      /*
+      * obtain quality flags
+      */
+     SCIA_SET_FLAG_QUALITY( &scia_cal );
+     if ( verbose )
+	  (void) fprintf( stderr, "Performed quality flagging\n" );
+     /* 
+      * apply darkcurrent correction
+      */
+     if ( scia_cal.limb_scans == 0 ) {
+	  calib_flag = DO_CORR_AO;
+	  SCIA_APPLY_DARK( fp, calib_flag, &scia_cal );
+     } else {
+	  SCIA_APPLY_DARK_LIMB( &scia_cal );
+     }
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
+     if ( verbose )
+	  (void) fprintf( stderr, "Read Dark current parameters\n" );
+     /*
       * compute estimates of channel averages at PET_min 
       * based on PMD read-outs
       */
      SCIA_CALC_CHAN_MEAN( state, mds_1b, &scia_cal );
      if ( verbose )
 	  (void) fprintf( stderr, "Calculated channel averages\n" );
-     /*
-      * obtain quality flags
-      */
-     SCIA_SET_FLAG_QUALITY( &scia_cal );
-     if ( verbose )
-	  (void) fprintf( stderr, "Performed quality flagging\n" );
      /*
       * de-coadd values using channel averages
       */
@@ -1471,12 +1673,10 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /*
       * apply Memory correction
       */
-     (void) memset( scia_cal.correction[0], 0,
-		    sizeof(float) * scia_cal.num_obs * scia_cal.num_pixels );
+     SCIA_CALC_MEM_CORR( &scia_cal );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
      if ( (patch_flag & SCIA_PATCH_MEM) != USHRT_ZERO ) {
-	  SCIA_CALC_MEM_CORR( &scia_cal );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
 	  SCIA_PATCH_MEM_CORR( &scia_cal, state, mds_1b );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Performed memory correction\n" );
@@ -1484,10 +1684,10 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /*
       * apply non-Linearity correction
       */
+     SCIA_CALC_NLIN_CORR( &scia_cal );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
      if ( (patch_flag & SCIA_PATCH_NLIN) != USHRT_ZERO ) {
-	  SCIA_CALC_NLIN_CORR( &scia_cal );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
 	  SCIA_PATCH_NL_CORR( &scia_cal, state, mds_1b );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Performed non-linearity correction\n" );
@@ -1496,7 +1696,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
       * Stray-light correction
       */
      if ( (patch_flag & SCIA_PATCH_STRAY) != USHRT_ZERO ) {
-	  SCIA_APPLY_CORR( &scia_cal );
+	  SCIA_APPLY_MEMCORR( &scia_cal );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Before Straylight correction\n" );
 	  SCIA_CALC_STRAY_CORR( &scia_cal );
