@@ -32,6 +32,7 @@
  * that this is a POSIX program
  */
 #define  POSIX 2
+#define  _BSD_SOURCE            /* required for mkstemp */
 
 /*+++++ System headers +++++*/
 #include <stdio.h>

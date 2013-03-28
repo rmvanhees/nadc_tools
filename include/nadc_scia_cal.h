@@ -130,7 +130,7 @@ extern void SCIA_ATBD_FLAG_BDPM( const struct file_rec *fileParam,
 
 extern void SCIA_SRON_FLAG_BDPM( const struct file_rec *fileParam,
 				 const struct state1_scia *, 
-				 struct mds1c_scia * );
+				 struct mds1c_scia * )
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp,
        mds_1c->pixel_val@*/;

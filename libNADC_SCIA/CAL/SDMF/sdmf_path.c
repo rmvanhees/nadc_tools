@@ -56,6 +56,7 @@ char *SDMF_PATH( const char version[] )
      static char sdmf24_path[80] = "/SCIA/SDMF241";
      static char sdmf30_path[80] = "/SCIA/SDMF30";
      static char sdmf31_path[80] = "/SCIA/SDMF31";
+     static char no_path[80] = "";
 
      static bool init = TRUE;
 
@@ -82,7 +83,7 @@ char *SDMF_PATH( const char version[] )
      else if ( strncmp( version, "3.1", 3 ) == 0 )
 	  return sdmf31_path;
      else
-	  return "";
+	  return no_path;
 }
     
 /*

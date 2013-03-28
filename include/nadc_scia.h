@@ -456,7 +456,7 @@ extern void SCIA_WR_ASCII_LADS( struct param_record, unsigned int,
 extern void SCIA_WR_H5_VERSION( hid_t )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern hid_t SCIA_CRE_H5_FILE( int instrument, const struct param_record * );
+extern hid_t SCIA_CRE_H5_FILE( int instrument, const struct param_record * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 extern void SCIA_WR_H5_MPH( struct param_record, const struct mph_envi * )

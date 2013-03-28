@@ -344,9 +344,9 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
 
      register unsigned int nr;
 
-     char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
+     char     sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
 
-     int  numChar;
+     size_t   numChar;
 
      PGresult *res;
 /*
@@ -393,7 +393,7 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
 /* tile */
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%s)",
 			      strcpy(cbuff,sql_query), TILE_DEFAULT );
-/* 	  (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
+/* 	  (void) fprintf( stderr, "%s [%-zd]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE ) {
 	       res = PQexec( conn, "ROLLBACK" );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_STRLEN,  "sql_query" );

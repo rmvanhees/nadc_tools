@@ -67,5 +67,5 @@ void NADC_RECEIVEDATE( const char *flname, char *receivedate )
 
      (void) stat( flname, &flstat );
      (void) strftime( receivedate, SHORT_STRING_LENGTH, 
-		      "%F %T", gmtime( &flstat.st_mtime ) );
+		      "%Y-%m-%d %H:%M:%S", gmtime( &flstat.st_mtime ) );
 }

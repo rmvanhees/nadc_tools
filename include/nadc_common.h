@@ -135,22 +135,22 @@ extern "C" {
  */
 #define NINT(a) ((a) >= 0.f ? (int)((a)+0.5) : (int)((a)-0.5))
 
-#define __ROUNDf_uc(val) ({                             \
-     typeof(val) _val = roundf(val);                    \
-     (_val < 0) ? (unsigned char) 0 :                   \
-          (_val < UCHAR_MAX) ? (unsigned char) (_val) : UCHAR_MAX;      \
+#define __ROUNDf_uc(val) __extension__ ({   \
+     __typeof__(val) _val = roundf(val);    \
+     (_val < 0) ? (unsigned char) 0 :       \
+          (_val < UCHAR_MAX) ? (unsigned char) (_val) : UCHAR_MAX;  \
           })
 
-#define __ROUNDf_us(val) ({                             \
-     typeof(val) _val = roundf(val);                    \
-     (_val < 0) ? (unsigned short) 0 :                  \
-          (_val < USHRT_MAX) ? (unsigned short) (_val) : USHRT_MAX;     \
+#define __ROUNDf_us(val) __extension__ ({   \
+     __typeof__(val) _val = roundf(val);    \
+     (_val < 0) ? (unsigned short) 0 :      \
+          (_val < USHRT_MAX) ? (unsigned short) (_val) : USHRT_MAX; \
           })
 
-#define __ROUND_us(val) ({                              \
-     typeof(val) _val = round(val);                     \
-     (_val < 0) ? (unsigned short) 0 :                  \
-          (_val < USHRT_MAX) ? (unsigned short) (_val) : USHRT_MAX;     \
+#define __ROUND_us(val) __extension__ ({    \
+     __typeof__(val) _val = round(val);     \
+     (_val < 0) ? (unsigned short) 0 :      \
+          (_val < USHRT_MAX) ? (unsigned short) (_val) : USHRT_MAX; \
           })
 
 /* return Longitude within range <-180, 180] */

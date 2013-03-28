@@ -46,9 +46,6 @@
 #define _SCIA_COMMON
 #include <nadc_idl.h>
 
-/* avoid conflicting definition in ITT's IDL code */
-#undef strlcpy
-
 #define ESM0 220.
 
 /*+++++ Global Variables +++++*/

@@ -649,7 +649,7 @@ struct ddr_gome
 /*
  * prototype declarations of GOME functions
  */
-extern void GOME_SET_PARAM( int, char **, int, struct param_record *param );
+extern void GOME_SET_PARAM( int, char **, int, struct param_record *param )
      /*@modifies param@*/;
 extern void GOME_SHOW_PARAM( int, const struct param_record );
 
@@ -808,7 +808,7 @@ extern void GOME_LV2_WR_ASCII_DDR( struct param_record, struct sph2_gome,
 extern void GOME_WR_H5_VERSION( hid_t )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern hid_t GOME_CRE_H5_FILE( int instrument, const struct param_record * );
+extern hid_t GOME_CRE_H5_FILE( int instrument, const struct param_record * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 extern void CRE_GOME_LV1_H5_STRUCTS( struct param_record );

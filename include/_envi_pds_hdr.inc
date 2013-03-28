@@ -9,13 +9,13 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	  (void) snprintf( format, SHORT_STRING_LENGTH, 
 			   "\"%%%-us\"", pds_item->length-1 );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			   format, (char *) buff );
+			   format, (const char *) buff );
 	  break;
      case PDS_Plain: 
 	  (void) snprintf( format, SHORT_STRING_LENGTH, 
 			   "%%%-us", pds_item->length );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			   format, (char *) buff );
+			   format, (const char *) buff );
 	  break;
      case PDS_Short: 
 	  if ( pds_item->unit != NULL )
@@ -25,7 +25,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	       (void) snprintf( format, SHORT_STRING_LENGTH, 
 				"%%+0%-uhd", pds_item->length );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((short *) buff) );
+			  format, *((const short *) buff) );
 	  break;
      case PDS_uShort: 
 	  if ( pds_item->unit != NULL )
@@ -35,7 +35,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	       (void) snprintf( format, SHORT_STRING_LENGTH, 
 				"+%%0%-uhu", pds_item->length-1 );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((unsigned short *) buff) );
+			  format, *((const unsigned short *) buff) );
 	  break;
      case PDS_Long: 
 	  if ( pds_item->unit != NULL )
@@ -45,7 +45,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	       (void) snprintf( format, SHORT_STRING_LENGTH, 
 				"%%+0%-ud", pds_item->length );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((int *) buff) );
+			  format, *((const int *) buff) );
 	  break;
      case PDS_uLong: 
 	  if ( pds_item->unit != NULL )
@@ -55,7 +55,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	       (void) snprintf( format, SHORT_STRING_LENGTH, 
 				"+%%0%-uu", pds_item->length-1 );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((unsigned int *) buff) );
+			  format, *((const unsigned int *) buff) );
 	  break;
      case PDS_Ado06: 
 	  if ( pds_item->unit != NULL )
@@ -64,7 +64,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	  else
 	       (void) snprintf( format, SHORT_STRING_LENGTH, "%%+8.6f" );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((double *) buff) );
+			  format, *((const double *) buff) );
 	  if ( pds_item->value[1] == '0' ) {
 	       size_t nbyte = strlen( pds_item->value );
 	       (void) memmove( pds_item->value+1, pds_item->value+2, nbyte-2 );
@@ -78,7 +78,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	  else
 	       (void) snprintf( format, SHORT_STRING_LENGTH, "%%+012.6f" );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((double *) buff) );
+			  format, *((const double *) buff) );
 	  break;
      case PDS_Ado73: 
 	  if ( pds_item->unit != NULL )
@@ -87,7 +87,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	  else
 	       (void) snprintf( format, SHORT_STRING_LENGTH, "%%+012.3f" );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((double *) buff) );
+			  format, *((const double *) buff) );
 	  break;
      case PDS_Ado18e:
 	  if ( pds_item->unit != NULL )
@@ -96,7 +96,7 @@ void NADC_WR_PDS_ITEM( NADC_pds_hdr_t *pds_item, const void *buff )
 	  else
 	       (void) snprintf( format, SHORT_STRING_LENGTH, "%%+15.8E" );
 	  (void) snprintf( pds_item->value, PDS_KEYVAL_LENGTH,
-			  format, *((double *) buff) );
+			  format, *((const double *) buff) );
 	  break;
      }
 }

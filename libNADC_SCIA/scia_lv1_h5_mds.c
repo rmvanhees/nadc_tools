@@ -998,7 +998,7 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
  * radiance units flag
  */
 	  (void) H5LTset_attribute_char( grp_id, clus_name, "rad_units_flag", 
-					 (char *) &mds_1c->rad_units_flag, 1 );
+					 (const char *) &mds_1c->rad_units_flag, 1 );
 /*
  * channel ID
  */
