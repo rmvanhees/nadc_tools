@@ -48,19 +48,9 @@ extern "C" {
 #endif
 
 #ifdef __GNUC__
-#define min(x,y) ({ \
-        const typeof(x) _x = (x);       \
-        const typeof(y) _y = (y);       \
-        (void) (&_x == &_y);            \
-        _x < _y ? _x : _y; })
-#define max(x,y) ({ \
-        const typeof(x) _x = (x);       \
-        const typeof(y) _y = (y);       \
-        (void) (&_x == &_y);            \
-        _x > _y ? _x : _y; })
-#define min_t(type,x,y) \
+#define min_t(type,x,y) __extension__  \
         ({ type __x = (x); type __y = (y); __x < __y ? __x: __y; })
-#define max_t(type,x,y) \
+#define max_t(type,x,y) __extension__ \
         ({ type __x = (x); type __y = (y); __x > __y ? __x: __y; })
 #else
 #define min_t(type,x,y) \
