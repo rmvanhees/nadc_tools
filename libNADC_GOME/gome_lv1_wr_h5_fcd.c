@@ -89,13 +89,13 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
  * detector confidence flags
  */
      dims[0] = 7;
-     cbuff[0] = (unsigned char) fcd->detector_flags.flag_fields.array_1;
-     cbuff[1] = (unsigned char) fcd->detector_flags.flag_fields.array_2;
-     cbuff[2] = (unsigned char) fcd->detector_flags.flag_fields.array_3;
-     cbuff[3] = (unsigned char) fcd->detector_flags.flag_fields.array_4;
-     cbuff[4] = (unsigned char) fcd->detector_flags.flag_fields.pmd_1;
-     cbuff[5] = (unsigned char) fcd->detector_flags.flag_fields.pmd_1;
-     cbuff[6] = (unsigned char) fcd->detector_flags.flag_fields.pmd_1;
+     cbuff[0] = (unsigned char) fcd->flags.field.array_1;
+     cbuff[1] = (unsigned char) fcd->flags.field.array_2;
+     cbuff[2] = (unsigned char) fcd->flags.field.array_3;
+     cbuff[3] = (unsigned char) fcd->flags.field.array_4;
+     cbuff[4] = (unsigned char) fcd->flags.field.pmd_1;
+     cbuff[5] = (unsigned char) fcd->flags.field.pmd_1;
+     cbuff[6] = (unsigned char) fcd->flags.field.pmd_1;
      NADC_WR_HDF5_Attribute( grp_id, "Detector Confidence Flags", 
 			    H5T_NATIVE_UCHAR, 1, dims, cbuff );
 /*

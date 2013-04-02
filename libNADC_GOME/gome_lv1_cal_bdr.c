@@ -947,17 +947,17 @@ void CALIB_PCD_BDR( unsigned short calib_flag, short nband,
 		    break;	       
 	       case BAND_2a:
 	       case BAND_2b:
-		    if ( pcd[rec[nr].indx_pcd].ihr.intg.stat.fpa2 == 1 )
+		    if ( pcd[rec[nr].indx_pcd].ihr.intg.field.fpa2 == 1 )
 			 factor = 2;
 		    break;	       
 	       case BAND_3:
-		    if ( pcd[rec[nr].indx_pcd].ihr.intg.stat.fpa3 == 1 )
+		    if ( pcd[rec[nr].indx_pcd].ihr.intg.field.fpa3 == 1 )
 			 factor = 2;
-		    else if ( pcd[rec[nr].indx_pcd].ihr.intg.stat.fpa3 == 2 )
+		    else if ( pcd[rec[nr].indx_pcd].ihr.intg.field.fpa3 == 2 )
 			 factor = 4;
 		    break;	       
 	       case BAND_4:
-		    if ( pcd[rec[nr].indx_pcd].ihr.intg.stat.fpa4 == 1 )
+		    if ( pcd[rec[nr].indx_pcd].ihr.intg.field.fpa4 == 1 )
 			 factor = 2;
 		    break;	       
 	       }
@@ -1107,17 +1107,17 @@ void CALIB_SMCD_BDR( unsigned short calib_flag, short nband,
 		    break;
 	       case BAND_2a:
 	       case BAND_2b:
-		    if ( smcd[rec[nr].indx_pcd].ihr.intg.stat.fpa2 == 1 )
+		    if ( smcd[rec[nr].indx_pcd].ihr.intg.field.fpa2 == 1 )
 			 factor = 2;
 		    break;
 	       case BAND_3:
-		    if ( smcd[rec[nr].indx_pcd].ihr.intg.stat.fpa3 == 1 )
+		    if ( smcd[rec[nr].indx_pcd].ihr.intg.field.fpa3 == 1 )
 			 factor = 2;
-		    else if ( smcd[rec[nr].indx_pcd].ihr.intg.stat.fpa3 == 2 )
+		    else if ( smcd[rec[nr].indx_pcd].ihr.intg.field.fpa3 == 2 )
 			 factor = 4;
 		    break;
 	       case BAND_4:
-		    if ( smcd[rec[nr].indx_pcd].ihr.intg.stat.fpa4 == 1 )
+		    if ( smcd[rec[nr].indx_pcd].ihr.intg.field.fpa4 == 1 )
 			 factor = 2;
 		    break;
 	       }

@@ -69,7 +69,7 @@ struct = { lv1_calib ,$
          }
 
 struct = { fcd_gome ,$
-           flags      :   0l  ,$
+           flags      :   0us ,$
            npeltier   :   0s  ,$
            nleak      :   0s  ,$
            nhot       :   0s  ,$

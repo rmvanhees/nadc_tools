@@ -213,7 +213,7 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
 /*
  * read data buffer to FCD structure
  */
-     (void) memcpy( &fcd->detector_flags.flags, fcd_char, GOME_SHORT );
+     (void) memcpy( &fcd->flags.two_byte, fcd_char, GOME_SHORT );
      fcd_pntr = fcd_char + GOME_SHORT;
      nr = 0;
      do {

@@ -99,7 +99,7 @@ int IDL_STDCALL _GOME_LV1_RD_FCD ( int argc, void *argv[] )
 
      struct IDL_fcd_gome
      {
-	  union quality_fcd detector_flags;
+	  unsigned short flag_bitfield;
 	  short  npeltier;
 	  short  nleak;
 	  short  nhot;
@@ -146,8 +146,7 @@ int IDL_STDCALL _GOME_LV1_RD_FCD ( int argc, void *argv[] )
      Use_Extern_Alloc = TRUE;
      if ( IS_ERR_STAT_FATAL ) return -1;
 
-     (void) memcpy( &fcd->detector_flags, &C_fcd.detector_flags, 
-		    sizeof(union quality_fcd) );
+     fcd->flag_bitfield = C_fcd.flags.two_byte;
      fcd->npeltier = C_fcd.npeltier;
      fcd->nleak = C_fcd.nleak;
      fcd->nhot = C_fcd.nhot;

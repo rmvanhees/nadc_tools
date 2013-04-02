@@ -87,7 +87,8 @@ void Sun2Intel_SMCD( struct smcd_gome *smcd )
      IEEE_Swap__FLT( &smcd->noise_factor );
      smcd->ihr.subsetcounter = byte_swap_u16( smcd->ihr.subsetcounter );
      smcd->ihr.prism_temp    = byte_swap_u16( smcd->ihr.prism_temp );
-     smcd->ihr.averagemode = byte_swap_u16( smcd->ihr.averagemode );
+     smcd->ihr.averagemode   = byte_swap_u16( smcd->ihr.averagemode );
+     smcd->ihr.intg.two_byte = byte_swap_u16( smcd->ihr.intg.two_byte );
      ni = 0;
      do { 
 	  smcd->ihr.pmd[0][ni] = byte_swap_u16( smcd->ihr.pmd[0][ni] );
@@ -215,7 +216,7 @@ short GOME_LV1_RD_SMCD( unsigned char source, FILE *infl,
  */
 	  smcd->ihr.subsetcounter = ihr_buff[sph->subset_entry];
 	  smcd->ihr.prism_temp = ihr_buff[PRE_DISP_TEMP_ENTRY];
-
+	  smcd->ihr.intg.two_byte = ihr_buff[sph->intgstat_entry];
 	  for ( nr = 0; nr < PMD_IN_GRID; nr++ ) {
 	       smcd->ihr.pmd[0][nr] = ihr_buff[sph->pmd_entry + nr * 4];
 	       smcd->ihr.pmd[1][nr] = ihr_buff[sph->pmd_entry + nr * 4 + 1];

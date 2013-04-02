@@ -262,20 +262,13 @@ void GOME_LV1_WR_ASCII_FCD( struct param_record param,
      nadc_write_header( outfl, nr, param.infile, 
 			 "Fixed Calibration Record Header" );
 /* 01 */
-     nadc_write_uint( outfl, ++nr, "Channel 1", 
-		      fcd->detector_flags.flag_fields.array_1 );
-     nadc_write_uint( outfl, nr, "Channel 2", 
-		      fcd->detector_flags.flag_fields.array_2 );
-     nadc_write_uint( outfl, nr, "Channel 3", 
-		      fcd->detector_flags.flag_fields.array_3 );
-     nadc_write_uint( outfl, nr, "Channel 4", 
-		      fcd->detector_flags.flag_fields.array_4 );
-     nadc_write_uint( outfl, nr, "PMD 1", 
-		      fcd->detector_flags.flag_fields.pmd_1 );
-     nadc_write_uint( outfl, nr, "PMD 2", 
-		      fcd->detector_flags.flag_fields.pmd_2 );
-     nadc_write_uint( outfl, nr, "PMD 3", 
-		      fcd->detector_flags.flag_fields.pmd_3 );
+     nadc_write_uint( outfl, ++nr, "Channel 1", fcd->flags.field.array_1 );
+     nadc_write_uint( outfl, nr, "Channel 2", fcd->flags.field.array_2 );
+     nadc_write_uint( outfl, nr, "Channel 3", fcd->flags.field.array_3 );
+     nadc_write_uint( outfl, nr, "Channel 4", fcd->flags.field.array_4 );
+     nadc_write_uint( outfl, nr, "PMD 1", fcd->flags.field.pmd_1 );
+     nadc_write_uint( outfl, nr, "PMD 2", fcd->flags.field.pmd_2 );
+     nadc_write_uint( outfl, nr, "PMD 3", fcd->flags.field.pmd_3 );
 /* 02 */
      count[0] = 3;
      uibuff[0] = (unsigned int) fcd->bcr[0].array_nr;
@@ -650,23 +643,23 @@ void GOME_LV1_WR_ASCII_PCD( struct param_record param, short nr_pcd,
 	  nadc_write_ushort( outfl, nr, "Average mode",
 			      pcd[nii].ihr.averagemode );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_FPA4", 
-			     pcd[nii].ihr.intg.stat.fpa4 );
+			     pcd[nii].ihr.intg.field.fpa4 );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_FPA3", 
-			     pcd[nii].ihr.intg.stat.fpa3 );
+			     pcd[nii].ihr.intg.field.fpa3 );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_FPA2", 
-			     pcd[nii].ihr.intg.stat.fpa2 );
+			     pcd[nii].ihr.intg.field.fpa2 );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_Band1a", 
-			     pcd[nii].ihr.intg.stat.ch1a );
+			     pcd[nii].ihr.intg.field.ch1a );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_Band1b", 
-			     pcd[nii].ihr.intg.stat.ch1b );
+			     pcd[nii].ihr.intg.field.ch1b );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_Band2a", 
-			     pcd[nii].ihr.intg.stat.ch2a );
+			     pcd[nii].ihr.intg.field.ch2a );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_Band2b", 
-			     pcd[nii].ihr.intg.stat.ch2b );
+			     pcd[nii].ihr.intg.field.ch2b );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_Band3", 
-			     pcd[nii].ihr.intg.stat.ch3 );
+			     pcd[nii].ihr.intg.field.ch3 );
 	  nadc_write_uchar( outfl, nr, "IntegrStatus_Band4", 
-			     pcd[nii].ihr.intg.stat.ch4 );
+			     pcd[nii].ihr.intg.field.ch4 );
 	  nadc_write_double( outfl, nr, "PreDisperserTemperature", 3,
 			     -1.721 + 0.006104 * 
 			     pcd[nii].ihr.prism_temp );
@@ -946,16 +939,16 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
      cbuff = (unsigned char *) malloc( count[0] * sizeof( unsigned char ));
      if ( cbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.dead;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.dead;
      nadc_write_arr_uchar( outfl, ++nr, "FlagDeadPixels", 1, count, cbuff );
      for ( nx = 0; nx < count[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.hot;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.hot;
      nadc_write_arr_uchar( outfl, nr, "FlagHotPixels", 1, count, cbuff );
      for ( nx = 0; nx < count[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.saturate;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.saturate;
      nadc_write_arr_uchar( outfl, nr, "FlagSaturatePixels", 1, count, cbuff );
      for ( nx = 0; nx < count[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.spectral;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.spectral;
      nadc_write_arr_uchar( outfl, nr, "FlagSpectralPixels", 1, count, cbuff );
      free( cbuff );
 /*

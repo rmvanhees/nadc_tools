@@ -45,22 +45,6 @@ enum cluster_type { RSIG = 1, RSIGC, ESIG, ESIGC };
 /*
  * compound data types
  */
-union det_signal
-{
-     struct signal_breakout
-     {
-#ifdef _SWAP_TO_LITTLE_ENDIAN
-	  unsigned int  sign :24;
-	  signed char   corr :8;
-#else
-	  signed char   corr :8;
-	  unsigned int  sign :24;
-#endif
-     } field;
-     
-     unsigned int four_byte;
-};
-
 struct Sig_scia
 {
      unsigned char  stray;
@@ -70,8 +54,19 @@ struct Sig_scia
 
 struct Sigc_scia
 {
-     unsigned char    stray;
-     union det_signal det;
+     unsigned char  stray;
+     union {
+	  struct sign_bitfield {
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	       unsigned int sign :24;
+	       signed char  corr :8;
+#else
+	       signed char  corr :8;
+	       unsigned int sign :24;
+#endif
+	  } field;
+	  unsigned int four_byte;
+     } det;
 };
 
 struct Clus_scia

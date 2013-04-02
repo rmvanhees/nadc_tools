@@ -143,8 +143,11 @@ short GOME_LV1_RD_REC( FILE *infl, short nband,
 /*
  * (1) quality flags
  */
-	  (void) memcpy( &rec->pixel_flags.flags, rec_pntr, GOME_SHORT );
+	  (void) memcpy( &rec->quality.two_byte, rec_pntr, GOME_SHORT );
 	  rec_pntr += GOME_SHORT;
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  rec->quality.two_byte = byte_swap_u16( rec->quality.two_byte );
+#endif
 /*
  * (2) index to Polarisations Sensitivity Parameters
  */

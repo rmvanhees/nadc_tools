@@ -129,19 +129,19 @@ void GOME_LV1_WR_H5_REC( unsigned char flag_origin, short nband,
      cbuff = (unsigned char *) malloc( dims[0] * sizeof( unsigned char ));
      if ( cbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
      for ( nx = 0; nx < dims[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.dead;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.dead;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagDeadPixels", 
 			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
      for ( nx = 0; nx < dims[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.hot;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.hot;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagHotPixels", 
 			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
      for ( nx = 0; nx < dims[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.saturate;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.saturate;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagSaturatePixels", 
 			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
      for ( nx = 0; nx < dims[0]; nx++ )
-	  cbuff[nx] = (unsigned char) rec[nx].pixel_flags.flag_fields.spectral;
+	  cbuff[nx] = (unsigned char) rec[nx].quality.field.spectral;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagSpectralPixels", 
 			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
      free( cbuff );

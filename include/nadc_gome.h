@@ -330,23 +330,6 @@ struct cr1_gome
      float  topPressError;
 };
 
-union quality_fcd
-{
-     struct fcd_breakout
-     {
-	  unsigned int array_1:2;
-	  unsigned int array_2:2;
-	  unsigned int array_3:2;
-	  unsigned int array_4:2;
-	  unsigned int pmd_1:1;
-	  unsigned int pmd_2:1;
-	  unsigned int pmd_3:1;
-	  unsigned int spare:5;
-     } flag_fields;
-
-     short flags;
-};
-
 struct lv1_bcr
 {
      short array_nr;
@@ -408,9 +391,20 @@ struct lv1_calib
      float response[CHANNEL_SIZE];
 };
 
-struct fcd_gome
+struct fcd_gome 
 {
-     union quality_fcd detector_flags;
+     union {
+	  struct flags_bitfield {
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	       unsigned short pmd_1:1, pmd_2:1, pmd_3:1, empty:5, 
+		    array_1:2, array_2:2, array_3:2, array_4:2;
+#else
+	       unsigned short empty:5, pmd_3:1, pmd_2:1, pmd_1:1, 
+		    array_4:2, array_3:2, array_2:2, array_1:2;
+#endif
+	  } field;
+	  unsigned short two_byte;
+     } flags;
      short  npeltier;
      short  nleak;
      short  nhot;
@@ -464,35 +458,21 @@ struct sph0_gome
 };
 
 
-struct ihr_gome
+struct ihr_gome 
 {
      unsigned short subsetcounter;
      unsigned short prism_temp;
      unsigned short averagemode;
      union {
-	  struct {
+	  struct intg_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned char ch4:2;
-	       unsigned char ch3:2;
-	       unsigned char ch2b:2;
-	       unsigned char ch2a:2;
-	       unsigned char ch1b:2;
-	       unsigned char ch1a:2;
-	       unsigned char fpa2:1;
-	       unsigned char fpa3:2;
-	       unsigned char fpa4:1;
+	       unsigned short ch4:2, ch3:2, ch2b:2, ch2a:2, ch1b:2, ch1a:2,
+		    fpa2:1, fpa3:2, fpa4:1;
 #else
-	       unsigned char fpa4:1;
-	       unsigned char fpa3:2;
-	       unsigned char fpa2:1;
-	       unsigned char ch1a:2;
-	       unsigned char ch1b:2;
-	       unsigned char ch2a:2;
-	       unsigned char ch2b:2;
-	       unsigned char ch3:2;
-	       unsigned char ch4:2;
-#endif	       
-	  } stat;
+	       unsigned short fpa4:1, fpa3:2, fpa2:1,
+		    ch1a:2, ch1b:2, ch2a:2, ch2b:2, ch3:2, ch4:2;
+#endif
+	  } field;
 	  unsigned short two_byte;
      } intg;
      unsigned short pmd[PMD_NUMBER][PMD_IN_GRID];
@@ -543,22 +523,18 @@ struct smcd_gome
      struct pmd_gome  pmd[PMD_IN_GRID];
 };
 
-union quality_rec
-{
-     struct rec_breakout
-     {
-	  unsigned int dead:2;
-	  unsigned int hot:2;
-	  unsigned int saturate:2;
-	  unsigned int spectral:2;
-     } flag_fields;
-
-     short flags;
-};
-
 struct rec_gome
 {
-     union quality_rec pixel_flags;
+     union {
+	  struct quality_bitfield {
+#ifdef _SWAP_TO_LITTLE_ENDIAN	  
+	       unsigned short dead:2, hot:2, saturate:2, spectral:2, empty:8;
+#else
+	       unsigned short empty:8, spectral:2, saturate:2, hot:2, dead:2;
+#endif
+	  } field;
+	  unsigned short two_byte;
+     } quality;
      short indx_psp;
      short indx_pcd;
      float integration[2];
