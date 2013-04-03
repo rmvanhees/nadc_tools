@@ -90,8 +90,8 @@ unsigned int GET_SCIA_LV1C_PMD( const struct state1_scia *state,
      mds_pmd->quality_flag = mds_1b->quality_flag;
      mds_pmd->type_mds = mds_1b->type_mds;
      mds_pmd->category = (unsigned char) state->category;
-     mds_pmd->state_id = mds_1b->state_id;
-     mds_pmd->state_index = mds_1b->state_index;
+     mds_pmd->state_id = state->state_id;
+     mds_pmd->state_index = state->indx;
      mds_pmd->dur_scan = state->dur_scan;
      mds_pmd->num_pmd = state->num_pmd * PMD_NUMBER;
      mds_pmd->num_geo = state->num_pmd;

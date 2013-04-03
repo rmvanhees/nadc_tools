@@ -84,10 +84,6 @@
 #define FLAG_DEAD             ((unsigned char) 0x4U)
 #define FLAG_SATURATE         ((unsigned char) 0x8U)
 
-#define absPixelID(Clcon,ipx) ((unsigned short)				\
-			       ((Clcon.pixel_nr + ipx +                 \
-				 CHANNEL_SIZE * ((int) Clcon.channel - 1))))
-
 /*+++++ Static Variables +++++*/
 struct scia_cal_rec {
      unsigned char    state_id;
@@ -116,6 +112,47 @@ struct scia_cal_rec {
 /*+++++ Global Variables +++++*/
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
+static inline
+unsigned short ABS_PIXELID( unsigned short ipx, struct Clcon_scia Clcon )
+{
+     return (unsigned short) (CHANNEL_SIZE * ((int) Clcon.channel - 1))
+	  + Clcon.pixel_nr + ipx;
+}
+
+static inline
+unsigned short VIRTUAL_CHANNEL( unsigned char chan_id, unsigned char clus_id )
+{
+     unsigned short vchan = USHRT_MAX;
+
+     switch ( (int) chan_id ) {
+     case 1:
+	  vchan = ((int) clus_id < 4) ? 0 : 1;
+	  break;
+     case 2:
+	  vchan = ((int) clus_id < 10) ? 3 : 2;
+	  break;
+     case 3:
+	  vchan = 4;
+	  break;
+     case 4:
+	  vchan = 5;
+	  break;
+     case 5:
+	  vchan = 6;
+	  break;
+     case 6:
+	  vchan = 7;
+	  break;
+     case 7:
+	  vchan = 8;
+	  break;
+     case 8:
+	  vchan = 9;
+	  break;
+     }
+     return vchan;
+}
+
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_FILL_SPECTRA
 .PURPOSE     convert level 1b readouts to spectral grid
@@ -152,7 +189,7 @@ void SCIA_FILL_SPECTRA( const struct state1_scia *state,
 	       register unsigned short nr;
 	       register unsigned short nd = 0;
 
-	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
+	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
 
 	       nobs = 0;
 	       do {
@@ -340,7 +377,7 @@ void SCIA_APPLY_DARK_LIMB( struct scia_cal_rec *scia_cal )
 {
      register unsigned short nr, np = 0;
 
-     unsigned short num_ll_obs, vchan;
+     unsigned short num_ll_obs;
 
      np = 0;
      do {
@@ -348,34 +385,11 @@ void SCIA_APPLY_DARK_LIMB( struct scia_cal_rec *scia_cal )
 	  register unsigned short num_valid = 0;
 	  register double dark = 0.;
 
-	  switch ( (int) scia_cal->chan_id[np] ) {
-	  case 1:
-	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
-	       break;
-	  case 2:
-	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
-	       break;
-	  case 3:
-	       vchan = 4;
-	       break;
-	  case 4:
-	       vchan = 5;
-	       break;
-	  case 5:
-	       vchan = 6;
-	       break;
-	  case 6:
-	       vchan = 7;
-	       break;
-	  case 7:
-	       vchan = 8;
-	       break;
-	  case 8:
-	       vchan = 9;
-	       break;
-	  default:         /* skip un-used pixels */
-	       continue;
-	  }
+	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						  scia_cal->clus_id[np] );
+
+          /* skip un-used pixels */
+	  if ( vchan == USHRT_MAX ) continue;
 
 	  num_ll_obs = 24 / scia_cal->chan_pet[vchan];
 	  if ( num_ll_obs == 0 ) num_ll_obs = 1;
@@ -431,8 +445,10 @@ void SCIA_CALC_CHAN_MEAN( const struct state1_scia *state,
 {
      register unsigned short nch;
 
+     float pmd_offs[VIRTUAL_CHANNELS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
      /* science channel 2 PMD mapping: 1-A, 2-A, 3-B, 4-C, 5-D, 6-E, 7-F, 8-F */
-     static const unsigned short Chan2PmdIndx[VIRTUAL_CHANNELS] = { 
+     const unsigned short Chan2PmdIndx[VIRTUAL_CHANNELS] = { 
 	  0, 0, 0, 0, 1, 2, 3, 4, 5, 5 
      };
 
@@ -456,33 +472,45 @@ void SCIA_CALC_CHAN_MEAN( const struct state1_scia *state,
 	  } while ( ++nch < VIRTUAL_CHANNELS );
      }
 
+     /* determine minimum of PMD values */
      nch = 0;
      do {
 	  register unsigned short nd  = 0;
-	  register size_t nobs = 0;
+
+	  do {
+	       register unsigned short indx = Chan2PmdIndx[nch];
+
+	       while ( indx < mds_1b[nd].n_pmd ) {
+		    if ( mds_1b[nd].int_pmd[indx] < pmd_offs[nch] ) 
+			 pmd_offs[nch] = floorf(mds_1b[nd].int_pmd[indx]);
+
+		    indx += PMD_NUMBER;
+	       }
+	  } while ( ++nd < state->num_dsr );
+     } while ( ++nch < VIRTUAL_CHANNELS );
+
+     /* calculate scaling factors for ca-added readouts */
+     nch = 0;
+     do {
+	  register unsigned short nd  = 0;
+	  register unsigned short nobs = 0;
 
 	  const unsigned short NumPmdPet = 2 * scia_cal->chan_pet[nch];
-
-	  if ( scia_cal->chan_pet[nch] == USHRT_MAX ) continue;
 
 	  do {
 	       register unsigned short indx = Chan2PmdIndx[nch];
 
 	       while ( indx < mds_1b[nd].n_pmd ) {
 		    register unsigned short np = 0;
-		    register unsigned short num_valid = 0;
 
 		    do {
-			 if ( mds_1b[nd].int_pmd[indx] > FLT_EPSILON ) {
-			      num_valid++;
-			      scia_cal->chan_mean[nch][nobs] += 
-				   mds_1b[nd].int_pmd[indx];
-			 }
+			 scia_cal->chan_mean[nch][nobs] += 
+			      (mds_1b[nd].int_pmd[indx] - pmd_offs[nch]);
+
 			 indx += PMD_NUMBER;
 		    } while ( ++np < NumPmdPet );
 
-		    if ( num_valid > 0 ) 
-			 scia_cal->chan_mean[nch][nobs] /= num_valid;
+		    scia_cal->chan_mean[nch][nobs] /= NumPmdPet;
 		    nobs++;
 	       }
 	  } while ( ++nd < state->num_dsr );
@@ -506,39 +534,13 @@ void SCIA_CAL_DE_COADD( struct scia_cal_rec *scia_cal )
 {
      register unsigned short np = 0;
 
-     unsigned short vchan;
-
      do {
 	  register unsigned short no = 0;
 
-	  switch ( (int) scia_cal->chan_id[np] ) {
-	  case 1:
-	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
-	       break;
-	  case 2:
-	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
-	       break;
-	  case 3:
-	       vchan = 4;
-	       break;
-	  case 4:
-	       vchan = 5;
-	       break;
-	  case 5:
-	       vchan = 6;
-	       break;
-	  case 6:
-	       vchan = 7;
-	       break;
-	  case 7:
-	       vchan = 8;
-	       break;
-	  case 8:
-	       vchan = 9;
-	       break;
-	  default:         /* skip un-used pixels */
-	       continue;
-	  }
+	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						  scia_cal->clus_id[np] );
+
+	  if ( vchan == USHRT_MAX ) continue;         /* skip un-used pixels */
 	  if ( scia_cal->coaddf[np] <= 1 ) continue;      /* only coaddf > 1 */
 
 	  do {
@@ -589,8 +591,6 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
      register unsigned short signNorm;
      register double         sign_before, sign_after;
 
-     unsigned short vchan;
-
      struct scia_memcorr memcorr = {{0,0}, NULL};
 
      const size_t num_tan_h = (scia_cal->limb_scans == 0) ? 0 : 
@@ -621,43 +621,19 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	  const short nchan = (short) scia_cal->chan_id[np] - 1;
 
 	  /* before reset */
-	  const double scale_before = 3 * (0.5 - (np % 1024) / 6138.)
-	       / (16 * scia_cal->pet[np]);
+	  const double scale_before = (nchan < 0) ? 0. :
+	       3 * (0.5 - (np % 1024) / 6138.) / (16 * scia_cal->pet[np]);
 	  /* after reset */
-	  const double scale_after  = 3 * (0.5 + (np % 1024) / 6138.)
-	       / (16 * scia_cal->pet[np]);
+	  const double scale_after  = (nchan < 0) ? 0. :
+	       3 * (0.5 + (np % 1024) / 6138.) / (16 * scia_cal->pet[np]);
 	  /* nadir reset */
 	  const double scale_reset = (nchan < 0) ? 0. :
 	       setup_it[scia_cal->state_id] / (1000. * scia_cal->pet[np]);
 
-	  switch ( (int) scia_cal->chan_id[np] ) {
-	  case 1:
-	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
-	       break;
-	  case 2:
-	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
-	       break;
-	  case 3:
-	       vchan = 4;
-	       break;
-	  case 4:
-	       vchan = 5;
-	       break;
-	  case 5:
-	       vchan = 6;
-	       break;
-	  case 6:
-	       vchan = 7;
-	       break;
-	  case 7:
-	       vchan = 8;
-	       break;
-	  case 8:
-	       vchan = 9;
-	       break;
-	  default:         /* skip un-used pixels */
-	       continue;
-	  }
+	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						  scia_cal->clus_id[np] );
+
+	  if ( vchan == USHRT_MAX ) continue;         /* skip un-used pixels */
 
 	  /* calculate memory correction for the first readout of a state */
 	  signNorm = __ROUND_us( scia_cal->dark_signal[np]
@@ -709,8 +685,6 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
      register unsigned short signNorm;
      register unsigned short curveIndx;
 
-     unsigned short vchan;
-
      struct scia_nlincorr nlcorr = {{0,0}, NULL, NULL};
 
      SCIA_RD_H5_NLIN( NULL, &nlcorr );
@@ -720,34 +694,10 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
      do {
 	  register size_t nobs = 0;
 
-	  switch ( (int) scia_cal->chan_id[np] ) {
-	  case 1:
-	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
-	       break;
-	  case 2:
-	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
-	       break;
-	  case 3:
-	       vchan = 4;
-	       break;
-	  case 4:
-	       vchan = 5;
-	       break;
-	  case 5:
-	       vchan = 6;
-	       break;
-	  case 6:
-	       vchan = 7;
-	       break;
-	  case 7:
-	       vchan = 8;
-	       break;
-	  case 8:
-	       vchan = 9;
-	       break;
-	  default:         /* skip un-used pixels */
-	       continue;
-	  }
+	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						  scia_cal->clus_id[np] );
+
+	  if ( vchan == USHRT_MAX ) continue;         /* skip un-used pixels */
 
 	  /* get index to curve to be used */
 	  curveIndx = (unsigned short) nlcorr.curve[np];
@@ -822,7 +772,7 @@ void SCIA_PATCH_MEM_CORR( struct scia_cal_rec *scia_cal,
 	       register unsigned short nd = 0;
 	       register size_t nobs = 0;
 
-	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
+	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
 	       const unsigned short coaddf = state->Clcon[ncl].coaddf;
 
 	       if ( state->Clcon[ncl].channel > VIS_CHANNELS ) continue;
@@ -892,7 +842,7 @@ void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
 	       register unsigned short nd = 0;
 	       register size_t nobs = 0;
 
-	       const unsigned short ipx = absPixelID(state->Clcon[ncl],np);
+	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
 	       const unsigned short coaddf = state->Clcon[ncl].coaddf;
 
 	       if ( state->Clcon[ncl].channel <= VIS_CHANNELS ) continue;
@@ -983,7 +933,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 {
      const char prognm[] = "SCIA_CALC_STRAY_CORR";
 
-     register unsigned short nch, ng, nr;
+     register unsigned short nch, ng, nr, np;
      register size_t ni;
 
      register size_t nobs;
@@ -1084,45 +1034,17 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      do {
 	  register unsigned short np = 0;
 
-	  unsigned short vchan, fillings;
-
 	  /* recontruct full spectra (8192 pixels) */
 	  do {
-	       switch ( (int) scia_cal->chan_id[np] ) {
-	       case 1:
-		    vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
-		    break;
-	       case 2:
-		    vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
-		    break;
-	       case 3:
-		    vchan = 4;
-		    break;
-	       case 4:
-		    vchan = 5;
-		    break;
-	       case 5:
-		    vchan = 6;
-		    break;
-	       case 6:
-		    vchan = 7;
-		    break;
-	       case 7:
-		    vchan = 8;
-		    break;
-	       case 8:
-		    vchan = 9;
-		    break;
-	       default:         /* skip un-used pixels */
-		    vchan = USHRT_MAX;
-		    break;
-	       }
-	       fillings = (vchan == USHRT_MAX) ? 0 :
-		    NINT(scia_cal->chan_pet[vchan] / scia_cal->state_pet_min);
+	       unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						       scia_cal->clus_id[np] );
+
+	       unsigned short fillings = (vchan == USHRT_MAX) ? 0 :
+		    (scia_cal->chan_pet[vchan] / scia_cal->state_pet_min);
 
 	       if ( fillings > 1 )
 		    spec_f[np] = (float) 
-			 scia_cal->spectra[np][nobs/fillings] / fillings;
+			 (scia_cal->spectra[np][nobs/fillings] / fillings);
 	       else if ( fillings == 1 )
 		    spec_f[np] = (float) scia_cal->spectra[np][nobs];
 	       else
@@ -1171,14 +1093,15 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 #ifdef DEBUG
 	  (void) fwrite( stray_f, sizeof(float), SCIENCE_PIXELS, fp_corr_full );
 #endif
-	  /* blank out blinded pixels, use quality_flag */
-	  np = 0;
-	  do { 
-	       if ( scia_cal->quality_flag[np] == FLAG_BLINDED )
-		    scia_cal->correction[np][nobs] = 0;
-	       else
-		    scia_cal->correction[np][nobs] = stray_f[np];
-	  } while ( ++np < SCIENCE_PIXELS );
+          /* blank out blinded pixels, use quality_flag */
+          np = 0;
+          do { 
+               if ( scia_cal->quality_flag[np] == FLAG_BLINDED
+		    || scia_cal->quality_flag[np] == FLAG_UNUSED )
+                    scia_cal->correction[np][nobs] = 0.f;
+               else
+                    scia_cal->correction[np][nobs] = stray_f[np];
+          } while ( ++np < SCIENCE_PIXELS );
      } while ( ++nobs < scia_cal->num_obs );
 #ifdef DEBUG
      (void) fclose( fp_full );
@@ -1186,6 +1109,36 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      (void) fclose( fp_corr_full );
      (void) fclose( fp_corr_grid );
 #endif
+     /* reduce correction to pixel exposure time */
+     np = 0;
+     do {
+	  register unsigned short no = 0;
+	  register unsigned short nobs = 0;
+
+	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						  scia_cal->clus_id[np] );
+
+	  unsigned short fillings = (vchan == USHRT_MAX) ? 0 :
+		    (scia_cal->chan_pet[vchan] / scia_cal->state_pet_min);
+
+	  if ( fillings <= 1 ) continue;
+
+	  do {
+	       register unsigned char nf = 0;
+
+	       register float corrval = 0.;
+
+	       do {
+		    corrval += scia_cal->correction[np][nobs];
+	       } while ( ++nobs, ++nf < fillings );
+	       scia_cal->correction[np][no] = corrval;
+	  } while ( ++no,  nobs < scia_cal->num_obs );
+
+	  /* set correction of remaining elements to zero */
+	  do {
+	       scia_cal->correction[np][no] = 0.f;
+	  } while ( ++no < scia_cal->num_obs );
+     } while ( ++np < SCIENCE_PIXELS );
 done:
      if ( grid_in_ll != NULL ) free( grid_in_ll );
      if ( grid_in_ul != NULL ) free( grid_in_ul );
@@ -1203,67 +1156,39 @@ void SCIA_CALC_STRAY_SCALE( struct scia_cal_rec *scia_cal,
 
      register unsigned short np = 0;
 
-     unsigned short vchan;
-
-     double corrMax[SCIENCE_CHANNELS] = { 0., 0., 0., 0., 0., 0., 0., 0. };
+     float corrMax[SCIENCE_CHANNELS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
      do {
 	  register unsigned short nobs = 0;
 
 	  const unsigned short ichan = scia_cal->chan_id[np];
 
-	  switch ( (int) scia_cal->chan_id[np] ) {
-	  case 1:
-	       vchan = (scia_cal->clus_id[np] < 4) ? 0 : 1;
-	       break;
-	  case 2:
-	       vchan = (scia_cal->clus_id[np] < 10) ? 3 : 2;
-	       break;
-	  case 3:
-	       vchan = 4;
-	       break;
-	  case 4:
-	       vchan = 5;
-	       break;
-	  case 5:
-	       vchan = 6;
-	       break;
-	  case 6:
-	       vchan = 7;
-	       break;
-	  case 7:
-	       vchan = 8;
-	       break;
-	  case 8:
-	       vchan = 9;
-	       break;
-	  default:         /* skip un-used pixels */
-	       continue;
-	  }
-	  if ( ichan == 0 ) continue;
+	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
+						  scia_cal->clus_id[np] );
+
+	  if ( vchan == USHRT_MAX ) continue;        /* skip un-used pixels */
 	  if ( scia_cal->quality_flag[np] != FLAG_VALID ) continue;
 
 	  do {
 	       register unsigned char nc = 0;
 
-	       register double corrval = 0.;
+	       register float corrval = 0.f;
 
 	       do {
 		    corrval += scia_cal->correction[np][nobs];
-		    nobs++;
-	       } while ( ++nc < scia_cal->coaddf[np] );
+	       } while ( ++nobs, ++nc < scia_cal->coaddf[np] );
 	       if ( corrMax[ichan] < corrval ) corrMax[ichan] = corrval;
 
 	  } while ( nobs < scia_cal->chan_obs[vchan] );
      } while ( ++np < SCIENCE_PIXELS );
 
-     scale_factor[1] = (unsigned char) ceil(10 * corrMax[1] / UCHAR_MAX );
-     scale_factor[2] = (unsigned char) ceil(10 * corrMax[2] / UCHAR_MAX );
-     scale_factor[3] = (unsigned char) ceil(10 * corrMax[3] / UCHAR_MAX );
-     scale_factor[4] = (unsigned char) ceil(10 * corrMax[4] / UCHAR_MAX );
-     scale_factor[5] = (unsigned char) ceil(10 * corrMax[5] / UCHAR_MAX );
-     scale_factor[6] = (unsigned char) ceil(10 * corrMax[6] / UCHAR_MAX );
-     scale_factor[7] = (unsigned char) ceil(10 * corrMax[7] / UCHAR_MAX );
+     scale_factor[1] = (unsigned char) ceilf(10 * corrMax[1] / UCHAR_MAX );
+     scale_factor[2] = (unsigned char) ceilf(10 * corrMax[2] / UCHAR_MAX );
+     scale_factor[3] = (unsigned char) ceilf(10 * corrMax[3] / UCHAR_MAX );
+     scale_factor[4] = (unsigned char) ceilf(10 * corrMax[4] / UCHAR_MAX );
+     scale_factor[5] = (unsigned char) ceilf(10 * corrMax[5] / UCHAR_MAX );
+     scale_factor[6] = (unsigned char) ceilf(10 * corrMax[6] / UCHAR_MAX );
+     scale_factor[7] = (unsigned char) ceilf(10 * corrMax[7] / UCHAR_MAX );
 
      /* (void) fprintf( stderr, "chan: %-d %12.6f %4hhu\n",  */
      /* 		     2, corrMax[1], scale_factor[1] ); */
@@ -1339,7 +1264,7 @@ void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
 	       register unsigned short nr;
 
 	       const unsigned short ich = state->Clcon[ncl].channel - 1;
-	       const unsigned short ipx = absPixelID(state->Clcon[ncl], np);
+	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
 
 	       const float scaleFactor = scale_factor[ich] / 10.f;
 
@@ -1368,8 +1293,7 @@ void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
 			      register float corrval = 0.;
 
 			      do {
-				   corrval += (float) 
-					scia_cal->correction[ipx][nobs];
+				   corrval += scia_cal->correction[ipx][nobs];
 				   nobs++;
 			      } while ( ++nc < state->Clcon[ncl].coaddf );
 			      mds_1b[nd].clus[ncl].sigc[nb].stray =
@@ -1581,7 +1505,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 	  unsigned short pet = __ROUNDf_us( 16 * state->Clcon[ncl].pet );
 
 	  for ( np = 0; np < state->Clcon[ncl].length; np++ ) {
-	       unsigned short ipx = absPixelID(state->Clcon[ncl],np);
+	       unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
 	  
 	       scia_cal.coaddf[ipx] = state->Clcon[ncl].coaddf;
 	       scia_cal.chan_id[ipx] = state->Clcon[ncl].channel;
@@ -1726,7 +1650,7 @@ done:
      if ( scia_cal.chan_obs != NULL ) free( scia_cal.chan_obs );
      if ( scia_cal.dark_signal != NULL ) free( scia_cal.dark_signal );
      if ( scia_cal.pet != NULL ) free( scia_cal.pet );
-     if ( scia_cal.chan_mean != NULL ) FREE_2D( (void **)scia_cal.chan_mean );
+     if ( scia_cal.chan_mean != NULL ) FREE_2D( (void **) scia_cal.chan_mean );
      if ( scia_cal.spectra != NULL ) FREE_2D( (void **) scia_cal.spectra );
      if ( scia_cal.correction != NULL ) FREE_2D((void **) scia_cal.correction);
      if ( verbose )

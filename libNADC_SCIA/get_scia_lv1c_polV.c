@@ -92,8 +92,8 @@ unsigned int GET_SCIA_LV1C_POLV( const struct state1_scia *state,
      mds_polV->quality_flag = mds_1b->quality_flag;
      mds_polV->type_mds = state->type_mds;
      mds_polV->category = (unsigned char) state->category;
-     mds_polV->state_id = mds_1b->state_id;
-     mds_polV->state_index = mds_1b->state_index;
+     mds_polV->state_id = state->state_id;
+     mds_polV->state_index = state->indx;
      mds_polV->dur_scan = state->dur_scan;
      mds_polV->orbit_phase = state->orbit_phase;
      mds_polV->num_diff_intg = state->num_intg;

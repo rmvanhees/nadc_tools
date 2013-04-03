@@ -197,7 +197,8 @@ PRO CMP_SCIA_CAL, scia_1b_fl, calib=calib, MDStype=MDStype, $
            FOR num_rep = 0, num_rep_states-1 DO BEGIN
 ; open output file and collect some statistics
               flname = str_type_mds[ids_type_mds[ni]] $
-                       + STRING( FORMAT='(A,I0,A,I0,A,I0)', '_', calib, '_', $
+                       + STRING( FORMAT='(A,I02,A,I02)', $
+                                 '_'+STRJOIN(STRSPLIT(calib,',',/EXTRACT))+'_', $
                                  uniq_state_id[ns], '-', num_rep )
               OPENW, unit, flname , /Get_Lun
 
