@@ -60,9 +60,5 @@ if (NOT PPF_FOUND)
       PPF_LIBRARIES
       PPF_INCLUDE_DIR
     )
-  else ()
-    if (PPF_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find PPF")
-    endif ()
   endif ()
 endif (NOT PPF_FOUND)

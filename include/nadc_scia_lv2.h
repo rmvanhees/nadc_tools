@@ -467,7 +467,7 @@ struct lcld_scia
 /*
  * prototype declarations of Sciamachy level 2 functions
  */
-#if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern void SCIA_LV2_RD_SPH( FILE *fp, const struct mph_envi,
 			     /*@out@*/ struct sph2_scia *sph )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
@@ -545,7 +545,7 @@ extern unsigned int SCIA_OL2_RD_LCLD( FILE *fp, unsigned int,
 				      /*@out@*/ struct lcld_scia **lcld )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *lcld@*/;
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern void SCIA_LV2_WR_ASCII_SPH( struct param_record, 
 				   const struct sph2_scia  * )

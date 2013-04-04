@@ -641,7 +641,7 @@ extern void GOME_SET_CALIB( /*@notnull@*/ const char *,
 			    /*@out@*/ unsigned short * );
 extern void GOME_GET_CALIB( unsigned short, /*@out@*/ char * );
 
-#if defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern void GOME_SHOW_VERSION( FILE *stream, const char * )
      /*@modifies stream@*/;
 extern void GOME_SHOW_CALIB( FILE *stream )
@@ -689,7 +689,7 @@ extern short GOME_LV2_RD_DDR( FILE *fp, const struct fsr2_gome *,
 			      /*@out@*/ struct ddr_gome **ddr )
      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fp, *ddr@*/;
-#endif   /* ---- defined _STDIO_H || defined __STDIO_H__ ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern void CALIB_PCD_PMD( unsigned char, unsigned short, 
 			   const struct fcd_gome *,

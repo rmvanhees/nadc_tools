@@ -39,6 +39,7 @@
 
 /*+++++ Local Headers +++++*/
 #define __IMLM_H2O_PRODUCT
+#define __NEED_ISO_ENTRIES
 #include <nadc_imlm.h>
 
 /*+++++ Macros +++++*/

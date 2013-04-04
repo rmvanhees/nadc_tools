@@ -119,6 +119,7 @@ check_include_file ( math.h     HAVE_MATH_H    )
 check_include_file ( stdbool.h  HAVE_STDBOOL_H )
 check_include_file ( stdio.h    HAVE_STDIO_H   )
 check_include_file ( stdlib.h   HAVE_STDLIB_H  )
+check_include_file ( string.h   HAVE_STRING_H )
 check_include_file ( strings.h  HAVE_STRINGS_H )
 check_include_file ( time.h     HAVE_TIME_H    )
 
@@ -163,9 +164,6 @@ add_subdirectory (libNADC)
 add_subdirectory (libNADC_GOME)
 add_subdirectory (libNADC_MERIS)
 add_subdirectory (libNADC_SCIA)
-if (IDL_FOUND AND BUILD_SHARED_LIBS)
-   add_subdirectory (libNADC_IDL)  ## check for IDL and shared libraries
-endif ()
 add_subdirectory (FRESCO)
 add_subdirectory (GOME)
 add_subdirectory (IMAP)
@@ -175,8 +173,11 @@ add_subdirectory (SCIA)
 add_subdirectory (TOGOMI)
 add_subdirectory (TOSOMI)
 add_subdirectory (include)
-add_subdirectory (idl_progs)
-
+## check for IDL and shared libraries
+if (IDL_FOUND AND BUILD_SHARED_LIBS)
+   add_subdirectory (libNADC_IDL)
+   add_subdirectory (idl_progs)
+endif ()
 
 ## =============================================================================
 ##

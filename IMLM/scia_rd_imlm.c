@@ -37,9 +37,10 @@
              1.0     02-Jul-2008   initial release by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * This code needs the GNU version of basename (not POSIX)
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -268,16 +269,23 @@ void SCIA_RD_IMLM( const char *flname, struct imlm_hdr *hdr,
 {
      const char prognm[] = "SCIA_RD_IMLM";
 
-     char   *pntr, ctemp[SHORT_STRING_LENGTH];
+     char   *cpntr, ctemp[SHORT_STRING_LENGTH];
 
      unsigned int numRec = 0u;
 
      struct imlm_rec *rec = NULL;
 /*
+ * strip path of file-name & remove extension ".gz"
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+     }
+     if ( (cpntr = strstr( ctemp, ".gz" )) != NULL ) *cpntr = '\0';
+/*
  * initialize IMLM header structure
  */
-     (void) strlcpy( ctemp, basename( flname ), SHORT_STRING_LENGTH );
-     if ( (pntr = strstr( ctemp, ".gz" )) != NULL ) *pntr = '\0';
      (void) strlcpy( hdr->product, ctemp, 42 );
      NADC_RECEIVEDATE( flname, hdr->receive_date );
      (void) strcpy( hdr->creation_date, "" );

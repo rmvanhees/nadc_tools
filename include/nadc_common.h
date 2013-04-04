@@ -566,7 +566,7 @@ extern unsigned int ENVI_GET_DSD_INDEX( unsigned int, const struct dsd_envi *,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 
-#if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern unsigned int ENVI_RD_PDS_INFO( FILE *fp, /*@out@*/ char *keyword, 
                                       /*@out@*/ char *keyvalue )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
@@ -692,7 +692,7 @@ extern void NADC_GET_XML_METADB( FILE *stream, /*@out@*/ char *,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies stream, nadc_stat, nadc_err_stack@*/;
 
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 #ifdef _HDF5_H
 extern hid_t NADC_OPEN_HDF5_Group( hid_t, const char * );

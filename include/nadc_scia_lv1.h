@@ -585,8 +585,7 @@ extern unsigned int SCIA_LV1_UPDATE_SQADS( struct sqads1_scia *);
 extern unsigned int SCIA_LV1_UPDATE_LADS( struct lads_scia * );
 extern unsigned int SCIA_LV1_UPDATE_STATE( struct state1_scia *);
 
-/* #if defined _STDIO_INCLUDED || defined __STDIO_H__ */
-#if defined _STDIO_H || defined S_SPLINT_S
+#if defined _STDIO_H || defined _STDIO_H_ || defined S_SPLINT_S
 extern unsigned int SCIA_LV1_RD_ASFP( FILE *fp, unsigned int, 
 				      const struct dsd_envi *,
 		                      /*@out@*/ struct asfp_scia **asfp )
@@ -905,7 +904,7 @@ extern void SCIA_get_AtbdDark( FILE *fp, unsigned int, float,
      /*@globals  errno, nadc_stat, nadc_err_stack@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fp@*/;
 
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern void GET_SCIA_LV1C_GEON( unsigned int, const struct geoN_scia *,
 				unsigned int, 

@@ -124,7 +124,7 @@ extern "C" {
      "regarding data use, results, and/or interpretation of the results "\
      "please contact Catharinus (Rien) Dijkstra (C.Dijkstra_at_sron.nl)."
 
-#if defined(__IMLM_CO_PRODUCT) || defined(__IMLM_H2O_PRODUCT)
+#ifdef __NEED_ISO_ENTRIES
 struct iso_entry_t {
      const char *attr_name;
      /*@null@*/ const char *attr_value;
@@ -215,7 +215,7 @@ static const struct iso_entry_t iso_prod_list[] = {
 /*@unused@*/
 static const unsigned short numIsoKeys = (unsigned short)
      (sizeof(iso_prod_list) / sizeof(struct iso_entry_t));
-#endif /* defined(__IMLM_CO_PRODUCT) || defined(__IMLM_H2O_PRODUCT) */
+#endif /* __NEED_ISO_ENTRIES */
 
 /* SCIA IMLM structures */
 struct imlm_hdr {

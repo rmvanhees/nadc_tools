@@ -21,7 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     write cloud information of a Sciamachy Lv2 product to database
 .INPUT/OUTPUT
-  call as   SCIA_OL2_WR_SQL_CLD( conn, be_verbose, sciafl, num_rec, geo, cld );
+  call as   SCIA_OL2_WR_SQL_CLD( conn, be_verbose, flname, num_rec, geo, cld );
      input:  
              PGconn *conn           : PostgreSQL connection handle
 	     bool be_verbose        : be verbose
@@ -44,7 +44,7 @@
  * Define _ISOC99_SOURCE to indicate
  * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -211,7 +211,7 @@ int GET_UPDATE_QUERY( char *sql_query, int meta_id, long long tile_id,
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *sciafl,
+void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
 			  unsigned int num_rec, 
 			  const struct ngeo_scia *geo,
 			  const struct cld_sci_ol *cld )
@@ -223,29 +223,37 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *sciafl,
 
      char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
 
-     bool           do_update;
-     char           *pntr;
-     int            nrow, numChar, meta_id;
-     long long      tile_id;
+     bool       do_update;
+     char       *cpntr, sciafl[SHORT_STRING_LENGTH];
+     int        nrow, numChar, meta_id;
+     long long  tile_id;
 
-     PGresult  *res;
+     PGresult   *res;
 
      const double SecPerDay = 24. * 60 * 60;
+/*
+ * strip path of file-name
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
+     }
 /*
  * check if product is already in database
  */
      (void) snprintf( sql_query, SQL_STR_SIZE, 
 		      "SELECT pk_meta FROM %s WHERE name=\'%s\'", 
-		      META_TBL_NAME, basename( sciafl ) );
+		      META_TBL_NAME, sciafl );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
           NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, basename( sciafl ) );
+          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, sciafl );
      }
-     pntr = PQgetvalue( res, 0, 0 );
-     meta_id = (int) strtol( pntr, (char **) NULL, 10 );     
+     cpntr = PQgetvalue( res, 0, 0 );
+     meta_id = (int) strtol( cpntr, (char **) NULL, 10 );     
      PQclear( res );
 /*
  * Start a transaction block
@@ -277,8 +285,8 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *sciafl,
           } 
 	  if ( PQntuples( res ) != 0 ) { /* should check product version */
 	       do_update = TRUE;
-               pntr = PQgetvalue( res, 0, 0 );
-               tile_id = strtoll( pntr, (char **) NULL, 10 );
+               cpntr = PQgetvalue( res, 0, 0 );
+               tile_id = strtoll( cpntr, (char **) NULL, 10 );
                PQclear( res );
                numChar = GET_UPDATE_QUERY( sql_query, 
 					   meta_id, tile_id, geo+nc, cld+nc );
@@ -290,8 +298,8 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *sciafl,
 	       if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
 				     PQresultErrorMessage(res) );
-	       pntr = PQgetvalue( res, 0, 0 );
-	       tile_id = strtoll( pntr, (char **) NULL, 10 );
+	       cpntr = PQgetvalue( res, 0, 0 );
+	       tile_id = strtoll( cpntr, (char **) NULL, 10 );
 	       PQclear( res );
                numChar = GET_INSERT_QUERY( sql_query, meta_id, tile_id, 
 					   jday, geo+nc, cld+nc );

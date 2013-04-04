@@ -21,12 +21,12 @@
 .LANGUAGE    ANSI C
 .PURPOSE     write Nadir fits of SCIA Lv2 offline product to database
 .INPUT/OUTPUT
-  call as   SCIA_OL2_WR_SQL_NFIT( conn, be_verbose, sciafl, nfit_name, 
+  call as   SCIA_OL2_WR_SQL_NFIT( conn, be_verbose, flname, nfit_name, 
                                   num_geo, geo, num_nfit, nfit );
      input:  
              PGconn *conn           : PostgreSQL connection handle
 	     bool be_verbose        : be verbose
-	     char   *sciafl         : name of SCIA lv2 product
+	     char   *flname         : name of SCIA lv2 product
 	     char   *nfit_name      : name of the Nadir fit specie
 	     unsigned int num_ngeo  : number of nadir gelocation records
 	     struct ngeo_scia *ngeo : pointer to structure with geolocation info
@@ -197,7 +197,7 @@ int GET_UPDATE_QUERY( const char *tbl_name, char *sql_query, int meta_id,
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *sciafl, 
+void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname, 
 			   const char *nfit_name, unsigned int num_ngeo, 
 			   const struct ngeo_scia *ngeo, unsigned int num_nfit, 
 			   const struct nfit_scia *nfit )
@@ -207,15 +207,15 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *sciafl,
      register unsigned int nf, ng;
      register unsigned int affectedRows = 0u;
 
-     bool            do_update;
-     char            *pntr;
-     int             nrow, numChar, meta_id;
-     long long       tile_id;
-
      char tbl_name[16];
      char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
 
-     PGresult *res;
+     bool       do_update;
+     char       *cpntr, sciafl[SHORT_STRING_LENGTH];
+     int        nrow, numChar, meta_id;
+     long long  tile_id;
+
+     PGresult   *res;
 
      const double SecPerDay = 24. * 60 * 60;
 
@@ -226,20 +226,28 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *sciafl,
      } else
 	  return;
 /*
+ * strip path of file-name
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
+     }
+/*
  * check if product is already in database
  */
      (void) snprintf( sql_query, SQL_STR_SIZE, 
 		      "SELECT pk_meta FROM %s WHERE name=\'%s\'", 
-		      META_TBL_NAME, basename( sciafl ) );
+		      META_TBL_NAME, sciafl );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
           NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, basename( sciafl ) );
+          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, sciafl );
      }
-     pntr = PQgetvalue( res, 0, 0 );
-     meta_id = (int) strtol( pntr, (char **) NULL, 10 );     
+     cpntr = PQgetvalue( res, 0, 0 );
+     meta_id = (int) strtol( cpntr, (char **) NULL, 10 );     
      PQclear( res );
 /*
  * Start a transaction block
@@ -278,8 +286,8 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *sciafl,
 
 	  if ( PQntuples( res ) != 0 ) {
                do_update = TRUE;
-               pntr = PQgetvalue( res, 0, 0 );
-               tile_id = strtoll( pntr, (char **) NULL, 10 );
+               cpntr = PQgetvalue( res, 0, 0 );
+               tile_id = strtoll( cpntr, (char **) NULL, 10 );
                PQclear( res );
                numChar = GET_UPDATE_QUERY( tbl_name, sql_query, 
 					   meta_id, tile_id, ngeo+ng, nfit+nf );
@@ -291,8 +299,8 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *sciafl,
 	       if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
 				     PQresultErrorMessage(res) );
-	       pntr = PQgetvalue( res, 0, 0 );
-	       tile_id = strtoll( pntr, (char **) NULL, 10 );
+	       cpntr = PQgetvalue( res, 0, 0 );
+	       tile_id = strtoll( cpntr, (char **) NULL, 10 );
 	       PQclear( res );
                numChar = GET_INSERT_QUERY( tbl_name, sql_query, meta_id, 
 					   tile_id, jday, ngeo+nf, nfit+nf );

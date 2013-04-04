@@ -37,9 +37,10 @@
              1.0     14-Feb-2007   initial release by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * This code needs the GNU version of basename (not POSIX)
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -325,15 +326,22 @@ unsigned int NADC_RD_FRESCO( const char *flname, struct fresco_hdr *hdr,
 
      register unsigned short num;
 
-     char  *pntr, ctemp[SHORT_STRING_LENGTH];
+     char  *cpntr, ctemp[SHORT_STRING_LENGTH];
 
      struct fresco_rec *fresco;
+/*
+ * strip path of file-name & remove extension ".gz"
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+     }
+     if ( (cpntr = strstr( ctemp, ".gz" )) != NULL ) *cpntr = '\0';
 /*
  * initialize Fresco header structure
  */
      NADC_RECEIVEDATE( flname, hdr->receive_date );
-     (void) strlcpy( ctemp, basename( flname ), SHORT_STRING_LENGTH );
-     if ( (pntr = strstr( ctemp, ".gz" )) != NULL ) *pntr = '\0';
      (void) strlcpy( hdr->product, ctemp, 26 );
      (void) strcpy( hdr->creation_date, "" );
      (void) strcpy( hdr->software_version, "" );

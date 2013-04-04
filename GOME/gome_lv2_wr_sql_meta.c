@@ -21,11 +21,11 @@
 .LANGUAGE    ANSI C
 .PURPOSE     write meta data of Gome Lv2 product to table "meta__2P"
 .INPUT/OUTPUT
-  call as   meta_id = GOME_LV2_WR_SQL_META( conn, be_verbose, gomefl, sph,fsr );
+  call as   meta_id = GOME_LV2_WR_SQL_META( conn, be_verbose, flname, sph,fsr );
      input:  
-             PGconn *conn :          PostgreSQL connection handle
-	     bool be_verbose       :  be verbose
-	     char *gomefl :          name of GOME file
+             PGconn *conn          : PostgreSQL connection handle
+	     bool be_verbose       : be verbose
+	     char *flname          : name of GOME file
 	     struct sph2_gome *sph : structure for SPH record
 	     struct fsr2_gome *fsr : structure for FSR record
 
@@ -43,7 +43,7 @@
  * Define _ISOC99_SOURCE to indicate
  * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -72,7 +72,7 @@
 	/* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *gomefl, 
+int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *flname, 
 			  const struct sph2_gome *sph,
 			  const struct fsr2_gome *fsr )
 {
@@ -80,24 +80,31 @@ int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *gomefl,
 
      PGresult *res;
 
-     char *pntr;
-     char ctemp[SHORT_STRING_LENGTH];
+     char *cpntr, ctemp[SHORT_STRING_LENGTH];
      char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
 
      int     flsize, nrow;
      int     meta_id;
      size_t  numChar;
 /*
+ * strip path of file-name
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+     }
+/*
  * check if product is already in database
  */
      (void) snprintf( sql_query, MAX_STRING_LENGTH, SELECT_FROM_META,
-		      basename( gomefl ), sph->soft_version );
+		      ctemp, sph->soft_version );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
           NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL_TWICE, basename( gomefl ) );
+          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL_TWICE, ctemp );
      }
      PQclear( res );
 /*
@@ -107,21 +114,21 @@ int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *gomefl,
 		   "SELECT nextval(\'meta__2p_pk_meta_seq\')" );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
-     pntr = PQgetvalue( res, 0, 0 );
-     meta_id = (int) strtol( pntr, (char **) NULL, 10 );
+     cpntr = PQgetvalue( res, 0, 0 );
+     meta_id = (int) strtol( cpntr, (char **) NULL, 10 );
      PQclear( res );
 /* pk_meta */
      (void) snprintf( sql_query, SQL_STR_SIZE, 
 		      "INSERT INTO meta__2P VALUES (%d,", meta_id );
 /* name */
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), basename( gomefl ) );
+		      strcpy(cbuff,sql_query), ctemp );
 /* fileSize */
      flsize = 38 + 12 + fsr->nr_sph * fsr->sz_sph + fsr->nr_ddr * fsr->sz_ddr;
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s%d,",
 		      strcpy(cbuff,sql_query), flsize );
 /* receiveDate */
-     NADC_RECEIVEDATE( gomefl, ctemp );
+     NADC_RECEIVEDATE( flname, ctemp );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), ctemp );
 /* procCenter  */

@@ -39,7 +39,7 @@
  * Define _ISOC99_SOURCE to indicate
  * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -76,17 +76,25 @@ void GOME_LV2_DEL_ENTRY( PGconn *conn, const char *flname,
 {
      const char prognm[] = "GOME_LV2_DEL_ENTRY";
 
-     char sql_query[SQL_STR_SIZE];
+     char     sql_query[SQL_STR_SIZE];
 
-     char         *pntr;
-     int          meta_id, nrow;
+     char     *cpntr, ctemp[SHORT_STRING_LENGTH];
+     int      meta_id, nrow;
 
      PGresult *res;
+/*
+ * strip path of file-name & remove extension ".gz"
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+     }
 /*
  * check if file is already stored in meta-table
  */
      (void) snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_META,
-		      basename( flname ), softVersion );
+		      ctemp, softVersion );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
 	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
@@ -96,8 +104,8 @@ void GOME_LV2_DEL_ENTRY( PGconn *conn, const char *flname,
 	  PQclear( res );
 	  return;
      }
-     pntr = PQgetvalue( res, 0, 0 );
-     meta_id = (int) strtol( pntr, (char **) NULL, 10 );
+     cpntr = PQgetvalue( res, 0, 0 );
+     meta_id = (int) strtol( cpntr, (char **) NULL, 10 );
      PQclear( res );
 /*
  * remove entry from table "meta__2P", everything else should be removed

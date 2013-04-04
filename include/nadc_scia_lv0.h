@@ -454,7 +454,7 @@ extern unsigned short GET_SCIA_CLUSDEF( unsigned short,
        /*@modifies clusDef@*/;
 
 
-#if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi,
 			     /*@out@*/ struct sph0_scia *sph )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
@@ -543,7 +543,7 @@ extern void SCIA_WR_ASCII_LV0_PMD( FILE *fd, unsigned int,
 				   const struct mds0_pmd * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, fd@*/;
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern double GET_SCIA_LV0_MDS_TIME( int, const void * );
 extern void GET_SCIA_LV0_MDS_TIME_ARR(int, const void *, /*@out@*/ double *);

@@ -35,9 +35,5 @@ if (NOT IDL_FOUND)
       IDL_FOUND
       IDL_INCLUDE_DIR
     )
-  else ()
-    if (IDL_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find IDL")
-    endif ()
   endif ()
 endif (NOT IDL_FOUND)

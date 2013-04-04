@@ -33,9 +33,10 @@
              1.0     18-Mar-2008   initial release by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * This code needs the GNU version of basename (not POSIX)
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -78,7 +79,7 @@ int main( int argc, char *argv[] )
      bool flag_replace = FALSE;
 
      char flname[MAX_STRING_LENGTH];
-     char ctemp[SHORT_STRING_LENGTH];
+     char *cpntr, ctemp[SHORT_STRING_LENGTH];
 
      int ncid;
      int retval;
@@ -104,6 +105,15 @@ int main( int argc, char *argv[] )
      } else
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
 /*
+ * strip path of file-name & remove extension ".gz"
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+     }
+     if ( (cpntr = strstr( ctemp, ".gz" )) != NULL ) *cpntr = '\0';
+/*
  * read the IMLM-CO product
  */
      if ( (retval = nc_open( flname, NC_NOWRITE, &ncid )) != NC_NOERR )
@@ -114,7 +124,6 @@ int main( int argc, char *argv[] )
      if ( hdr.numProd > 1 ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
 			   "no more than one orbit per ingest" );
-     (void) strlcpy( ctemp, basename( flname ), SHORT_STRING_LENGTH );
      (void) strlcpy( hdr.product, ctemp, SHORT_STRING_LENGTH );
      NADC_RECEIVEDATE( flname, hdr.receive_date );
      hdr.file_size = NADC_FILESIZE( flname );

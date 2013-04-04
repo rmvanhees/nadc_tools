@@ -256,7 +256,7 @@ extern void MERIS_SET_PARAM( int, char **, int,
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
 extern void MERIS_SHOW_PARAM( int, struct param_record );
 
-#if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern void MERIS_SHOW_VERSION( FILE *stream, const char * )
      /*@modifies stream@*/;
 
@@ -323,7 +323,7 @@ extern unsigned int MERIS_RR2_RD_MDS_20( FILE *, unsigned int,
 					 struct mds_rr2_20_meris **mds )
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern void MERIS_WR_ASCII_SPH( struct param_record, 
 				const struct sph_meris * )

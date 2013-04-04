@@ -432,7 +432,7 @@ extern void SCIA_SET_PARAM( int, char **, int,
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
 extern void SCIA_SHOW_PARAM( int, struct param_record );
 
-#if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern void SCIA_SHOW_VERSION( FILE *stream, const char * )
      /*@modifies stream@*/;
 extern void SCIA_SHOW_CALIB( FILE *stream )
@@ -445,7 +445,7 @@ extern unsigned int SCIA_RD_LADS( FILE *fp, unsigned int,
 				  /*@out@*/ struct lads_scia **lads )
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *lads@*/;
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern void SCIA_WR_ASCII_LADS( struct param_record, unsigned int, 
 				const struct lads_scia * )

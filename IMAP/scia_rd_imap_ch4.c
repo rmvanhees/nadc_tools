@@ -36,9 +36,10 @@
              1.0     20-Nov-2008   initial release by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * This code needs the GNU version of basename (not POSIX)
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -131,9 +132,16 @@ void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
 
      struct imap_rec *rec = NULL;
 /*
+ * strip path of file-name
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+     }
+/*
  * initialize IMAP header structure
  */
-     (void) strlcpy( ctemp, basename( flname ), SHORT_STRING_LENGTH );
      (void) strlcpy( hdr->product, ctemp, ENVI_FILENAME_SIZE );
      NADC_RECEIVEDATE( flname, hdr->receive_date );
      (void) strcpy( hdr->creation_date, hdr->receive_date );

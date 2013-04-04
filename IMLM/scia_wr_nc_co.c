@@ -42,6 +42,7 @@
 
 /*+++++ Local Headers +++++*/
 #define __IMLM_CO_PRODUCT
+#define __NEED_ISO_ENTRIES
 #include <nadc_imlm.h>
 
 /*+++++ Macros +++++*/

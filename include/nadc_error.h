@@ -135,11 +135,11 @@ extern void NADC_Err_Keep( bool )
         /*@globals  nadc_stat, nadc_err_stack;@*/
         /*@modifies nadc_stat, nadc_err_stack@*/;
 
-#if defined _STDIO_INCLUDED || defined _STDIO_H || defined __STDIO_H__
+#if defined _STDIO_H || defined _STDIO_H_
 extern void NADC_Err_Trace( FILE *stream )
         /*@globals  nadc_stat, nadc_err_stack;@*/
         /*@modifies stream@*/;
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 #ifdef __cplusplus
   }

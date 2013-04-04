@@ -39,7 +39,7 @@
  * Define _ISOC99_SOURCE to indicate
  * that this is a ISO C99 program
  */
-#define  _GNU_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -83,20 +83,27 @@ void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
 
      register int nr;
 
-     char sql_query[SQL_STR_SIZE];
-
-     char procStage[2];
-
-     char         *pntr;
-     int          nrow, numChar;
      unsigned int indx;
 
+     char     sql_query[SQL_STR_SIZE];
+     char     procStage[2];
+     char     *cpntr, sciafl[SHORT_STRING_LENGTH];
+     int      nrow, numChar;
+
      PGresult *res, *res_update;
+/*
+ * strip path of file-name
+ */
+     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
+          (void) strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
+     } else {
+          (void) strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
+     }
 /*
  * check if we have to reverse field "softVersion[0]" in table "stateinfo"
  */
      numChar = snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_STATEINFO,
-			 basename( flname ) );
+			 sciafl );
      if ( be_verbose )
           (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
@@ -110,10 +117,10 @@ void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
 /*
  * update field "softVersion[0]" in table "stateinfo"
  */
-     (void) strlcpy( procStage, basename( flname )+10, 2 );
+     (void) strlcpy( procStage, sciafl+10, 2 );
      for ( nr = 0; nr < nrow; nr++ ) {
-	  pntr = PQgetvalue( res, nr, 0 );
-          indx = (unsigned int) strtoul( pntr, (char **)NULL, 10 );
+	  cpntr = PQgetvalue( res, nr, 0 );
+          indx = (unsigned int) strtoul( cpntr, (char **)NULL, 10 );
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, 
 			      UPDATE_STATEINFO, indx, procStage );
 	  if ( be_verbose )
@@ -135,8 +142,7 @@ void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
  * remove entry from table "meta__0P"
  * referenced entries in table "stateinfo_meta__0P" are removed by the engine
  */
-     numChar = snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_META,
-			 basename( flname ) );
+     numChar = snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_META, sciafl );
      if ( be_verbose )
 	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )

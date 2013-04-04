@@ -83,8 +83,7 @@ extern void SCIA_RD_H5_STRAY( /*@out@*/ struct scia_straycorr *stray )
        /*@modifies nadc_stat, nadc_err_stack@*/;
 extern void SCIA_FREE_H5_STRAY( struct scia_straycorr *stray );
 
-/* #if defined _STDIO_INCLUDED || defined __STDIO_H__ */
-#if defined _STDIO_H || defined S_SPLINT_S
+#if defined _STDIO_H || defined _STDIO_H_ || defined S_SPLINT_S
 extern void SCIA_LV1_CAL( FILE *fp, unsigned int,
 			  const struct state1_scia *,
 			  const struct mds1_scia *, 
@@ -103,7 +102,7 @@ extern void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short,
       /*@modifies errno, stderr, nadc_stat, nadc_err_stack, fp, mds, 
 	          internalState@*/;
 
-#endif   /* ---- defined _STDIO_INCLUDED || defined _STDIO_H ----- */
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 extern void SCIA_LV1C_FLAG_BDPM( unsigned short, unsigned short, 
 				 struct mds1c_scia *mds_1c )
