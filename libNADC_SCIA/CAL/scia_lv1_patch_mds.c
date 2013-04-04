@@ -692,7 +692,7 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
 
      do {
-	  register size_t nobs = 0;
+	  register unsigned short nobs = 0;
 
 	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
 						  scia_cal->clus_id[np] );
@@ -767,16 +767,19 @@ void SCIA_PATCH_MEM_CORR( struct scia_cal_rec *scia_cal,
      do {
 	  register unsigned short np = 0;
 
+	  const unsigned short coaddf = state->Clcon[ncl].coaddf;
+
+	  if ( state->Clcon[ncl].channel > VIS_CHANNELS ) continue;
+
 	  do {
-	       register unsigned short nr;
 	       register unsigned short nd = 0;
 	       register size_t nobs = 0;
 
 	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
-	       const unsigned short coaddf = state->Clcon[ncl].coaddf;
 
-	       if ( state->Clcon[ncl].channel > VIS_CHANNELS ) continue;
 	       do {
+		    register unsigned short nr;
+
 		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
 			 register unsigned short nb = np;
 
@@ -837,18 +840,21 @@ void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
      do {
 	  register unsigned short np = 0;
 
+	  const unsigned short coaddf = state->Clcon[ncl].coaddf;
+
+	  if ( state->Clcon[ncl].channel <= VIS_CHANNELS ) continue;
+
 	  do {
-	       register unsigned short nr;
 	       register unsigned short nd = 0;
 	       register size_t nobs = 0;
 
 	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
-	       const unsigned short coaddf = state->Clcon[ncl].coaddf;
 
-	       if ( state->Clcon[ncl].channel <= VIS_CHANNELS ) continue;
 	       if ( scia_cal->quality_flag[ipx] > FLAG_BLINDED ) continue;
 
 	       do {
+		    register unsigned short nr;
+
 		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
 			 register unsigned short nb = np;
 
@@ -1113,7 +1119,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      np = 0;
      do {
 	  register unsigned short no = 0;
-	  register unsigned short nobs = 0;
+	  register size_t nobs = 0;
 
 	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
 						  scia_cal->clus_id[np] );
@@ -1257,22 +1263,24 @@ void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
      do {
 	  register unsigned short np = 0;
 
+	  const unsigned short ich = state->Clcon[ncl].channel - 1;
+
+	  const float scaleFactor = scale_factor[ich] / 10.f;
+
+	  /* do not patch straylight of channel 1 */
+	  if ( ich == 0 ) continue;
+
 	  do {
 	       register unsigned short nd = 0;
 	       register size_t nobs = 0;
 
-	       register unsigned short nr;
-
-	       const unsigned short ich = state->Clcon[ncl].channel - 1;
 	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
 
-	       const float scaleFactor = scale_factor[ich] / 10.f;
-
-	       /* do not patch straylight of channel 1 */
-	       if ( ich == 0 ) continue;
 	       if ( scia_cal->quality_flag[ipx] != FLAG_VALID ) continue;
 
 	       do {
+		    register unsigned short nr;
+
 		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
 			 register unsigned short nb = np;
 
