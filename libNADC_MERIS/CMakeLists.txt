@@ -41,6 +41,10 @@ set (NADC_MERIS_SRCS
 )
 
 ## Compiler instructions
+if (APPLE)
+   set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+endif (APPLE)
+
 add_library (${NADC_MERIS_LIB_TARGET} ${LIB_TYPE} ${NADC_MERIS_SRCS})
 
 ## Linker instructions

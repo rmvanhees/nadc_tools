@@ -68,6 +68,10 @@ set (NADC_GOME_SRCS
 )
 
 ## Compiler instructions
+if (APPLE)
+   set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+endif (APPLE)
+
 add_library (${NADC_GOME_LIB_TARGET} ${LIB_TYPE} ${NADC_GOME_SRCS})
 
 ## Linker instructions

@@ -216,6 +216,10 @@ set (NADC_SCIA_SRCS
 # Set-up for NADC_SCIA_LIB
 #-----------------------------------------------------------------------------
 ## Compiler instructions
+if (APPLE)
+   set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+endif (APPLE)
+
 add_library (${NADC_SCIA_LIB_TARGET} ${LIB_TYPE} ${NADC_SCIA_SRCS})
 
 ## Linker instructions
