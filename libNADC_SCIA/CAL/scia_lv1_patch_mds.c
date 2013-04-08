@@ -595,6 +595,8 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 
      const size_t num_tan_h = (scia_cal->limb_scans == 0) ? 0 : 
 	  scia_cal->num_obs / scia_cal->limb_scans;
+
+     /* state set-up time in milli-seconds */
      const float setup_it[] = { 0.f,
           421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
           421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
@@ -620,13 +622,14 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 
 	  const short nchan = (short) scia_cal->chan_id[np] - 1;
 
-	  /* before reset */
+	  /* limb only, before reset at new tangent height */
 	  const double scale_before = (nchan < 0) ? 0. :
 	       3 * (0.5 - (np % 1024) / 6138.) / (16 * scia_cal->pet[np]);
-	  /* after reset */
+	  /* limb only, after reset at new tangent height */
 	  const double scale_after  = (nchan < 0) ? 0. :
 	       3 * (0.5 + (np % 1024) / 6138.) / (16 * scia_cal->pet[np]);
-	  /* nadir reset */
+
+	  /* reset at start of new state execution */
 	  const double scale_reset = (nchan < 0) ? 0. :
 	       setup_it[scia_cal->state_id] / (1000. * scia_cal->pet[np]);
 
@@ -636,21 +639,20 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	  if ( vchan == USHRT_MAX ) continue;         /* skip un-used pixels */
 
 	  /* calculate memory correction for the first readout of a state */
-	  signNorm = __ROUND_us( scia_cal->dark_signal[np]
-				 + scale_reset * scia_cal->spectra[np][no] );
+	  signNorm = __ROUND_us( scia_cal->dark_signal[np] +
+				 scale_reset * scia_cal->spectra[np][no] );
 	  scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
 
 	  /* use previous readout to calculate correction next readout */
 	  while ( ++no < scia_cal->chan_obs[vchan] ) {
 	       if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
 
-	       if ( scia_cal->limb_scans != 0 
-		    && ((no - 1) % num_tan_h) == 0 ) {
+	       if ( scia_cal->limb_scans != 0 && (no % num_tan_h) == 0 ) {
 		    sign_before = scale_before * scia_cal->spectra[np][no-1];
 		    sign_after  = scale_after * scia_cal->spectra[np][no];
 
 		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
-					   + sign_before + sign_after );
+					   + (sign_before + sign_after) );
 	       } else {
 		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
 					   + scia_cal->spectra[np][no-1] );
@@ -831,8 +833,8 @@ void SCIA_PATCH_MEM_CORR( struct scia_cal_rec *scia_cal,
 -------------------------*/
 static
 void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
-			const struct state1_scia *state, 
-			struct mds1_scia *mds_1b )
+			 const struct state1_scia *state, 
+			 struct mds1_scia *mds_1b )
        /*@modifies mds_1b@*/
 {
      register unsigned short ncl = 0;
@@ -901,24 +903,80 @@ void SCIA_PATCH_NL_CORR( struct scia_cal_rec *scia_cal,
 .RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
-static
-void SCIA_APPLY_MEMCORR( struct scia_cal_rec *scia_cal )
-       /*@modifies scia_cal->spectra, scia_cal->correction@*/
+static inline
+float MemNlin2Flt( short chanID, float corr )
 {
-     register unsigned short np = 0;
+     float rval = 0.f;
+
+     switch ( chanID ) {
+     case 1: case 2: case 3: case 4: case 5:
+	  rval = (1.25f * (corr + 37.f));
+	  break;
+     case 6:
+	  rval = (1.25f * (corr + 102.f));
+	  break;
+     case 7:
+	  rval = (1.5f * (corr - 126.f));
+	  break;
+     case 8:
+	  rval = (1.25f * (corr - 126.f));
+	  break;
+     }
+     return rval;
+}
+
+static
+void SCIA_APPLY_MemNlin( const struct state1_scia *state, 
+			 const struct mds1_scia *mds_1b,
+			 struct scia_cal_rec *scia_cal )
+       /*@modifies scia_cal->spectra@*/
+{
+     register unsigned short ncl = 0;
 
      do {
-	  register size_t no = 0;
+	  register unsigned short np = 0;
 
-	  if ( scia_cal->quality_flag[np] != FLAG_VALID ) continue;
+	  const short nchan = (short) scia_cal->chan_id[np] - 1;
+
+	  if ( nchan < 0 ) continue;
+
 	  do {
-	       if ( isnormal( scia_cal->spectra[np][no] ) )
-		    scia_cal->spectra[np][no] += scia_cal->correction[np][no];
-	  } while ( ++no < scia_cal->num_obs );
-     } while ( ++np < SCIENCE_PIXELS );
-     
-     (void) memset( scia_cal->correction[0], 0,
-		    sizeof(float) * scia_cal->num_obs * scia_cal->num_pixels );
+	       register unsigned short nr;
+	       register unsigned short nd = 0;
+
+	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
+
+	       register size_t nobs = 0;
+	       do {
+		    register size_t nb = np;
+
+		    if ( mds_1b[nd].clus[ncl].n_sig > 0 ) {
+			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
+			      register float corr =
+				   mds_1b[nd].clus[ncl].sig[nb].corr;
+
+			      scia_cal->spectra[ipx][nobs] -=
+				   MemNlin2Flt( nchan, corr );
+			      nobs++;
+			      nb += state->Clcon[ncl].length;
+			 }
+		    }
+		    if ( mds_1b[nd].clus[ncl].n_sigc > 0 ) {
+			 for ( nr = 0; nr < state->Clcon[ncl].n_read; nr++ ) {
+			      register unsigned short nc = 0;
+			      register float corr =
+				   mds_1b[nd].clus[ncl].sigc[nb].det.field.corr;
+			      do {
+				   scia_cal->spectra[ipx][nobs] -= 
+					MemNlin2Flt( nchan, corr );
+				   nobs++;
+			      } while ( ++nc < state->Clcon[ncl].coaddf );
+			      nb += state->Clcon[ncl].length;
+			 }
+		    }
+	       } while ( ++nd < state->num_dsr );
+	  } while ( ++np < state->Clcon[ncl].length );
+     } while ( ++ncl < state->num_clus );
 }
 
 /*+++++++++++++++++++++++++
@@ -958,6 +1016,10 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      FILE *fp_corr_full, *fp_corr_grid;
 #endif
      struct scia_straycorr stray = {{0,0}, NULL, NULL, NULL};
+
+     /* reset correction values */
+     (void) memset( scia_cal->correction[0], 0,
+		    sizeof(float) * scia_cal->num_obs * scia_cal->num_pixels );
 
      /* read straylight correction matrix */
      SCIA_RD_H5_STRAY( &stray );
@@ -1167,7 +1229,7 @@ void SCIA_CALC_STRAY_SCALE( struct scia_cal_rec *scia_cal,
      do {
 	  register unsigned short nobs = 0;
 
-	  const unsigned short ichan = scia_cal->chan_id[np];
+	  const unsigned short ichan = scia_cal->chan_id[np] - 1;
 
 	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
 						  scia_cal->clus_id[np] );
@@ -1230,13 +1292,12 @@ void SCIA_CALC_STRAY_SCALE( struct scia_cal_rec *scia_cal,
 -------------------------*/
 static
 void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
-			const struct state1_scia *state, 
-			struct mds1_scia *mds_1b )
+			    const struct state1_scia *state, 
+			    struct mds1_scia *mds_1b )
        /*@modifies mds_1b@*/
 {
      register unsigned short ncl = 0;
      register unsigned short nd;
-
 
      unsigned char scale_factor[SCIENCE_CHANNELS];
 
@@ -1310,6 +1371,8 @@ void SCIA_PATCH_STRAY_CORR( struct scia_cal_rec *scia_cal,
 			      nb += state->Clcon[ncl].length;
 			 }
 		    }
+/*		    (void) fprintf( stderr, "%3hu %4hu %4hu %2hu %5hu %5zd\n", 
+		    ncl, np, nd, ich, ipx, nobs ); */
 	       } while ( ++nd < state->num_dsr );
 	  } while ( ++np < state->Clcon[ncl].length );
       } while ( ++ncl < state->num_clus );
@@ -1579,8 +1642,9 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /* 
       * apply darkcurrent correction
       */
-     if ( scia_cal.limb_scans == 0 ) {
-	  calib_flag = DO_CORR_AO;
+/*     if ( scia_cal.limb_scans == 0 ) { */
+     if ( 1 == 1 ) {
+	  calib_flag = (DO_CORR_AO|DO_CORR_DARK);
 	  SCIA_APPLY_DARK( fp, calib_flag, &scia_cal );
      } else {
 	  SCIA_APPLY_DARK_LIMB( &scia_cal );
@@ -1605,10 +1669,10 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /*
       * apply Memory correction
       */
-     SCIA_CALC_MEM_CORR( &scia_cal );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
      if ( (patch_flag & SCIA_PATCH_MEM) != USHRT_ZERO ) {
+	  SCIA_CALC_MEM_CORR( &scia_cal );
+	  if ( IS_ERR_STAT_FATAL )
+	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
 	  SCIA_PATCH_MEM_CORR( &scia_cal, state, mds_1b );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Performed memory correction\n" );
@@ -1616,10 +1680,10 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /*
       * apply non-Linearity correction
       */
-     SCIA_CALC_NLIN_CORR( &scia_cal );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
      if ( (patch_flag & SCIA_PATCH_NLIN) != USHRT_ZERO ) {
+	  SCIA_CALC_NLIN_CORR( &scia_cal );
+	  if ( IS_ERR_STAT_FATAL )
+	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
 	  SCIA_PATCH_NL_CORR( &scia_cal, state, mds_1b );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Performed non-linearity correction\n" );
@@ -1628,9 +1692,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
       * Stray-light correction
       */
      if ( (patch_flag & SCIA_PATCH_STRAY) != USHRT_ZERO ) {
-	  SCIA_APPLY_MEMCORR( &scia_cal );
-	  if ( verbose )
-	       (void) fprintf( stderr, "Before Straylight correction\n" );
+	  SCIA_APPLY_MemNlin( state, mds_1b, &scia_cal );
 	  SCIA_CALC_STRAY_CORR( &scia_cal );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "STRAY" );

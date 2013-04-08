@@ -28,34 +28,24 @@ include (CheckFunctionExists)
 include (FindPackageHandleStandardArgs)
 include (TestBigEndian)
 
+#-----------------------------------------------------------------------------
+# Option path to SRON calibration parameters
+#-----------------------------------------------------------------------------
+if (APPLE)
+   set (NADC_TOOLS_DATADIR "$ENV{HOME}/SCIA/CKD")
+else ()
+   set (NADC_TOOLS_DATADIR "/SCIA/share/nadc_tools")
+endif ()
+
 ## =============================================================================
 ##
 ##  Configuration options
 ##
 ## =============================================================================
-option (ENABLE_TESTING    "Enable the CTest test driver?"            NO)
-option (CONFIGURE_VERBOSE "Enhanced verbosity during configuration?" NO)
+option (ENABLE_TESTING    "Enable the CTest test driver?"            NO )
+option (BUILD_SHARED_LIBS "Enable building shared libraries"         YES)
+option (CONFIGURE_VERBOSE "Enhanced verbosity during configuration?" NO )
 option (CONFIGURE_SUMMARY "Provide summary at the end of configure?" YES)
-
-#-----------------------------------------------------------------------------
-# Option path to SRON calibration parameters
-#-----------------------------------------------------------------------------
-set (NADC_TOOLS_DATADIR "/SCIA/share/nadc_tools")
-
-#-----------------------------------------------------------------------------
-# Option to Build Shared/Static libs, default is shared
-#-----------------------------------------------------------------------------
-option (BUILD_SHARED_LIBS "Build Shared Libraries" YES)
-set (LIB_TYPE STATIC)
-set (NADC_ENABLE_SHARED_LIB NO)
-set (NADC_ENABLE_STATIC_LIB NO)
-if (BUILD_SHARED_LIBS)
-  set (LIB_TYPE SHARED)
-  set (NADC_ENABLE_SHARED_LIB YES)
-  set (CMAKE_INSTALL_SO_NO_EXE "0")
-ELSE ()
-  SET (NADC_ENABLE_STATIC_LIB YES)
-ENDIF ()
 
 ##__________________________________________________________
 ## Installation prefix
@@ -63,9 +53,22 @@ ENDIF ()
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set (CMAKE_INSTALL_PREFIX
     "$ENV{HOME}/x86_64" CACHE PATH "Installation location prefix" FORCE
-#    "${PROJECT_SOURCE_DIR}/release" CACHE PATH "Installation location prefix" FORCE
-  )
+    )
 endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+##__________________________________________________________
+## Handle option: building shared libraries
+
+set (LIB_TYPE STATIC)
+set (NADC_ENABLE_SHARED_LIB NO)
+set (NADC_ENABLE_STATIC_LIB NO)
+if (BUILD_SHARED_LIBS)
+  set (LIB_TYPE SHARED)
+  set (NADC_ENABLE_SHARED_LIB YES)
+  set (CMAKE_INSTALL_SO_NO_EXE "0")
+else ()
+  SET (NADC_ENABLE_STATIC_LIB YES)
+endif ()
 
 ## =============================================================================
 ##
@@ -160,6 +163,11 @@ include_directories(
   ${PGSQL_INCLUDE_DIR}
   )
 
+## =============================================================================
+##
+##  Project sub-directories
+##
+## =============================================================================
 add_subdirectory (libNADC)
 add_subdirectory (libNADC_GOME)
 add_subdirectory (libNADC_MERIS)
@@ -203,7 +211,7 @@ message ( " Project configuration"                                      )
 message ( " .. Project name ............. = ${PROJECT_NAME}"            )
 message ( " .. Project version .......... = ${PROJECT_VERSION}"         )
 message ( " .. Build shared libraries ... = ${BUILD_SHARED_LIBS}"       )
-message ( " .. Verbose configuration .... = ${CONFIGURE_VERBOSE}"       )
+message ( " .. Sciamachy CKD directory ...= ${NADC_TOOLS_DATADIR}"      )
 message ( " .. Installation prefix ...... = ${CMAKE_INSTALL_PREFIX}"    )
 message ( " --------------------------------------------------------"   )
 message ( " Processing tools & libraries"                               )

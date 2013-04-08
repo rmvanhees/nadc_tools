@@ -1,0 +1,1 @@
+* check for presence of "byteswap.h" on the system and use these functions
