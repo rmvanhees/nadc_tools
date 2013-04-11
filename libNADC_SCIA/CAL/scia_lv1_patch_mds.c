@@ -563,80 +563,121 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 {
      const char prognm[] = "SCIA_CALC_MEM_CORR";
 
+     register short nchan;
+
      register unsigned short np = 0;
-     register unsigned short signNorm;
-     register double         sign_before, sign_after;
+     register unsigned short ipx, signNorm;
+
+     unsigned short vchan;
+
+     double scale_reset;
 
      struct scia_memcorr memcorr = {{0,0}, NULL};
-
-     const size_t num_tan_h = (scia_cal->limb_scans == 0) ? 0 : 
-	  scia_cal->num_obs / scia_cal->limb_scans;
-
-     /* state set-up time in milli-seconds */
-     const float setup_it[] = { 0.f,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 1269.53125, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 421.875, 1269.53125,
-          421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
-          421.875, 421.875, 421.875, 421.875, 519.53125, 421.875,
-          1269.53125, 421.875, 421.875, 421.875, 335.9375, 421.875,
-          421.875, 421.875, 519.53125, 1269.53125
-     };
 
      /* read memory correction values */
      SCIA_RD_H5_MEM( &memcorr );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
 
-     do {
-	  register unsigned short no = 0;
+     if ( scia_cal->limb_scans == 0 ) {
 
-	  const short nchan = (short) scia_cal->chan_id[np] - 1;
+	  /* state set-up time in milli-seconds */
+	  const float setup_it[] = { 
+	       0.f, 421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 1269.53125, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 1269.53125,
+	       421.875, 421.875, 421.875, 421.875, 421.875, 421.875,
+	       421.875, 421.875, 421.875, 421.875, 519.53125, 421.875,
+	       1269.53125, 421.875, 421.875, 421.875, 335.9375, 421.875,
+	       421.875, 421.875, 519.53125, 1269.53125
+	  };
 
-	  /* limb only, before reset at new tangent height */
-	  const double scale_before = (nchan < 0) ? 0. :
-	       3 * (0.5 - (np % 1024) / 6138.) / (16 * scia_cal->pet[np]);
-	  /* limb only, after reset at new tangent height */
-	  const double scale_after  = (nchan < 0) ? 0. :
-	       3 * (0.5 + (np % 1024) / 6138.) / (16 * scia_cal->pet[np]);
+	  do {
+	       register unsigned short no = 0;
 
-	  /* reset at start of new state execution */
-	  const double scale_reset = (nchan < 0) ? 0. :
-	       setup_it[scia_cal->state_id] / (1000. * scia_cal->pet[np]);
+	       nchan = (short) scia_cal->chan_id[np] - 1;
+	       if ( nchan < 0 ) continue;
 
-	  unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
-						  scia_cal->clus_id[np] );
+	       vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np], scia_cal->clus_id[np] );
 
-	  if ( vchan == USHRT_MAX ) continue;         /* skip un-used pixels */
+	       ipx = (scia_cal->chan_id[np] == 2) ?
+		    (CHANNEL_SIZE-1) - (np % CHANNEL_SIZE) : (np % CHANNEL_SIZE);
 
-	  /* calculate memory correction for the first readout of a state */
-	  signNorm = __ROUND_us( scia_cal->dark_signal[np]
-				 + scale_reset * scia_cal->spectra[np][0] );
-	  scia_cal->correction[np][0] = memcorr.matrix[nchan][signNorm];
+	       /* reset at start of new state execution */
+	       scale_reset = setup_it[scia_cal->state_id] / (1000. * scia_cal->pet[np]);
 
-	  /* use previous readout to calculate correction next readout */
-	  while ( ++no < scia_cal->chan_obs[vchan] ) {
-	       if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
+	       /* calculate memory correction for the first readout of a state */
+	       signNorm = __ROUND_us( scia_cal->dark_signal[np]
+				      + scale_reset * scia_cal->spectra[np][0] );
+	       scia_cal->correction[np][0] = memcorr.matrix[nchan][signNorm];
 
-	       if ( scia_cal->limb_scans != 0 && (no % num_tan_h) == 0 ) {
-		    sign_before = scale_before * scia_cal->spectra[np][no-1];
-		    sign_after  = scale_after * scia_cal->spectra[np][no];
+	       /* use previous readout to calculate correction next readout */
+	       while ( ++no < scia_cal->chan_obs[vchan] ) {
+		    if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
 
-		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
-					   + (sign_before + sign_after) );
-	       } else {
 		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
 					   + scia_cal->spectra[np][no-1] );
-	       }
+	       };
 	       scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
-	  }
-     } while ( ++np < (VIS_CHANNELS * CHANNEL_SIZE) );
+	  } while ( ++np < (VIS_CHANNELS * CHANNEL_SIZE) );
+     } else {                                                        /* limb profiles */
+	  register double sign_before, sign_after;
 
+	  double scale_before, scale_after;
+
+	  unsigned short num_at_tan_h;
+
+	  do {
+	       register unsigned short no = 0;
+
+	       nchan = (short) scia_cal->chan_id[np] - 1;
+	       if ( nchan < 0 ) continue;
+
+	       vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np], scia_cal->clus_id[np] );
+
+	       ipx = (scia_cal->chan_id[np] == 2) ?
+		    (CHANNEL_SIZE-1) - (np % CHANNEL_SIZE) : (np % CHANNEL_SIZE);
+
+	       /* number of read-outs per tangent height */
+	       num_at_tan_h = scia_cal->chan_obs[vchan] / scia_cal->limb_scans;
+
+	       /* reset at start of new state execution */
+	       scale_reset = 3 / (16 * scia_cal->pet[np]);
+
+	       /* limb only, before reset at new tangent height */
+	       scale_before = 3 * (0.5 - ipx / 6138.) / (16 * scia_cal->pet[np]);
+
+	       /* limb only, after reset at new tangent height */
+	       scale_after  = 3 * (0.5 + ipx / 6138.) / (16 * scia_cal->pet[np]);
+
+	       /* calculate memory correction for the first readout of a state */
+	       signNorm = __ROUND_us( scia_cal->dark_signal[np]
+				      + scale_reset * scia_cal->spectra[np][0] );
+	       scia_cal->correction[np][0] = memcorr.matrix[nchan][signNorm];
+
+	       /* use previous readout to calculate correction next readout */
+	       while ( ++no < scia_cal->chan_obs[vchan] ) {
+		    if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
+
+		    if ( (no % num_at_tan_h) == 0 ) {
+			 sign_before = scale_before * scia_cal->spectra[np][no-1];
+			 sign_after  = scale_after * scia_cal->spectra[np][no];
+
+			 signNorm = __ROUND_us( scia_cal->dark_signal[np]
+						+ (sign_before + sign_after) );
+		    } else {
+			 signNorm = __ROUND_us( scia_cal->dark_signal[np]
+						+ scia_cal->spectra[np][no-1] );
+		    }
+		    scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
+	       }
+	  } while ( ++np < (VIS_CHANNELS * CHANNEL_SIZE) );
+     }
      SCIA_FREE_H5_MEM( &memcorr );
 }
 
@@ -1059,6 +1100,10 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	  }
      }
 #ifdef DEBUG
+     for ( nr = 0; nr < stray.dims[1]; nr++ ) 
+	  (void) fprintf( stderr, "%5hu %12.3f %4hu %hu\n", nr, stray.grid_in[nr], 
+			  grid_in_ll[nr], grid_in_ul[nr] );
+
      fp_full = fopen( "tmp_spectrum_full.dat", "w" );
      fp_grid = fopen( "tmp_spectrum_grid.dat", "w" );
      fp_corr_full = fopen( "tmp_correction_full.dat", "w" );
@@ -1088,7 +1133,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	       else if ( fillings == 1 )
 		    spec_f[np] = (float) scia_cal->spectra[np][nobs];
 	       else
-		    spec_f[np] = 0.f;
+		    spec_f[np] = NAN;
 	  } while ( ++np < SCIENCE_PIXELS );
 #ifdef DEBUG
 	  (void) fwrite( spec_f, sizeof(float), SCIENCE_PIXELS, fp_full );
@@ -1100,10 +1145,10 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 
 	       spec_r[nr] = 0;
 	       for ( ng = grid_in_ll[nr]; ng <= grid_in_ul[nr]; ng++ ) {
-		    if ( scia_cal->quality_flag[ng] == FLAG_VALID
+		    if ( scia_cal->quality_flag[ng] == FLAG_VALID 
 			 && isnormal(spec_f[ng]) ) {
-			 numval++;
 			 spec_r[nr] += spec_f[ng];
+			 numval++;
 		    }
 	       }
 	       if ( numval > 0 && numval < allval )
@@ -1163,7 +1208,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	  if ( fillings <= 1 ) continue;
 
 	  do {
-	       register unsigned char nf = 0;
+	       register unsigned short nf = 0;
 
 	       register float corrval = 0.;
 
