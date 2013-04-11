@@ -28,15 +28,6 @@ include (CheckFunctionExists)
 include (FindPackageHandleStandardArgs)
 include (TestBigEndian)
 
-#-----------------------------------------------------------------------------
-# Option path to SRON calibration parameters
-#-----------------------------------------------------------------------------
-if (APPLE)
-   set (NADC_TOOLS_DATADIR "$ENV{HOME}/SCIA/CKD")
-else ()
-   set (NADC_TOOLS_DATADIR "/SCIA/share/nadc_tools")
-endif ()
-
 ## =============================================================================
 ##
 ##  Configuration options
@@ -69,6 +60,17 @@ if (BUILD_SHARED_LIBS)
 else ()
   SET (NADC_ENABLE_STATIC_LIB YES)
 endif ()
+
+#-----------------------------------------------------------------------------
+# Path to SRON calibration parameters
+#-----------------------------------------------------------------------------
+find_path (NADC_TOOLS_DATADIR
+	  MEMcorr.h5
+	  PATHS "/SCIA/share/nadc_tools"
+	  	"$ENV{HOME}/SCIA/CKD"
+		"/data/$ENV{USER}/SCIA/CKD"
+	  NO_DEFAULT_PATH
+)
 
 ## =============================================================================
 ##
