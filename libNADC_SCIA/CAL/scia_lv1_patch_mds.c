@@ -577,7 +577,7 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
      /* read memory correction values */
      SCIA_RD_H5_MEM( &memcorr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
 
      if ( scia_cal->limb_scans == 0 ) {
 
@@ -603,32 +603,33 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	       nchan = (short) scia_cal->chan_id[np] - 1;
 	       if ( nchan < 0 ) continue;
 
-	       vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np], scia_cal->clus_id[np] );
+	       vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np], 
+					scia_cal->clus_id[np] );
 
-	       ipx = (scia_cal->chan_id[np] == 2) ?
-		    (CHANNEL_SIZE-1) - (np % CHANNEL_SIZE) : (np % CHANNEL_SIZE);
+	       ipx = (np % CHANNEL_SIZE);
+	       if ( scia_cal->chan_id[np] == 2 ) ipx = (CHANNEL_SIZE-1) - ipx;
 
 	       /* reset at start of new state execution */
-	       scale_reset = setup_it[scia_cal->state_id] / (1000. * scia_cal->pet[np]);
+	       scale_reset = setup_it[scia_cal->state_id] 
+		    / (1000. * scia_cal->pet[np]);
 
-	       /* calculate memory correction for the first readout of a state */
+	       /* calculate memory correction for first readout of a state */
 	       signNorm = __ROUND_us( scia_cal->dark_signal[np]
-				      + scale_reset * scia_cal->spectra[np][0] );
+				      + scale_reset * scia_cal->spectra[np][0]);
 	       scia_cal->correction[np][0] = memcorr.matrix[nchan][signNorm];
 
 	       /* use previous readout to calculate correction next readout */
 	       while ( ++no < scia_cal->chan_obs[vchan] ) {
-		    if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
-
 		    signNorm = __ROUND_us( scia_cal->dark_signal[np]
 					   + scia_cal->spectra[np][no-1] );
+		    scia_cal->correction[np][no] = 
+			 memcorr.matrix[nchan][signNorm];
 	       };
-	       scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
 	  } while ( ++np < (VIS_CHANNELS * CHANNEL_SIZE) );
-     } else {                                                        /* limb profiles */
-	  register double sign_before, sign_after;
+     } else {                                              /* limb profiles */
+	  register double sign_prev, sign_curr;
 
-	  double scale_before, scale_after;
+	  double scale_prev, scale_curr;
 
 	  unsigned short num_at_tan_h;
 
@@ -638,10 +639,11 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	       nchan = (short) scia_cal->chan_id[np] - 1;
 	       if ( nchan < 0 ) continue;
 
-	       vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np], scia_cal->clus_id[np] );
+	       vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np], 
+					scia_cal->clus_id[np] );
 
-	       ipx = (scia_cal->chan_id[np] == 2) ?
-		    (CHANNEL_SIZE-1) - (np % CHANNEL_SIZE) : (np % CHANNEL_SIZE);
+	       ipx = (np % CHANNEL_SIZE);
+	       if ( scia_cal->chan_id[np] == 2 ) ipx = (CHANNEL_SIZE-1) - ipx;
 
 	       /* number of read-outs per tangent height */
 	       num_at_tan_h = scia_cal->chan_obs[vchan] / scia_cal->limb_scans;
@@ -650,34 +652,34 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
 	       scale_reset = 3 / (16 * scia_cal->pet[np]);
 
 	       /* limb only, before reset at new tangent height */
-	       scale_before = 3 * (0.5 - ipx / 6138.) / (16 * scia_cal->pet[np]);
+	       scale_prev = 3 * (0.5 - ipx / 6138.) / (16 * scia_cal->pet[np]);
 
 	       /* limb only, after reset at new tangent height */
-	       scale_after  = 3 * (0.5 + ipx / 6138.) / (16 * scia_cal->pet[np]);
+	       scale_curr = 3 * (0.5 + ipx / 6138.) / (16 * scia_cal->pet[np]);
 
-	       /* calculate memory correction for the first readout of a state */
+	       /* calculate memory correction for first readout of a state */
 	       signNorm = __ROUND_us( scia_cal->dark_signal[np]
-				      + scale_reset * scia_cal->spectra[np][0] );
+				      + scale_reset * scia_cal->spectra[np][0]);
 	       scia_cal->correction[np][0] = memcorr.matrix[nchan][signNorm];
 
 	       /* use previous readout to calculate correction next readout */
 	       while ( ++no < scia_cal->chan_obs[vchan] ) {
-		    if ( ! isnormal(scia_cal->spectra[np][no]) ) continue;
-
 		    if ( (no % num_at_tan_h) == 0 ) {
-			 sign_before = scale_before * scia_cal->spectra[np][no-1];
-			 sign_after  = scale_after * scia_cal->spectra[np][no];
+			 sign_prev = scale_prev * scia_cal->spectra[np][no-1];
+			 sign_curr = scale_curr * scia_cal->spectra[np][no];
 
 			 signNorm = __ROUND_us( scia_cal->dark_signal[np]
-						+ (sign_before + sign_after) );
+						+ (sign_prev + sign_curr) );
 		    } else {
 			 signNorm = __ROUND_us( scia_cal->dark_signal[np]
 						+ scia_cal->spectra[np][no-1] );
 		    }
-		    scia_cal->correction[np][no] = memcorr.matrix[nchan][signNorm];
+		    scia_cal->correction[np][no] = 
+			 memcorr.matrix[nchan][signNorm];
 	       }
 	  } while ( ++np < (VIS_CHANNELS * CHANNEL_SIZE) );
      }
+done:
      SCIA_FREE_H5_MEM( &memcorr );
 }
 
@@ -725,8 +727,8 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
 	  do {
 	       if ( ! isnormal(scia_cal->spectra[np][nobs]) ) continue;
 
-	       signNorm = __ROUND_us( scia_cal->spectra[np][nobs] 
-				      + scia_cal->dark_signal[np] );
+	       signNorm = __ROUND_us( scia_cal->dark_signal[np] 
+				      + scia_cal->spectra[np][nobs] );
 
 	       scia_cal->correction[np][nobs] = 
 		    nlcorr.matrix[curveIndx][signNorm];
@@ -956,8 +958,8 @@ void SCIA_APPLY_MemNlin( const struct state1_scia *state,
 	  if ( nchan < 0 ) continue;
 
 	  do {
-	       register unsigned short nr;
 	       register unsigned short nd = 0;
+	       register unsigned short nr;
 	       register size_t nobs = 0;
 
 	       const unsigned short ipx = ABS_PIXELID(np, state->Clcon[ncl]);
@@ -1651,6 +1653,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
       * apply darkcurrent correction
       */
      calib_flag = (DO_CORR_AO|DO_CORR_DARK);
+     calib_flag = (DO_CORR_AO);
      SCIA_APPLY_DARK( fp, calib_flag, &scia_cal );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
