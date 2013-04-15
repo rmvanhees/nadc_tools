@@ -94,7 +94,8 @@
 .COMMENTS    none
 -------------------------*/
 static
-void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument, 
+void WRITE_HDF5_HISTORY( hid_t file_id, 
+			 hid_t instrument __attribute ((unused)), 
 			 const struct param_record param )
 {
      char    cbuff[MAX_STRING_LENGTH];

@@ -254,7 +254,7 @@ extern void MERIS_SET_PARAM( int, char **, int,
                              /*@out@*/ struct param_record *param )
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
-extern void MERIS_SHOW_PARAM( int, struct param_record );
+extern void MERIS_SHOW_PARAM( int instrument, struct param_record );
 
 #if defined _STDIO_H || defined _STDIO_H_
 extern void MERIS_SHOW_VERSION( FILE *stream, const char * )

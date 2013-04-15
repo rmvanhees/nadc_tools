@@ -257,7 +257,7 @@ extern unsigned short SDMF_get_stateCount( unsigned char, unsigned short )
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern unsigned char SDMF_PET2StateID( unsigned short, unsigned short,
-				       float );
+				       float ) __attribute__ ((const));
 extern float SDMF_orbitPhaseDiff( int orbit )
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;

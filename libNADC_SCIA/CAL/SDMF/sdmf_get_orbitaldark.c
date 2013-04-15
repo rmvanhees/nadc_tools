@@ -274,11 +274,12 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-bool SDMF_get_OrbitalDark( unsigned short absOrbit, float orbitPhase, 
+bool SDMF_get_OrbitalDark( unsigned short absOrbit __attribute ((unused)), 
+			   float orbitPhase __attribute ((unused)), 
 			   float *analogOffs, float *darkCurrent, 
 			   float *analogOffsError, float *darkCurrentError )
 {
-     const char prognm[] = "SDMF_get_OrbitalDark";
+     const char prognm[] = "SDMF_get_OrbitalDark" __attribute ((unused));
 
      bool   found = FALSE;
 

@@ -154,7 +154,7 @@ set (NADC_IDL_LIB_NAME            "lib${NADC_IDL_LIB_TARGET}")
 ##
 ## =============================================================================
 ## Compiler flags
-set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wdisabled-optimization -Wstrict-prototypes -Wdeclaration-after-statement")
+set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wdisabled-optimization -Wstrict-prototypes -Wdeclaration-after-statement -Wsuggest-attribute=const")
 set (CMAKE_C_FLAGS_DEBUG "-g -pg -pedantic -Wno-long-long -Wno-overlength-strings")
 set (CMAKE_C_FLAGS_RELEASE "-march=native -O3")
 

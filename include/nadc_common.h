@@ -463,7 +463,8 @@ extern size_t strlcat( /*@out@*/ char *, /*@unique@*/ const char *, size_t );
 extern void rstrip( /*@out@*/ char *, /*@unique@*/ const char * );
 
 extern void Set_Bit_LL( unsigned long long *, unsigned char );
-extern unsigned long long Get_Bit_LL( unsigned long long, unsigned char );
+extern unsigned long long Get_Bit_LL( unsigned long long, unsigned char )
+     __attribute__ ((const));
 
 extern void Julian_2_MJD( double, /*@out@*/ double *, 
 			  /*@out@*/ unsigned int *, /*@out@*/ unsigned int * );
@@ -513,7 +514,8 @@ extern void NADC_FIT( size_t, const float *, const float *, const float *,
 extern void NADC_RECEIVEDATE( const char *, /*@out@*/ char *datetime )
        /*@modifies datetime@*/;
 
-extern bool NADC_CHECK_FOR_SAA( const double, const double );
+extern bool NADC_CHECK_FOR_SAA( const double, const double )
+     __attribute__ ((const));
 
 extern unsigned int NADC_FILESIZE( const char * );
 

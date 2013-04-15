@@ -432,7 +432,8 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
 .RETURNS     Nothing (check global error status)
 .COMMENTS    none
 -------------------------*/
-void MERIS_SHOW_PARAM( int instrument, const struct param_record param )
+void MERIS_SHOW_PARAM( int instrument __attribute ((unused)), 
+		       const struct param_record param )
 {
      register unsigned int nr = 0;
 
