@@ -23,6 +23,7 @@ set (PROJECT_VERSION
     "${NADC_VERS_MAJOR}.${NADC_VERS_MINOR}.${NADC_VERS_RELEASE}")
 
 ## CMake standard modules
+include (CheckCCompilerFlag)
 include (CheckIncludeFile)
 include (CheckFunctionExists)
 include (FindPackageHandleStandardArgs)
@@ -154,7 +155,11 @@ set (NADC_IDL_LIB_NAME            "lib${NADC_IDL_LIB_TARGET}")
 ##
 ## =============================================================================
 ## Compiler flags
-set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wdisabled-optimization -Wstrict-prototypes -Wdeclaration-after-statement -Wsuggest-attribute=const")
+set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wdisabled-optimization -Wstrict-prototypes -Wdeclaration-after-statement")
+check_c_compiler_flag (-Wsuggest-attribute=const HAS_SUGGEST_ATTRIBUTE)
+if (HAS_SUGGEST_ATTRIBUTE)
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsuggest-attribute=const")
+endif ()
 set (CMAKE_C_FLAGS_DEBUG "-g -pg -pedantic -Wno-long-long -Wno-overlength-strings")
 set (CMAKE_C_FLAGS_RELEASE "-march=native -O3")
 

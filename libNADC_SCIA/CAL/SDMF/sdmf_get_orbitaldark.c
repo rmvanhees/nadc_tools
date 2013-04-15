@@ -279,7 +279,7 @@ bool SDMF_get_OrbitalDark( unsigned short absOrbit __attribute ((unused)),
 			   float *analogOffs, float *darkCurrent, 
 			   float *analogOffsError, float *darkCurrentError )
 {
-     const char prognm[] = "SDMF_get_OrbitalDark" __attribute ((unused));
+     /* const char prognm[] = "SDMF_get_OrbitalDark"; */
 
      bool   found = FALSE;
 
