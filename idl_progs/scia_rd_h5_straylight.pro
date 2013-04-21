@@ -73,12 +73,15 @@ PRO SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayCorr, STRAY_DB=STRAY_DB
   IF dd LT 0 THEN MESSAGE, 'Could not open dataset: grid_out'
   grid_out = H5D_READ( dd )
   H5D_CLOSE, dd
-  dd = H5D_OPEN( fid, 'strayCorr' )
-  IF dd LT 0 THEN MESSAGE, 'Could not open dataset: strayCorr'
+  dd = H5D_OPEN( fid, 'strayGhost' )
+  IF dd LT 0 THEN MESSAGE, 'Could not open dataset: strayGhost'
+  strayGhost = H5D_READ( dd )
+  H5D_CLOSE, dd
+  dd = H5D_OPEN( fid, 'strayMatrix' )
+  IF dd LT 0 THEN MESSAGE, 'Could not open dataset: strayMatrix'
   strayCorr = H5D_READ( dd )
   H5D_CLOSE, dd
   H5F_CLOSE, fid
-
 
   RETURN
 END

@@ -44,32 +44,67 @@
 ;       Modified:  RvH, 6 July 2011
 ;                    straylight keydata for all channels
 ;-
-PRO SCIA_WR_H5_STRAYLIGHT, grid_in, grid_out, strayCorr, $
-                           straylight_fl=straylight_fl
+PRO SCIA_WR_H5_STRAYLIGHT, stray_uniform, stray_ghost, $
+                           keydata_fl=keydata_fl
   compile_opt idl2,hidden
 
 ; check required parameters
-  IF N_PARAMS() NE 3 THEN BEGIN
-     MESSAGE, ' Usage: scia_wr_h5_straylight, strayCorr ' $
-              + ', straylight_fl=straylight_fl', /INFO
+  IF N_PARAMS() NE 2 THEN BEGIN
+     MESSAGE, ' Usage: scia_wr_h5_straylight, stray_uniform, stray_ghost ' $
+              + ', keydata_fl=keydata_fl', /INFO
      status = -1
      RETURN
   ENDIF
 
-  IF N_ELEMENTS( straylight_fl ) EQ 0 THEN $
-     straylight_fl = './keydata_final.sav'
-  result = FILE_TEST( straylight_fl, /READ )
-  IF result EQ 0 THEN MESSAGE, 'File: ' + straylight_fl + ' does not exist!'
+  IF N_ELEMENTS( keydata_fl ) EQ 0 THEN $
+     keydata_fl = './keydata_final.sav'
+  result = FILE_TEST( keydata_fl, /READ )
+  IF result EQ 0 THEN MESSAGE, 'File: ' + keydata_fl + ' does not exist!'
 
-; extract Straylight correction data
-  RESTORE, straylight_fl
+; extract Straylight keydata
+  RESTORE, keydata_fl
+  stray_uniform = keydata.stray_uniform
+  stray_ghost = keydata.stray_ghost
+  
+; write Straylight keydata to HDF5 file
   grid_in  = keydata.stray_uniform.dim2
   grid_out = keydata.stray_uniform.dim1
-  strayCorr = TRANSPOSE( keydata.stray_uniform.data )
-  dimX = N_ELEMENTS( grid_in )
-  dimY = N_ELEMENTS( grid_out )
+  strayMatrix = TRANSPOSE( keydata.stray_uniform.data )
+  strayGhost = keydata.stray_ghost.data
 
-  stat = call_external( lib_name('libnadc_idl'), '_SCIA_WR_H5_STRAYLIGHT', $
-                        dimX, dimY, grid_in, grid_out, strayCorr, /CDECL )
+  fid = H5F_create( 'Straylight.h5' )
+  type_id = H5T_idl_create( grid_in )
+  space_id = H5S_create_simple( SIZE(grid_in, /DIMENSIONS) )
+  data_id = H5D_create( fid, 'grid_in', type_id, space_id )
+  H5D_write, data_id, grid_in
+  H5T_close, type_id
+  H5S_close, space_id
+  H5D_close, data_id
+
+  type_id = H5T_idl_create( grid_out )
+  space_id = H5S_create_simple( SIZE(grid_out, /DIMENSIONS) )
+  data_id = H5D_create( fid, 'grid_out', type_id, space_id )
+  H5D_write, data_id, grid_out
+  H5T_close, type_id
+  H5S_close, space_id
+  H5D_close, data_id
+
+  type_id = H5T_idl_create( strayMatrix )
+  space_id = H5S_create_simple( SIZE(strayMatrix, /DIMENSIONS) )
+  data_id = H5D_create( fid, 'strayMatrix', type_id, space_id )
+  H5D_write, data_id, strayMatrix
+  H5T_close, type_id
+  H5S_close, space_id
+  H5D_close, data_id
+
+  type_id = H5T_idl_create( strayGhost )
+  space_id = H5S_create_simple( SIZE(strayGhost, /DIMENSIONS) )
+  data_id = H5D_create( fid, 'strayGhost', type_id, space_id )
+  H5D_write, data_id, strayGhost
+  H5T_close, type_id
+  H5S_close, space_id
+  H5D_close, data_id
+
+  H5F_close, fid
   RETURN
 END

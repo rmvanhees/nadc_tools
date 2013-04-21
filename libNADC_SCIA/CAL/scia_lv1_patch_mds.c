@@ -33,7 +33,8 @@
                    handle PET < 1/32 correctly
 		   handle spikes in the PMD readouts correctly
 .ENVIRONment None
-.VERSION     5.1     11-Jan-2013   fixed memory corruption bug which occured
+.VERSION     6.0     21-Apr-2013   verified stray-light correction, RvH
+             5.1     11-Jan-2013   fixed memory corruption bug which occured
                                    when not all channels where processed, RvH
              5.0     23-Aug-2011   re-write to include stray-light correction,
                                    RvH
@@ -158,6 +159,36 @@ unsigned short VIRTUAL_CHANNEL( unsigned char chan_id, unsigned char clus_id )
 }
 
 static inline
+float Eval_Poly3( float xx, const double *coeffs )
+{
+     return (float)((coeffs[2] * xx + coeffs[1]) * xx + coeffs[0]);
+}
+
+static inline
+float Eval_Poly4( float xx, const double *coeffs )
+{
+     return (float) (((coeffs[3] * xx + coeffs[2]) 
+		      * xx + coeffs[1]) * xx + coeffs[0]);
+}
+
+static inline
+void MinMax( size_t dim, const float *array, 
+	     /*@out@*/ size_t *min, /*@out@*/ size_t *max )
+{
+     register size_t nd = 0;
+
+     float min_val = *array;
+     float max_val = *array;
+
+     for ( nd = 0; nd < dim; nd++, array++ ) {
+	  if ( (min_val - *array) > FLT_EPSILON ) min_val = *array;
+	  else if ( (*array - max_val) >= FLT_EPSILON ) max_val = *array;
+     }
+     *min = (min_val < 0.f) ? 0 : (size_t) floorf( min_val );
+     *max = (max_val < 0.f) ? 0 : (size_t) floorf( max_val );
+}
+
+static inline
 float DERIV( unsigned short ni, unsigned short dim, const float *array )
 {
      if ( ni == 0 ) {
@@ -167,6 +198,43 @@ float DERIV( unsigned short ni, unsigned short dim, const float *array )
      } else {
 	  return (3 * array[ni] - 4 * array[ni-1] + array[ni-2]) / 2.f;
      }
+}
+
+static
+void SHELLrr( size_t dim, float *ra, float *rra )
+{
+     register size_t ii, jj;
+
+     size_t inc = 1;
+     float  buff, test;
+/*
+ * determine the starting increment
+ */
+     ra--; rra--;
+     do {
+          inc *= 3;
+          inc++;
+     } while ( inc <= dim );
+/*
+ * loop over the partial sorts
+ */
+     do {
+          inc /= 3;
+          for ( ii = inc + 1; ii <= dim; ii++ ) {
+               test = ra[ii];
+               buff = rra[ii];
+
+               jj = ii;
+               while ( ra[jj-inc] > test ) {
+                    ra[jj] = ra[jj-inc];
+                    rra[jj] = rra[jj-inc];
+                    jj -= inc;
+                    if ( jj <= inc ) /*@innerbreak@*/ break;
+               }
+               ra[jj] = test;
+               rra[jj] = buff;
+          }
+     } while ( inc > 1 );
 }
 
 /*+++++++++++++++++++++++++
@@ -1008,6 +1076,80 @@ void SCIA_APPLY_MemNlin( const struct state1_scia *state,
 }
 
 /*+++++++++++++++++++++++++
+.IDENTifer   SCIA_CALC_STRAY_GHOSTS
+.PURPOSE     calculate stray light contribution for the ghosts
+.INPUT/OUTPUT
+  call as    SCIA_CALC_STRAY_GHOSTS( stray, spec_f, stray_f );
+ in/output:
+	    struct scia_cal_rec *scia_cal :  record with SCIA data of one state
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+static
+void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray, 
+			     const double *spec_f, /*@out@*/ float *stray_f )
+{
+     register size_t ng, np, ns;
+     register float  intensity;
+
+     size_t min_pix, max_pix, dim_pix;
+
+     float pixels[SCIENCE_PIXELS];
+     float positions[SCIENCE_PIXELS];
+     float ghoststray[SCIENCE_PIXELS];
+     float tmp_stray[SCIENCE_PIXELS];
+/*
+ * The ghost keydata contains the following parameteres:
+ *  - ghosts[ng][0:2]  :  polynominal coefficients of the ghost position
+ *  - ghosts[ng][3]    :  minimum of the position of the ghost
+ *  - ghosts[ng][4]    :  minimum of the intensity of the ghost
+ *  - ghosts[ng][5]    :  maximum of the position of the ghost
+ *  - ghosts[ng][6]    :  maximum of the intensity of the ghost
+ *  - ghosts[ng][7:10] :  polynominal coefficients of the ghost intensity
+ *  - ghosts[ng][11]   :  smoothing width for the ghost intensity
+ */
+     for ( ng = 0; ng < stray->dims_ghost[0]; ng++ ) {
+	  const double coeffs_x[] = { stray->ghosts[ng][0],
+				      stray->ghosts[ng][1],
+				      stray->ghosts[ng][2]
+	  };
+	  const double coeffs_y[] = { stray->ghosts[ng][7], 
+				      stray->ghosts[ng][8], 
+				      stray->ghosts[ng][9], 
+				      stray->ghosts[ng][10]
+	  };
+	  size_t dim_pos = stray->ghosts[ng][5] - stray->ghosts[ng][3];
+
+	  ns = 0;
+	  for ( np = stray->ghosts[ng][3]; np < stray->ghosts[ng][5]; np++ ) {
+	       positions[ns] = Eval_Poly3( np, coeffs_x );
+	       intensity = Eval_Poly4( np, coeffs_y );
+	       if ( intensity < 0.f ) intensity = 0.f;
+	       ghoststray[ns++] = intensity * spec_f[np];
+	  }
+
+	  /* make sure the data is sorted */
+	  if ( positions[0] > positions[ns-1] )
+	       SHELLrr( ns, positions, ghoststray );
+	  MinMax( dim_pos, positions, &min_pix, &max_pix );
+	  dim_pix = max_pix - min_pix;
+
+	  ns = 0;
+	  for ( np = min_pix; np < max_pix; np++ ) pixels[ns++] = (float) np;
+
+	  /* resample straylight spectrum to original input grid */
+	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, dim_pos, positions, ghoststray,
+			  FLT32_T, FLT32_T, dim_pix, pixels, tmp_stray );
+
+	  /* store stray light for this ghost */
+	  ns = 0;
+	  for ( np = min_pix; np < max_pix; np++ ) 
+	       stray_f[np] += tmp_stray[ns++];
+     }
+}
+
+/*+++++++++++++++++++++++++
 .IDENTifer   SCIA_CALC_STRAY_CORR
 .PURPOSE     calculate straylight correction
 .INPUT/OUTPUT
@@ -1018,7 +1160,6 @@ void SCIA_APPLY_MemNlin( const struct state1_scia *state,
 .RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
-#define DEBUG
 static
 void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
        /*@globals  nadc_stat, nadc_err_stack;@*/
@@ -1031,7 +1172,8 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 
      register size_t nobs;
 
-     float  grid_f[SCIENCE_PIXELS], stray_f[SCIENCE_PIXELS];
+     float  grid_f[SCIENCE_PIXELS], ghost_f[SCIENCE_PIXELS], 
+	  stray_f[SCIENCE_PIXELS];
      double spec_f[SCIENCE_PIXELS];
 
      unsigned short *grid_in_ll = NULL;
@@ -1042,9 +1184,12 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      float  *stray_r    = NULL;
 #ifdef DEBUG
      FILE *fp_full, *fp_grid;
+     FILE *fp_ghost;
      FILE *fp_corr_full, *fp_corr_grid;
 #endif
-     struct scia_straycorr stray = {{0,0}, NULL, NULL, NULL};
+     struct scia_straycorr stray = {
+	  {0,0}, NULL, NULL, NULL, {0,0}, NULL
+     };
 
      /* reset correction values */
      (void) memset( scia_cal->correction[0], 0,
@@ -1112,6 +1257,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 #ifdef DEBUG
      fp_full = fopen( "tmp_spectrum_full.dat", "w" );
      fp_grid = fopen( "tmp_spectrum_grid.dat", "w" );
+     fp_ghost = fopen( "tmp_ghosts_full.dat", "w" );
      fp_corr_full = fopen( "tmp_correction_full.dat", "w" );
      fp_corr_grid = fopen( "tmp_correction_grid.dat", "w" );
 #endif
@@ -1152,6 +1298,12 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 #ifdef DEBUG
 	  (void) fwrite( spec_f, sizeof(double), SCIENCE_PIXELS, fp_full );
 #endif
+	  /* calculate stray light contribution for the ghosts */
+	  (void) memset( ghost_f, 0, SCIENCE_PIXELS * sizeof(float) );
+	  SCIA_CALC_STRAY_GHOSTS( &stray, spec_f, ghost_f );
+#ifdef DEBUG
+	  (void) fwrite( ghost_f, sizeof(float), SCIENCE_PIXELS, fp_ghost );
+#endif
 	  /* reduce dimension of spectrum to stray.grid_in */
 	  for ( nr = 0; nr < stray.dims[1]; nr++ ) {
 	       register double dval = 0.;
@@ -1190,16 +1342,17 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
           do { 
                if ( (scia_cal->quality_flag[np] & (FLAG_BLINDED|FLAG_UNUSED))
 		    == UCHAR_ZERO )
-                    scia_cal->correction[np][nobs] = stray_f[np];
+                    scia_cal->correction[np][nobs] = (ghost_f[np] + stray_f[np]);
           } while ( ++np < SCIENCE_PIXELS );
      } while ( ++nobs < scia_cal->num_obs );
 #ifdef DEBUG
      (void) fclose( fp_full );
      (void) fclose( fp_grid );
+     (void) fclose( fp_ghost );
      (void) fclose( fp_corr_full );
      (void) fclose( fp_corr_grid );
 #endif
-     /* reduce correction to pixel exposure time */
+     /* scale straylight correction to pixel exposure time */
      np = 0;
      do {
 	  register unsigned short no = 0;
@@ -1658,8 +1811,8 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /* 
       * apply darkcurrent correction
       */
-     /* calib_flag = (DO_CORR_AO|DO_CORR_DARK); */
-     calib_flag = (DO_CORR_AO);
+     calib_flag = (DO_CORR_AO|DO_CORR_DARK);
+     /* calib_flag = (DO_CORR_AO); */
      SCIA_APPLY_DARK( fp, calib_flag, &scia_cal );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
@@ -1758,7 +1911,7 @@ int main( void )
      float **spec_corr = NULL;
      float **spec_nocorr = NULL;
 
-     const char stray_fl[] = "straylight_test_data_2013-04-16.h5";
+     const char stray_fl[] = "straylight_test_data_2013-04-19.h5";
 
      struct scia_cal_rec scia_cal = { 0, 0, 0, 0, 0, 0, 0, 0, 0.f, 0.f, 
 				      NULL, NULL, NULL, NULL, NULL, NULL,  

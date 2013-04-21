@@ -49,7 +49,7 @@
 
 /*+++++ Local Headers +++++*/
 #define _SCIA_LEVEL_1
-#include <nadc_scia.h>
+#include <nadc_scia_cal.h>
 
 /*+++++ Static Variables +++++*/
         /* NONE */
@@ -76,11 +76,11 @@ void SCIA_RD_H5_STRAY( struct scia_straycorr *stray )
  * open straylight correction database (HDF5-file)
  */
      if ( env_str == NULL ) {
-	  const char nlin_fl[] = DATA_DIR"/Straylight.h5";
+	  const char stray_fl[] = DATA_DIR"/Straylight.h5";
 
-          file_id = H5Fopen( nlin_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
+          file_id = H5Fopen( stray_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, nlin_fl );
+               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, stray_fl );
      } else {
           file_id = H5Fopen( env_str, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 ) 
@@ -89,13 +89,13 @@ void SCIA_RD_H5_STRAY( struct scia_straycorr *stray )
 /*
  * read datasets
  */
-     (void) H5LTget_dataset_info( file_id, "strayCorr", hdims, NULL, NULL );
+     (void) H5LTget_dataset_info( file_id, "strayMatrix", hdims, NULL, NULL );
      stray->dims[0] = (size_t) hdims[0];
      stray->dims[1] = (size_t) hdims[1];
      stray->matrix = ALLOC_R2D( stray->dims[0], stray->dims[1] );
      if ( stray->matrix == NULL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stray->matrix" );
-     (void) H5LTread_dataset_float( file_id, "strayCorr", stray->matrix[0] );
+     (void) H5LTread_dataset_float( file_id, "strayMatrix", stray->matrix[0] );
 
      stray->grid_in = (float *) malloc( stray->dims[1] * sizeof(float) );
      if ( stray->grid_in == NULL ) 
@@ -106,6 +106,14 @@ void SCIA_RD_H5_STRAY( struct scia_straycorr *stray )
      if ( stray->grid_out == NULL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stray->grid_out" );
      (void) H5LTread_dataset_float( file_id, "grid_out", stray->grid_out );
+
+     (void) H5LTget_dataset_info( file_id, "strayGhost", hdims, NULL, NULL );
+     stray->dims_ghost[0] = (size_t) hdims[0];
+     stray->dims_ghost[1] = (size_t) hdims[1];
+     stray->ghosts = ALLOC_R2D( stray->dims_ghost[0], stray->dims_ghost[1] );
+     if ( stray->ghosts == NULL ) 
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stray->ghosts" );
+     (void) H5LTread_dataset_float( file_id, "strayGhost", stray->ghosts[0] );
 /*
  * give message to user
  */
