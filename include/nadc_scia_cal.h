@@ -16,6 +16,31 @@ extern "C" {
 #define SCIA_NLIN_SCALE_ATBD  ((unsigned char) 0x2U)
 #define SCIA_NLIN_SCALE_PATCH ((unsigned char) 0x4U)
 
+struct scale_rec {
+     float offs;
+     float scale;
+};
+
+struct scia_memcorr {
+     size_t dims[2];
+     float **matrix;
+};
+
+struct scia_nlincorr {
+     size_t dims[2];
+     char  *curve;
+     float **matrix;
+};
+
+struct scia_straycorr {
+     size_t dims[2];
+     float *grid_in;
+     float *grid_out;
+     float **matrix;
+     size_t dims_ghost[2];
+     float **ghosts;
+};
+
 struct file_rec {
      FILE *fp;
      char procName[ENVI_FILENAME_SIZE];

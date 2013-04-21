@@ -177,29 +177,6 @@ enum scia_q_sost { SCIA_Q_OK = 0,
 extern bool Use_Extern_Alloc;
 
 /*+++++ Structures & Unions +++++*/
-struct scale_rec {
-     float offs;
-     float scale;
-};
-
-struct scia_memcorr {
-     size_t dims[2];
-     float **matrix;
-};
-
-struct scia_nlincorr {
-     size_t dims[2];
-     char  *curve;
-     float **matrix;
-};
-
-struct scia_straycorr {
-     size_t dims[2];
-     float *grid_in;
-     float *grid_out;
-     float **matrix;
-};
-
 /*
  * basic SCIAMACHY data structures
  */

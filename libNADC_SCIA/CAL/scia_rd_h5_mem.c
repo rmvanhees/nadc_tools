@@ -47,7 +47,7 @@
 
 /*+++++ Local Headers +++++*/
 #define _SCIA_LEVEL_1
-#include <nadc_scia.h>
+#include <nadc_scia_cal.h>
 
 /*+++++ Static Variables +++++*/
         /* NONE */
