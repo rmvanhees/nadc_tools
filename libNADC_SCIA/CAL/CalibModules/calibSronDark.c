@@ -55,7 +55,7 @@
 #include <nadc_scia_cal.h>
 
 #include "getCorrIntg.inc"
-#define _DarkCalib_
+#define __NEED_DARK_ERROR__
 #include "calibCalcError.inc"
 
 /*+++++ Macros +++++*/

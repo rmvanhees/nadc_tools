@@ -30,11 +30,11 @@
 # scientific data.
 #
 # The following variables are set when NETCDF is found:
-# NETCDF_FOUND = Set to true, if all components of NETCDF have been found.
-# NETCDF_INCLUDES = Include path for the header files of NETCDF
-# NETCDF_LIBRARIES = Link these to use NETCDF
-# NETCDF_LFLAGS = Linker flags (optional)
-
+# NETCDF_FOUND        = Set to true, if all components of NETCDF have been found.
+# NETCDF_INCLUDE_DIRS = Include path for the header files of NETCDF
+# NETCDF_LIBRARIES    = Libraries for NETCDF bindings
+# NETCDF_VERSION      = Version of NETCDF library
+#
 if (NOT NETCDF_FOUND)
 
   if (NOT NETCDF_ROOT_DIR)
@@ -44,7 +44,7 @@ if (NOT NETCDF_FOUND)
   ##___________________________________________________________________________
   ## Check for the header files
 
-  find_path (NETCDF_INCLUDES
+  find_path (NETCDF_INCLUDE_DIRS
     NAMES netcdf.h
     HINTS ${NETCDF_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
     PATH_SUFFIXES include
@@ -61,47 +61,49 @@ if (NOT NETCDF_FOUND)
   ##_____________________________________________________________________________
   ## Check for the executable
 
-  find_program (NETCDF_PC netcdf.pc
+  find_program (NETCDF_CONFIG nc-config
     HINTS ${NETCDF_ROOT_DIR} ${CMAKE_INSTALL_PREFIX}
-    PATH_SUFFIXES lib lib/pkgconfig
+    PATH_SUFFIXES bin
+    )
+
+  execute_process(COMMAND ${NETCDF_CONFIG} --version
+    OUTPUT_VARIABLE NETCDF_FULL_VERSION
     )
 
   ##_____________________________________________________________________________
   ## Determine version of the library
 
-  if (NETCDF_PC)
+  if (NETCDF_CONFIG)
 
-    file (STRINGS ${NETCDF_PC} NETCDF_VERSION REGEX "Version:")
-
-    if (NETCDF_VERSION)
+    if (NETCDF_FULL_VERSION)
 
       ## Dissect version number into individual parts
-      string(REGEX REPLACE ".*([0-9]+).[0-9]+.[0-9]+.[0-9]+.*" "\\1"
-NETCDF_VERSION_MAJOR ${NETCDF_VERSION})
-      string(REGEX REPLACE ".*[0-9]+.([0-9]+).[0-9]+.[0-9]+.*" "\\1"
-NETCDF_VERSION_MINOR ${NETCDF_VERSION})
+      string(REGEX REPLACE ".*([0-9]+).[0-9]+.[0-9]+.*" "\\1"
+NETCDF_VERSION_MAJOR ${NETCDF_FULL_VERSION})
+      string(REGEX REPLACE ".*[0-9]+.([0-9]+).[0-9]+.*" "\\1"
+NETCDF_VERSION_MINOR ${NETCDF_FULL_VERSION})
       string(REGEX REPLACE ".*[0-9]+.[0-9]+.([0-9]+).*" "\\1"
-NETCDF_VERSION_PATCH ${NETCDF_VERSION})
+NETCDF_VERSION_PATCH ${NETCDF_FULL_VERSION})
 
       ## Assemble version number
       set (NETCDF_VERSION "${NETCDF_VERSION_MAJOR}")
       set (NETCDF_VERSION "${NETCDF_VERSION}.${NETCDF_VERSION_MINOR}")
       set (NETCDF_VERSION "${NETCDF_VERSION}.${NETCDF_VERSION_PATCH}")
 
-    endif (NETCDF_VERSION)
+    endif (NETCDF_FULL_VERSION)
 
-  endif (NETCDF_PC)
+  endif (NETCDF_CONFIG)
 
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
 
-  find_package_handle_standard_args (NETCDF DEFAULT_MSG NETCDF_LIBRARIES NETCDF_INCLUDES)
+  find_package_handle_standard_args (NETCDF DEFAULT_MSG NETCDF_LIBRARIES NETCDF_INCLUDE_DIRS)
 
   if (NETCDF_FOUND)
     if (NOT NETCDF_FIND_QUIETLY)
       message (STATUS "Found components for NETCDF")
       message (STATUS "NETCDF_ROOT_DIR = ${NETCDF_ROOT_DIR}")
-      message (STATUS "NETCDF_INCLUDES = ${NETCDF_INCLUDES}")
+      message (STATUS "NETCDF_INCLUDE_DIRS = ${NETCDF_INCLUDE_DIRS}")
       message (STATUS "NETCDF_LIBRARIES = ${NETCDF_LIBRARIES}")
       message (STATUS "NETCDF_VERSION = ${NETCDF_VERSION}")
     endif (NOT NETCDF_FIND_QUIETLY)
@@ -116,7 +118,7 @@ NETCDF_VERSION_PATCH ${NETCDF_VERSION})
 
   mark_as_advanced (
     NETCDF_ROOT_DIR
-    NETCDF_INCLUDES
+    NETCDF_INCLUDE_DIRS
     NETCDF_LIBRARIES
     NETCDF_VERSION
     )

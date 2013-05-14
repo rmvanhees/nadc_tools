@@ -33,7 +33,7 @@
 
 #include <errno.h>
 
-#ifdef _DarkCalib_
+#ifdef __NEED_DARK_ERROR__
 /*+++++++++++++++++++++++++
 .IDENTifer   calcShotNoise
 .PURPOSE     calculate precision of SCIA data, which is shot noise limited
@@ -146,15 +146,15 @@ void calcDarkErrorLimb( struct mds1c_scia *mds_1c )
 	  } while( e_signal++, ++npix < mds_1c->num_pixels );
      } while ( ++nobs < mds_1c->num_obs );
 }
-#endif
+#endif   /*  __NEED_DARK_ERROR__ */
 
-#ifdef _PPG_Calib_
-#endif
+#ifdef __NEED_PPG_ERROR___
+#endif   /* __NEED_PPG_ERROR___ */
 
-#ifdef _StrayCalib_
-#endif
+#ifdef __NEED_STRAY_ERROR__
+#endif   /* __NEED_STRAY_ERROR__ */
 
-#ifdef _SciaCalib_
+#ifdef __NEED_GRID_ACCURACY__
 /*+++++++++++++++++++++++++
 .IDENTifer   calcSpecAccuracy
 .PURPOSE     calculate relative presision error on the spectra, 
@@ -169,7 +169,7 @@ void calcDarkErrorLimb( struct mds1c_scia *mds_1c )
 .RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
-static 
+static inline
 void calcSpectralAccuracy( const struct state1_scia state[],
 			   struct mds1c_scia *mds_1c )
      /*@modifies mds_1c->pixel_err@*/
@@ -190,5 +190,5 @@ void calcSpectralAccuracy( const struct state1_scia state[],
 	  } while ( e_signal++, signal++, ++ns < numSignal );
      } while ( mds_1c++, ++num < state->num_clus );
 }
-#endif
-#endif
+#endif   /* __NEED_GRID_ACCURACY__ */
+#endif   /* __CALC_ERROR */

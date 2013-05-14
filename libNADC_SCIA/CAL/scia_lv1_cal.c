@@ -126,7 +126,7 @@
 #define _SCIA_LEVEL_1
 #include <nadc_scia_cal.h>
 
-#define _SciaCalib_
+#define __NEED_GRID_ACCURACY__
 #include "CalibModules/calibCalcError.inc"
 
 /*+++++ Macros +++++*/

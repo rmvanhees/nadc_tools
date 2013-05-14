@@ -30,7 +30,9 @@
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 .ENVIRONment None
-.VERSION     4.1   21-Aug-2009 moved all error functions to include file, RvH
+.VERSION     4.2   14-May-2013 fixed longstanding issue with GADS orbit-phase
+                               interpolation, RvH
+             4.1   21-Aug-2009 moved all error functions to include file, RvH
              4.0   22-Jan-2009 combined ATBD and SRON/SDMF implementation
                                moved to SDMF v3, RvH
              3.0   09-Nov-2007 seperate ATBD, SRON/SDMF and ADS method, RvH
@@ -55,7 +57,7 @@
 #include <nadc_scia_cal.h>
 
 #include "getCorrIntg.inc"
-#define _DarkCalib_
+#define __NEED_DARK_ERROR__
 #include "calibCalcError.inc"
 
 /*+++++ Macros +++++*/
@@ -159,6 +161,7 @@ void addOrbitDarkADS( int source, unsigned int calib_flag,
 
      struct sip_scia  sip;
      struct vlcp_scia *vlcp;
+     struct vlcp_scia *vlcp_orig;
 
      const bool Save_Extern_Alloc = Use_Extern_Alloc;
 /*
@@ -171,17 +174,30 @@ void addOrbitDarkADS( int source, unsigned int calib_flag,
  * read variable portion of the dark-current parameters
  */
      Use_Extern_Alloc = FALSE;
-     num_dsr = SCIA_LV1_RD_VLCP( fp, num_dsd, dsd, &vlcp );
+     num_dsr = SCIA_LV1_RD_VLCP( fp, num_dsd, dsd, &vlcp_orig );
      if ( IS_ERR_STAT_FATAL ) 
           NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "VLCP" );
      Use_Extern_Alloc = Save_Extern_Alloc;
 /*
- * extend vlcp with the first record as last (orbit_phase = 1)
+ * extend vlcp with two records to cover orbit phases between zero and one
  */
      vlcp = (struct vlcp_scia *) 
-	  realloc( vlcp, ++num_dsr * sizeof( struct vlcp_scia ) );
-     (void) memcpy( vlcp+(num_dsr-1), vlcp, sizeof( struct vlcp_scia ) );
+	  malloc( (num_dsr + 2) * sizeof( struct vlcp_scia ) );
+     if ( vlcp == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vlcp" );
+     (void) memcpy( vlcp, vlcp_orig+(num_dsr-1), sizeof( struct vlcp_scia ) );
+     (void) memcpy( vlcp+1, vlcp_orig, num_dsr * sizeof( struct vlcp_scia ) );
+     (void) memcpy( vlcp+(num_dsr+1), vlcp_orig, sizeof( struct vlcp_scia ) );
+     free( vlcp_orig );
+     num_dsr += 2;
+
+     /* correct the orbit_phases */
      vlcp[num_dsr-1].orbit_phase = 1.f;
+     for ( nd = 1; nd < num_dsr-1; nd++ ) {
+	  vlcp[nd].orbit_phase = 
+	       (vlcp[nd].orbit_phase + vlcp[nd+1].orbit_phase) / 2.f;
+     }
+     vlcp[0].orbit_phase = vlcp[num_dsr-2].orbit_phase - 1.f;
+     vlcp[num_dsr-1].orbit_phase = vlcp[1].orbit_phase + 1.f;
 /*
  * find vlcp record with orbit_phase just smaller than requested orbit_phase
  */
