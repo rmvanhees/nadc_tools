@@ -34,7 +34,8 @@ set (NADC_COMMON_SRCS
     nadc_ext_h5_array.c
     nadc_files_equal.c 
     nadc_filesize.c nadc_fit.c
-    nadc_flip.c 
+    nadc_flip.c
+    nadc_gettime.c
     nadc_hdf5_api.c 
     nadc_info_screen.c
     nadc_init_param.c 
