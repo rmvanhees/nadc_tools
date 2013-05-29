@@ -38,12 +38,12 @@ endif ()
 add_executable(scia_imlm_co scia_imlm_co.c 
 			     ${IMLM_CO_SRCS} ${IMLM_CO_SQL_SRCS})
 
-target_link_libraries(scia_imlm_co ${IMLM_LIBS})
+target_link_libraries(scia_imlm_co ${IMLM_LIBS} -lm)
 
 add_executable(scia_imlm_h2o scia_imlm_h2o.c 
 			     ${IMLM_H2O_SRCS} ${IMLM_H2O_SQL_SRCS})
 
-target_link_libraries(scia_imlm_h2o ${IMLM_LIBS})
+target_link_libraries(scia_imlm_h2o ${IMLM_LIBS} -lm)
 
 if (NETCDF_FOUND)
    add_executable(adaguc_imlm_co adaguc_imlm_co.c ${IMLM_CO_SRCS})

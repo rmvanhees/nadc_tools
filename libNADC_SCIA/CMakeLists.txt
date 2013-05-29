@@ -8,6 +8,10 @@ string (REGEX REPLACE ".*#define[ \t]+version_release[ \t]+([0-9]*).*$"
        "\\1" SCIA_VERS_RELEASE ${_version_contents})
 set (LIB_VERS "${SCIA_VERS_MAJOR}.${SCIA_VERS_MINOR}.${SCIA_VERS_RELEASE}")
 
+if (${LIB_TYPE} MATCHES "SHARED")
+   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif (${LIB_TYPE} MATCHES "SHARED")
+
 ## define pre-compiler flags
 add_definitions (-DDATA_DIR="${NADC_TOOLS_DATADIR}")
 
@@ -144,52 +148,6 @@ set (SCIA_LV2_SRCS
     scia_ol2_wr_h5_sqads.c
 )
 
-set (NADC_SCIA_CAL_SRCS
-    CAL/scia_lv1_cal.c
-    CAL/scia_lv1c_cal.c
-    CAL/scia_lv1c_scale.c
-    CAL/scia_lv1_mfactor_srs.c
-    CAL/scia_lv1_patch_mds.c
-    CAL/scia_rd_h5_mem.c
-    CAL/scia_rd_h5_nlin.c
-    CAL/scia_rd_h5_psp.c
-    CAL/scia_rd_h5_rsp.c
-    CAL/scia_rd_h5_stray.c
-    CAL/scia_rd_mfactor.c
-    CAL/CalibModules/calibAtbdDark.c
-    CAL/CalibModules/calibAtbdMemLin.c
-    CAL/CalibModules/calibAtbdPPG.c
-    CAL/CalibModules/calibCalcWave.c
-    CAL/CalibModules/calibCorrEtalon.c
-    CAL/CalibModules/calibCorrPol.c
-    CAL/CalibModules/calibCorrRad.c
-    CAL/CalibModules/calibCorrRefl.c
-    CAL/CalibModules/calibCorrStray.c
-    CAL/CalibModules/calibFlagBDPM.c
-    CAL/CalibModules/calibSronDark.c
-    CAL/CalibModules/calibSronMemLin.c
-    CAL/CalibModules/calibSronNoise.c
-    CAL/CalibModules/calibSronPPG.c
-    CAL/CalibModules/calibSronTrans.c
-    CAL/CalibModules/calibStateDark.c
-    CAL/SDMF/sdmf_array.c
-    CAL/SDMF/sdmf_clusConf.c
-    CAL/SDMF/sdmf_dark.c
-    CAL/SDMF/sdmf_get_bdpm.c
-    CAL/SDMF/sdmf_get_fileEntry.c
-    CAL/SDMF/sdmf_get_fitteddark.c
-    CAL/SDMF/sdmf_get_orbitaldark.c
-    CAL/SDMF/sdmf_get_ppg.c
-    CAL/SDMF/sdmf_get_statedark.c
-    CAL/SDMF/sdmf_get_transmission.c
-    CAL/SDMF/sdmf_hist.c
-    CAL/SDMF/sdmf_meta.c
-    CAL/SDMF/sdmf_orbitPhaseDiff.c
-    CAL/SDMF/sdmf_path.c
-    CAL/SDMF/sdmf_pt_db.c
-    CAL/SDMF/sdmf_simudark.c
-)
-
 set (NADC_SCIA_SRCS
     get_scia_clusdef.c
     get_scia_magic_id.c
@@ -212,6 +170,8 @@ set (NADC_SCIA_SRCS
     ${SCIA_LV2_SRCS}
 )
 
+add_library (SCIA OBJECT ${NADC_SCIA_SRCS})
+
 #-----------------------------------------------------------------------------
 # Set-up for NADC_SCIA_LIB
 #-----------------------------------------------------------------------------
@@ -220,30 +180,35 @@ if (APPLE)
    set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
 endif (APPLE)
 
-add_library (${NADC_SCIA_LIB_TARGET} ${LIB_TYPE} ${NADC_SCIA_SRCS})
+add_library (${NADC_SCIA_LIB_TARGET} ${LIB_TYPE} $<TARGET_OBJECTS:SCIA>)
 
 ## Linker instructions
 target_link_libraries (${NADC_SCIA_LIB_TARGET} ${NADC_LIB_TARGET})
 
-IF (${LIB_TYPE} MATCHES "SHARED")
+if (${LIB_TYPE} MATCHES "SHARED")
    SET_TARGET_PROPERTIES (${NADC_SCIA_LIB_TARGET} PROPERTIES 
    			 SOVERSION ${LIB_VERS})
-ENDIF (${LIB_TYPE} MATCHES "SHARED")
+endif (${LIB_TYPE} MATCHES "SHARED")
 
 #-----------------------------------------------------------------------------
 # Set-up for NADC_SCIA_CAL_LIB
 #-----------------------------------------------------------------------------
 ## Compiler instructions
+add_subdirectory(CAL)
 add_library (${NADC_SCIA_CAL_LIB_TARGET} ${LIB_TYPE} 
-	    ${NADC_SCIA_SRCS} ${NADC_SCIA_CAL_SRCS})
+	    $<TARGET_OBJECTS:SCIA>
+	    $<TARGET_OBJECTS:SCIA_CAL>
+	    $<TARGET_OBJECTS:MODS>
+	    $<TARGET_OBJECTS:SDMF>
+)
 
 ## Linker instructions
 target_link_libraries (${NADC_SCIA_CAL_LIB_TARGET} ${NADC_LIB_TARGET})
 
-IF (${LIB_TYPE} MATCHES "SHARED")
+if (${LIB_TYPE} MATCHES "SHARED")
    SET_TARGET_PROPERTIES (${NADC_SCIA_CAL_LIB_TARGET} PROPERTIES 
    			 SOVERSION ${LIB_VERS})
-ENDIF (${LIB_TYPE} MATCHES "SHARED")
+endif (${LIB_TYPE} MATCHES "SHARED")
 
 ## Installation instructions
 install (
