@@ -4,7 +4,8 @@
 ; open file
 data_dir = '/SCIA/LV1_07/W/'
 flname = 'SCI_NL__1PWDPA20031114_103040_000060062021_00352_08923_6491.N1'
-
+data_dir = '/deos/krijger2/Verification/Verificatie_20130506/V7/'
+flname = 'SCI_NL__1PWDPA20020810_051658_000060132008_00263_02321_0195.N1'
 SCIA_HL_OPEN, data_dir + flname, dsd, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
 

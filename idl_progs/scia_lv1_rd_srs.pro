@@ -35,6 +35,7 @@
 ;       srs :    structure for Sun reference spectrum
 ;
 ; KEYWORD PARAMETERS:
+;    doppler:    correct Sun reference spectrum D0 for doppler shift
 ;    status :    returns named variable with error status (0 = ok)
 ;
 ; EXAMPLES:
@@ -50,8 +51,20 @@
 ;       Written by:  Richard van Hees (SRON), February 2002
 ;       Modified:  RvH, 20 Jan 2003
 ;                    added more failure checking, and documentation
+;       Modified:  RvH, 02 Jul 2013
+;                    added function DOPPLER_CORR_SRS
 ;-
-PRO SCIA_LV1_RD_SRS, dsd, srs, status=status
+FUNCTION DOPPLER_CORR_SRS, srs
+
+ srs_d0 = srs[0]
+ dopplerCorr = 1 + srs_d0.dopp_shift / 500.d
+ wvlen_sun = dopplerCorr * srs_d0.wvlen_ref_spec
+
+ RETURN, INTERPOL(srs_d0.mean_ref_spec, wvlen_sun, srs_d0.wvlen_ref_spec, /NAN)
+END
+
+
+PRO SCIA_LV1_RD_SRS, dsd, srs, doppler=doppler, status=status
   compile_opt idl2,logical_predicate,hidden
 
 ; initialize the return values
@@ -77,5 +90,16 @@ PRO SCIA_LV1_RD_SRS, dsd, srs, status=status
   ENDIF ELSE $
      MESSAGE, ' no SUN_REFERENCE DSD records found', /INFORM
   
+  IF KEYWORD_SET( DOPPLER ) THEN BEGIN
+     ii = 0
+     REPEAT BEGIN
+        IF STRING(srs[ii].spec_id) EQ 'D0' THEN BREAK
+     ENDREP UNTIL ii EQ N_ELEMENTS(SRS)
+
+     IF ii LT N_ELEMENTS(SRS) THEN BEGIN
+        srs[ii].mean_ref_spec = DOPPLER_CORR_SRS( srs[0] )
+     ENDIF
+  ENDIF
+
   RETURN
 END
