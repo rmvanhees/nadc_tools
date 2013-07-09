@@ -57,10 +57,18 @@
 FUNCTION DOPPLER_CORR_SRS, srs
 
  srs_d0 = srs[0]
- dopplerCorr = 1 + srs_d0.dopp_shift / 500.d
+ dopplerCorr = 1 + srs_d0.dopp_shift / 500.
  wvlen_sun = dopplerCorr * srs_d0.wvlen_ref_spec
 
- RETURN, INTERPOL(srs_d0.mean_ref_spec, wvlen_sun, srs_d0.wvlen_ref_spec, /NAN)
+ indx = LINDGEN(1023)
+ spec = FINDGEN(8192)
+ FOR ch = 0, 7 DO BEGIN
+    spec[indx] = INTERPOL(srs_d0.mean_ref_spec[indx], wvlen_sun[indx], $
+                          srs_d0.wvlen_ref_spec[indx], /NAN)
+    indx += 1024L
+ ENDFOR
+
+ RETURN, spec
 END
 
 
