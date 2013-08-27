@@ -7,6 +7,7 @@ set (NADC_SCIA_SDMF_SRCS
     sdmf_get_fitteddark.c
     sdmf_get_orbitaldark.c
     sdmf_get_ppg.c
+    sdmf_get_smr.c
     sdmf_get_statedark.c
     sdmf_get_transmission.c
     sdmf_hist.c

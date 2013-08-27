@@ -781,9 +781,12 @@ void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start,
 		    dir_name = mf_dir_name;
 		    closedir( dir );
 	       } else {
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-				       "Cannot find auxiliary files"
-				       " directory m-factor_06.01" );
+		    char msg[MAX_STRING_LENGTH];
+
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     "can not open m-factor directory: %s", 
+				     mf_dir_name );
+		    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, msg );
 	       }
 	  }
      }

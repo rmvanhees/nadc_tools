@@ -1,0 +1,8 @@
+Most modules in this directory can be compiled to executable for test purposes.
+
+For example:
+    gcc -Wall -O2 -march=native -DTEST_PROG \
+    	-I../../../include -I$NADC_EXTERN/include \
+	-L$HOME/x86_64/lib -lnadc_scia_cal -lnadc_scia -lnadc \
+	-L$NADC_EXTERN/lib -lhdf5_hl -lhdf5 -Lz -lm \
+	-o sdmf_get_smr sdmf_get_smr.c

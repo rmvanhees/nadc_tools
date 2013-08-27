@@ -258,16 +258,17 @@ extern void SCIA_LV1C_SCALE( unsigned int, struct mds1c_scia *mds_1c )
        /*@modifies nadc_stat, nadc_err_stack, mds_1c->pixel_val@*/;
 #endif
 
-extern int SCIA_ATBD_CAL_RAD_DETWIDE(const struct file_rec *fileParam,
-			      const struct wvlen_rec wvlen, float *spec,
-                              float *pos_asm, float *sun_zen_ang, int n_obs)
-     /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/;
+extern void SCIA_SMR_CAL_RAD( unsigned short, unsigned short, 
+			      float, float, /*@null@*/ const float *, 
+			      /*@out@*/ float *smr )
+      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
+      /*@modifies errno, nadc_stat, nadc_err_stack, smr@*/;
 
 extern void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
 				 float, struct wvlen_rec *wvlen )
-     /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
-     /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp,
-       wvlen->science, wvlen->error, wvlen->solar@*/;
+      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
+      /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp,
+	wvlen->science, wvlen->error, wvlen->solar@*/;
 
 #ifdef __cplusplus
   }

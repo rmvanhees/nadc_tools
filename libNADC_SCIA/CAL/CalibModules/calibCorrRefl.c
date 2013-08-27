@@ -115,115 +115,6 @@ void Get_DopplerCorrSRS( const struct srs_scia *srs,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   getSolarSpectrumSRON_30
-.PURPOSE     obtain mean Solar spectrum from SDMF (v3.0)
-.INPUT/OUTPUT
-  call as    stat = getSolarSpectrumSRON_30( fileParam, struct srs_scia *srs );
-     input:
-           struct file_rec *fileParam : file/calibration parameters
- in/output:
-	   struct srs_scia *srs       : Solar Reference Spectrum
-
-.RETURNS     flag: FALSE (no SMR found) or TRUE
-.COMMENTS    None
--------------------------*/
-static
-bool getSolarSpectrumSRON_30( const struct file_rec *fileParam, 
-			     struct srs_scia *srs )
-      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-      /*@modifies errno, nadc_stat, nadc_err_stack, srs->mean_sun @*/
-{
-    const char prognm[]  = "getSolarSpectrumSRON_30";
-
-    register unsigned short ip, ipix, ich;
-
-    bool ret = FALSE;
-
-    hid_t fid = -1;
-
-    int   center_idx;
-    float asm_pos, esm_pos, sun_zen_ang;
-    float smr[SCIENCE_PIXELS];
-
-    int center240_idx[] = {0, 120};
-    int slabsize[]      = {1,1};
-
-    /* max 4 sun measurements in this range */
-    int numIndx, metaIndx[4];          
-
-    struct wvlen_rec wvlen;
-
-    const char sdmf_smr_db[] = "/SCIA/SDMF30/sdmf_smr.h5";
-    
-    const int pixel_range[] = {0, SCIENCE_PIXELS-1};
-
-    const unsigned short state62_coadds[SCIENCE_CHANNELS] = {
-	 2, 2, 2, 2, 2, 2, 2, 1 
-    };
-
-    /* orbits per day = 14.3, rounded up to 15 */
-    const int orbit_range[] = {
-	 fileParam->absOrbit-15, fileParam->absOrbit+15 };
-/*
- * copy wavelength grid of Solar spectrum
- */
-    (void) memcpy( wvlen.science, srs->wvlen_sun, 
-		   SCIENCE_PIXELS * sizeof(float) );
-/*
- * open HDF5-file
- */
-    if ( (fid = H5Fopen( sdmf_smr_db, H5F_ACC_RDONLY, H5P_DEFAULT )) < 0 )
-	 NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_smr_db );
-/*
- * get indices of nearest orbits
- */
-    SDMF_get_metaIndex_range(fid, orbit_range, &numIndx, metaIndx, 1);
-    if (IS_ERR_STAT_FATAL)
-        NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex");
-    
-/*
- * read SMR and HK information (HK information is on a finer time grid:
- * 240 measurements)
- */
-    center_idx       = metaIndx[numIndx/2];
-    center240_idx[0] = center_idx;
-    SDMF_rd_float_Array( fid, "SMR", 1, &center_idx, pixel_range, smr );
-    __Inverse_Chan2( smr );
-
-    SDMF_rd_float_Matrix( fid, "asm", center240_idx, slabsize, 2, &asm_pos );
-    SDMF_rd_float_Matrix( fid, "esm", center240_idx, slabsize, 2, &esm_pos );
-    SDMF_rd_float_Matrix( fid, "sunel", center240_idx, slabsize, 2, 
-			  &sun_zen_ang );
-/*
- * return SMR to co-added format (BU). radiometric calibration will do 
- * normalisation per second, assuming non-coadded input.
- */ 
-    for ( ip = 0, ich = 0; ich < SCIENCE_CHANNELS; ich++ ) {
-        /* state 62 coadding factors per channel */
-        for ( ipix = 0; ipix < CHANNEL_SIZE; ipix++ )
-	     smr[ip++] *= state62_coadds[ich];
-    }
-/*
- * Apply radiance calibration
- * correct SZA and ASM angle
- */
-    asm_pos = -2. * (asm_pos + 45.);
-    sun_zen_ang += 90.;
-    SCIA_ATBD_CAL_RAD_DETWIDE( fileParam, wvlen, smr, 
-			       &asm_pos, &sun_zen_ang, 1 );
-    (void) memcpy( srs->mean_sun, smr, SCIENCE_PIXELS * sizeof(float) );
-    ret = TRUE;
-/*
- * close HDF5-file
- */
- done:
-    if ( fid >= 0 ) H5Fclose( fid );
-
-    return ret;
-}
-
-
-/*+++++++++++++++++++++++++
 .IDENTifer   Apply_RadNormNadir
 .PURPOSE     convert radiances to reflectances
 .INPUT/OUTPUT
@@ -396,25 +287,26 @@ void SCIA_ATBD_CAL_REFL( const struct file_rec *fileParam,
      static struct srs_scia srs;
 
      if ( fileParam->flagInitFile ) {
-	  unsigned int num_dsr;
+	  unsigned short indx_smr = fileParam->level_2_smr[0];
 	  struct srs_scia *srs_all;
 
 	  const bool Save_Extern_Alloc = Use_Extern_Alloc;
 
 	  Use_Extern_Alloc = FALSE;
-	  num_dsr = SCIA_LV1_RD_SRS( fileParam->fp, fileParam->num_dsd, 
+	  (void) SCIA_LV1_RD_SRS( fileParam->fp, fileParam->num_dsd, 
 				     fileParam->dsd, &srs_all );
+	  Use_Extern_Alloc = Save_Extern_Alloc;
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
+
+	  (void) memcpy( &srs, &srs_all[indx_smr], sizeof(struct srs_scia) );
+	  free ( srs_all );
+
 	  /* KB: Apply mfactor, if needed */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
 	       SCIA_LV1_MFACTOR_SRS( fileParam->sensing_start, 
-				     fileParam->calibFlag, num_dsr, srs_all );
+				     fileParam->calibFlag, 1, &srs );
 	  }
-	  (void) memcpy( &srs, &srs_all[fileParam->level_2_smr[0]],
-			 sizeof(struct srs_scia) );
-	  free ( srs_all );
-	  Use_Extern_Alloc = Save_Extern_Alloc;
      }
 /*
  * apply radiance sensitivy correction
@@ -446,30 +338,34 @@ void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
      static struct srs_scia srs;
 
      if ( fileParam->flagInitFile ) {
-	  unsigned int num_dsr;
 	  unsigned short indx_smr = fileParam->level_2_smr[0];
 	  struct srs_scia *srs_all;
+
+	  float smr[SCIENCE_PIXELS];
 
 	  const bool Save_Extern_Alloc = Use_Extern_Alloc;
 
 	  Use_Extern_Alloc = FALSE;
-	  num_dsr = SCIA_LV1_RD_SRS( fileParam->fp, fileParam->num_dsd, 
-				     fileParam->dsd, &srs_all );
+	  (void) SCIA_LV1_RD_SRS( fileParam->fp, fileParam->num_dsd, 
+				  fileParam->dsd, &srs_all );
+	  Use_Extern_Alloc = Save_Extern_Alloc;
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
 
+	  (void) memcpy( &srs, &srs_all[indx_smr], sizeof(struct srs_scia) );
+	  free ( srs_all );
+
 	  /* read SDMF Solar spectrum */
-	  if ( ! getSolarSpectrumSRON_30( fileParam, srs_all+indx_smr ) )
-              NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, "SMR_v3.0");
+	  if ( ! SDMF_get_SMR_30( TRUE, fileParam->absOrbit, 0, 
+				  srs.wvlen_sun, smr ) )
+              NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "SMR_v3.0" );
+	  (void) memcpy( srs.mean_sun, smr, SCIENCE_PIXELS * sizeof(float) );
 
 	  /* KB: Apply mfactor, if needed */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
 	       SCIA_LV1_MFACTOR_SRS( fileParam->sensing_start, 
-				     fileParam->calibFlag, num_dsr, srs_all );
+				     fileParam->calibFlag, 1, &srs );
 	  }
-	  (void) memcpy( &srs, &srs_all[indx_smr], sizeof(struct srs_scia) );
-	  free ( srs_all );
-	  Use_Extern_Alloc = Save_Extern_Alloc;
      }
 /*
  * apply radiance sensitivy correction

@@ -15,12 +15,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330, 
    Boston, MA  02111-1307, USA.
 
-.IDENTifer   SDMF_get_PPG
+.IDENTifer   SDMF_get_SMR
 .AUTHOR      R.M. van Hees
-.KEYWORDS    SDMF - Pixel-to-Pixel Gain
+.KEYWORDS    SDMF - Sun-Mean_Reference
 .LANGUAGE    ANSI C
-.PURPOSE     obtain PPG parameters
-.COMMENTS    contains SDMF_get_PPG_24, SDMF_get_PPG_30
+.PURPOSE     obtain SMR parameters
+.COMMENTS    contains SDMF_get_SMR, SDMF_get_SMR_30
 .ENVIRONment None
 .VERSION     1.0     04-Jul-2012   initial release by R. M. van Hees
 ------------------------------------------------------------*/
@@ -49,104 +49,50 @@
 	/* NONE */
 
 /*+++++++++++++++++++++++++ SDMF version 2.4 ++++++++++++++++++++++++++++++*/
+                         /* not available, yet */
+
+/*+++++++++++++++++++++++++ SDMF version 3.0 ++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++
-.IDENTifer   SDMF_get_PPG_24
-.PURPOSE     Read Pixel-to-Pixel Gain factors from Monitoring database (v2.4)
+.IDENTifer   SDMF_get_SMR_30
+.PURPOSE     obtain Sun Mean Reference spectrum from SRON Monitoring database
 .INPUT/OUTPUT
-  call as    SDMF_get_PPG_24( absOrbit, channel, pixelGain );
+  call as    SDMF_get_SMR_30( calibRad, absOrbit, channel, solarMean );
      input:
            unsigned short absOrbit  :  absolute orbitnumber
            unsigned short channel   :  channel ID or zero for all channels
     output:
-           float *pixelGain         :  Pixel-to-Pixel Gain factors
+	   float *solarMean         :  Sun Mean Reference spectrum
 
-.RETURNS     flag: FALSE (no mask found) or TRUE
+.RETURNS     flag: FALSE (no SMR found) or TRUE
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-bool SDMF_get_PPG_24( unsigned short absOrbit, unsigned short channel, 
-		      float *pixelGain )
+static inline
+void __Inverse_Chan2( float *rbuff )
 {
-     const char prognm[] = "SDMF_get_PPG_24";
+     register unsigned short nr;
+     register float rtemp;
 
-     register unsigned np = 0;
-
-     char ppg_fl[MAX_STRING_LENGTH];
-
-     FILE  *db_fp;
-
-     const size_t disk_sz_ppg_rec = 32816;
-     struct ppg_rec {
-          int    Orbit;
-          int    MagicNumber;
-          int    Saa;
-          float  Tobm;
-          float  Tdet[SCIENCE_CHANNELS];
-          float  PixelGain[SCIENCE_PIXELS];
-     } mrec;
-/*
- * initialise output arrays
- */
-     if ( channel == 0 ) {
-	  do { pixelGain[np] = 1.f; } while ( ++np < SCIENCE_PIXELS );
-     } else {
-	  do { pixelGain[np] = 1.f; } while ( ++np < CHANNEL_SIZE );
+     rbuff += CHANNEL_SIZE;                   /* move to channel 2 data */
+     for ( nr = 0; nr <  CHANNEL_SIZE / 2; nr++ ) {
+          rtemp = rbuff[nr];
+          rbuff[nr] = rbuff[(CHANNEL_SIZE-1)-nr];
+          rbuff[(CHANNEL_SIZE-1)-nr] = rtemp;
      }
-/*
- * find file with Pixel-to-Pixel Gains, requirements:
- *  - orbit number within a range MAX_DiffOrbitNumber
- */
-     if ( ! SDMF_get_fileEntry( SDMF24_PPG, (int) absOrbit, ppg_fl ) ) 
-          return FALSE;
-/*
- * read Pixel-to-Pixel Gain values
- */
-     if ( (db_fp = fopen( ppg_fl, "r" )) == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, ppg_fl );
-     if ( fread( &mrec, disk_sz_ppg_rec, 1, db_fp ) != 1 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "mrec" );
-     (void) fclose( db_fp );
-
-     if ( channel == 0 ) {
-          (void) memcpy( pixelGain, mrec.PixelGain,
-                         SCIENCE_PIXELS * sizeof(float) );
-     } else {
-          const size_t offs = (channel-1) * CHANNEL_SIZE;
-
-          (void) memcpy( pixelGain, mrec.PixelGain+offs,
-                         CHANNEL_SIZE * sizeof(float) );
-     }
-     return TRUE;
- done:
-     return FALSE;
 }
 
-/*+++++++++++++++++++++++++
-.IDENTifer   SDMF_get_PPG_30
-.PURPOSE     obtain Pixel-to-Pixel Gain factors from SRON Monitoring database
-.INPUT/OUTPUT
-  call as    SDMF_get_PPG_30( absOrbit, channel, pixelGain );
-     input:
-           unsigned short absOrbit  :  absolute orbitnumber
-           unsigned short channel   :  channel ID or zero for all channels
-    output:
-	   float *pixelGain         :  Pixel-to-Pixel Gain factors
-
-.RETURNS     flag: FALSE (no PPG found) or TRUE
-             error status passed by global variable ``nadc_stat''
-.COMMENTS    none
--------------------------*/
-bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
-		      float *pixelGain )
+bool SDMF_get_SMR_30( bool calibRad,
+		      unsigned short absOrbit, unsigned short channel,
+		      /*@null@*/ const float *wvlen, float *solarMean )
 {
-     const char prognm[] = "SDMF_get_PPG_30";
+     const char prognm[] = "SDMF_get_SMR_30";
 
      const char msg_found[] =
-          "\n\tapplied SDMF Pixel-to-Pixel Gain (v3.0) of Orbit %-d";
+          "\n\tapplied SDMF Sun-Mean-Reference spectrum (v3.0) of Orbit %-d";
      const char msg_notfound[] =
-          "\n\tno applicable Pixel-to-Pixel Gain (v3.0) found for Orbit %-d";
+          "\n\tno applicable Sun-Mean-Reference (v3.0) found for Orbit %-d";
 
-     const int  MAX_DiffOrbitNumber = 100;
+     const int  MAX_DiffOrbitNumber = 50;  /* within one week */
      const int  orbit = (int) absOrbit;
      const int pixelRange[2] = { 
           (channel == 0) ? 0 : (channel-1) * CHANNEL_SIZE,
@@ -168,21 +114,21 @@ bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
  * initialise output arrays
  */
      if ( channel == 0 ) {
-	  do { pixelGain[np] = 1.f; } while ( ++np < SCIENCE_PIXELS );
+	  do { solarMean[np] = 0.f; } while ( ++np < SCIENCE_PIXELS );
      } else {
-	  do { pixelGain[np] = 1.f; } while ( ++np < CHANNEL_SIZE );
+	  do { solarMean[np] = 0.f; } while ( ++np < CHANNEL_SIZE );
      }
 /*
- * open SDMF PPG database
+ * open SDMF Sun-Mean-Reference database
  */
      (void) snprintf( sdmf_db, MAX_STRING_LENGTH, "%s/%s", 
-                      SDMF_PATH("3.0"), "sdmf_ppg.h5" );
+                      SDMF_PATH("3.0"), "sdmf_smr.h5" );
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
 /*
- * find PPG values, requirements:
+ * find SMR values, requirements:
  *  - orbit number within a range MAX_DiffOrbitNumber
  */
      metaIndx = -1;
@@ -202,18 +148,36 @@ bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
 	       }
 	  }
      } while ( ! found );
-
-     if ( channel == 0 ) {
-          SDMF_rd_float_Array( fid, "pixelGain", 1, &metaIndx, NULL, 
-                               pixelGain );
-     } else {
-          SDMF_rd_float_Array( fid, "pixelGain", 1, &metaIndx, pixelRange, 
-                               pixelGain );
-     }
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg_found, orbit + delta );
      NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
 /*
- * close SDMF pixel-to-pixel gain database
+ * read SMR data
+ */
+     if ( channel == 0 ) {
+          SDMF_rd_float_Array( fid, "SMR", 1, &metaIndx, NULL, 
+                               solarMean );
+	  __Inverse_Chan2( solarMean );
+     } else {
+          SDMF_rd_float_Array( fid, "SMR", 1, &metaIndx, pixelRange, 
+                               solarMean );
+     }
+/*
+ * calibrate SMR spectrum
+ */
+     if ( calibRad ) {
+	  const int indx[]     = {metaIndx, 240/2-1};
+	  const int slabsize[] = {1,1};
+	  float asm_pos, esm_pos, sunel;
+
+	  SDMF_rd_float_Matrix( fid, "asm", indx, slabsize, 2, &asm_pos );
+	  SDMF_rd_float_Matrix( fid, "esm", indx, slabsize, 2, &esm_pos );
+	  SDMF_rd_float_Matrix( fid, "sunel", indx, slabsize, 2, &sunel );
+
+	  SCIA_SMR_CAL_RAD( absOrbit, channel, asm_pos, sunel, wvlen, 
+			    solarMean );
+     }
+/*
+ * close SDMF Sun-Mean-Reference database
  */
  done:
      if ( fid != -1 ) (void) H5Fclose( fid );
@@ -231,41 +195,38 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_get_ppg";
+     const char prognm[] = "sdmf_get_smr";
 
      register unsigned short np = 0;
 
      unsigned short orbit;
      unsigned short channel = 0;
 
-     bool  fnd_24, fnd_30;
-     float ppg_24[SCIENCE_PIXELS], ppg_30[SCIENCE_PIXELS];
+     bool  fnd_30;
+     bool  calibRad = FALSE;
+     float smr_30[SCIENCE_PIXELS];
 /*
  * initialization of command-line parameters
  */
      if ( argc == 1 || (argc > 1 && strncmp( argv[1], "-h", 2 ) == 0) ) {
-          (void) fprintf(stderr, "Usage: %s orbit [channel]\n", argv[0]);
+          (void) fprintf(stderr, "Usage: %s orbit [channel] [calibRad]\n", argv[0]);
           exit( EXIT_FAILURE );
      }
      orbit = (unsigned short) atoi( argv[1] );
      if ( argc >= 3 ) channel = (unsigned short) atoi( argv[2] );
+     if ( argc >= 4 && strncmp( argv[3], "calibRad", 7 ) == 0 )
+	  calibRad = TRUE;
 
-     fnd_24 = SDMF_get_PPG_24( orbit, channel, ppg_24 );
+     fnd_30 = SDMF_get_SMR_30( calibRad, orbit, channel, NULL, smr_30 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_PPG_24" );
-     if ( ! fnd_24 ) (void) fprintf( stderr, "# no solution for SDMF v2.4\n" );
-     fnd_30 = SDMF_get_PPG_30( orbit, channel, ppg_30 );
-     if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_PPG_30" );
+          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_SMR_30" );
      if ( ! fnd_30 ) (void) fprintf( stderr, "# no solution for SDMF v3.0\n" );
 
-     if ( ! (fnd_24 || fnd_30) ) goto done;
+     if ( ! (fnd_30) ) goto done;
      do {
           (void) printf( "%5hu", np );
-          if ( fnd_24 )
-               (void) printf( " %12.6g", ppg_24[np] );
           if ( fnd_30 )
-               (void) printf( " %12.6g", ppg_30[np] );
+               (void) printf( " %12.6g", smr_30[np] );
           (void) printf( "\n" );
      } while( ++np < ((channel == 0) ? SCIENCE_PIXELS : CHANNEL_SIZE) );
 done:

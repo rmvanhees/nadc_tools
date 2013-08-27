@@ -76,7 +76,7 @@ long long SCIA_LV1_CHAN2CLUS( const struct param_record param,
 	  return clus_mask;
      }
 /*
- * the user did both channel and cluster selection!
+ * both channel and cluster selection!
  */
      nc = 0;
      do {

@@ -44,6 +44,7 @@ IF status NE 0 THEN NADC_ERR_TRACE
 ; read Sun Reference Spectrum
 SCIA_LV1_RD_SRS, dsd, srs, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
+SCIA_LV1_RD_SRS, dsd, srs_2, /doppler
 
 ; read Polarisation Sensitivity Parameters Nadir
 SCIA_LV1_RD_PSPN, dsd, pspn, status=status

@@ -818,7 +818,7 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
  * read de Measurement Data Sets of one state
  */
      nadc_stat = NADC_STAT_SUCCESS;
-     nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, clus_mask, &state, &C_mds1b );
+     nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, ~0ULL, &state, &C_mds1b );
      if ( IS_ERR_STAT_FATAL ) return -1;
 /*
  * correct the line-of-sight azimuth and zenith angles (geoN)
@@ -839,11 +839,18 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 	  patch_mask |= SCIA_PATCH_STRAY;
      SCIA_LV1_PATCH_MDS( fd_nadc, patch_mask, &state, C_mds1b );
 /*
- * calibrate and copy the data in the level 1b records to level 1c records
+ * copy the data in the level 1b records to level 1c records
  */
      C_mds = (struct mds1c_scia *)
 	  malloc( state.num_clus * sizeof( struct mds1c_scia ));
      nr_mds = (int) GET_SCIA_LV1C_MDS( &state, C_mds1b, C_mds );
+/*
+ * select level 1c MDS records on requested channels & clusters
+ */
+     nr_mds = (int) SCIA_LV1C_SELECT_MDS( clus_mask, &state, C_mds );
+/*
+ * calibrate detector read-outs
+ */
      SCIA_LV1_CAL( fd_nadc, calib_mask, &state, C_mds1b, C_mds );
 /*
  * release the level 1b C-structures

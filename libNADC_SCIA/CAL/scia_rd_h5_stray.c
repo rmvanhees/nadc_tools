@@ -111,7 +111,7 @@ void SCIA_RD_H5_STRAY( struct scia_straycorr *stray )
      stray->dims_ghost[0] = (size_t) hdims[0];
      stray->dims_ghost[1] = (size_t) hdims[1];
      stray->ghosts = ALLOC_R2D( stray->dims_ghost[0], stray->dims_ghost[1] );
-     if ( stray->ghosts == NULL ) 
+     if ( stray->ghosts == NULL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stray->ghosts" );
      (void) H5LTread_dataset_float( file_id, "strayGhost", stray->ghosts[0] );
 /*

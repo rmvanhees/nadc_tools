@@ -58,6 +58,7 @@
 
 /*+++++ Local Headers +++++*/
 #define _SCIA_LEVEL_1
+#include <nadc_sdmf.h>
 #include <nadc_scia_cal.h>
 
 #include "getCorrIntg.inc"
@@ -205,7 +206,7 @@ void Interp_Akima_Per_Channel( const float* wvlen_in, const float* data_in,
 .IDENTifer  Calc_RadSensStatic
 .PURPOSE    calculate ELEV_i_alpha0, bas_rad and obm_s_p
 .INPUT/OUTPUT
-  call as    Get_RadSensCal(  );
+  call as    Get_RadSensCal( NDF, wvlen, key, elev_a0, abs_rad, obm_s_p );
      input:
 	    bool NDF_flag               :  flag for using NDF correction
             float *wvlen                :  wavelength grid 
@@ -318,7 +319,7 @@ unsigned short Get_RadSensNadir( const struct file_rec *fileParam,
 {
      const char prognm[] = "Get_RadSensNadir";
 
-     register unsigned short n_ch, np, nr;
+     register unsigned short n_ch, nr;
 
      unsigned short num_rsp = 0;
 
@@ -357,20 +358,6 @@ unsigned short Get_RadSensNadir( const struct file_rec *fileParam,
 	       }
 	  }
      }
-/* 
- * apply m-factor to radiance sensitivity 
- */
-     if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	  float mfactor[SCIENCE_PIXELS];
-
-	  SCIA_RD_MFACTOR( M_DN, fileParam->sensing_start, 
-			   fileParam->calibFlag, mfactor );
-
-	  for ( nr = 0; nr < num_rsp; nr++ ) {
-	       for ( np = 0; np < SCIENCE_PIXELS; np++ )
-		    rspn[nr].sensitivity[np] /= mfactor[np];
-	  }
-     }
 /*
  * everything went fine, so return the data...
  */
@@ -383,19 +370,18 @@ unsigned short Get_RadSensNadir( const struct file_rec *fileParam,
 .IDENTifer   Get_H5_RadSensNadir
 .PURPOSE     Obtain Radiation Sensitivity Parameters for wavelength grid
 .INPUT/OUTPUT
-  call as    Get_H5_RadSensNadir( NDF, fileParam, wvlen, &rspn );
+  call as    Get_H5_RadSensNadir( NDF, wvlen, &rspn );
      input:
             bool NDF                  : neutral density filter flag
-            struct file_rec *fileParam: file/calibration parameters
-	    struct wvlen_rec wvlen    : Solar/Science wavelength grid
+            
+	    float *wvlen              : wavelength grid
     output:
             struct rspn_scia **rspn   : radiance sensitivity parameters (Nadir)
 .RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_H5_RadSensNadir( bool NDF, const struct file_rec *fileParam,
-				    const struct wvlen_rec wvlen, 
+unsigned short Get_H5_RadSensNadir( bool NDF, const float *wvlen, 
 				    struct rspn_scia **rspn_out )
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, *rspn_out@*/
@@ -429,7 +415,7 @@ unsigned short Get_H5_RadSensNadir( bool NDF, const struct file_rec *fileParam,
 /*
  * calculate elev_i_alpha0, abs_rad and obm_s_p
  */
-     Calc_RadSensStatic( NDF, wvlen.science, &key, elev_a0, abs_rad, obm_s_p );
+     Calc_RadSensStatic( NDF, wvlen, &key, elev_a0, abs_rad, obm_s_p );
 /*
  * allocate memory for the RSPN records
  */
@@ -449,13 +435,13 @@ unsigned short Get_H5_RadSensNadir( bool NDF, const struct file_rec *fileParam,
 			  key.elev_p[offs].n_wl, key.elev_p[offs].wl,
 			  key.elev_p[offs].sensitivity,
 			  FLT32_T, FLT64_T, 
-			  SCIENCE_PIXELS, wvlen.science, elev_p );
+			  SCIENCE_PIXELS, wvlen, elev_p );
 
 	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, 
 			  key.elev_s[offs].n_wl, key.elev_s[offs].wl,
 			  key.elev_s[offs].sensitivity,
 			  FLT32_T, FLT64_T, 
-			  SCIENCE_PIXELS, wvlen.science, elev_s );
+			  SCIENCE_PIXELS, wvlen, elev_s );
 
 	  rspn[nr].ang_esm = key.elev_p[offs].elevat_angle;
 	  for ( np = 0; np < SCIENCE_PIXELS; np++ )
@@ -466,20 +452,6 @@ unsigned short Get_H5_RadSensNadir( bool NDF, const struct file_rec *fileParam,
 #ifdef DEBUG
      WRITE_H5_RSPN( "scia_key_rspn.h5", "rspn", num_rsp, rspn );
 #endif
-/* 
- * apply m-factor to radiance sensitivity 
- */
-     if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	  float mfactor[SCIENCE_PIXELS];
-
-	  SCIA_RD_MFACTOR( M_DN, fileParam->sensing_start, 
-			   fileParam->calibFlag, mfactor );
-
-	  for ( nr = 0; nr < num_rsp; nr++ ) {
-	       for ( np = 0; np < SCIENCE_PIXELS; np++ )
-		    rspn[nr].sensitivity[np] /= mfactor[np];
-	  }
-     }
 /*
  * everything went fine, so return the data...
  */
@@ -601,7 +573,7 @@ unsigned short Get_RadSensLimb( const struct file_rec *fileParam,
 {
      const char prognm[] = "Get_RadSensLimb";
 
-     register unsigned short n_ch, np, nr;
+     register unsigned short n_ch, nr;
 
      unsigned short num_rsp = 0;
 
@@ -635,20 +607,6 @@ unsigned short Get_RadSensLimb( const struct file_rec *fileParam,
 	       }
 	  }
      }
-/* 
- * apply m-factor to radiance sensitivity 
- */
-     if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	  float mfactor[SCIENCE_PIXELS];
-
-	  SCIA_RD_MFACTOR( M_DL, fileParam->sensing_start, 
-			   fileParam->calibFlag, mfactor );
-
-	  for ( nr = 0; nr < num_rsp; nr++ ) {
-	       for ( np = 0; np < SCIENCE_PIXELS; np++ )
-		    rspl[nr].sensitivity[np] /= mfactor[np];
-	  }
-     }
 /*
  * everything went fine, so return the data...
  */
@@ -679,7 +637,7 @@ unsigned short Get_RadSensOccul( const struct file_rec *fileParam,
 {
      const char prognm[] = "Get_RadSensOccul";
 
-     register unsigned short n_ch, np, nr;
+     register unsigned short n_ch, nr;
 
      unsigned short num_rsp = 0;
 
@@ -712,20 +670,6 @@ unsigned short Get_RadSensOccul( const struct file_rec *fileParam,
 	       }
 	  }
      }
-/* 
- * apply m-factor to radiance sensitivity 
- */
-     if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	  float mfactor[SCIENCE_PIXELS];
-
-	  SCIA_RD_MFACTOR( M_DL, fileParam->sensing_start, 
-			   fileParam->calibFlag, mfactor );
-
-	  for ( nr = 0; nr < num_rsp; nr++ ) {
-	       for ( np = 0; np < SCIENCE_PIXELS; np++ )
-		    rspo[nr].sensitivity[np] /= mfactor[np];
-	  }
-     }
 /*
  * everything went fine, so return the data...
  */
@@ -738,19 +682,17 @@ unsigned short Get_RadSensOccul( const struct file_rec *fileParam,
 .IDENTifer   Get_H5_RadSensLimb
 .PURPOSE     Obtain Radiation Sensitivity Parameters for wavelength grid
 .INPUT/OUTPUT
-  call as    Get_H5_RadSensLimb( NDF, fileParam, wvlen, &rspl );
+  call as    Get_H5_RadSensLimb( NDF, wvlen, &rspl );
      input:
-            bool NDF                  : neutral density filter flag
-            struct file_rec *fileParam: file/calibration parameters
-	    struct wvlen_rec wvlen    : Solar/Science wavelength grid
+            bool NDF                   : neutral density filter flag
+	    float *wvlen               : wavelength grid
     output:
-            struct rsplo_scia **rspl  : radiance sensitivity parameters (Limb)
+            struct rsplo_scia **rspl   : radiance sensitivity parameters (Limb)
 .RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_H5_RadSensLimb( bool NDF, const struct file_rec *fileParam, 
-				   const struct wvlen_rec wvlen, 
+unsigned short Get_H5_RadSensLimb( bool NDF, const float *wvlen, 
 				   struct rsplo_scia **rspl_out )
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, *rspl_out@*/
@@ -786,7 +728,7 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const struct file_rec *fileParam,
 /*
  * calculate elev_i_alpha0, abs_rad and obm_s_p
  */
-     Calc_RadSensStatic( NDF, wvlen.science, &key, elev_a0, abs_rad, obm_s_p );
+     Calc_RadSensStatic( NDF, wvlen, &key, elev_a0, abs_rad, obm_s_p );
 /*
  * allocate memory for the RSPL records
  */
@@ -818,13 +760,13 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const struct file_rec *fileParam,
 			  key.el_az_p[indx].n_wl, key.el_az_p[indx].wl,
 			  key.el_az_p[indx].sensitivity,
 			  FLT32_T, FLT64_T, 
-			  SCIENCE_PIXELS, wvlen.science, el_az_p );
+			  SCIENCE_PIXELS, wvlen, el_az_p );
 
 	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, 
 			  key.el_az_s[indx].n_wl, key.el_az_s[indx].wl,
 			  key.el_az_s[indx].sensitivity,
 			  FLT32_T, FLT64_T, 
-			  SCIENCE_PIXELS, wvlen.science, el_az_s );
+			  SCIENCE_PIXELS, wvlen, el_az_s );
 
 	  rspl[nr].ang_esm = key.el_az_p[indx].elevat_angle;
 	  rspl[nr].ang_asm  = key.el_az_p[indx].azimuth_angle;
@@ -836,20 +778,6 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const struct file_rec *fileParam,
 #ifdef DEBUG
      WRITE_H5_RSPLO( "scia_key_rspl.h5", "rspl", num_rsp, rspl );
 #endif
-/* 
- * apply m-factor to radiance sensitivity 
- */
-     if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	  float mfactor[SCIENCE_PIXELS];
-
-	  SCIA_RD_MFACTOR( M_DL, fileParam->sensing_start, 
-			   fileParam->calibFlag, mfactor );
-
-	  for ( nr = 0; nr < num_rsp; nr++ ) {
-	       for ( np = 0; np < SCIENCE_PIXELS; np++ )
-		    rspl[nr].sensitivity[np] /= mfactor[np];
-	  }
-     }
 /*
  * everything went fine, so return the data...
  */
@@ -868,19 +796,17 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const struct file_rec *fileParam,
 .IDENTifer   Get_H5_RadSensMoni
 .PURPOSE     Obtain Radiation Sensitivity Parameters for wavelength grid
 .INPUT/OUTPUT
-  call as    Get_H5_RadSensMoni( NDF, fileParam, wvlen, &rspm );
+  call as    Get_H5_RadSensMoni( NDF, wvlen, &rspm );
      input:
-            bool NDF                  : neutral density filter flag
-            struct file_rec *fileParam: file/calibration parameters
-	    struct wvlen_rec wvlen    : Solar/Science wavelength grid
+            bool NDF                   : neutral density filter flag
+	    float *wvlen               : Solar/Science wavelength grid
     output:
-            struct rsplo_scia **rspm  : radiance sensitivity parameters (Moni)
+            struct rsplo_scia **rspm   : radiance sensitivity parameters (Moni)
 .RETURNS     nothing
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_H5_RadSensMoni( bool NDF, const struct file_rec *fileParam, 
-				   const struct wvlen_rec wvlen, 
+unsigned short Get_H5_RadSensMoni( bool NDF, /*@null@*/ const float *wvlen_in, 
 				   struct rsplo_scia **rspm_out )
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, *rspm_out@*/
@@ -893,6 +819,7 @@ unsigned short Get_H5_RadSensMoni( bool NDF, const struct file_rec *fileParam,
      unsigned short num_rsp = 0;
 
      float  tmpAzi;
+     float wvlen[SCIENCE_PIXELS];
      double elev_a0[SCIENCE_PIXELS], abs_rad[SCIENCE_PIXELS], 
 	  obm_s_p[SCIENCE_PIXELS], brdf_p[SCIENCE_PIXELS], 
 	  brdf_s[SCIENCE_PIXELS];
@@ -914,9 +841,16 @@ unsigned short Get_H5_RadSensMoni( bool NDF, const struct file_rec *fileParam,
  */
      SCIA_RD_H5_RSPD( &key );
 /*
+ * check wavelength grid
+ */
+     if ( wvlen_in == NULL )
+	  (void) memcpy( wvlen, key.key_fix.wl, SCIENCE_PIXELS * sizeof(float));
+     else
+	  (void) memcpy( wvlen, wvlen_in, SCIENCE_PIXELS * sizeof(float) );
+/*
  * calculate elev_i_alpha0, abs_rad and obm_s_p
  */
-     Calc_RadSensStatic( NDF, wvlen.science, &key, elev_a0, abs_rad, obm_s_p );
+     Calc_RadSensStatic( NDF, wvlen, &key, elev_a0, abs_rad, obm_s_p );
 /*
  * allocate memory for the RSPM records
  */
@@ -949,13 +883,13 @@ unsigned short Get_H5_RadSensMoni( bool NDF, const struct file_rec *fileParam,
 			  key.brdf_p[indx].n_wl, key.brdf_p[indx].wl,
 			  key.brdf_p[indx].sensitivity,
 			  FLT32_T, FLT64_T, 
-			  SCIENCE_PIXELS, wvlen.science, brdf_p );
+			  SCIENCE_PIXELS, wvlen, brdf_p );
 
 	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, 
 			  key.brdf_s[indx].n_wl, key.brdf_s[indx].wl,
 			  key.brdf_s[indx].sensitivity,
 			  FLT32_T, FLT64_T, 
-			  SCIENCE_PIXELS, wvlen.science, brdf_s );
+			  SCIENCE_PIXELS, wvlen, brdf_s );
 
 	  rspm[nr].ang_esm = key.brdf_p[indx].elevat_angle;
 	  rspm[nr].ang_asm  = key.brdf_p[indx].asm_angle;
@@ -967,20 +901,6 @@ unsigned short Get_H5_RadSensMoni( bool NDF, const struct file_rec *fileParam,
 #ifdef DEBUG
      WRITE_H5_RSPLO( "scia_key_rspm.h5", "rspm", num_rsp, rspm );
 #endif
-/* 
- * apply m-factor to radiance sensitivity 
- */
-     if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	  float mfactor[SCIENCE_PIXELS];
-
-	  SCIA_RD_MFACTOR( M_CAL, fileParam->sensing_start, 
-			   fileParam->calibFlag, mfactor );
-
-	  for ( nr = 0; nr < num_rsp; nr++ ) {
-	       for ( np = 0; np < SCIENCE_PIXELS; np++ )
-		    rspm[nr].sensitivity[np] /= mfactor[np];
-	  }
-     }
 /*
  * everything went fine, so return the data...
  */
@@ -1251,7 +1171,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 {
      const char prognm[] = "SCIA_ATBD_CAL_RAD";
 
-     register unsigned short num;
+     register unsigned short nr, np, num;
 
      unsigned short num_rsp = 0;
 
@@ -1277,12 +1197,26 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
      switch ( (int) state->type_mds ) {
      case SCIA_NADIR:
 	  if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO )
-	       num_rsp = Get_H5_RadSensNadir( FALSE, fileParam, wvlen, &rspn );
+	       num_rsp = Get_H5_RadSensNadir( FALSE, wvlen.science, &rspn );
 	  else 
 	       num_rsp = Get_RadSensNadir( fileParam, wvlen, &rspn );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensNadir" );
 
+          /* apply m-factor to radiance sensitivity */
+	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+	       float mfactor[SCIENCE_PIXELS];
+
+	       SCIA_RD_MFACTOR( M_DN, fileParam->sensing_start, 
+				fileParam->calibFlag, mfactor );
+
+	       for ( nr = 0; nr < num_rsp; nr++ ) {
+		    for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			 rspn[nr].sensitivity[np] /= mfactor[np];
+	       }
+	  }
+
+	  /* apply radiance sensitivity correction */
 	  num = 0;
 	  do {
 	       Apply_RadSensNadir( getCorrIntg( state->Clcon[num] ), 
@@ -1293,12 +1227,26 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	  break;
      case SCIA_LIMB:
 	  if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO )
-	       num_rsp = Get_H5_RadSensLimb( FALSE, fileParam, wvlen, &rspl );
+	       num_rsp = Get_H5_RadSensLimb( FALSE, wvlen.science, &rspl );
 	  else
 	       num_rsp = Get_RadSensLimb( fileParam, wvlen, &rspl );
 	  if ( IS_ERR_STAT_FATAL )
 	    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensLimb" );
 
+          /* apply m-factor to radiance sensitivity */
+	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+	       float mfactor[SCIENCE_PIXELS];
+
+	       SCIA_RD_MFACTOR( M_DL, fileParam->sensing_start, 
+				fileParam->calibFlag, mfactor );
+
+	       for ( nr = 0; nr < num_rsp; nr++ ) {
+		    for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			 rspl[nr].sensitivity[np] /= mfactor[np];
+	       }
+	  }
+
+          /* apply radiance sensitivity correction */
 	  num = 0;
 	  do {
 	       Apply_RadSensLimb( getCorrIntg( state->Clcon[num] ), 
@@ -1309,12 +1257,26 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	  break;
      case SCIA_OCCULT:
 	  if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO )
-	       num_rsp = Get_H5_RadSensLimb( TRUE, fileParam, wvlen, &rspo );
+	       num_rsp = Get_H5_RadSensLimb( TRUE, wvlen.science, &rspo );
 	  else
 	       num_rsp = Get_RadSensOccul( fileParam, wvlen, &rspo );
 	  if ( IS_ERR_STAT_FATAL )
 	    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensOccul" );
 
+          /* apply m-factor to radiance sensitivity */
+	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+	       float mfactor[SCIENCE_PIXELS];
+
+	       SCIA_RD_MFACTOR( M_DL, fileParam->sensing_start, 
+				fileParam->calibFlag, mfactor );
+
+	       for ( nr = 0; nr < num_rsp; nr++ ) {
+		    for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			 rspl[nr].sensitivity[np] /= mfactor[np];
+	       }
+	  }
+
+          /* apply radiance sensitivity correction */
 	  num = 0;
 	  do {
 	       Apply_RadSensOccul( getCorrIntg( state->Clcon[num] ), 
@@ -1350,12 +1312,26 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 		    NDF = FALSE;
 	       }
 	       if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO )
-		    num_rsp = Get_H5_RadSensLimb(NDF, fileParam, wvlen, &rspl);
+		    num_rsp = Get_H5_RadSensLimb(NDF, wvlen.science, &rspl);
 	       else
 		    num_rsp = Get_RadSensLimb( fileParam, wvlen, &rspl );
 	       if ( IS_ERR_STAT_FATAL )
 		    NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "Get_RadSensLimb");
 
+               /* apply m-factor to radiance sensitivity */
+	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+		    float mfactor[SCIENCE_PIXELS];
+
+		    SCIA_RD_MFACTOR( M_DL, fileParam->sensing_start, 
+				     fileParam->calibFlag, mfactor );
+
+		    for ( nr = 0; nr < num_rsp; nr++ ) {
+			 for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			      rspl[nr].sensitivity[np] /= mfactor[np];
+		    }
+	       }
+
+	       /* apply radiance sensitivity correction */
 	       num = 0;
 	       do {
 		    Apply_RadSensLimb( getIntg( state->Clcon[num] ), 
@@ -1371,12 +1347,26 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       light_path = MONI_SOLAR_PATH;
 	       if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO ) {
 		    num_rsp = 
-			 Get_H5_RadSensNadir( TRUE, fileParam, wvlen, &rspn );
+			 Get_H5_RadSensNadir( TRUE, wvlen.science, &rspn );
 	       } else
 		    num_rsp = Get_RadSensNadir( fileParam, wvlen, &rspn );
 	       if ( IS_ERR_STAT_FATAL )
 		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,"Get_RadSensNadir");
 
+               /* apply m-factor to radiance sensitivity */
+	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+		    float mfactor[SCIENCE_PIXELS];
+
+		    SCIA_RD_MFACTOR( M_DN, fileParam->sensing_start, 
+				     fileParam->calibFlag, mfactor );
+
+		    for ( nr = 0; nr < num_rsp; nr++ ) {
+			 for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			      rspn[nr].sensitivity[np] /= mfactor[np];
+		    }
+	       }
+
+	       /* apply radiance sensitivity correction */
 	       num = 0;
 	       do {
 		    Apply_RadSensNadir( getIntg( state->Clcon[num] ), 
@@ -1394,12 +1384,26 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO ) {
 		    NDF = (state->state_id == 48) ? TRUE : FALSE;
 		    num_rsp = 
-			 Get_H5_RadSensNadir( NDF, fileParam, wvlen, &rspn );
+			 Get_H5_RadSensNadir( NDF, wvlen.science, &rspn );
 	       } else
 		    num_rsp = Get_RadSensNadir( fileParam, wvlen, &rspn );
 	       if ( IS_ERR_STAT_FATAL )
 		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,"Get_RadSensNadir");
 
+               /* apply m-factor to radiance sensitivity */
+	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+		    float mfactor[SCIENCE_PIXELS];
+
+		    SCIA_RD_MFACTOR( M_DN, fileParam->sensing_start, 
+				     fileParam->calibFlag, mfactor );
+
+		    for ( nr = 0; nr < num_rsp; nr++ ) {
+			 for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			      rspn[nr].sensitivity[np] /= mfactor[np];
+		    }
+	       }
+
+	       /* apply radiance sensitivity correction */
 	       num = 0;
 	       do {
 		    Apply_RadSensNadir( getIntg( state->Clcon[num] ), 
@@ -1415,10 +1419,24 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	  case 52:		/* ESM diffuser */
 	       light_path = MONI_SOLAR_PATH;
 	       NDF = (state->state_id == 62) ? TRUE : FALSE;
-	       num_rsp = Get_H5_RadSensMoni( NDF, fileParam, wvlen, &rspm );
+	       num_rsp = Get_H5_RadSensMoni( NDF, wvlen.science, &rspm );
 	       if ( IS_ERR_STAT_FATAL )
 		    NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "Get_RadSensMoni");
 
+               /* apply m-factor to radiance sensitivity */
+	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
+		    float mfactor[SCIENCE_PIXELS];
+
+		    SCIA_RD_MFACTOR( M_CAL, fileParam->sensing_start, 
+				     fileParam->calibFlag, mfactor );
+
+		    for ( nr = 0; nr < num_rsp; nr++ ) {
+			 for ( np = 0; np < SCIENCE_PIXELS; np++ )
+			      rspm[nr].sensitivity[np] /= mfactor[np];
+		    }
+	       }
+
+	       /* apply radiance sensitivity correction */
 	       num = 0;
 	       do {
 		    Apply_RadSensLimb( getIntg( state->Clcon[num] ), 
@@ -1439,105 +1457,110 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   Apply_RadSensLimb_detwide
-.PURPOSE     apply radiance sensitivity correction (Limb)
+.IDENTifer   SCIA_SMR_CAL_RAD
+.PURPOSE     apply radiance sensitivity correction on Solar spectrum
 .INPUT/OUTPUT
-  call as    Apply_RadSensLimb_detwide( num_rsp, rspl, 
-                                        pos_asm, sun_zen_ang, n_obs, spec);
+  call as    SCIA_SMR_CAL_RAD( orbit, channel, angAsm, angEsm, wvlen, smr );
      input:
-            unsigned short    num_rsp : number of RSPL records
-	    struct rsplo_scia  *rspl  : radiance sensitivity parameters (Limb)
-	    float *pos_asm            :
-	    float *sun_zen_ang        :
-	    int   n_obs               : number of Solar spectra
+            unsigned short orbit       : absolute orbit number
+	    unsigned short channel     : channel ID [1,2,..,8]
+	    float angAsm               : ASM angle
+	    float angEsm               : ESM angle
+	    const float *wvlen         : wavelength [all channels]
  in/output:
-            float *spec               : sun spectrum
+            float *smr                 : Solar Mean Spectrum
 
 .RETURNS     nothing
-.COMMENTS    static function
+.COMMENTS    only works for SDMF (v3.0) SMR derived from state 62 observations
 -------------------------*/
-static
-void Apply_RadSensLimb_detwide(unsigned short num_rsp, 
-                               const struct rsplo_scia *rspl, 
-                               const float *pos_asm,
-                               const float *sun_zen_ang,
-                               int n_obs, /*@out@*/ float *spec )
+void SCIA_SMR_CAL_RAD( unsigned short absOrbit, unsigned short channel, 
+		       float angAsm, float angEsm, const float *wvlen, 
+		       float *smr )
+      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
 {
-     register unsigned short na, ne, nobs = 0;
+     const char prognm[] = "SCIA_SMR_CAL_RAD";
 
-     register double angAsm, angEsm;
-     register float  *signal = spec;
+     const bool NDF = TRUE;
+     const bool Save_Extern_Alloc = Use_Extern_Alloc;
+
+     register unsigned short na, ne;
+
+     unsigned short num_rsp = 0;
 
      unsigned short n_asm, n_esm;
 
-     const float state62_intg[] = { 
-	  .125, .125, .0625, .0625, .125, 0.06131875, 0.12381875, 0.12381875
-     };
+     float pet;
 
-     const struct rsplo_scia 
-	  **mtx_rspl = Get_Matrix_RSPLO( num_rsp, rspl, &n_asm, &n_esm );
+     struct rsplo_scia *rspm = NULL;
+     const struct rsplo_scia **mtx_rspm;
+/* 
+ * Obtain Radiation Sensitivity Parameters for wavelength grid 
+ */
+     Use_Extern_Alloc = FALSE;
+     num_rsp = Get_H5_RadSensMoni( NDF, wvlen, &rspm );
+     Use_Extern_Alloc = Save_Extern_Alloc;
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensMoni" );
 
+     /* create 2D-matrix pointing to rspm structure */
+     mtx_rspm = Get_Matrix_RSPLO( num_rsp, rspm, &n_asm, &n_esm );
+
+     /* find rspm record with ang_esm just smaller than angEsm */
+     ne = 0;
      do {
+	  if ( angEsm >= mtx_rspm[ne][0].ang_esm ) break;
+     } while ( ++ne < n_esm );
+     if ( ne == n_esm ) 
+	  ne -= 2;
+     else if ( ne > 0 ) 
+	  ne--;
+
+     /* find rspm record with ang_asm just smaller than angAsm */
+     na = 0;
+     do {
+	  if ( angAsm >= mtx_rspm[ne][na].ang_asm ) break;
+     } while ( ++na < n_asm );
+     if ( na == n_asm ) 
+	  na -= 2;
+     else if ( na > 0 ) 
+	  na--;
+/*
+ *
+ */
+     if ( channel == 0 ) {
 	  register unsigned short np = 0;
+	  register unsigned short nch;
 
-          angAsm = alpha0_asm - 0.5 * pos_asm[nobs];
-	  angEsm = sun_zen_ang[nobs] - 90.;
+	  for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+	       register unsigned short ni = (nch-1) * CHANNEL_SIZE;
 
-          /* find rsplo record with ang_esm just smaller than angEsm */
-	  ne = 0;
-          do {
-               if ( angEsm >= (double) mtx_rspl[ne][0].ang_esm ) break;
-          } while ( ++ne < n_esm );
-          if ( ne == n_esm ) 
-	       ne -= 2;
-          else if ( ne > 0 ) 
-	       ne--;
+	       SDMF_get_statePET( 62, absOrbit, nch, &pet );
+	       if ( nch > 5 ) pet -= 1.18125e-3;
 
-          /* find rsplo record with ang_asm just smaller than angAsm */
-	  na = 0;
-          do {
-               if ( angAsm >= (double) mtx_rspl[ne][na].ang_asm ) break;
-          } while ( ++na < n_asm );
-          if ( na == n_asm ) 
-	       na -= 2;
-          else if ( na > 0 ) 
-	       na--;
+	       do {
+		    register double val = (double) smr[np] / pet;
+
+		    smr[np] = (float) 
+			 (val / InterpolRSPLO( ni, angAsm, angEsm,
+					       mtx_rspm[ne+1]+na, mtx_rspm[ne]+na ));
+	       } while ( ++np, ++ni < (nch * CHANNEL_SIZE) );
+	  }
+     } else {
+	  register unsigned short np = 0;
+	  register unsigned short ni = (channel-1) * CHANNEL_SIZE;
+
+	  SDMF_get_statePET( 62, absOrbit, channel, &pet );
+	  if ( channel > 5 ) pet -= 1.18125e-3;
 
 	  do {
-	       register double val = (double) (*signal) 
-                                   / state62_intg[np/CHANNEL_SIZE];
+	       register double val = (double) smr[np] / pet;
 
-	       *signal = (float) 
-		    (val / InterpolRSPLO( np, angAsm, angEsm,
-					  mtx_rspl[ne+1]+na, mtx_rspl[ne]+na ));
-	  } while ( ++signal, ++np < SCIENCE_PIXELS );
-     } while ( ++nobs < n_obs );
-
-     free( mtx_rspl );
-}
-
-int SCIA_ATBD_CAL_RAD_DETWIDE( const struct file_rec *fileParam,
-			       const struct wvlen_rec wvlen, float *spec,
-			       float *pos_asm, float *sun_zen_ang, int n_obs )
-{
-    const char prognm[] = "SCIA_ATBD_CAL_RAD_DETWIDE";
-
-    int ret = -1;
-
-    unsigned short num_rsp = 0;
-    struct rsplo_scia *rspm = NULL;
-
-    const bool Save_Extern_Alloc = Use_Extern_Alloc;
-
-    num_rsp = Get_H5_RadSensMoni( TRUE, fileParam, wvlen, &rspm );
-    if ( IS_ERR_STAT_FATAL )
-        NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensMoni" );
-    
-    Apply_RadSensLimb_detwide(num_rsp, rspm, pos_asm, sun_zen_ang, n_obs, spec);
-    ret = 0;
-
-    if ( rspm != NULL ) free( rspm );
- done:
-    Use_Extern_Alloc = Save_Extern_Alloc;
-    return ret;
+	       smr[np] = (float) 
+		    (val / InterpolRSPLO( ni, angAsm, angEsm,
+					  mtx_rspm[ne+1]+na, mtx_rspm[ne]+na ));
+	  } while ( ++ni, ++np < CHANNEL_SIZE );
+     }
+     free( mtx_rspm );
+done:
+     if ( rspm != NULL ) free( rspm );
 }

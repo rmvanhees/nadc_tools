@@ -345,6 +345,12 @@ extern bool SDMF_get_OrbitalDark( unsigned short, float,
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack, ao, lc, ao_err, lc_err@*/;
 
+extern bool SDMF_get_SMR_30( bool, unsigned short, unsigned short,
+			     /*@null@*/ const float *,
+			     /*@out@*/ float *solarMean )
+     /*@globals  nadc_stat, nadc_err_stack;@*/
+     /*@modifies nadc_stat, nadc_err_stack, solarMean@*/;
+
 extern bool SDMF_get_Transmission_24( bool, unsigned short, unsigned short,
 				      /*@out@*/ float *transmission )
      /*@globals  nadc_stat, nadc_err_stack;@*/

@@ -195,9 +195,8 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 		    && param.write_sql == PARAM_UNSET )
                     NADC_Info_Update( stdout, 2, ns );
 
-	       clus_mask = SCIA_LV1_CHAN2CLUS( param, state+ns );
-/* read level 1b MDS-records */
-	       nr_mds = SCIA_LV1_RD_MDS( fp, clus_mask, state+ns, &mds );
+/* read level 1b MDS-records (read all cluster data) */
+	       nr_mds = SCIA_LV1_RD_MDS( fp, ~0ULL, state+ns, &mds );
 	       if ( IS_ERR_STAT_FATAL )
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
 				     "SCIA_LV1_RD_MDS" );
@@ -234,6 +233,12 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
 					  "GET_SCIA_LV1C_MDS" );
 		    }
+/* select level 1c MDS records on requested channels & clusters */
+		    clus_mask = SCIA_LV1_CHAN2CLUS( param, state+ns );
+		    nr_mds1c = SCIA_LV1C_SELECT_MDS( clus_mask, 
+						     state+ns, mds1c );
+		    if ( nr_mds1c == 0 ) continue;
+
 /* calibrate detector read-outs */
 		    SCIA_LV1_CAL( fp, param.calib_scia, state+ns, mds, mds1c );
 		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
