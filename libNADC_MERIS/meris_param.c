@@ -353,7 +353,6 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
 		    param->write_ascii = PARAM_SET;
 	       }
 	  }
-     }
 	  if ( strncmp( argv[narg], "-o", 2 ) == 0 
 	       || strncmp( argv[narg], "--output=", 9 ) == 0 ) {
 	       while ( ++narg < argc && argv[narg][0] == '-' );
