@@ -121,7 +121,6 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 
      register unsigned short ns;
      
-     unsigned short     patch_scia = SCIA_PATCH_NONE;
      unsigned int       nr_mds;
      unsigned long long clus_mask;
 
@@ -178,87 +177,102 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 #ifdef _WITH_SQL
 	       }
 #endif
-	  }
-     } else {   /* write in Level 1c format */
+	  } /* loop over num_state */
+/*
+ * read MDS's from level 1b and write MDS's to level 1c product
+ */
+     } else {
 	  char *env_str = getenv( "SCIA_CORR_LOS" );
 
 	  struct mds1c_pmd  *pmd = NULL;
 	  struct mds1c_polV *polV = NULL;
 	  struct mds1c_scia *mds1c = NULL;
-/*
- * read MDS's from level 1b and write MDS's to level 1c product
- */
+
+	  unsigned short patch_scia = SCIA_PATCH_NONE;
+
+	  /* set mask with patch algorithms */
+	  if ( (param.calib_scia & DO_CORR_VIS_MEM) != UINT_ZERO 
+	       && (param.calib_scia & DO_SRON_MEM_NLIN) != UINT_ZERO )
+	       patch_scia |= SCIA_PATCH_MEM;
+	  if ( (param.calib_scia & DO_CORR_IR_NLIN) != UINT_ZERO 
+		    && (param.calib_scia & DO_SRON_MEM_NLIN) != UINT_ZERO )
+	       patch_scia |= SCIA_PATCH_NLIN;
+	  if ( (param.calib_scia & DO_CORR_STRAY) != UINT_ZERO 
+	       && (param.calib_scia & DO_SRON_STRAY) != UINT_ZERO )
+	       patch_scia |= SCIA_PATCH_STRAY;
+
 	  for ( ns = 0; ns < (unsigned short) num_state; ns++ ) {
-	       unsigned int nr_mds1c = 0;
+	       unsigned int   nr_mds1c = 0;
 
 	       if ( param.flag_silent == PARAM_UNSET 
 		    && param.write_sql == PARAM_UNSET )
                     NADC_Info_Update( stdout, 2, ns );
 
-/* read level 1b MDS-records (read all cluster data) */
-	       nr_mds = SCIA_LV1_RD_MDS( fp, ~0ULL, state+ns, &mds );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
-				     "SCIA_LV1_RD_MDS" );
-/* correct line-of-sight angles */
-	       if ( env_str != NULL && strcmp( env_str, "1" ) == 0 )
-		    SCIA_LV1_CORR_LOS( state+ns, mds );
+	       /* read level 1b MDS-records */
+	       if ( patch_scia == SCIA_PATCH_NONE ) {
+		    clus_mask = SCIA_LV1_CHAN2CLUS( param, state+ns );
 
-	       if ( state[ns].num_clus > 0 ) {
-		    if ( (param.calib_scia & DO_CORR_VIS_MEM) != UINT_ZERO 
-			 && (param.calib_scia & DO_SRON_MEM_NLIN) != UINT_ZERO )
-			 patch_scia |= SCIA_PATCH_MEM;
-		    if ( (param.calib_scia & DO_CORR_IR_NLIN) != UINT_ZERO 
-			 && (param.calib_scia & DO_SRON_MEM_NLIN) != UINT_ZERO )
-			 patch_scia |= SCIA_PATCH_NLIN;
-		    if ( (param.calib_scia & DO_CORR_STRAY) != UINT_ZERO 
-			 && (param.calib_scia & DO_SRON_STRAY) != UINT_ZERO )
-			 patch_scia |= SCIA_PATCH_STRAY;
-/* patch MDS level 1b record */
+		    nr_mds = SCIA_LV1_RD_MDS( fp, clus_mask, state+ns, &mds );
+		    if ( IS_ERR_STAT_FATAL )
+			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+					  "SCIA_LV1_RD_MDS" );
+		    if ( state[ns].num_clus == 0 ) continue;
+	       } else {
+		    nr_mds = SCIA_LV1_RD_MDS( fp, ~0ULL, state+ns, &mds );
+		    if ( IS_ERR_STAT_FATAL )
+			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+					  "SCIA_LV1_RD_MDS" );
+		    /* patch MDS level 1b record */
 		    SCIA_LV1_PATCH_MDS( fp, patch_scia, state+ns, mds );
 		    if ( IS_ERR_STAT_FATAL ) {
 			 SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
 					  "SCIA_LV1_PATCH_MDS" );
 		    }
-/* reconstruct level 1c MDS-records from level 1b MDS-records */
-		    mds1c = (struct mds1c_scia *) malloc( 
-			 state[ns].num_clus * sizeof(struct mds1c_scia) );
-		    if ( mds1c == NULL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1c" );
-		    nr_mds1c = GET_SCIA_LV1C_MDS( state+ns, mds, mds1c );
-		    if ( IS_ERR_STAT_FATAL ) {
-			 SCIA_LV1_FREE_MDS( source, nr_mds, mds );
-			 SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
-					  "GET_SCIA_LV1C_MDS" );
-		    }
-/* select level 1c MDS records on requested channels & clusters */
-		    clus_mask = SCIA_LV1_CHAN2CLUS( param, state+ns );
-		    nr_mds1c = SCIA_LV1C_SELECT_MDS( clus_mask, 
-						     state+ns, mds1c );
-		    if ( nr_mds1c == 0 ) continue;
-
-/* calibrate detector read-outs */
-		    SCIA_LV1_CAL( fp, param.calib_scia, state+ns, mds, mds1c );
-		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
-		    if ( IS_ERR_STAT_FATAL ) {
-			 SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
-					  "SCIA_LV1_CALIB" );
-		    }
-/* write level 1c MDS-records */
-		    SCIA_WRITE_MDS_1C( param, nr_mds1c, mds1c );
-		    SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
-		    if ( IS_ERR_STAT_FATAL ) {
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
-					  "SCIA_WRITE_MDS_1C" );
-		    }
 	       }
-	  }
-/* 
- * reconstruct level 1c MDS_PMD-records from level 1b MDS-records
- */
+	       /* correct line-of-sight angles */
+	       if ( env_str != NULL && strcmp( env_str, "1" ) == 0 )
+		    SCIA_LV1_CORR_LOS( state+ns, mds );
+
+	       /* reconstruct level 1c MDS-records from level 1b MDS-records */
+	       mds1c = (struct mds1c_scia *) malloc( 
+		    state[ns].num_clus * sizeof(struct mds1c_scia) );
+	       if ( mds1c == NULL )
+		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1c" );
+
+	       nr_mds1c = GET_SCIA_LV1C_MDS( state+ns, mds, mds1c );
+	       if ( IS_ERR_STAT_FATAL ) {
+		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
+		    SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
+		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+				     "GET_SCIA_LV1C_MDS" );
+	       }
+	       /* select level 1c MDS records on requested clusters */
+	       if ( patch_scia != SCIA_PATCH_NONE ) {
+		    clus_mask = SCIA_LV1_CHAN2CLUS( param, state+ns );
+		    (void) SCIA_LV1C_SELECT_MDS( clus_mask, 
+						 state+ns, mds1c );
+		    if ( state[ns].num_clus == 0 ) continue;
+	       }
+	       /* calibrate detector read-outs */
+	       SCIA_LV1_CAL( fp, param.calib_scia, state+ns, mds, mds1c );
+	       SCIA_LV1_FREE_MDS( source, nr_mds, mds );
+	       if ( IS_ERR_STAT_FATAL ) {
+		    SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
+		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+				     "SCIA_LV1_CALIB" );
+	       }
+	       /* write level 1c MDS-records */
+	       SCIA_WRITE_MDS_1C( param, nr_mds1c, mds1c );
+	       SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
+	       if ( IS_ERR_STAT_FATAL ) {
+		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+				     "SCIA_WRITE_MDS_1C" );
+	       }
+	  } /* loop over num_state */
+	  /* 
+	   * reconstruct level 1c MDS_PMD-records from level 1b MDS-records
+	   */
 	  if ( source != SCIA_MONITOR && param.write_pmd == PARAM_SET ) {
 	       (void) memcpy( state, state_in, 
 			      num_state * sizeof( struct state1_scia ));
@@ -288,9 +302,9 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 					  "SCIA_WRITE_MDS_PMD" );
 	       }
 	  }
-/*
- * reconstruct level 1c MDS_POLV-records from level 1b MDS-records
- */
+	  /*
+	   * reconstruct level 1c MDS_POLV-records from level 1b MDS-records
+	   */
 	  if ( source != SCIA_MONITOR && param.write_polV == PARAM_SET ) {
 	       (void) memcpy( state, state_in, 
 			      num_state * sizeof( struct state1_scia ));

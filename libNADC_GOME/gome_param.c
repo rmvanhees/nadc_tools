@@ -789,16 +789,30 @@ void GOME_SET_PARAM( int argc, char *argv[], int instrument,
 		    }
 	       }
 	  }
-	  if ( strncmp( argv[narg], "-o", 2 ) == 0 
-	       || strncmp( argv[narg], "--output=", 9 ) == 0 ) {
-	       while ( ++narg < argc && argv[narg][0] == '-' );
-	       if ( ++narg >= argc 
-		    || argv == NULL || argv[narg][0] == '-' ) 
+	  if ( strncmp( argv[narg], "-o", 2 ) == 0 ) {
+	       if ( ++narg >= argc || argv[narg][0] == '-' ) 
 		    NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
 
 	       if ( param->flag_outfile == PARAM_UNSET ) {
 		    (void) snprintf( outfile, MAX_STRING_LENGTH, 
 				     "%s", argv[narg] );
+		    if ( (cpntr = strstr( outfile, ".h5" )) != NULL )
+			 *cpntr = '\0';
+		    if ( (cpntr = strstr( outfile, ".hdf" )) != NULL )
+			 *cpntr = '\0';
+		    if ( (cpntr = strstr( outfile, ".txt" )) != NULL )
+			 *cpntr = '\0';
+		    if ( (cpntr = strstr( outfile, ".child" )) != NULL )
+			 *cpntr = '\0';
+		    param->flag_outfile = PARAM_SET;
+	       }
+	  } else if ( strncmp( argv[narg]+2, "output=", 7 ) == 0 ) {
+	       if ( strlen( argv[narg]+9 ) == 0 )
+		    NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
+
+	       if ( param->flag_outfile == PARAM_UNSET ) {
+		    (void) snprintf( outfile, MAX_STRING_LENGTH, 
+				     "%s", argv[narg]+9 );
 		    if ( (cpntr = strstr( outfile, ".h5" )) != NULL )
 			 *cpntr = '\0';
 		    if ( (cpntr = strstr( outfile, ".hdf" )) != NULL )
