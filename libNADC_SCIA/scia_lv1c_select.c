@@ -54,6 +54,47 @@
 #define _SCIA_LEVEL_1
 #include <nadc_scia.h>
 
+/*+++++++++++++++++++++++++
+.IDENTifer   FREE_LV1C_MDS
+.PURPOSE     free memory within a level 1c MDS
+.INPUT/OUTPUT
+  call as   FREE_MDS( source, nr_mds, mds );
+     input:  
+            int          source    : source of MDS (Nadir, Limb, ... )
+    output:  
+            struct mds1c_scia *mds : level 1c MDS records
+
+.RETURNS     nothing
+.COMMENTS    none
+-------------------------*/
+static inline
+void FREE_LV1C_MDS( int source, struct mds1c_scia *mds )
+{
+     if ( mds->num_obs != 0 ) {
+	  switch ( source ) {
+	  case SCIA_NADIR:
+	       if ( mds->geoN != NULL ) free( mds->geoN );
+	       break;
+	  case SCIA_LIMB:
+	  case SCIA_OCCULT:
+	       if ( mds->geoL != NULL ) free( mds->geoL );
+	       break;
+	  case SCIA_MONITOR:
+	       if ( mds->geoC != NULL ) free( mds->geoC );
+	       break;
+	  }
+     }
+     if ( mds->num_pixels != 0 ) {
+	  if ( mds->pixel_ids != NULL ) free( mds->pixel_ids );
+	  if ( mds->pixel_wv != NULL ) free( mds->pixel_wv );
+	  if ( mds->pixel_wv_err != NULL ) free( mds->pixel_wv_err );
+	  if ( mds->num_obs != 0 ) {
+	       if ( mds->pixel_val != NULL ) free( mds->pixel_val );
+	       if ( mds->pixel_err != NULL ) free( mds->pixel_err );
+	  }
+     }
+}
+
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 unsigned int SCIA_LV1C_SELECT_MDS( unsigned long long clus_mask,
 				   struct state1_scia *state, 
@@ -67,7 +108,16 @@ unsigned int SCIA_LV1C_SELECT_MDS( unsigned long long clus_mask,
 
      if ( clus_mask == ~0ULL ) return num_mds;
 /*
- * update state-record to reflect the actual cluster stored in the MDS record
+ * release all memmory which we no longer need
+ */
+     nc = 0;
+     do {
+	  if ( Get_Bit_LL( clus_mask, (unsigned char) nc ) == 0ULL ) {
+	       FREE_LV1C_MDS( (int) state->type_mds, mds+nc );
+	  }
+     } while ( ++nc < state->num_clus );
+/*
+ * compact all selected clusters
  */
      nc = ncc = 0;
      do {
@@ -75,7 +125,7 @@ unsigned int SCIA_LV1C_SELECT_MDS( unsigned long long clus_mask,
 	       if ( ncc < nc ) {
 		    (void) memmove( &state->Clcon[ncc], &state->Clcon[nc],
 				    sizeof( struct Clcon_scia ) );
-		    (void) memmove( mds+ncc, mds+nc, 
+		    (void) memmove( &mds[ncc], &mds[nc],
 				    sizeof( struct mds1c_scia ) );
 	       }
 	       ncc++;

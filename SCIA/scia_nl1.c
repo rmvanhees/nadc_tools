@@ -250,8 +250,8 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       /* select level 1c MDS records on requested clusters */
 	       if ( patch_scia != SCIA_PATCH_NONE ) {
 		    clus_mask = SCIA_LV1_CHAN2CLUS( param, state+ns );
-		    (void) SCIA_LV1C_SELECT_MDS( clus_mask, 
-						 state+ns, mds1c );
+		    nr_mds1c = SCIA_LV1C_SELECT_MDS( clus_mask, 
+						     state+ns, mds1c );
 		    if ( state[ns].num_clus == 0 ) continue;
 	       }
 	       /* calibrate detector read-outs */
@@ -751,8 +751,10 @@ int main( int argc, char *argv[] )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
      /* KB: apply m-factor from ext. database, if requested */
      SCIA_LV1_MFACTOR_SRS( mph.sensing_start, param.calib_scia, num_dsr, srs );
-     if ( IS_ERR_STAT_FATAL )
+     if ( IS_ERR_STAT_FATAL ) {
+	  if ( num_dsr > 0 ) free( srs );
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SRS(mfactor)" );
+     }
      SCIA_WRITE_SRS( param, num_dsr, srs );
      if ( num_dsr > 0 ) free( srs );
      if ( IS_ERR_STAT_FATAL ) 
