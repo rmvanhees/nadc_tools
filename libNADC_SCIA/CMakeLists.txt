@@ -82,7 +82,6 @@ set (SCIA_LV1_SRCS
     scia_lv1_rd_mds.c
     scia_lv1_scale_mds.c
     scia_lv1_select.c
-    scia_lv1c_select.c
     scia_lv1_wr_ascii_ads.c
     scia_lv1_wr_ascii_gads.c
     scia_lv1_wr_ascii_mds.c

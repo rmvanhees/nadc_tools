@@ -109,9 +109,9 @@ void SCIA_LV1_FREE_MDS( int source, unsigned int nr_mds,
 
 	  nc = 0;
 	  do {
-	       if ( mds[nm].clus[nc].sig != NULL )
+	       if ( mds[nm].clus[nc].n_sig != 0 )
 		    free( mds[nm].clus[nc].sig );
-	       else if ( mds[nm].clus[nc].sigc != NULL )
+	       else if ( mds[nm].clus[nc].n_sigc != 0 )
 		    free( mds[nm].clus[nc].sigc );
 	       else 
 		    last_clus = TRUE;

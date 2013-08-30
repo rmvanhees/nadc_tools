@@ -1269,9 +1269,8 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      /* loop over spectra*/
      nobs = 0;
      do {
-	  register unsigned short np = 0;
-
 	  /* recontruct full spectra (8192 pixels) */
+	  np = 0;
 	  do {
 	       unsigned short vchan = VIRTUAL_CHANNEL( scia_cal->chan_id[np],
 						       scia_cal->clus_id[np] );

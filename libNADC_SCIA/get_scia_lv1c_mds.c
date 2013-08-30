@@ -21,17 +21,21 @@
 .LANGUAGE    ANSI C
 .PURPOSE     convert MDS in level 1b format to level 1c format
 .INPUT/OUTPUT
-  call as    nr_mds = GET_SCIA_LV1C_MDS( state, mds_1b, mds_1c );
+  call as    nr_mds = GET_SCIA_LV1C_MDS( clus_mask, state, mds_1b, mds_1c );
      input:
+            ulong64 clus_mask         : mask for cluster selection
+ in/output:
 	    struct state1_scia *state : structure with States of the product
             struct mds1_scia *mds_1b  : structure holding level 1b MDS records
     output:
             struct mds1c_scia *mds_1c : level 1c MDS records
 
-.RETURNS     number of level 1c MDS records
+.RETURNS     number of level 1c MDS records (unsigned int), 
+             error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 .ENVIRONment None
-.VERSION      2.0   07-Dec-2005 removed esig/esigc from MDS(1b)-struct,
+.VERSION      3.0   30-Aug-2013 added selection on clusters, RvH
+              2.0   07-Dec-2005 removed esig/esigc from MDS(1b)-struct,
 				renamed pixel_val_err to pixel_err, RvH
               1.3   17-Oct-2005 pass state-record by reference, RvH
               1.2   13-Oct-2005 obtain MJD from state definition, RvH
@@ -63,16 +67,21 @@
 	/* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
-				const struct mds1_scia *mds_1b, 
+unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
+				struct state1_scia *state,
+				struct mds1_scia *mds_1b, 
 				struct mds1c_scia *mds_1c )
 {
      const char prognm[] = "GET_SCIA_LV1C_MDS";
 
-     register unsigned int   nc, nd, ng, num;
+     register unsigned int   nc, nd, ng;
      register unsigned short nb, np;
 
-     unsigned int nrpix;
+     register unsigned short nclus = 0;
+
+     unsigned int nr_mds = 0u;
+
+     size_t nrpix;
 
 /* constants */
      const unsigned int geoC_size = 20u;
@@ -81,8 +90,12 @@ unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
 /*
  * reorganise level 1b struct into level 1c struct
  */	  
-     num = 0;
      do {
+	  unsigned char indx_mask = state->Clcon[nclus].id - 1;
+
+	  if ( Get_Bit_LL( clus_mask, indx_mask ) == 0ULL )
+	       continue;
+
 	  (void) memcpy( &mds_1c->mjd, &state->mjd, sizeof( struct mjd_envi ));
 	  mds_1c->rad_units_flag = CHAR_ZERO;
 	  mds_1c->quality_flag   = mds_1b->quality_flag;
@@ -90,12 +103,12 @@ unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
 	  mds_1c->category       = (unsigned char) state->category;
 	  mds_1c->state_id       = state->state_id;
 	  mds_1c->state_index    = state->indx;
-	  mds_1c->chan_id        = state->Clcon[num].channel;
-	  mds_1c->clus_id        = state->Clcon[num].id;
-	  mds_1c->coaddf         = (unsigned char) state->Clcon[num].coaddf;
-	  mds_1c->pet            = state->Clcon[num].pet;
-	  mds_1c->num_obs        = state->num_dsr * state->Clcon[num].n_read;
-	  mds_1c->num_pixels     = state->Clcon[num].length;
+	  mds_1c->chan_id        = state->Clcon[nclus].channel;
+	  mds_1c->clus_id        = state->Clcon[nclus].id;
+	  mds_1c->coaddf         = (unsigned char) state->Clcon[nclus].coaddf;
+	  mds_1c->pet            = state->Clcon[nclus].pet;
+	  mds_1c->num_obs        = state->num_dsr * state->Clcon[nclus].n_read;
+	  mds_1c->num_pixels     = state->Clcon[nclus].length;
 	  mds_1c->dur_scan       = state->dur_scan;
 	  mds_1c->orbit_phase    = state->orbit_phase;
 /*
@@ -151,9 +164,8 @@ unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
 	       mds_1c->geoL = NULL;
 	       break;
 	  }
-	  nrpix = mds_1c->num_pixels;
-	  mds_1c->pixel_ids = (unsigned short *) 
-	       malloc( nrpix * sizeof( short ));
+	  nrpix = (size_t) mds_1c->num_pixels;
+	  mds_1c->pixel_ids = (unsigned short *) malloc( nrpix * sizeof(short));
 	  if ( mds_1c->pixel_ids == NULL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_ids" );
 	  mds_1c->pixel_wv = (float *) calloc( nrpix, sizeof( float ));
@@ -163,7 +175,7 @@ unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
 	  if ( mds_1c->pixel_wv_err == NULL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_wv_err" );
 
-	  nrpix = mds_1c->num_obs * mds_1c->num_pixels;
+	  nrpix = (size_t) (mds_1c->num_obs * mds_1c->num_pixels);
 	  mds_1c->pixel_val = (float *) malloc( nrpix * sizeof( float ));
 	  if ( mds_1c->pixel_val == NULL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_val" );
@@ -175,7 +187,7 @@ unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
  */
 	  np = 0;
 	  do {
-	       mds_1c->pixel_ids[np] = absPixelID(state->Clcon[num]) + np;
+	       mds_1c->pixel_ids[np] = absPixelID(state->Clcon[nclus]) + np;
 	  } while( ++np < mds_1c->num_pixels );
 /*
  * go through all the cluster DataSet Records
@@ -190,39 +202,70 @@ unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *state,
 	       switch( (int) state->type_mds ) {
 	       case SCIA_NADIR:
 		    GET_SCIA_LV1C_GEON( mds_1b[nd].n_aux, mds_1b[nd].geoN,
-					state->Clcon[num].n_read,
+					state->Clcon[nclus].n_read,
 					mds_1c->geoN+ng );
 		    break;
 	       case SCIA_LIMB:
 	       case SCIA_OCCULT:
 		    GET_SCIA_LV1C_GEOL( mds_1b[nd].n_aux, mds_1b[nd].geoL,
-					state->Clcon[num].n_read, 
+					state->Clcon[nclus].n_read, 
 					mds_1c->geoL+ng );
 		    break;
 	       case SCIA_MONITOR:
 		    GET_SCIA_LV1C_GEOC( mds_1b[nd].n_aux, mds_1b[nd].geoC,
-					state->Clcon[num].n_read, 
+					state->Clcon[nclus].n_read, 
 					mds_1c->geoC+ng );
 		    break;
 	       }
-	       ng += state->Clcon[num].n_read;
+	       ng += state->Clcon[nclus].n_read;
 /*
  * copy raw detector counts from 1b-struct to 1c-struct
  */
-	       for ( nb = 0; nb < mds_1b[nd].clus[num].n_sig; nb++ ) {
+	       for ( nb = 0; nb < mds_1b[nd].clus[nclus].n_sig; nb++ ) {
 		    mds_1c->pixel_val[nc++] = (float) 
-			 mds_1b[nd].clus[num].sig[nb].sign;
+			 mds_1b[nd].clus[nclus].sig[nb].sign;
 	       }
-	       for ( nb = 0; nb < mds_1b[nd].clus[num].n_sigc; nb++ ) {
+	       for ( nb = 0; nb < mds_1b[nd].clus[nclus].n_sigc; nb++ ) {
 		    mds_1c->pixel_val[nc++] = (float) 
-			 mds_1b[nd].clus[num].sigc[nb].det.field.sign;
+			 mds_1b[nd].clus[nclus].sigc[nb].det.field.sign;
 	       }
 	  } while ( ++nd < state->num_dsr );
-     } while ( mds_1c++, ++num < state->num_clus ); 
+
+	  /* update State-record */
+	  if ( nr_mds < nclus ) {
+	       (void) memcpy( &state->Clcon[nr_mds], &state->Clcon[nclus],
+			      sizeof( struct Clcon_scia ) );
+
+	       nd = 0;
+	       do {
+		    for ( nb = 0; nb < mds_1b[nd].clus[nclus].n_sig; nb++ ) {
+			 (void) memcpy( &mds_1b[nd].clus[nr_mds],
+					&mds_1b[nd].clus[nclus],
+					sizeof( struct Clus_scia ) );
+		    }
+		    mds_1b[nd].clus[nclus].n_sig = 0;
+
+		    for ( nb = 0; nb < mds_1b[nd].clus[nclus].n_sigc; nb++ ) {
+			 (void) memcpy( &mds_1b[nd].clus[nr_mds],
+					&mds_1b[nd].clus[nclus],
+					sizeof( struct Clus_scia ) );
+		    }
+		    mds_1b[nd].clus[nclus].n_sigc = 0;
+	       } while ( ++nd < state->num_dsr );  
+	  }
+
+	  /* succesfully filled a MDS record */
+	  nr_mds++;
+	  mds_1c++;
+
+     } while ( ++nclus < state->num_clus );
+ 
+     /* update number of clusters in State-record */
+     state->num_clus = (unsigned short) nr_mds;
 /*
  * return number of MDS records
  */
-     return num;
- done:
+     return nr_mds;
+done:
      return 0u;
 }

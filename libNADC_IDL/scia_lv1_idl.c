@@ -843,11 +843,7 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
  */
      C_mds = (struct mds1c_scia *)
 	  malloc( state.num_clus * sizeof( struct mds1c_scia ));
-     nr_mds = (int) GET_SCIA_LV1C_MDS( &state, C_mds1b, C_mds );
-/*
- * select level 1c MDS records on requested channels & clusters
- */
-     nr_mds = (int) SCIA_LV1C_SELECT_MDS( clus_mask, &state, C_mds );
+     nr_mds = (int) GET_SCIA_LV1C_MDS( clus_mask, &state, C_mds1b, C_mds );
 /*
  * calibrate detector read-outs
  */
@@ -1592,8 +1588,7 @@ int IDL_STDCALL _GET_SCIA_MDS1_DATA ( int argc, void *argv[] )
 					    &sign );
 	  if ( IS_ERR_STAT_FATAL ) goto done;
      } else {
-	  nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, clus_mask, &state,
-					    &C_mds1b );
+	  nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, ~0ULL, &state, &C_mds1b );
 	  if ( IS_ERR_STAT_FATAL ) goto done;
 /*
  * calibrate and copy the data in the level 1b records to level 1c records
@@ -1602,7 +1597,8 @@ int IDL_STDCALL _GET_SCIA_MDS1_DATA ( int argc, void *argv[] )
 	       malloc( state.num_clus * sizeof( struct mds1c_scia ));
 	  if ( C_mds1c == NULL ) 
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "C_mds1c" );
-	  nr_mds1c = (int) GET_SCIA_LV1C_MDS( &state, C_mds1b, C_mds1c );
+	  nr_mds1c = (int) 
+	       GET_SCIA_LV1C_MDS( clus_mask, &state, C_mds1b, C_mds1c );
 	  if ( IS_ERR_STAT_FATAL ) goto done;
 	  SCIA_LV1_CAL( fd_nadc, calib_mask, &state, C_mds1b, C_mds1c );
 	  if ( IS_ERR_STAT_FATAL ) goto done;

@@ -56,7 +56,7 @@
 	/* NONE */
 
 /*+++++ Global Variables +++++*/
-extern bool Use_Extern_Alloc;
+	/* NONE */
 
 /*+++++ Static Variables +++++*/
 	/* NONE */

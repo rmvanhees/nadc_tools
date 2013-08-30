@@ -927,11 +927,12 @@ extern void SCIA_LV1_CORR_LOS( const struct state1_scia *,
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack, mds_1b->geoN@*/;
 
-extern unsigned int GET_SCIA_LV1C_MDS( const struct state1_scia *,
-				       const struct mds1_scia *, 
-				       /*@out@*/ struct mds1c_scia *mds )
+extern unsigned int GET_SCIA_LV1C_MDS( unsigned long long,
+				       struct state1_scia *state,
+				       struct mds1_scia *mds_1b, 
+				       /*@out@*/ struct mds1c_scia *mds_1c )
      /*@globals errno, nadc_stat, nadc_err_stack@*/
-     /*@modifies errno, nadc_stat, nadc_err_stack@, mds*/;
+     /*@modifies errno, nadc_stat, nadc_err_stack@, state, mds_1b, mds_1c*/;
 extern unsigned int GET_SCIA_LV1C_PMD( const struct state1_scia *,
 				       const struct mds1_scia *, 
 				       /*@out@*/ struct mds1c_pmd *mds_pmd )
@@ -953,10 +954,6 @@ extern unsigned short GET_SCIA_MDS1_DATA( bool, unsigned char,
        /*@modifies nadc_stat, nadc_err_stack, *sign_out@*/;
 
 extern bool IS_SCIA_LV1C( unsigned int, const struct dsd_envi * );
-extern unsigned int SCIA_LV1C_SELECT_MDS( unsigned long long,
-					  struct state1_scia *state,
-					  struct mds1c_scia *mds )
-       /*@modifies state, mds@*/;
 extern unsigned long long SCIA_LV1_CHAN2CLUS( const struct param_record, 
 					      const struct state1_scia * );
 
