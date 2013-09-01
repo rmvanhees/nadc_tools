@@ -62,7 +62,7 @@ void NADC_Info_Proc( FILE *stream, const char proc_name[],
 		     unsigned int counter )
 {
      (void) fprintf( stream, "Processing %s [%-u]\t-\t", proc_name, counter );
-     (void) fflush( stdout );
+     (void) fflush( stream );
      nadc_info_init = TRUE;
 }
 
@@ -93,13 +93,13 @@ void NADC_Info_Update( FILE *stream, unsigned short digits,
 	  (void) strcpy( sbuff, "" );
 	  for ( ni = 0; ni < digits; ni++ ) (void) strcat( sbuff, "\b" );
 	  (void) fprintf( stream, "%s", sbuff );
-	  (void) fflush( stdout );
+	  (void) fflush( stream );
 	  (void) free( sbuff );
      } else
 	  nadc_info_init = FALSE;
      (void) snprintf( str_fmt, 8, "%%0%-huu", digits );
      (void) fprintf( stream, str_fmt, counter );
-     (void) fflush( stdout );
+     (void) fflush( stream );
 }
 
 /*+++++++++++++++++++++++++
@@ -135,5 +135,5 @@ void NADC_Info_Finish( FILE *stream, unsigned short digits,
 	  (void) snprintf( str_fmt, 8, "%%0%-huu\n", digits );
 	  (void) fprintf( stream, str_fmt, counter );
      }
-     (void) fflush( stdout );
+     (void) fflush( stream );
 }

@@ -93,9 +93,20 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
      do {
 	  unsigned char indx_mask = state->Clcon[nclus].id - 1;
 
-	  if ( Get_Bit_LL( clus_mask, indx_mask ) == 0ULL )
+	  if ( Get_Bit_LL( clus_mask, indx_mask ) == 0ULL ) {
+	       nd = 0;
+	       do {
+		    if ( mds_1b[nd].clus[nclus].n_sig != 0 ) {
+			 free( mds_1b[nd].clus[nclus].sig );
+			 mds_1b[nd].clus[nclus].n_sig = 0;
+		    }
+		    if ( mds_1b[nd].clus[nclus].n_sigc != 0 ) {
+			 free( mds_1b[nd].clus[nclus].sigc );
+			 mds_1b[nd].clus[nclus].n_sigc = 0;
+		    }
+	       } while ( ++nd < state->num_dsr );  
 	       continue;
-
+	  }
 	  (void) memcpy( &mds_1c->mjd, &state->mjd, sizeof( struct mjd_envi ));
 	  mds_1c->rad_units_flag = CHAR_ZERO;
 	  mds_1c->quality_flag   = mds_1b->quality_flag;
@@ -231,25 +242,18 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 	       }
 	  } while ( ++nd < state->num_dsr );
 
-	  /* update State-record */
+	  /* update State & MDS(1B) records*/
 	  if ( nr_mds < nclus ) {
 	       (void) memcpy( &state->Clcon[nr_mds], &state->Clcon[nclus],
 			      sizeof( struct Clcon_scia ) );
 
 	       nd = 0;
 	       do {
-		    for ( nb = 0; nb < mds_1b[nd].clus[nclus].n_sig; nb++ ) {
-			 (void) memcpy( &mds_1b[nd].clus[nr_mds],
-					&mds_1b[nd].clus[nclus],
-					sizeof( struct Clus_scia ) );
-		    }
+		    (void) memcpy( &mds_1b[nd].clus[nr_mds],
+				   &mds_1b[nd].clus[nclus],
+				   sizeof( struct Clus_scia ) );
+		    /* no double free */
 		    mds_1b[nd].clus[nclus].n_sig = 0;
-
-		    for ( nb = 0; nb < mds_1b[nd].clus[nclus].n_sigc; nb++ ) {
-			 (void) memcpy( &mds_1b[nd].clus[nr_mds],
-					&mds_1b[nd].clus[nclus],
-					sizeof( struct Clus_scia ) );
-		    }
 		    mds_1b[nd].clus[nclus].n_sigc = 0;
 	       } while ( ++nd < state->num_dsr );  
 	  }

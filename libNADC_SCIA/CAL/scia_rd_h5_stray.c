@@ -127,7 +127,8 @@ void SCIA_FREE_H5_STRAY( struct scia_straycorr *stray )
 {
      if ( stray->grid_in != NULL ) free( stray->grid_in );
      if ( stray->grid_out != NULL ) free( stray->grid_out );
-     if ( stray->matrix != NULL ) FREE_2D( (void **) stray->matrix );     
+     if ( stray->ghosts != NULL ) FREE_2D( (void **) stray->ghosts );
+     if ( stray->matrix != NULL ) FREE_2D( (void **) stray->matrix );
 }
 
 /*
