@@ -1093,7 +1093,8 @@ void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray,
      register size_t ng, np, ns;
      register float  intensity;
 
-     size_t min_pix, max_pix, dim_pix;
+     size_t dim_pos;
+     size_t dim_pix, min_pix, max_pix;
 
      float pixels[SCIENCE_PIXELS];
      float positions[SCIENCE_PIXELS];
@@ -1102,10 +1103,10 @@ void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray,
 /*
  * The ghost keydata contains the following parameteres:
  *  - ghosts[ng][0:2]  :  polynominal coefficients of the ghost position
- *  - ghosts[ng][3]    :  minimum of the position of the ghost
- *  - ghosts[ng][4]    :  minimum of the intensity of the ghost
- *  - ghosts[ng][5]    :  maximum of the position of the ghost
- *  - ghosts[ng][6]    :  maximum of the intensity of the ghost
+ *  - ghosts[ng][3]    :  starting pixel with parent contribution
+ *  - ghosts[ng][4]    :  starting pixel with ghost contribution
+ *  - ghosts[ng][5]    :  ending pixel with parent contribution
+ *  - ghosts[ng][6]    :  ending pixel with ghost contribution
  *  - ghosts[ng][7:10] :  polynominal coefficients of the ghost intensity
  *  - ghosts[ng][11]   :  smoothing width for the ghost intensity
  */
@@ -1119,19 +1120,22 @@ void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray,
 				      stray->ghosts[ng][9], 
 				      stray->ghosts[ng][10]
 	  };
-	  size_t dim_pos = stray->ghosts[ng][5] - stray->ghosts[ng][3];
 
+	  /* added test to force position within range [0,8192> */
 	  ns = 0;
 	  for ( np = stray->ghosts[ng][3]; np < stray->ghosts[ng][5]; np++ ) {
 	       positions[ns] = Eval_Poly3( np, coeffs_x );
-	       intensity = Eval_Poly4( np, coeffs_y );
-	       if ( intensity < 0.f ) intensity = 0.f;
-	       ghoststray[ns++] = intensity * spec_f[np];
+	       if ( positions[ns] >= 0.f && positions[ns] < SCIENCE_PIXELS ) {
+		    intensity = Eval_Poly4( np, coeffs_y );
+		    if ( intensity < 0.f ) intensity = 0.f;
+		    ghoststray[ns++] = intensity * spec_f[np];
+	       }
 	  }
+	  dim_pos = ns;
 
 	  /* make sure the data is sorted */
 	  if ( positions[0] > positions[ns-1] )
-	       SHELLrr( ns, positions, ghoststray );
+	       SHELLrr( dim_pos, positions, ghoststray );
 	  MinMax( dim_pos, positions, &min_pix, &max_pix );
 	  dim_pix = max_pix - min_pix;
 
