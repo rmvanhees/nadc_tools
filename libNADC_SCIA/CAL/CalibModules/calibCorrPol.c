@@ -33,7 +33,8 @@
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 .ENVIRONment None
-.VERSION      2.0   05-Nov-2007 nearly complete rewrite, RvH
+.VERSION      2.0   02-Sep-2013 fixed memory leak mtx_psplo, RvH
+              2.0   05-Nov-2007 nearly complete rewrite, RvH
               1.1   24-Aug-2006 fixed bug the GPF correction, RvH
                                 ToDo: handling invalid GPF values gracefully
               1.0   06-Jun-2006 initial release by R. M. van Hees
@@ -806,6 +807,8 @@ void Apply_PolCorrLO( unsigned short num_psp, const struct psplo_scia *psplo,
 	       *signal /= (float) corrP;
 	  } while ( ++signal, ++np < mds_1c->num_pixels );
      } while ( ++polV, ++nobs < mds_1c->num_obs );
+
+     free( mtx_psplo );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
