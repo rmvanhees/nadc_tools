@@ -172,23 +172,6 @@ float Eval_Poly4( float xx, const double *coeffs )
 }
 
 static inline
-void MinMax( size_t dim, const float *array, 
-	     /*@out@*/ size_t *min, /*@out@*/ size_t *max )
-{
-     register size_t nd = 0;
-
-     float min_val = *array;
-     float max_val = *array;
-
-     for ( nd = 0; nd < dim; nd++, array++ ) {
-	  if ( (min_val - *array) > FLT_EPSILON ) min_val = *array;
-	  else if ( (*array - max_val) >= FLT_EPSILON ) max_val = *array;
-     }
-     *min = (min_val < 0.f) ? 0 : (size_t) floorf( min_val );
-     *max = (max_val < 0.f) ? 0 : (size_t) floorf( max_val );
-}
-
-static inline
 float DERIV( unsigned short ni, unsigned short dim, const float *array )
 {
      if ( ni == 0 ) {
@@ -198,43 +181,6 @@ float DERIV( unsigned short ni, unsigned short dim, const float *array )
      } else {
 	  return (3 * array[ni] - 4 * array[ni-1] + array[ni-2]) / 2.f;
      }
-}
-
-static
-void SHELLrr( size_t dim, float *ra, float *rra )
-{
-     register size_t ii, jj;
-
-     size_t inc = 1;
-     float  buff, test;
-/*
- * determine the starting increment
- */
-     ra--; rra--;
-     do {
-          inc *= 3;
-          inc++;
-     } while ( inc <= dim );
-/*
- * loop over the partial sorts
- */
-     do {
-          inc /= 3;
-          for ( ii = inc + 1; ii <= dim; ii++ ) {
-               test = ra[ii];
-               buff = rra[ii];
-
-               jj = ii;
-               while ( ra[jj-inc] > test ) {
-                    ra[jj] = ra[jj-inc];
-                    rra[jj] = rra[jj-inc];
-                    jj -= inc;
-                    if ( jj <= inc ) /*@innerbreak@*/ break;
-               }
-               ra[jj] = test;
-               rra[jj] = buff;
-          }
-     } while ( inc > 1 );
 }
 
 /*+++++++++++++++++++++++++
@@ -1090,6 +1036,8 @@ static
 void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray, 
 			     const double *spec_f, /*@out@*/ float *stray_f )
 {
+     const char prognm[] = "SCIA_CALC_STRAY_GHOSTS";
+
      register size_t ng, np, ns;
      register float  intensity;
 
@@ -1134,17 +1082,31 @@ void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray,
 	  dim_pos = ns;
 
 	  /* make sure the data is sorted */
-	  if ( positions[0] > positions[ns-1] )
-	       SHELLrr( dim_pos, positions, ghoststray );
-	  MinMax( dim_pos, positions, &min_pix, &max_pix );
-	  dim_pix = max_pix - min_pix;
+	  if ( positions[0] > positions[dim_pos-1] ) {
+	       register float rbuff;
+
+	       for ( np = 0; np < dim_pos/2; np++ ) {
+		    rbuff = positions[np];
+		    positions[np] = positions[dim_pos-np-1];
+		    positions[dim_pos-np-1] = rbuff;
+
+		    rbuff = ghoststray[np];
+		    ghoststray[np] = ghoststray[dim_pos-np-1];
+		    ghoststray[dim_pos-np-1] = rbuff;
+	       }
+	  }
+	  min_pix = ceilf( positions[0] );
+	  max_pix = floorf( positions[dim_pos-1] );
+	  dim_pix = max_pix - min_pix + 1;
 
 	  ns = 0;
-	  for ( np = min_pix; np < max_pix; np++ ) pixels[ns++] = (float) np;
+	  for ( np = min_pix; np <= max_pix; np++ ) pixels[ns++] = (float) np;
 
 	  /* resample straylight spectrum to original input grid */
 	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, dim_pos, positions, ghoststray,
 			  FLT32_T, FLT32_T, dim_pix, pixels, tmp_stray );
+	  if ( IS_ERR_STAT_FATAL )
+	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "AKIMA" );
 
 	  /* store stray light for this ghost */
 	  ns = 0;
@@ -1187,9 +1149,11 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      double *spec_r     = NULL;
      float  *stray_r    = NULL;
 #ifdef DEBUG
-     FILE *fp_full, *fp_grid;
-     FILE *fp_ghost;
-     FILE *fp_corr_full, *fp_corr_grid;
+     FILE *fp_full = NULL;
+     FILE *fp_grid = NULL;
+     FILE *fp_ghost = NULL;
+     FILE *fp_corr_full = NULL;
+     FILE *fp_corr_grid = NULL;
 #endif
      struct scia_straycorr stray = {
 	  {0,0}, NULL, NULL, NULL, {0,0}, NULL
@@ -1333,10 +1297,32 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	  (void) fwrite( stray_r, sizeof(float), stray.dims[0], fp_corr_grid );
 #endif
 	  /* resample straylight spectrum to original input grid */
-	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, stray.dims[0], stray.grid_out, 
-			  stray_r, 
-			  FLT32_T, FLT32_T, SCIENCE_PIXELS, grid_f, 
-			  stray_f );
+
+	  for ( nch = 0; nch < SCIENCE_CHANNELS; nch++ ) {
+	       unsigned short ipix_ch_mn = nch * CHANNEL_SIZE;
+	       unsigned short ipix_ch_mx = (nch+1) * CHANNEL_SIZE - 1;
+
+	       bool found = FALSE;
+	       size_t offs = 0;
+	       size_t dim = 0;
+
+	       for ( nr = 0; nr < stray.dims[0]; nr++ ) {
+		    if ( stray.grid_out[nr] < ipix_ch_mn ) continue;
+		    if ( stray.grid_out[nr] > ipix_ch_mx ) break;
+
+		    if ( ! found ) {
+			 offs = nr;
+			 found = TRUE;
+		    }
+		    dim++;
+	       }
+	       FIT_GRID_AKIMA( FLT32_T, FLT32_T, dim, 
+			       &stray.grid_out[offs], &stray_r[offs], 
+			       FLT32_T, FLT32_T, CHANNEL_SIZE, 
+			       &grid_f[ipix_ch_mn], &stray_f[ipix_ch_mn] );
+	       if ( IS_ERR_STAT_FATAL )
+		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "AKIMA" );
+	  }
 #ifdef DEBUG
 	  (void) fwrite( stray_f, sizeof(float), SCIENCE_PIXELS, fp_corr_full );
 #endif
@@ -1348,13 +1334,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
                     scia_cal->correction[np][nobs] = (ghost_f[np] + stray_f[np]);
           } while ( ++np < SCIENCE_PIXELS );
      } while ( ++nobs < scia_cal->num_obs );
-#ifdef DEBUG
-     (void) fclose( fp_full );
-     (void) fclose( fp_grid );
-     (void) fclose( fp_ghost );
-     (void) fclose( fp_corr_full );
-     (void) fclose( fp_corr_grid );
-#endif
+
      /* scale straylight correction to pixel exposure time */
      np = 0;
      do {
@@ -1366,7 +1346,15 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	  unsigned short fillings = (vchan == USHRT_MAX) ? 0 :
 		    (scia_cal->num_obs / scia_cal->chan_obs[vchan]);
 
+#ifdef DEBUG
+	  if ( fillings <= 1 ) {
+	       (void) fprintf( stderr, "\n%s %4d %15.6f", prognm, np, 
+			       scia_cal->correction[np][scia_cal->num_obs/2] );
+	       continue;
+	  }
+#else
 	  if ( fillings <= 1 ) continue;
+#endif
 
 	  nobs = 0;
 	  do {
@@ -1379,8 +1367,19 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	       } while ( ++nf < fillings );
 	       scia_cal->correction[np][no] = corrval;
 	  } while ( ++no < scia_cal->chan_obs[vchan] );
+#ifdef DEBUG
+	  (void) fprintf( stderr, "\n%s %4d %15.6f", prognm, np, 
+			  scia_cal->correction[np][scia_cal->num_obs/2] );
+#endif
      } while ( ++np < SCIENCE_PIXELS );
 done:
+#ifdef DEBUG
+     if ( fp_full != NULL ) (void) fclose( fp_full );
+     if ( fp_grid != NULL ) (void) fclose( fp_grid );
+     if ( fp_ghost != NULL ) (void) fclose( fp_ghost );
+     if ( fp_corr_full != NULL ) (void) fclose( fp_corr_full );
+     if ( fp_corr_grid != NULL ) (void) fclose( fp_corr_grid );
+#endif
      if ( grid_in_ll != NULL ) free( grid_in_ll );
      if ( grid_in_ul != NULL ) free( grid_in_ul );
      if ( grid_deriv != NULL ) free( grid_deriv );

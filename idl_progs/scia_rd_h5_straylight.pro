@@ -26,10 +26,11 @@
 ;	Sciamachy calibration
 ;
 ; CALLING SEQUENCE:
-;	SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayCorr, STRAY_DB=STRAY_DB
+;	SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayGhost, strayMatrix, STRAY_DB=STRAY_DB
 ;
 ; INPUTS:
-;	strayCorr:      Straylight correction keydata
+;	strayGhost:      Straylight correction keydata (ghosts
+;	strayMatrix:     Straylight correction keydata (uniform)
 ;
 ; EXAMPLE:
 ;	None
@@ -41,12 +42,13 @@
 ;       Modified:  RvH, 25 August 2011
 ;                    re-write using IDL HDF5 calls
 ;-
-PRO SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayCorr, STRAY_DB=STRAY_DB
+PRO SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayGhost, strayMatrix, $
+                           STRAY_DB=STRAY_DB
   compile_opt idl2,hidden
 
-  IF N_PARAMS() NE 3 THEN BEGIN
-     MESSAGE, ' Usage: SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayCorr,' $
-              + ' STRAY_DB=STRAY_DB', /INFO
+  IF N_PARAMS() NE 4 THEN BEGIN
+     MESSAGE, ' Usage: SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayGhost,' $
+              + ' strayMatrix, STRAY_DB=STRAY_DB', /INFO
      RETURN
   ENDIF
 
@@ -79,7 +81,7 @@ PRO SCIA_RD_H5_STRAYLIGHT, grid_in, grid_out, strayCorr, STRAY_DB=STRAY_DB
   H5D_CLOSE, dd
   dd = H5D_OPEN( fid, 'strayMatrix' )
   IF dd LT 0 THEN MESSAGE, 'Could not open dataset: strayMatrix'
-  strayCorr = H5D_READ( dd )
+  strayMatrix = H5D_READ( dd )
   H5D_CLOSE, dd
   H5F_CLOSE, fid
 
