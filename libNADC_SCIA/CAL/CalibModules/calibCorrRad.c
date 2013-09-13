@@ -20,19 +20,12 @@
 .KEYWORDS    Sciamachy - Level 1b - Calibration
 .LANGUAGE    ANSI C
 .PURPOSE     perform Radiance correction on Sciamachy L1b science data
-.INPUT/OUTPUT
-  call as   SCIA_ATBD_CAL_RAD( fileParam, wvlen, state, mds_1c );
-     input:  
-             struct file_rec *fileParam : file/calibration parameters
-	     struct wvlen_rec wvlen     : Solar and science wavelength grid
-	     struct state1_scia *state  : structure with States of the product
- in/output:  
-             struct mds1c_scia *mds_1c  : level 1c MDS records
-
-.RETURNS     Nothing, error status passed by global variable ``nadc_stat''
-.COMMENTS    None
+.COMMENTS    Contains functions SCIA_ATBD_CAL_RAD & SCIA_SMR_CAL_RAD
 .ENVIRONment None
-.VERSION      3.3   02-Feb-2011 fixed round-off errors
+.VERSION      4.0   11-Sep-2013 replaced SCIA_ATBD_CAL_RAD_DETWIDE and 
+                                Apply_RadSensLimb_detwide by SCIA_SMR_CAL_RAD
+				fixed several minor bugs, RvH
+	      3.3   02-Feb-2011 fixed round-off errors
                                 apply PET correction (channel 6 - 8)
                                 and update documentation, RvH
               3.2   02-Jul-2008 improved implementation (speed-up), RvH
@@ -373,7 +366,6 @@ unsigned short Get_RadSensNadir( const struct file_rec *fileParam,
   call as    Get_H5_RadSensNadir( NDF, wvlen, &rspn );
      input:
             bool NDF                  : neutral density filter flag
-            
 	    float *wvlen              : wavelength grid
     output:
             struct rspn_scia **rspn   : radiance sensitivity parameters (Nadir)
@@ -799,7 +791,7 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const float *wvlen,
   call as    Get_H5_RadSensMoni( NDF, wvlen, &rspm );
      input:
             bool NDF                   : neutral density filter flag
-	    float *wvlen               : Solar/Science wavelength grid
+	    float *wvlen               : wavelength grid
     output:
             struct rsplo_scia **rspm   : radiance sensitivity parameters (Moni)
 .RETURNS     nothing
@@ -1163,6 +1155,21 @@ void Apply_RadSensOccul( float intg, unsigned short num_rsp,
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_ATBD_CAL_RAD
+.PURPOSE     perform Radiance correction on Sciamachy L1b science data
+.INPUT/OUTPUT
+  call as   SCIA_ATBD_CAL_RAD( fileParam, wvlen, state, mds_1c );
+     input:  
+             struct file_rec *fileParam : file/calibration parameters
+	     struct wvlen_rec wvlen     : Solar and science wavelength grid
+	     struct state1_scia *state  : structure with States of the product
+ in/output:  
+             struct mds1c_scia *mds_1c  : level 1c MDS records
+
+.RETURNS     Nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    None
+-------------------------*/
 void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 			const struct wvlen_rec wvlen,
 			const struct state1_scia *state,
@@ -1312,7 +1319,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 		    NDF = FALSE;
 	       }
 	       if ( (fileParam->calibFlag & DO_KEYDATA_RAD) != UINT_ZERO )
-		    num_rsp = Get_H5_RadSensLimb(NDF, wvlen.science, &rspl);
+		    num_rsp = Get_H5_RadSensLimb( NDF, wvlen.science, &rspl );
 	       else
 		    num_rsp = Get_RadSensLimb( fileParam, wvlen, &rspl );
 	       if ( IS_ERR_STAT_FATAL )
@@ -1466,7 +1473,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	    unsigned short channel     : channel ID [1,2,..,8]
 	    float angAsm               : ASM angle
 	    float angEsm               : ESM angle
-	    const float *wvlen         : wavelength [all channels]
+	    float *wvlen               : wavelength grid [all channels]
  in/output:
             float *smr                 : Solar Mean Spectrum
 
