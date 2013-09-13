@@ -49,8 +49,8 @@ struct mtbl_pt_rec {
      float  orbitPhase;                     /* + taken from ROE info */
      float  asmAngle;                       /* + taken from DORIS / AUX_FRA */
      float  esmAngle;                       /* + taken from DORIS / AUX_FRA */
-     float  sunAz;                          /* + taken from DORIS / AUX_FRA */
-     float  sunEl;                          /* + taken from DORIS / AUX_FRA */
+     float  sunAzim;                        /* + taken from DORIS / AUX_FRA */
+     float  sunElev;                        /* + taken from DORIS / AUX_FRA */
      float  longitude;                      /* + taken from DORIS / AUX_FRA */
      float  latitude;                       /* + taken from DORIS / AUX_FRA */
      float  obmTemp;                        /* + taken from MDS_AUX */
@@ -61,8 +61,8 @@ struct geo_pt_rec {
      double julianDay;
      float  asmAngle;
      float  esmAngle;
-     float  sunAz;
-     float  sunEl;
+     float  sunAzim;
+     float  sunElev;
 };
 
 /* structure definitions (all databases) */
@@ -234,6 +234,31 @@ static const size_t mtbl_simudark_sizes[DIM_MTBL_SIMUDARK] = {
      sizeof( float ), sizeof( float )
 };
 
+/* structure definitions SMR database (SDMF31) */
+#define DIM_MTBL_SMR2    13
+struct mtbl_smr2_rec 
+{
+     double julianDay;
+     char   entryDate[STR_SZ_DATE];
+     unsigned short absOrbit;                 
+     unsigned short quality;
+     float  orbitPhase;
+     float  longitude;
+     float  latitude;
+     float  asmAngle;
+     float  esmAngle;
+     float  sunAzim;
+     float  sunElev;
+     float  obmTemp;
+     float  detTemp[SCIENCE_CHANNELS];
+};
+/*@unused@*/ 
+static const size_t mtbl_smr2_sizes[DIM_MTBL_SMR2] = {
+     sizeof( double ), STR_SZ_DATE * sizeof( char),  
+     sizeof( short ), sizeof( short ), sizeof( float ), sizeof( float ), 
+     sizeof( float ), sizeof( float ), SCIENCE_CHANNELS * sizeof( float )
+};
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * function prototypes
  */
@@ -346,6 +371,12 @@ extern bool SDMF_get_OrbitalDark( unsigned short, float,
      /*@modifies nadc_stat, nadc_err_stack, ao, lc, ao_err, lc_err@*/;
 
 extern bool SDMF_get_SMR_30( bool, unsigned short, unsigned short,
+			     /*@null@*/ const float *,
+			     /*@out@*/ float *solarMean )
+     /*@globals  nadc_stat, nadc_err_stack;@*/
+     /*@modifies nadc_stat, nadc_err_stack, solarMean@*/;
+
+extern bool SDMF_get_SMR_31( bool, unsigned short, unsigned short,
 			     /*@null@*/ const float *,
 			     /*@out@*/ float *solarMean )
      /*@globals  nadc_stat, nadc_err_stack;@*/
