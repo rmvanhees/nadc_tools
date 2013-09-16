@@ -28,7 +28,7 @@ As of 2013-03-20 the source code is hosted as a public repository on Github.
 
 In order to retrieve a working copy or clone into a local bare Git repository:
 
-    git clone git@github.com:rmvanhees/nadc_tools.git [<local>]
+    git clone https://github.com/rmvanhees/nadc_tools.git [<local>]
 
 It is adviced though that in order to push back changes, your are working off a fork from the original repository and then issue a pull request once you think your code is ready to be merged back into the main repositorys' master branch.
 
