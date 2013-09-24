@@ -288,16 +288,14 @@ bool SDMF_get_SMR_31( bool calibRad,
 	       (orbitList[nr] -  absOrbit) : (absOrbit - orbitList[nr]);
 	  if ( delta < delta_min ) {
 	       metaIndx = nr;
-	       if ( (delta_min = delta) == 0 ) {
-		    found = TRUE;
-		    break;
-	       }
+	       if ( (delta_min = delta) == 0 ) break;
 	  }
      }
      if ( delta_min > MAX_DiffOrbitNumber ) {
 	  (void) snprintf(str_msg, SHORT_STRING_LENGTH, msg_notfound, absOrbit);
 	  NADC_GOTO_ERROR( prognm, NADC_SDMF_ABSENT, str_msg );
      }
+     found = TRUE;
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg_found, 
 		      orbitList[metaIndx] );
      NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
