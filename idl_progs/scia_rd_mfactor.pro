@@ -65,10 +65,10 @@ PRO SCIA_RD_MFACTOR, mftype, sensing_start, mfactor
  mfactor = FLTARR(8192)
 
  IF TYPENAME(sensing_start) EQ 'BYTE' THEN BEGIN
-    res = call_external( lib_name('libIDL_NADC'), '_SCIA_RD_MFACTOR', $
+    res = call_external( lib_name('libnadc_idl'), '_SCIA_RD_MFACTOR', $
                          mftype, STRING(sensing_start), mfactor, /CDECL )
  ENDIF ELSE IF TYPENAME(sensing_start) EQ 'STRING' THEN BEGIN
-    res = call_external( lib_name('libIDL_NADC'), '_SCIA_RD_MFACTOR', $
+    res = call_external( lib_name('libnadc_idl'), '_SCIA_RD_MFACTOR', $
                          mftype, sensing_start, mfactor, /CDECL )
  ENDIF ELSE BEGIN
     MESSAGE, 'FATAL: invalid sensing start given' 
