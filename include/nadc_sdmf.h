@@ -270,10 +270,9 @@ extern void SDMF_get_stateParam( unsigned char, unsigned short,
 				 /*@null@*/ int *orbit_range )
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack, int_pet, orbit_range@*/;
-extern void SDMF_get_statePET( unsigned char, unsigned short,
-			       unsigned short, /*@out@*/ float *pet )
+extern float SDMF_get_statePET( unsigned char, unsigned short, unsigned short )
      /*@globals  nadc_stat, nadc_err_stack;@*/
-     /*@modifies nadc_stat, nadc_err_stack, pet@*/;
+     /*@modifies nadc_stat, nadc_err_stack@*/;
 extern unsigned char SDMF_get_stateCoadd( unsigned char, unsigned short, 
 					  unsigned short )
      /*@globals  nadc_stat, nadc_err_stack;@*/

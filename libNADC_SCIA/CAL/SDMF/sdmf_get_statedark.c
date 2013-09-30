@@ -682,10 +682,6 @@ bool SDMF_get_StateDark( unsigned char stateID, unsigned short channel,
 		      mtbl->absOrbit, mtbl->stateCount );
      NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
 /*
- * get pixel exposure time for this state (per channel)
- */
-     SDMF_get_statePET( stateID, absOrbit, channel, pet );
-/*
  * read dark parameters from SDMF database
  */
      if ( channel == 0 ) {

@@ -1541,7 +1541,7 @@ void SCIA_SMR_CAL_RAD( unsigned short absOrbit, unsigned short channel,
 	  for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
 	       register unsigned short ni = (nch-1) * CHANNEL_SIZE;
 
-	       SDMF_get_statePET( 62, absOrbit, nch, &pet );
+	       pet = SDMF_get_statePET( 62, absOrbit, nch );
 	       if ( nch > 5 ) pet -= 1.18125e-3;
 
 	       do {
@@ -1556,7 +1556,7 @@ void SCIA_SMR_CAL_RAD( unsigned short absOrbit, unsigned short channel,
 	  register unsigned short np = 0;
 	  register unsigned short ni = (channel-1) * CHANNEL_SIZE;
 
-	  SDMF_get_statePET( 62, absOrbit, channel, &pet );
+	  pet = SDMF_get_statePET( 62, absOrbit, channel );
 	  if ( channel > 5 ) pet -= 1.18125e-3;
 
 	  do {

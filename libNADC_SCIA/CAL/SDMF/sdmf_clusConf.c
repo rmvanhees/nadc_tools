@@ -432,8 +432,10 @@ void SDMF_get_stateParam( unsigned char stateID, unsigned short absOrbit,
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
 	  break;
      }}
-     while( absOrbit >= clusConf[nc+1].absOrbit ) nc++;
-     if ( absOrbit < clusConf[nc].absOrbit ) goto done;
+     if ( absOrbit > 0u ) {
+	  while( absOrbit >= clusConf[nc+1].absOrbit ) nc++;
+	  if ( absOrbit < clusConf[nc].absOrbit ) goto done;
+     }
      if ( orbit_range != NULL ) {
           if ( orbit_range[0] < clusConf[nc].absOrbit )
                orbit_range[0] = clusConf[nc].absOrbit;
@@ -453,28 +455,24 @@ done:
 .IDENTifer   SDMF_get_statePET
 .PURPOSE     obtain PET for given state, orbit and channel
 .INPUT/OUTPUT
-  call as    SDMF_get_statePET( stateID, orbit, channel, pet );
+  call as    pet = SDMF_get_statePET( stateID, orbit, channel );
     input:
-            unsigned char  stateID :  state ID
+            unsigned char  stateID :  state ID [1..70]
             unsigned short orbit   :  orbit number
-	    unsigned short channel :  channel ID or zero for all channels
-   output:
-            float                  :  pixel exposure time (s)
+	    unsigned short channel :  channel ID [1..8]
 
-.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.RETURNS     float pixel exposure time (s)
+             error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SDMF_get_statePET( unsigned char stateID, unsigned short absOrbit,
-			unsigned short channel, float *pet )
+float SDMF_get_statePET( unsigned char stateID, unsigned short absOrbit,
+			unsigned short channel )
 {
      const char prognm[] = "SDMF_get_statePET";
 
      const struct clusConf_rec *clusConf;
 
      register unsigned short nc = 0;
-
-     /* initialize return value */
-     *pet = -1.f;
 
      switch ( (int) stateID ) {
      case 8:
@@ -527,22 +525,15 @@ void SDMF_get_statePET( unsigned char stateID, unsigned short absOrbit,
 
 	  (void) snprintf( msg, 64, "undefined clusConf for state: %02hhu\n", 
 			   stateID );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, msg );
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
 	  break;
      }}
      while( absOrbit >= clusConf[nc+1].absOrbit ) nc++;
-     if ( absOrbit < clusConf[nc].absOrbit ) return;
-     if ( channel == 0 ) {
-	  pet[0] = clusConf[nc].pet[0];
-	  pet[1] = clusConf[nc].pet[1];
-	  pet[2] = clusConf[nc].pet[2];
-	  pet[3] = clusConf[nc].pet[3];
-	  pet[4] = clusConf[nc].pet[4];
-	  pet[5] = clusConf[nc].pet[5];
-	  pet[6] = clusConf[nc].pet[6];
-	  pet[7] = clusConf[nc].pet[7];
-     } else
-	  *pet = clusConf[nc].pet[channel-1];
+     if ( absOrbit < clusConf[nc].absOrbit ) return -1.f;
+
+     return clusConf[nc].pet[channel-1];
+done:
+     return -1.f;
 }
 
 /*+++++++++++++++++++++++++
