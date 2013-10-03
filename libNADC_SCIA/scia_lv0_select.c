@@ -161,14 +161,14 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_info *info,
      /* compose message to user */
      if ( (int) info[indx_info[0]].packetID == SCIA_AUX_PACKET ) {
 	  (void) snprintf( msg, 64, 
-			   "Rejected %-u duplicated Auxiliary packages", 
+			   "rejected %-u duplicated Auxiliary packages", 
 			   nr_indx - nr );
      } else if ( (int) info[indx_info[0]].packetID == SCIA_DET_PACKET ) {
 	  (void) snprintf( msg, 64, 
-			   "Rejected %-u duplicated Detector packages", 
+			   "rejected %-u duplicated Detector packages", 
 			   nr_indx - nr );
      } else {
-	  (void) snprintf( msg, 64, "Rejected %-u duplicated PMD packages", 
+	  (void) snprintf( msg, 64, "rejected %-u duplicated PMD packages", 
 			   nr_indx - nr );
      }
      NADC_ERROR( prognm, NADC_ERR_NONE, msg );

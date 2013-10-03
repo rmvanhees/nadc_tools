@@ -265,10 +265,10 @@ unsigned char CHECK_CLUSTERDEF( struct info_clus *info_clus )
 	       && ClusterDef[nc].length == info_clus->length ) break;
      } while( ++nc < numClus );
      if ( nc < numClus ) {
-	  info_clus->clusID = ClusterDef[nc].clusID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CLUSID, 
 			   info_clus->clusID, ClusterDef[nc].clusID );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  info_clus->clusID = ClusterDef[nc].clusID;
 	  return DET_SRC_MODIFIED_CLUSID;
      }
 
@@ -280,10 +280,10 @@ unsigned char CHECK_CLUSTERDEF( struct info_clus *info_clus )
 	       && ClusterDef[nc].length == info_clus->length ) break;
      } while( ++nc < numClus );
      if ( nc < numClus ) {
-	  info_clus->chanID = ClusterDef[nc].chanID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CHANID, 
 			   info_clus->chanID, ClusterDef[nc].chanID );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  info_clus->chanID = ClusterDef[nc].chanID;
 	  return DET_SRC_MODIFIED_CHANID;
      }
 
@@ -295,10 +295,10 @@ unsigned char CHECK_CLUSTERDEF( struct info_clus *info_clus )
 	       && ClusterDef[nc].length == info_clus->length ) break;
      } while( ++nc < numClus );
      if ( nc < numClus ) {
-	  info_clus->start = ClusterDef[nc].start;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_START, 
 			   info_clus->start, ClusterDef[nc].start );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  info_clus->start = ClusterDef[nc].start;
 	  return DET_SRC_MODIFIED_START;
      }
 
@@ -310,10 +310,10 @@ unsigned char CHECK_CLUSTERDEF( struct info_clus *info_clus )
 	       && ClusterDef[nc].start == info_clus->start ) break;
      } while( ++nc < numClus );
      if ( nc < numClus ) {
-	  info_clus->length = ClusterDef[nc].length;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_LENGTH,
 			   info_clus->length, ClusterDef[nc].length );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  info_clus->length = ClusterDef[nc].length;
 	  return DET_SRC_MODIFIED_LENGTH;
      }
 
@@ -392,7 +392,10 @@ size_t SCIA_LV0_INFO_READ_AUX( const char *mds_pntr, struct mds0_info *info )
      if ( info->packetID != SCIA_AUX_PACKET 
 	  || info->stateID == 0 || info->stateID > 70
 	  || MJD_BEFORE_SENSING_START( info->mjd ) 
-	  || MJD_AFTER_SENSING_STOP( info->mjd ) ) return 0;
+	  || MJD_AFTER_SENSING_STOP( info->mjd ) ) {
+ 	  NADC_ERROR( prognm, NADC_ERR_NONE, "MDS_AUX validity check Failure" );
+	  return 0;
+     }
 
      /* read source packages */
      (void) memcpy( &info->bcps, cpntr+ENVI_USHRT, ENVI_USHRT );
@@ -511,25 +514,20 @@ size_t SCIA_LV0_INFO_READ_DET( const char *mds_pntr, struct mds0_info *info )
      num_chan = byte_swap_u16( num_chan );
 #endif
 #ifdef DEBUG
-     (void) fprintf( stderr, "DET: %3hhu %3hhu %5d %5u %6u %2hu\n", 
+     (void) fprintf( stdout, "DET: %3hhu %3hhu %5d %5u %6u %2hu\n", 
 		     info->stateID, info->packetID, info->mjd.days,
 		     info->mjd.secnd, info->mjd.musec, num_chan);
 #endif
-/*
- * set/point global structure ClusterDef (not implemented for absOrbit < 4151)
- */
-     NADC_ERR_SAVE();
-     numClus = GET_CLUSTERDEF( info->stateID );
-     if ( IS_ERR_STAT_FATAL ) {
-          NADC_ERR_RESTORE();
-          NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, "invalid StateID" );
-     }
-
      /* validity check */
      if ( info->packetID != SCIA_DET_PACKET
 	  || info->stateID == 0 || info->stateID > 70
 	  || MJD_BEFORE_SENSING_START( info->mjd ) 
-	  || MJD_AFTER_SENSING_STOP( info->mjd ) ) return 0;
+	  || MJD_AFTER_SENSING_STOP( info->mjd ) ) 
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, 
+			   "MDS_DET validity check Failure" );
+
+     /* set global varible ClusterDef (not implemented for absOrbit < 4151) */
+     numClus = GET_CLUSTERDEF( info->stateID );
 
      /* read source packages */
      (void) memcpy( &info->bcps, cpntr+(2 * ENVI_USHRT), ENVI_USHRT );
@@ -541,7 +539,7 @@ size_t SCIA_LV0_INFO_READ_DET( const char *mds_pntr, struct mds0_info *info )
 	  cpntr += ENVI_USHRT;
 	  if ( chan_sync != CHANNEL_SYNC ) {
 	       char msg[SHORT_STRING_LENGTH];
-	       char  date_str[UTC_STRING_LENGTH];
+	       char date_str[UTC_STRING_LENGTH];
 
 	       (void) MJD_2_ASCII( info->mjd.days, info->mjd.secnd, 
 				   info->mjd.musec, date_str );
@@ -559,11 +557,12 @@ size_t SCIA_LV0_INFO_READ_DET( const char *mds_pntr, struct mds0_info *info )
 	       cpntr += ENVI_USHRT;
 	       if ( clus_sync != CLUSTER_SYNC ) {
 		    char msg[SHORT_STRING_LENGTH];
-		    char  date_str[UTC_STRING_LENGTH];
+		    char date_str[UTC_STRING_LENGTH];
 
 		    (void) MJD_2_ASCII( info->mjd.days, info->mjd.secnd, 
 					info->mjd.musec, date_str );
 		    (void) snprintf( msg, SHORT_STRING_LENGTH, 
+				     FMT_DET_CLUS_SYNC,
 				     date_str, info->bcps, nc );
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
@@ -682,7 +681,10 @@ size_t SCIA_LV0_INFO_READ_PMD( const char *mds_pntr, struct mds0_info *info )
      if ( info->packetID != SCIA_PMD_PACKET
 	  || info->stateID == 0 || info->stateID > 70
 	  || MJD_BEFORE_SENSING_START( info->mjd ) 
-	  || MJD_AFTER_SENSING_STOP( info->mjd ) ) return 0;
+	  || MJD_AFTER_SENSING_STOP( info->mjd ) ) {
+ 	  NADC_ERROR( prognm, NADC_ERR_NONE, "MDS_PMD validity check Failure" );
+	  return 0;
+     }
 
      /* read source packages */
      cpntr += ENVI_USHRT;                         /* skip PMD Temperature HK */
