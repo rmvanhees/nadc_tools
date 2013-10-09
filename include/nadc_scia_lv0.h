@@ -445,14 +445,10 @@ struct h5_mds0_info
 /*
  * prototype declarations of Sciamachy level 0 functions
  */
-extern unsigned short GET_SCIA_CLUSDEF( unsigned short, 
-					unsigned int, 
-					const struct mds0_info *,
-					/*@NULL@*/ /*@out@*/
-					struct clusdef_rec *clusDef )
-       /*@globals clusDef;@*/
-       /*@modifies clusDef@*/;
-
+extern unsigned short GET_SCIA_CLUSDEF( unsigned char, 
+					/*@out@*/ struct clusdef_rec *clusDef )
+       /*@globals clusDefOne, clusDefThree, nadc_stat, nadc_err_stack;@*/
+       /*@modifies clusDef, nadc_stat, nadc_err_stack@*/;
 
 #if defined _STDIO_H || defined _STDIO_H_
 extern void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi,

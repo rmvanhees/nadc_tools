@@ -58,6 +58,46 @@
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 static inline
+unsigned short GET_INFO_CLUSDEF( unsigned short stateIndex, 
+                                 unsigned int nr_info, 
+                                 const struct mds0_info *info,
+                                 /*@NULL@*/ /*@out@*/
+                                 struct clusdef_rec *clusDef )
+{
+     register unsigned char ncl, nch;
+     register unsigned int  ni;
+
+     unsigned short numClus = 0;
+
+     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+          unsigned char clusIDmx = 0;
+          for ( ni = 0; ni < nr_info; ni++ ) {
+               if ( info[ni].stateIndex != stateIndex ) continue;
+
+               for ( ncl = 0 ; ncl < info[ni].numClusters; ncl++ ) {
+                    if ( info[ni].cluster[ncl].chanID == nch 
+                         && info[ni].cluster[ncl].clusID == clusIDmx ) {
+                         clusIDmx = info[ni].cluster[ncl].clusID;
+                         if ( clusDef != NULL ) {
+                              clusDef[numClus+clusIDmx].chanID = 
+                                   info[ni].cluster[ncl].chanID;
+                              clusDef[numClus+clusIDmx].clusID =
+                                   info[ni].cluster[ncl].clusID;
+                              clusDef[numClus+clusIDmx].start  =
+                                   info[ni].cluster[ncl].start;
+                              clusDef[numClus+clusIDmx].length =
+                                   info[ni].cluster[ncl].length;
+                         }
+                         clusIDmx += UCHAR_ONE;
+                    }
+               }
+          }
+          numClus += clusIDmx;
+     }
+     return numClus;
+}
+
+static inline
 unsigned short GET_DET_BCPS( const struct clusdef_rec *clusDef, 
 			     unsigned int num_det, const struct mds0_det *det )
 {
@@ -139,7 +179,7 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int nr_det,
  */
      do {
 	  if ( nd == 0 || info[nd-1].stateIndex != info[nd].stateIndex ) {
-	       num_mds += GET_SCIA_CLUSDEF( info[nd].stateIndex, 
+	       num_mds += GET_INFO_CLUSDEF( info[nd].stateIndex, 
 					    nr_det, info, NULL );
 	  }
      } while ( ++nd < nr_det );
@@ -164,7 +204,7 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int nr_det,
 	       const double dsec_const  = det[nd].isp.secnd 
 		    + det[nd].isp.musec / 1e6 + ri[stateID-1] / 256.;
 
-	       numClus = GET_SCIA_CLUSDEF( info[nd].stateIndex, 
+	       numClus = GET_INFO_CLUSDEF( info[nd].stateIndex, 
 					   nr_det, info, clusDef );
 
 	       /* set pointer to mds-records of next state */

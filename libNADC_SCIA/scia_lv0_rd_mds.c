@@ -79,43 +79,9 @@
 #define _SCIA_LEVEL_0
 #include <nadc_scia.h>
 
-static unsigned short numClus = 0;
 static bool ClusterCorrectionFlag = TRUE;
-static /*@null@*/ const struct clusdef_rec *ClusterDef = NULL;
-
-#define NCLUSDEF_ONE     40
-static 
-const struct clusdef_rec ClusDefOne[NCLUSDEF_ONE] = {
-     {1, 0, 0, 5}, {1, 1, 5, 192}, {1, 2, 197, 355}, {1, 3, 552, 290}, 
-     {1, 4, 842, 177}, {1, 5, 1019, 5}, {2, 0, 1024, 5}, {2, 1, 1029, 71}, 
-     {2, 2, 1100, 778}, {2, 3, 1878, 94}, {2, 4, 1972, 71}, {2, 5, 2043, 5}, 
-     {3, 0, 2048, 10}, {3, 1, 2058, 23}, {3, 2, 2081, 897}, {3, 3, 2978, 89},
-     {3, 4, 3067, 5}, {4, 0, 3072, 5}, {4, 1, 3077, 5}, {4, 2, 3082, 909}, 
-     {4, 3, 3991, 100}, {4, 4, 4091, 5}, {5, 0, 4096, 5}, {5, 1, 4101, 5}, 
-     {5, 2, 4106, 991}, {5, 3, 5097, 18}, {5, 4, 5115, 5}, {6, 0, 5120, 10}, 
-     {6, 1, 5130, 14}, {6, 2, 5144, 973}, {6, 3, 6117, 17}, {6, 4, 6134, 10},
-     {7, 0, 6144, 10}, {7, 1, 6154, 38}, {7, 2, 6192, 940}, {7, 3, 7132,26 },
-     {7, 4, 7158, 10}, {8, 0, 7168, 10}, {8, 1, 7178, 1004}, {8, 2, 8182, 10}
-};
-
-#define NCLUSDEF_THREE   56
-static 
-const struct clusdef_rec ClusDefThree[NCLUSDEF_THREE] = {
-     {1, 0, 0, 5}, {1, 1, 5, 192}, {1, 2, 197, 355}, {1, 3, 552, 196}, 
-     {1, 4, 748, 94}, {1, 5, 1019, 5}, {2, 0, 1024, 5}, {2, 1, 1100, 114}, 
-     {2, 2, 1214, 664}, {2, 3, 1878, 94}, {2, 4, 2043, 5}, {3, 0, 2048, 10}, 
-     {3, 1, 2081, 50}, {3, 2, 2131, 80}, {3, 3, 2211, 436}, {3, 4, 2647, 75}, 
-     {3, 5, 2722, 87}, {3, 6, 2809, 135}, {3, 7, 2944, 34}, {3, 8, 3067, 5}, 
-     {4, 0, 3072, 5}, {4, 1, 3082, 36}, {4, 2, 3118, 32}, {4, 3, 3150, 535}, 
-     {4, 4, 3685, 134}, {4, 5, 3819, 106}, {4, 6, 3925, 66}, {4, 7, 4091, 5}, 
-     {5, 0, 4096, 5}, {5, 1, 4106, 46}, {5, 2, 4152, 28}, {5, 3, 4180, 525}, 
-     {5, 4, 4705, 158}, {5, 5, 4863, 234}, {5, 6, 5115, 5}, {6, 0, 5120, 10}, 
-     {6, 1, 5144, 83}, {6, 2, 5227, 228}, {6, 3, 5455, 26}, {6, 4, 5481, 178}, 
-     {6, 5, 5659, 28}, {6, 6, 5687, 179}, {6, 7, 5866, 154}, {6, 8, 6020, 31}, 
-     {6, 9, 6051, 14}, {6, 10, 6065, 52}, {6, 11, 6134, 10}, {7, 0, 6144, 10}, 
-     {7, 1, 6192, 245}, {7, 2, 6437, 148}, {7, 3, 6585, 442}, {7, 4, 7027,105},
-     {7, 5, 7158, 10}, {8, 0, 7168, 10}, {8, 1, 7178, 1004}, {8, 2, 8182, 10}
-};
+static unsigned short numClusDef  = 0;
+static struct clusdef_rec clusDef[MAX_NUM_STATE];
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 #include "selected_channel.inc"
@@ -143,48 +109,12 @@ void SET_NO_CLUSTER_CORRECTION( FILE *fd )
      }
 }
 
-static inline
-unsigned short GET_CLUSTERDEF( unsigned char stateID )
-       /*@globals  ClusterDef;@*/
-       /*@modifies ClusterDef@*/
-{
-     const char prognm[] = "GET_CLUSTERDEF";
-
-     const unsigned short ClusDefIndx[MAX_NUM_STATE] = {
-          3, 3, 3, 3, 3, 3, 3, 1, 3, 3,
-          3, 3, 3, 3, 3, 1, 1, 1, 1, 1,
-          1, 1, 3, 3, 3, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 3, 1, 1,
-          1, 3, 3, 3, 3, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-     };
-
-     if ( stateID == UCHAR_ZERO || stateID > (unsigned char) MAX_NUM_STATE ) {
-          NADC_ERROR( prognm, NADC_ERR_FATAL, "state ID out-of-range" );
-          ClusterDef = NULL;
-          return USHRT_ZERO;
-     }
-     switch ( ClusDefIndx[stateID-1] ) {
-     case ((unsigned short) 1 ): {
-	  ClusterDef = ClusDefOne;
-	  return NCLUSDEF_ONE;
-     }
-     case ((unsigned short) 3 ): {
-          ClusterDef = ClusDefThree;
-          return NCLUSDEF_THREE;
-     } 
-     default: {
-	  ClusterDef = NULL;
-	  return USHRT_ZERO;
-     }}
-}
 
 /*+++++++++++++++++++++++++
-.IDENTifer   CHECK_CLUSTERDEF
-.PURPOSE     
+.IDENTifier CHECK_CLUSTERDEF
+.PURPOSE    Check and (if necessary) correct cluster parameters
 .INPUT/OUTPUT
-  call as   stat = CHECK_CLUSTERDEF( det_src );
+  call as   stat = CHECK_CLUSTERDEF( ncl, det_src );
  in/output:  
 	    struct det_src *data_src  : Detector Source Packets
 
@@ -206,8 +136,9 @@ unsigned short GET_CLUSTERDEF( unsigned char stateID )
 #define FMT_MSG_FAIL     "can not correct corrupted cluster"
 
 static inline
-unsigned char CHECK_CLUSTERDEF( unsigned short ncl, struct det_src *det_src )
-       /*@globals  nadc_stat, nadc_err_stack, numClus, ClusterDef;@*/
+unsigned char CHECK_CLUSTERDEF( unsigned short ncl, 
+				struct det_src *det_src )
+       /*@globals  nadc_stat, nadc_err_stack, numClusDef, clusDef;@*/
        /*@modifies nadc_stat, nadc_err_stack, det_src@*/
 {
      const char prognm[] = "CHECK_CLUSTERDEF";
@@ -228,24 +159,24 @@ unsigned char CHECK_CLUSTERDEF( unsigned short ncl, struct det_src *det_src )
      /* check if all fields in header are oke */
      nc = 0;
      do {
-	  if ( ClusterDef[nc].chanID == chanID 
-	       && ClusterDef[nc].clusID == clusID
-	       && ClusterDef[nc].start == start
-	       && ClusterDef[nc].length == length ) break;
-     } while( ++nc < numClus );
-     if ( nc < numClus ) return DET_SRC_MODIFIED_NONE;
+	  if ( clusDef[nc].chanID == chanID 
+	       && clusDef[nc].clusID == clusID
+	       && clusDef[nc].start == start
+	       && clusDef[nc].length == length ) break;
+     } while( ++nc < numClusDef );
+     if ( nc < numClusDef ) return DET_SRC_MODIFIED_NONE;
 
      /* check if 3 fields in header are oke, except "clusID" */
      nc = 0;
      do {
-	  if ( ClusterDef[nc].chanID == chanID 
-	       && ClusterDef[nc].start == start
-	       && ClusterDef[nc].length == length ) break;
-     } while( ++nc < numClus );
-     if ( nc < numClus ) {
-	  det_src->pixel[ncl].cluster_id = ClusterDef[nc].clusID;
+	  if ( clusDef[nc].chanID == chanID 
+	       && clusDef[nc].start == start
+	       && clusDef[nc].length == length ) break;
+     } while( ++nc < numClusDef );
+     if ( nc < numClusDef ) {
+	  det_src->pixel[ncl].cluster_id = clusDef[nc].clusID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CLUSID, 
-			   clusID, ClusterDef[nc].clusID );
+			   clusID, clusDef[nc].clusID );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_CLUSID;
      }
@@ -253,14 +184,14 @@ unsigned char CHECK_CLUSTERDEF( unsigned short ncl, struct det_src *det_src )
      /* check if 3 fields in header are oke, except "chanID" */
      nc = 0;
      do {
-	  if ( ClusterDef[nc].clusID == clusID
-	       && ClusterDef[nc].start == start
-	       && ClusterDef[nc].length == length ) break;
-     } while( ++nc < numClus );
-     if ( nc < numClus ) {
-	  det_src->hdr.channel.field.id = ClusterDef[nc].chanID;
+	  if ( clusDef[nc].clusID == clusID
+	       && clusDef[nc].start == start
+	       && clusDef[nc].length == length ) break;
+     } while( ++nc < numClusDef );
+     if ( nc < numClusDef ) {
+	  det_src->hdr.channel.field.id = clusDef[nc].chanID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CHANID, 
-			   chanID, ClusterDef[nc].chanID );
+			   chanID, clusDef[nc].chanID );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_CHANID;
      }
@@ -268,14 +199,14 @@ unsigned char CHECK_CLUSTERDEF( unsigned short ncl, struct det_src *det_src )
      /* check if 3 fields in header are oke, except "start" */
      nc = 0;
      do {
-	  if ( ClusterDef[nc].chanID == chanID 
-	       && ClusterDef[nc].clusID == clusID
-	       && ClusterDef[nc].length == length ) break;
-     } while( ++nc < numClus );
-     if ( nc < numClus ) {
-	  det_src->pixel[ncl].start = ClusterDef[nc].start;
+	  if ( clusDef[nc].chanID == chanID 
+	       && clusDef[nc].clusID == clusID
+	       && clusDef[nc].length == length ) break;
+     } while( ++nc < numClusDef );
+     if ( nc < numClusDef ) {
+	  det_src->pixel[ncl].start = clusDef[nc].start;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_START, 
-			   start, ClusterDef[nc].start );
+			   start, clusDef[nc].start );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_START;
      }
@@ -283,14 +214,14 @@ unsigned char CHECK_CLUSTERDEF( unsigned short ncl, struct det_src *det_src )
      /* check if 3 fields in header are oke, except "length" */
      nc = 0;
      do {
-	  if ( ClusterDef[nc].chanID == chanID 
-	       && ClusterDef[nc].clusID == clusID
-	       && ClusterDef[nc].start == start ) break;
-     } while( ++nc < numClus );
-     if ( nc < numClus ) {
-	  det_src->pixel[ncl].length = ClusterDef[nc].length;
+	  if ( clusDef[nc].chanID == chanID 
+	       && clusDef[nc].clusID == clusID
+	       && clusDef[nc].start == start ) break;
+     } while( ++nc < numClusDef );
+     if ( nc < numClusDef ) {
+	  det_src->pixel[ncl].length = clusDef[nc].length;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_LENGTH,
-			   length, ClusterDef[nc].length );
+			   length, clusDef[nc].length );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_LENGTH;
      }
@@ -590,7 +521,7 @@ void SCIA_LV0_RD_MDS_AUX_SRC( FILE *fd, /*@out@*/ struct aux_src *aux_src )
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV0_RD_MDS_DET_SRC
+.IDENTifier   SCIA_LV0_RD_MDS_DET_SRC
 .PURPOSE     read Source Data of Detector Data Packet
 .INPUT/OUTPUT
   call as   nr_chan = SCIA_LV0_RD_MDS_DET_SRC( fd, det_length,
@@ -951,10 +882,8 @@ static
 void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 			  const struct mds0_info *info,
 			  struct mds0_det *det )
-       /*@globals  errno, numClus, ClusterDef, nadc_stat, nadc_err_stack, 
-                   Use_Extern_Alloc;@*/
-       /*@modifies errno, numClus, ClusterDef, nadc_stat, nadc_err_stack, 
-                   fd, det@*/
+       /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
+       /*@modifies errno, nadc_stat, nadc_err_stack, fd, det@*/
 {
      const char prognm[] = "SCIA_LV0_RD_ONE_DET";
 
@@ -1019,15 +948,8 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 	  det->num_chan = byte_swap_u16( det->num_chan );
      }
 #endif
-/*
- * set/point global structure ClusterDef (not implemented for absOrbit < 4151)
- */
-     NADC_ERR_SAVE();
-     numClus = GET_CLUSTERDEF( info->stateID );
-     if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERR_RESTORE();
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, "invalid StateID" );
-     }
+     /* obtain cluster definition (not implemented for absOrbit < 4151) */
+     numClusDef = GET_SCIA_CLUSDEF( info->stateID, clusDef );
 /*
  * read ISP Detector Data Source Packet
  */
