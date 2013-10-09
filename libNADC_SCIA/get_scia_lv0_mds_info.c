@@ -516,7 +516,7 @@ size_t SCIA_LV0_INFO_READ_DET( const char *mds_pntr, struct mds0_info *info )
 #ifdef DEBUG
      (void) fprintf( stdout, "DET: %3hhu %3hhu %5d %5u %6u %2hu\n", 
 		     info->stateID, info->packetID, info->mjd.days,
-		     info->mjd.secnd, info->mjd.musec, num_chan);
+		     info->mjd.secnd, info->mjd.musec, num_chan );
 #endif
      /* validity check */
      if ( info->packetID != SCIA_DET_PACKET

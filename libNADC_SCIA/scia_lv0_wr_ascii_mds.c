@@ -534,10 +534,10 @@ void SCIA_LV0_WR_ASCII_DET( struct param_record param, unsigned int stateIndx,
 	  WRITE_PACKET_HDR( outfl, ++nr, det->packet_hdr );
 	  WRITE_DATA_HDR( outfl, ++nr, det->data_hdr );
 	  nadc_write_ushort( outfl, nr, "Broadcast Counter (MDI)", 
-			      det->bcps );
+			     det->bcps );
 	  WRITE_PMTC_HDR( outfl, ++nr, &det->pmtc_hdr );
 	  nadc_write_arr_int( outfl, ++nr, "Orbit State Vector", 
-			       1, &num_orbit, det->orbit_vector );
+			      1, &num_orbit, det->orbit_vector );
 	  nadc_write_ushort( outfl, ++nr, "Channels", det->num_chan );
 /*
  * -------------------------
