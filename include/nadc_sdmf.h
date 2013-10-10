@@ -18,6 +18,34 @@ enum sdmf24_db {
 /* maximum number of states in a level 0 product */
 #define MAX_STATES_IN_FILE   256       
 
+/* structure definitions (all databases) */
+#define DIM_FTBL   4
+struct ftbl_rec 
+{
+     int    absOrbit;
+     char   prodName[ENVI_FILENAME_SIZE];
+     char   entryDate[STR_SZ_DATE];
+     char   stateList[MAX_NUM_STATE];
+     char   dummy[3];
+};
+/*@unused@*/ 
+static const size_t ftbl_sizes[DIM_FTBL] = {
+     sizeof( int ), ENVI_FILENAME_SIZE, STR_SZ_DATE, MAX_NUM_STATE
+};
+
+struct ftbl2_rec 
+{
+     char            prodName[ENVI_FILENAME_SIZE];
+     char            dummy;
+     char            entryDate[STR_SZ_DATE];
+     char            stateList[MAX_NUM_STATE];
+     unsigned short  absOrbit;
+};
+/*@unused@*/ 
+static const size_t ftbl2_sizes[DIM_FTBL] = {
+     ENVI_FILENAME_SIZE, STR_SZ_DATE, MAX_NUM_STATE, sizeof(short)
+};
+
 /* structure definition of SDMF v2.4 MonitorList */
 struct monitor_rec {
      int  Orbit;
@@ -34,6 +62,112 @@ struct monitor_rec {
      int  OrbitalFit;
      int  SMR;
      char FileName[70];
+};
+
+/* structure definition of histograms (SDMF30)*/
+#define DIM_SDMF_HIST1    5
+#define MAX_NUM_HIST1     120
+struct sdmf_hist1_rec 
+{
+     unsigned int   offset;
+     unsigned char  binsize;
+     unsigned char  coaddf;
+     unsigned short location[MAX_NUM_HIST1];
+     unsigned short count[MAX_NUM_HIST1];
+};
+/*@unused@*/ 
+static const size_t sdmf_hist1_sizes[DIM_SDMF_HIST1] = {
+     sizeof(int), sizeof(char), sizeof(char), 
+     MAX_NUM_HIST1 * sizeof(short), MAX_NUM_HIST1 * sizeof(short)
+};
+
+/* structure definition of histograms (SDMF31)*/
+#define DIM_SDMF_HIST2   6
+#define MAX_NUM_HIST2    80
+struct sdmf_hist2_rec 
+{
+     unsigned int   offset;
+     unsigned char  binsize;
+     unsigned char  coaddf;
+     unsigned short count[MAX_NUM_HIST2];
+     unsigned short location[MAX_NUM_HIST2];
+     unsigned short remainder[MAX_NUM_HIST2];
+};
+/*@unused@*/ 
+static const size_t sdmf_hist2_sizes[DIM_SDMF_HIST2] = {
+     sizeof(int), sizeof(char), sizeof(char), 
+     MAX_NUM_HIST2 * sizeof(short), 
+     MAX_NUM_HIST2 * sizeof(short), 
+     MAX_NUM_HIST2 * sizeof(short)
+};
+
+/* structure calibration-state database (SDMF30) */
+#define DIM_MTBL_CALIB   18
+struct mtbl_calib_rec 
+{
+     double julianDay;                        /* taken from MDS_DET */
+     int    duration;                         /* 1/16 sec from MDS_DET */
+     int    absOrbit;                         /* taken from MPH */
+     char   entryDate[STR_SZ_DATE];
+     char   procStage[2];                     /* taken from MPH */
+     char   softVersion[15];                  /* taken from MPH */
+     unsigned char saaFlag;                   /* taken from ROE info */
+     unsigned char rtsEnhFlag;                /* bit 0: ch 6+, bit 1: ch 8*/
+     unsigned char vorporFlag;                /* 000000GV G: geo/pnt presence, V: VOR presence */
+     unsigned short crc_state;                /* CRC errors in state */
+     unsigned short solomon_state;            /* reed-solomon errors in state */
+     float  orbitPhase;                       /* taken from ROE info*/
+     float  sunSemiDiam;                      /* taken from DORIS */
+     float  moonAreaSunlit;                   /* taken from DORIS */
+     float  longitude;                        /* taken from DORIS */
+     float  latitude;                         /* taken from DORIS */
+     float  asmAngle;                         /* taken from MDS_AUX */
+     float  esmAngle;                         /* taken from MDS_AUX */
+     float  obmTemp;                          /* taken from MDS_AUX */
+     float  detectorTemp[SCIENCE_CHANNELS];   /* taken from MDS_DET */
+};
+/*@unused@*/ 
+static const size_t mtbl_calib_sizes[DIM_MTBL_CALIB] = {
+     sizeof(double), sizeof(int), sizeof(int), 
+     STR_SZ_DATE * sizeof(char), 2 * sizeof(char), 15 * sizeof(char), 
+     sizeof(char), sizeof(char), sizeof(char), 
+     sizeof(float), sizeof(float), sizeof(float), sizeof(float), 
+     sizeof(float), sizeof(float), sizeof(float), sizeof(float),
+     SCIENCE_CHANNELS * sizeof(float)
+};
+
+/* structure calibration-state database (SDMF31) */
+#define DIM_MTBL_CALIB2   19
+struct mtbl_calib2_rec 
+{
+     double julianDay;                        /* taken from MDS_DET */
+     char   entryDate[STR_SZ_DATE];
+     char   softVersion[15];                  /* taken from MPH */
+     char   procStage;                        /* taken from MPH */
+     unsigned char vorporFlag;                /* quality Doris prediction */
+     bool   saaFlag;                          /* taken from ROE info */
+     unsigned short crc_errs;                 /* CRC errors in state */
+     unsigned short solomon_errs;             /* reed-solomon errors in state */
+     int    absOrbit;                         /* taken from MPH */
+     int    duration;                         /* 1/16 sec from MDS_DET */
+     float  orbitPhase;                       /* taken from ROE info*/
+     float  sunSemiDiam;                      /* taken from DORIS */
+     float  moonAreaSunlit;                   /* taken from DORIS */
+     float  longitude;                        /* taken from DORIS */
+     float  latitude;                         /* taken from DORIS */
+     float  asmAngle;                         /* taken from MDS_AUX */
+     float  esmAngle;                         /* taken from MDS_AUX */
+     float  obmTemp;                          /* taken from MDS_AUX */
+     float  detectorTemp[SCIENCE_CHANNELS];   /* taken from MDS_DET */
+};
+/*@unused@*/ 
+static const size_t mtbl_calib2_sizes[DIM_MTBL_CALIB2] = {
+     sizeof(double), STR_SZ_DATE * sizeof(char), 15 * sizeof(char), 
+     sizeof(char), sizeof(char), sizeof(bool), 
+     sizeof(short), sizeof(short), sizeof(int), sizeof(int), 
+     sizeof(float), sizeof(float), sizeof(float), sizeof(float), 
+     sizeof(float), sizeof(float), sizeof(float), sizeof(float),
+     SCIENCE_CHANNELS * sizeof(float)
 };
 
 /* structure definitions (Sun/Last-Limb databases) */
@@ -65,106 +199,7 @@ struct geo_pt_rec {
      float  sunElev;
 };
 
-/* structure definitions (all databases) */
-#define DIM_FTBL   4
-struct ftbl_rec 
-{
-     int    absOrbit;
-     char   prodName[ENVI_FILENAME_SIZE];
-     char   entryDate[STR_SZ_DATE];
-     char   stateList[MAX_NUM_STATE];
-     char   dummy[3];
-};
-/*@unused@*/ 
-static const size_t ftbl_sizes[DIM_FTBL] = {
-     sizeof( int ), ENVI_FILENAME_SIZE, STR_SZ_DATE, MAX_NUM_STATE
-};
-
-/* structure definition of histograms (SDMF30)*/
-#define DIM_SDMF_HIST1    5
-#define MAX_NUM_HIST1     120
-struct sdmf_hist1_rec 
-{
-     unsigned int   offset;
-     unsigned char  binsize;
-     unsigned char  coaddf;
-     unsigned short location[MAX_NUM_HIST1];
-     unsigned short count[MAX_NUM_HIST1];
-};
-/*@unused@*/ 
-static const size_t sdmf_hist1_sizes[DIM_SDMF_HIST1] = {
-     sizeof( int ), sizeof( char ), sizeof( char ), 
-     MAX_NUM_HIST1 * sizeof( short ), MAX_NUM_HIST1 * sizeof( short )
-};
-
-/* structure definition of histograms (SDMF31)*/
-#define DIM_SDMF_HIST2   6
-#define MAX_NUM_HIST2    80
-struct sdmf_hist2_rec 
-{
-     unsigned int   offset;
-     unsigned char  binsize;
-     unsigned char  coaddf;
-     unsigned short count[MAX_NUM_HIST2];
-     unsigned short location[MAX_NUM_HIST2];
-     unsigned short remainder[MAX_NUM_HIST2];
-};
-/*@unused@*/ 
-static const size_t sdmf_hist2_sizes[DIM_SDMF_HIST2] = {
-     sizeof( int ), sizeof( char ), sizeof( char ), 
-     MAX_NUM_HIST2 * sizeof( short ), 
-     MAX_NUM_HIST2 * sizeof( short ), 
-     MAX_NUM_HIST2 * sizeof( short )
-};
-
-/* structure definitions (calibration-state databases) */
-#define DIM_MTBL_CALIB   18
-struct mtbl_calib_rec 
-{
-     double julianDay;                        /* taken from MDS_DET */
-     int    duration;                         /* 1/16 sec from MDS_DET */
-     int    absOrbit;                         /* taken from MPH */
-     char   entryDate[STR_SZ_DATE];
-     char   procStage[2];                     /* taken from MPH */
-     char   softVersion[15];                  /* taken from MPH */
-     unsigned char saaFlag;                   /* taken from ROE info */
-     unsigned char rtsEnhFlag;                /* bit 0: ch 6+, bit 1: ch 8*/
-     unsigned char vorporFlag;                /* 000000GV G: geo/pnt presence, V: VOR presence */
-     float  orbitPhase;                       /* taken from ROE info*/
-     float  sunSemiDiam;                      /* taken from DORIS */
-     float  moonAreaSunlit;                   /* taken from DORIS */
-     float  longitude;                        /* taken from DORIS */
-     float  latitude;                         /* taken from DORIS */
-     float  asmAngle;                         /* taken from MDS_AUX */
-     float  esmAngle;                         /* taken from MDS_AUX */
-     float  obmTemp;                          /* taken from MDS_AUX */
-     float  detectorTemp[SCIENCE_CHANNELS];   /* taken from MDS_DET */
-};
-/*@unused@*/ 
-static const size_t mtbl_calib_sizes[DIM_MTBL_CALIB] = {
-     sizeof( double ), sizeof( int ), sizeof( int ), 
-     STR_SZ_DATE * sizeof( char ), 2 * sizeof( char ),  
-     15 * sizeof( char ), sizeof( unsigned char ), sizeof( unsigned char), 
-     sizeof( unsigned char ), 
-     sizeof( float ), sizeof( float ), sizeof( float ), sizeof( float ), 
-     sizeof( float ), sizeof( float ), sizeof( float ), sizeof( float ),
-     SCIENCE_CHANNELS * sizeof( float )
-};
-
-/* structure definitions (State-Dark database) */
-#define DIM_MTBL_STATEDARK   8
-struct mtbl_statedark_rec
-{
-    int   absOrbit;
-    short StateId;
-    short StateCount;
-    float Tobm;
-    float Tdet[SCIENCE_CHANNELS];
-    char  entryDate[STR_SZ_DATE];
-    bool  saaFlag;
-    int   Quality;
-};
-
+/* structure State-Dark database (SDMF30) */
 #define DIM_MTBL_DARK   8
 struct mtbl_dark_rec 
 {
@@ -179,9 +214,9 @@ struct mtbl_dark_rec
 };
 /*@unused@*/ 
 static const size_t mtbl_dark_sizes[DIM_MTBL_DARK] = {
-     sizeof( double ), sizeof( int ), STR_SZ_DATE * sizeof( char ), 
-     sizeof( bool ), sizeof( short ), sizeof( float ), sizeof( float ), 
-     SCIENCE_CHANNELS * sizeof( float )
+     sizeof(double), sizeof(int), STR_SZ_DATE * sizeof(char), 
+     sizeof(bool), sizeof(short), sizeof(float), sizeof(float), 
+     SCIENCE_CHANNELS * sizeof(float)
 };
 
 /* structure definitions Dark database (SDMF31) */
@@ -202,13 +237,13 @@ struct mtbl_dark2_rec
 };
 /*@unused@*/ 
 static const size_t mtbl_dark2_sizes[DIM_MTBL_DARK2] = {
-     sizeof( double ), sizeof( double ),  
-     sizeof( short ), sizeof( short ), sizeof( short ), sizeof( short ),
-     2 * SCIENCE_CHANNELS * sizeof( short ), 
-     sizeof( float ), SCIENCE_CHANNELS * sizeof( float )
+     sizeof(double), sizeof(double),  
+     sizeof(short), sizeof(short), sizeof(short), sizeof(short),
+     2 * SCIENCE_CHANNELS * sizeof(short), 
+     sizeof(float), SCIENCE_CHANNELS * sizeof(float)
 };
 
-/* structure definitions (Simu-Dark database) */
+/* structure definitions Simu-Dark database (SDMF30) */
 #define DIM_MTBL_SIMUDARK 13
 struct mtbl_simudark_rec
 {
@@ -228,10 +263,10 @@ struct mtbl_simudark_rec
 };
 /*@unused@*/ 
 static const size_t mtbl_simudark_sizes[DIM_MTBL_SIMUDARK] = {
-     sizeof( double ), sizeof( int ), STR_SZ_DATE * sizeof( char), 
-     sizeof( bool ), sizeof( float ), sizeof( float ), sizeof( float ), 
-     sizeof( float ), sizeof( float ), sizeof( float ), sizeof( float ), 
-     sizeof( float ), sizeof( float )
+     sizeof(double), sizeof(int), STR_SZ_DATE * sizeof( char), 
+     sizeof(bool), sizeof(float), sizeof(float), sizeof(float), 
+     sizeof(float), sizeof(float), sizeof(float), sizeof(float), 
+     sizeof(float), sizeof(float)
 };
 
 /* structure definitions SMR database (SDMF31) */
@@ -254,9 +289,9 @@ struct mtbl_smr2_rec
 };
 /*@unused@*/ 
 static const size_t mtbl_smr2_sizes[DIM_MTBL_SMR2] = {
-     sizeof( double ), STR_SZ_DATE * sizeof( char),  
-     sizeof( short ), sizeof( short ), sizeof( float ), sizeof( float ), 
-     sizeof( float ), sizeof( float ), SCIENCE_CHANNELS * sizeof( float )
+     sizeof(double), STR_SZ_DATE * sizeof(char),  
+     sizeof(short), sizeof(short), sizeof(float), sizeof(float), 
+     sizeof(float), sizeof(float), SCIENCE_CHANNELS * sizeof(float)
 };
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -396,8 +431,11 @@ extern int SDMF_get_metaIndex( hid_t, int, int *numIndex, int *metaIndex)
 extern int SDMF_get_metaIndex_range( hid_t, const int *, int *numIndex, 
 				     int *metaIndex, int use_neighbours )
       /*@modifies numIndex, metaIndex@*/;
-extern void SDMF_rd_metaTable( hid_t, /*@out@*/ int *numIndx, const int *,
-			       /*@out@*/ struct mtbl_calib_rec **mtbl )
+extern void SDMF30_rd_metaTable( hid_t, /*@out@*/ int *numIndx, const int *,
+				 /*@out@*/ struct mtbl_calib_rec **mtbl )
+          /*@modifies numIndx, *mtbl@*/;
+extern void SDMF31_rd_metaTable( hid_t, /*@out@*/ int *numIndx, const int *,
+				 /*@out@*/ struct mtbl_calib2_rec **mtbl )
           /*@modifies numIndx, *mtbl@*/;
 extern void SDMF30_rd_histTable( hid_t, int, const int *, const int *,
                                  /*@out@*/ struct sdmf_hist1_rec *sdmf_hist )

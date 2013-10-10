@@ -457,7 +457,7 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
      (void) SDMF_get_metaIndex( gid, orbit, &numIndx, metaIndx );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex" );
-     SDMF_rd_metaTable( gid, &numIndx, metaIndx, &mtbl );
+     SDMF30_rd_metaTable( gid, &numIndx, metaIndx, &mtbl );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_rd_metaTable" );
 /*

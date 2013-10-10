@@ -54,29 +54,6 @@ static const char  listName[] = "orbitList";
 static const char  indexName[] = "orbitIndex";
 static const char  tableName[] = "metaTable";
 
-static const size_t mtbl_size = sizeof( struct mtbl_calib_rec );
-
-static const size_t mtbl_offs[DIM_MTBL_CALIB] = {
-     HOFFSET( struct mtbl_calib_rec, julianDay ),
-     HOFFSET( struct mtbl_calib_rec, duration ),
-     HOFFSET( struct mtbl_calib_rec, absOrbit ),
-     HOFFSET( struct mtbl_calib_rec, entryDate ),
-     HOFFSET( struct mtbl_calib_rec, procStage ),
-     HOFFSET( struct mtbl_calib_rec, softVersion ),
-     HOFFSET( struct mtbl_calib_rec, saaFlag ),
-     HOFFSET( struct mtbl_calib_rec, rtsEnhFlag ),
-     HOFFSET( struct mtbl_calib_rec, vorporFlag ),
-     HOFFSET( struct mtbl_calib_rec, orbitPhase ),
-     HOFFSET( struct mtbl_calib_rec, sunSemiDiam ),
-     HOFFSET( struct mtbl_calib_rec, moonAreaSunlit ),
-     HOFFSET( struct mtbl_calib_rec, longitude ),
-     HOFFSET( struct mtbl_calib_rec, latitude ),
-     HOFFSET( struct mtbl_calib_rec, asmAngle ),
-     HOFFSET( struct mtbl_calib_rec, esmAngle ),
-     HOFFSET( struct mtbl_calib_rec, obmTemp ),
-     HOFFSET( struct mtbl_calib_rec, detectorTemp )
-};
-
 /*+++++++++++++++++++++++++ Static Function(s) +++++++++++++++*/
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -321,10 +298,10 @@ done:
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SDMF_rd_metaTable
+.IDENTifer   SDMF30_rd_metaTable
 .PURPOSE     read metaTable records from SDMF calibration state database
 .INPUT/OUTPUT
-  call as    SDMF_rd_metaTable( locID, &numIndx, metaIndx, &mtbl );
+  call as    SDMF30_rd_metaTable( locID, &numIndx, metaIndx, &mtbl );
      input:
            hid_t locID            :  HDF5 identifier of file or group
            int   *metaIndx        :  array with indices to requested records
@@ -338,16 +315,39 @@ done:
 .COMMENTS    Note that *numIndx has to be zero and/or *metaIndx equal to NULL 
              to read all metaTable records
 -------------------------*/
-void SDMF_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
+void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                           struct mtbl_calib_rec **mtbl_out )
 {
-     const char prognm[] = "SDMF_rd_metaTable";
+     const char prognm[] = "SDMF30_rd_metaTable";
 
      int     nrows;
      herr_t  stat;
      hsize_t nfields, nrecords;
 
      struct mtbl_calib_rec *mtbl;
+
+     const size_t mtbl_size = sizeof( struct mtbl_calib_rec );
+
+     const size_t mtbl_offs[DIM_MTBL_CALIB] = {
+	  HOFFSET( struct mtbl_calib_rec, julianDay ),
+	  HOFFSET( struct mtbl_calib_rec, duration ),
+	  HOFFSET( struct mtbl_calib_rec, absOrbit ),
+	  HOFFSET( struct mtbl_calib_rec, entryDate ),
+	  HOFFSET( struct mtbl_calib_rec, procStage ),
+	  HOFFSET( struct mtbl_calib_rec, softVersion ),
+	  HOFFSET( struct mtbl_calib_rec, saaFlag ),
+	  HOFFSET( struct mtbl_calib_rec, rtsEnhFlag ),
+	  HOFFSET( struct mtbl_calib_rec, vorporFlag ),
+	  HOFFSET( struct mtbl_calib_rec, orbitPhase ),
+	  HOFFSET( struct mtbl_calib_rec, sunSemiDiam ),
+	  HOFFSET( struct mtbl_calib_rec, moonAreaSunlit ),
+	  HOFFSET( struct mtbl_calib_rec, longitude ),
+	  HOFFSET( struct mtbl_calib_rec, latitude ),
+	  HOFFSET( struct mtbl_calib_rec, asmAngle ),
+	  HOFFSET( struct mtbl_calib_rec, esmAngle ),
+	  HOFFSET( struct mtbl_calib_rec, obmTemp ),
+	  HOFFSET( struct mtbl_calib_rec, detectorTemp )
+     };
 /*
  * initialize return values
  */
@@ -393,6 +393,112 @@ void SDMF_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                stat = H5TBread_records( locID, tableName, start, 1,
                                         mtbl_size, mtbl_offs, 
                                         mtbl_calib_sizes, mtbl+nm );
+               if ( stat < 0 ) {
+                    free( mtbl );
+                    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+               } 
+          }
+     }
+     *mtbl_out = mtbl;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SDMF31_rd_metaTable
+.PURPOSE     read metaTable records from SDMF calibration state database
+.INPUT/OUTPUT
+  call as    SDMF31_rd_metaTable( locID, &numIndx, metaIndx, &mtbl );
+     input:
+           hid_t locID            :  HDF5 identifier of file or group
+           int   *metaIndx        :  array with indices to requested records
+ in/output:
+           int   *numIndx         :  input: dimension metaIndx (or zero)
+                                     output: number records read
+    output:
+           struct mtbl_calib_rec **mtbl :  State meta-data records to read
+
+.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    Note that *numIndx has to be zero and/or *metaIndx equal to NULL 
+             to read all metaTable records
+-------------------------*/
+void SDMF31_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
+                          struct mtbl_calib2_rec **mtbl_out )
+{
+     const char prognm[] = "SDMF31_rd_metaTable";
+
+     int     nrows;
+     herr_t  stat;
+     hsize_t nfields, nrecords;
+
+     struct mtbl_calib2_rec *mtbl;
+
+     const size_t mtbl_size = sizeof( struct mtbl_calib2_rec );
+
+     const size_t mtbl_offs[DIM_MTBL_CALIB2] = {
+	  HOFFSET( struct mtbl_calib2_rec, julianDay ),
+	  HOFFSET( struct mtbl_calib2_rec, entryDate ),
+	  HOFFSET( struct mtbl_calib2_rec, softVersion ),
+	  HOFFSET( struct mtbl_calib2_rec, procStage ),
+	  HOFFSET( struct mtbl_calib2_rec, vorporFlag ),
+	  HOFFSET( struct mtbl_calib2_rec, saaFlag ),
+	  HOFFSET( struct mtbl_calib2_rec, crc_errs ),
+	  HOFFSET( struct mtbl_calib2_rec, solomon_errs ),
+	  HOFFSET( struct mtbl_calib2_rec, absOrbit ),
+	  HOFFSET( struct mtbl_calib2_rec, duration ),
+	  HOFFSET( struct mtbl_calib2_rec, orbitPhase ),
+	  HOFFSET( struct mtbl_calib2_rec, sunSemiDiam ),
+	  HOFFSET( struct mtbl_calib2_rec, moonAreaSunlit ),
+	  HOFFSET( struct mtbl_calib2_rec, longitude ),
+	  HOFFSET( struct mtbl_calib2_rec, latitude ),
+	  HOFFSET( struct mtbl_calib2_rec, asmAngle ),
+	  HOFFSET( struct mtbl_calib2_rec, esmAngle ),
+	  HOFFSET( struct mtbl_calib2_rec, obmTemp ),
+	  HOFFSET( struct mtbl_calib2_rec, detectorTemp )
+     };
+/*
+ * initialize return values
+ */
+     *mtbl_out = NULL;
+/*
+ * does the table already exists?
+ */
+     H5E_BEGIN_TRY {
+          hid_t dataID = H5Dopen( locID, tableName, H5P_DEFAULT );
+          if ( dataID < 0 ) return;
+          (void) H5Dclose( dataID );
+     } H5E_END_TRY;
+/*
+ * obtain table info
+ */
+     stat = H5TBget_table_info(locID, tableName, &nfields, &nrecords );
+     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+     nrows = (int) nrecords;
+     if ( *numIndx == 0 || metaIndx == NULL ) *numIndx = nrows;
+     if ( nrows == 0 ) return;
+/*
+ * allocate memory to store metaTable records
+ */
+     mtbl = (struct mtbl_calib2_rec *) 
+	  malloc( (size_t) (*numIndx) * mtbl_size );
+     if ( mtbl == NULL )
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl" );
+/*
+ * read table
+ */
+     if ( (*numIndx) == nrows ) {
+          stat = H5TBread_table( locID, tableName, mtbl_size, mtbl_offs, 
+                                 mtbl_calib2_sizes, mtbl );
+          if ( stat < 0 ) {
+               free( mtbl );
+               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+          }
+     } else {
+          register int nm;
+
+          for ( nm = 0; nm < (*numIndx); nm++ ) {
+               hsize_t start = metaIndx[nm];
+               stat = H5TBread_records( locID, tableName, start, 1,
+                                        mtbl_size, mtbl_offs, 
+                                        mtbl_calib2_sizes, mtbl+nm );
                if ( stat < 0 ) {
                     free( mtbl );
                     NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
