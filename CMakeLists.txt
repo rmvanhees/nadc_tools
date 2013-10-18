@@ -165,14 +165,22 @@ add_custom_target(uninstall
 ## =============================================================================
 ## Compiler flags
 set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wstrict-prototypes -Wdeclaration-after-statement")
+
 check_c_compiler_flag (-Wdisabled-optimization HAS_DISABLED_OPTIMIZATION)
 if (HAS_DISABLED_OPTIMIZATION)
    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wdisabled-optimization")
 endif ()
+
 check_c_compiler_flag (-Wsuggest-attribute=const HAS_SUGGEST_ATTRIBUTE)
 if (HAS_SUGGEST_ATTRIBUTE)
    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsuggest-attribute=const")
 endif ()
+
+check_c_compiler_flag (-fcatch-undefined-behavior HAS_CATCH_UNDEF_BEHAVIOR)
+if (HAS_CATCH_UNDEF_BEHAVIOR)
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fcatch-undefined-behavior")
+endif ()
+
 if (CMAKE_BUILD_TYPE STREQUAL "")
    set (CMAKE_C_FLAGS "-Os ${CMAKE_C_FLAGS}")
 endif ()
