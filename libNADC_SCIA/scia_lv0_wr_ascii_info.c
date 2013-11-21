@@ -74,43 +74,20 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, unsigned int num_info,
 			     (double) info[ni].mjd.days + 
 			     ((info[ni].mjd.secnd + info[ni].mjd.musec / 1e6)
 			      / (24. * 60 * 60)) );
-	  nadc_write_uchar( outfl, ni, "Packet ID", info[ni].packetID );
+	  nadc_write_uchar( outfl, ni, "Packet ID", info[ni].packet_type );
 	  nadc_write_uchar( outfl, ni, "Category", info[ni].category );
-	  nadc_write_uchar( outfl, ni, "State ID", info[ni].stateID );
-	  nadc_write_uchar( outfl, ni, "Number of Clusters", 
-			    info[ni].numClusters );
-	  nadc_write_ushort( outfl, ni, "length", info[ni].length );
+	  nadc_write_uchar( outfl, ni, "State ID", info[ni].state_id );
+	  nadc_write_uchar( outfl, ni, "Quality", info[ni].quality );
+	  nadc_write_ushort( outfl, ni, "CRC errors", info[ni].crc_errors );
+	  nadc_write_ushort( outfl, ni, "Reed-Solomon errors", 
+	       info[ni].rs_errors );
 	  nadc_write_ushort( outfl, ni, "BCPS", info[ni].bcps );
-	  nadc_write_ushort( outfl, ni, "State counter", info[ni].stateIndex );
+	  nadc_write_ushort( outfl, ni, "State counter", info[ni].state_index );
+	  nadc_write_ushort( outfl, ni, "Data packet length", 
+			     info[ni].packet_length );
+	  nadc_write_uint( outfl, ni, "ICU on-board-time", 
+			   info[ni].on_board_time );
 	  nadc_write_uint( outfl, ni, "Offset in file", info[ni].offset );
-	  if ( info[ni].packetID == (unsigned char) SCIA_DET_PACKET  ) {
-	       register unsigned int nc;
-
-	       unsigned int   count = (unsigned int) info[ni].numClusters;
-	       unsigned char  ucbuff[MAX_CLUSTER];
-	       unsigned short usbuff[MAX_CLUSTER];
-
-	       for ( nc = 0; nc < count ; nc++ )
-		    ucbuff[nc] = info[ni].cluster[nc].chanID;
-	       nadc_write_arr_uchar( outfl, ni, "Channel ID", 
-				     1, &count, ucbuff );
-	       for ( nc = 0; nc < count ; nc++ )
-		    ucbuff[nc] = info[ni].cluster[nc].clusID;
-	       nadc_write_arr_uchar( outfl, ni, "Cluster ID", 
-				     1, &count, ucbuff );
-	       for ( nc = 0; nc < count; nc++ )
-		    ucbuff[nc] = info[ni].cluster[nc].coAdding;
-	       nadc_write_arr_uchar( outfl, ni, "Coadding Factor", 
-				     1, &count, ucbuff );
-	       for ( nc = 0; nc < count; nc++ )
-		    usbuff[nc] = info[ni].cluster[nc].start;
-	       nadc_write_arr_ushort( outfl, ni, "Cluster Start pixelID", 
-				      1, &count, usbuff );
-	       for ( nc = 0; nc < count; nc++ )
-		    usbuff[nc] = info[ni].cluster[nc].length;
-	       nadc_write_arr_ushort( outfl, ni, "Cluster Length", 
-				      1, &count, usbuff );
-	  }
      }
      (void) fclose( outfl );
 }

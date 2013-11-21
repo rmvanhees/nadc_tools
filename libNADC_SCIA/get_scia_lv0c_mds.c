@@ -361,7 +361,7 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int num_det,
      do {
 	  nd = ndd;
 	  while ( ++ndd < num_det 
-		  && info[ndd].stateIndex == info[nd].stateIndex );
+		  && info[ndd].state_index == info[nd].state_index );
 	  num_mds += _GET_NUM_CLUSDEF( ndd-nd, det+nd );
      } while ( ndd < num_det );
 /*
@@ -379,13 +379,13 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int num_det,
  */
      ndd = 0;
      do {
-	  const unsigned char stateID = info[ndd].stateID;
+	  const unsigned char stateID = info[ndd].state_id;
 	  const double dsec_const  = det[ndd].isp.secnd 
 	       + det[ndd].isp.musec / 1e6 + ri[stateID-1] / 256.;
 
 	  nd = ndd;
 	  while ( ++ndd < num_det 
-		  && info[ndd].stateIndex == info[nd].stateIndex );
+		  && info[ndd].state_index == info[nd].state_index );
 	  numClus = _GET_LV0_CLUSDEF( ndd-nd, det+nd, clusDef );
 
 	  /* initialise mds-records of this state */

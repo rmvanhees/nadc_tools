@@ -21,17 +21,17 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write Measurement Data Sets in HDF5 format
 .INPUT/OUTPUT
-  call as    SCIA_LV0_WR_H5_AUX( param, stateIndx, nr_mds, aux );
-             SCIA_LV0_WR_H5_DET( param, stateIndx, nr_mds, det );
-             SCIA_LV0_WR_H5_PMD( param, stateIndx, nr_mds, pmd );
+  call as    SCIA_LV0_WR_H5_AUX( param, state_index, nr_mds, aux );
+             SCIA_LV0_WR_H5_DET( param, state_index, nr_mds, det );
+             SCIA_LV0_WR_H5_PMD( param, state_index, nr_mds, pmd );
 
      input:  
-             struct param_record param :  struct holding user-defined settings
-	     unsigned int    stateIndx :  index of State in product
-	     unsigned int    nr_mds    :  number of MDS structures	
-             struct mds0_aux *aux      :  Auxiliary MDS records
-             struct mds0_det *det      :  Detector MDS records
-             struct mds0_pmd *pmd      :  PMD MDS records
+             struct param_record param  :  struct holding user-defined settings
+	     unsigned short state_index :  index of State in product
+	     unsigned int   nr_mds      :  number of MDS structures	
+             struct mds0_aux *aux       :  Auxiliary MDS records
+             struct mds0_det *det       :  Detector MDS records
+             struct mds0_pmd *pmd       :  PMD MDS records
 
 .RETURNS     Nothing
 .COMMENTS    None
@@ -58,45 +58,49 @@
 #define _SCIA_LEVEL_0
 #include <nadc_scia.h>
 
-#define CMP_MJD(a,b) memcmp( &(a), &(b), sizeof(struct mjd_envi)) 
-
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 /*
  * determine characteristics of available clusters
  */
 static inline
-unsigned short GET_SCIA_CLUSTERDEF( struct mjd_envi mjd, unsigned int nr_info,
-				    const struct mds0_info *info,
-				    /*@null@*/ /*@out@*/
-				    struct clusdef_rec *clusDef )
+unsigned short _GET_LV0_CLUSDEF( unsigned int num_det, 
+                                 const struct mds0_det *det,
+				 struct clusdef_rec *clusDef )
 {
      register unsigned char ncl, nch;
-     register unsigned int  ni;
+     register unsigned int  nd;
 
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     /* initialize return value */
      unsigned short numClus = 0;
 
-     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
-          unsigned char clusIDmx = 0;
-          for ( ni = 0; ni < nr_info; ni++ ) {
-               if ( CMP_MJD( info[ni].mjd, mjd ) != 0 ) continue;
+     (void) memset( clusDef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
 
-               for ( ncl = 0 ; ncl < info[ni].numClusters; ncl++ ) {
-                    if ( info[ni].cluster[ncl].chanID == nch
-                         && info[ni].cluster[ncl].clusID == clusIDmx ) {
-                         clusIDmx = info[ni].cluster[ncl].clusID;
-                         if ( clusDef != NULL ) {
-                              clusDef[numClus+clusIDmx].chanID =
-                                   info[ni].cluster[ncl].chanID;
-                              clusDef[numClus+clusIDmx].clusID =
-                                   info[ni].cluster[ncl].clusID;
-                              clusDef[numClus+clusIDmx].start  =
-                                   info[ni].cluster[ncl].start;
-                              clusDef[numClus+clusIDmx].length =
-				   info[ni].cluster[ncl].length;
-                         }
-                         clusIDmx += UCHAR_ONE;
-                    }
-               }
+     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+          register unsigned char clusIDmx = 0;
+
+          for ( nd = 0; nd < num_det; nd++ ) {
+	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+		    if ( det[nd].data_src[nch].hdr.channel.field.id != nch )
+			 continue;
+
+		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+		    chan_src = det[nd].data_src[nch].pixel;
+		    
+		    for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+			 unsigned short indx = 
+			      numClus + chan_src[ncl].cluster_id;
+			 
+			 if ( chan_src[ncl].cluster_id > clusIDmx )
+			      clusIDmx = chan_src[ncl].cluster_id;
+			 clusDef[indx].chanID = nch;
+			 clusDef[indx].clusID = chan_src[ncl].cluster_id;
+			 clusDef[indx].start  = chan_src[ncl].start;
+			 clusDef[indx].length = chan_src[ncl].length;
+		    }
+	       }
           }
           numClus += clusIDmx;
      }
@@ -108,17 +112,17 @@ unsigned short GET_SCIA_CLUSTERDEF( struct mjd_envi mjd, unsigned int nr_info,
 .IDENTifer   SCIA_LV0_WR_H5_AUX
 .PURPOSE     define and write Auxiliary MDS records in HDF5 format
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_H5_AUX( param, stateIndx, nr_mds, aux );
+  call as   SCIA_LV0_WR_H5_AUX( param, state_index, nr_mds, aux );
      input:  
-             struct param_record param : struct holding user-defined settings
-	     unsigned int stateIndx    : index of State in product
-	     unsigned int nr_mds       : number of MDS structures	
-             struct mds0_aux *aux      : Auxiliary MDS records
+             struct param_record param  : struct holding user-defined settings
+	     unsigned short state_index : index of State in product
+	     unsigned int nr_mds        : number of MDS structures	
+             struct mds0_aux *aux       : Auxiliary MDS records
 
 .RETURNS     nothing
 .COMMENTS    nothing
 -------------------------*/
-void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned int stateIndx, 
+void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index, 
                          unsigned int nr_aux, const struct mds0_aux *aux )
 {
      const char prognm[] = "SCIA_LV0_WR_H5_AUX";
@@ -140,16 +144,16 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned int stateIndx,
  */
      switch ( (int) GET_SCIA_MDS_TYPE( aux->data_hdr.state_id ) ) {
      case SCIA_NADIR:
-	  (void) snprintf( grpName, 11, "nadir_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "nadir_%03hu", state_index );
 	  break;
      case SCIA_LIMB:
-	  (void) snprintf( grpName, 11, "limb_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "limb_%03hu", state_index );
 	  break;
      case SCIA_MONITOR:
-	  (void) snprintf( grpName, 11, "moni_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "moni_%03hu", state_index );
 	  break;
      case SCIA_OCCULT:
-	  (void) snprintf( grpName, 11, "occult_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "occult_%03hu", state_index );
 	  break;
      default:
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
@@ -320,17 +324,17 @@ done:
 .IDENTifer   SCIA_LV0_WR_H5_PMD
 .PURPOSE     define and write PMD MDS records in HDF5 format
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_H5_PMD( param, stateIndx, nr_mds, pmd );
+  call as   SCIA_LV0_WR_H5_PMD( param, state_index, nr_mds, pmd );
      input:  
-             struct param_record param : struct holding user-defined settings
-	     unsigned int stateIndx    : index of State in product
-	     unsigned int nr_mds       : number of MDS structures	
-             struct mds0_pmd *pmd      : PMD MDS records
+             struct param_record param  : struct holding user-defined settings
+	     unsigned short state_index : index of State in product
+	     unsigned int nr_mds        : number of MDS structures	
+             struct mds0_pmd *pmd       : PMD MDS records
 
 .RETURNS     nothing
 .COMMENTS    nothing
 -------------------------*/
-void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned int stateIndx, 
+void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index, 
                          unsigned int nr_pmd, const struct mds0_pmd *pmd )
 {
      const char prognm[] = "SCIA_LV0_WR_H5_PMD";
@@ -352,16 +356,16 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned int stateIndx,
  */
      switch ( (int) GET_SCIA_MDS_TYPE( pmd->data_hdr.state_id ) ) {
      case SCIA_NADIR:
-	  (void) snprintf( grpName, 11, "nadir_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "nadir_%03hu", state_index );
 	  break;
      case SCIA_LIMB:
-	  (void) snprintf( grpName, 11, "limb_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "limb_%03hu", state_index );
 	  break;
      case SCIA_MONITOR:
-	  (void) snprintf( grpName, 11, "moni_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "moni_%03hu", state_index );
 	  break;
      case SCIA_OCCULT:
-	  (void) snprintf( grpName, 11, "occult_%03u", stateIndx );
+	  (void) snprintf( grpName, 11, "occult_%03hu", state_index );
 	  break;
      default:
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
@@ -494,18 +498,17 @@ done:
 .IDENTifer   SCIA_LV0_WR_H5_DET
 .PURPOSE     define and write Detector MDS records in HDF5 format
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_H5_DET( param, info, nr_mds, det );
+  call as   SCIA_LV0_WR_H5_DET( param, state_index, nr_mds, det );
      input:  
-             struct param_record param : struct holding user-defined settings
-	     struct mds0_scia *info    : 
-	     unsigned int nr_mds       : number of MDS structures	
-             struct mds0_det *det      : Detector MDS records
+             struct param_record param  : struct holding user-defined settings
+	     unsigned short state_index : index of State in product
+	     unsigned int nr_mds        : number of MDS structures	
+             struct mds0_det *det       : Detector MDS records
 
 .RETURNS     nothing
 .COMMENTS    nothing
 -------------------------*/
-void SCIA_LV0_WR_H5_DET( struct param_record param, 
-			 const struct mds0_info *info,
+void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
                          unsigned int nr_det, const struct mds0_det *det )
 {
      const char prognm[] = "SCIA_LV0_WR_H5_DET";
@@ -527,11 +530,8 @@ void SCIA_LV0_WR_H5_DET( struct param_record param,
 
      const char tblName[] = "mds0_det";
 
-     const unsigned short stateIndex = (info != NULL) ? info->stateIndex : 0;
-
      const unsigned short CLUSTER_SYNC = 0xBBBB;
-     const unsigned short numClus = 
-	  GET_SCIA_CLUSTERDEF( det->isp, nr_det, info, clusDef );
+     const unsigned short numClus = _GET_LV0_CLUSDEF( nr_det, det, clusDef );
 
      const int compress = (param.flag_deflate == PARAM_SET) ? 3 : -1;
 /*
@@ -543,16 +543,16 @@ void SCIA_LV0_WR_H5_DET( struct param_record param,
  */
      switch ( (int) GET_SCIA_MDS_TYPE( det->data_hdr.state_id ) ) {
      case SCIA_NADIR:
-	  (void) snprintf( grpName, 11, "nadir_%03hu", stateIndex );
+	  (void) snprintf( grpName, 11, "nadir_%03hu", state_index );
 	  break;
      case SCIA_LIMB:
-	  (void) snprintf( grpName, 11, "limb_%03hu", stateIndex );
+	  (void) snprintf( grpName, 11, "limb_%03hu", state_index );
 	  break;
      case SCIA_MONITOR:
-	  (void) snprintf( grpName, 11, "moni_%03hu", stateIndex );
+	  (void) snprintf( grpName, 11, "moni_%03hu", state_index );
 	  break;
      case SCIA_OCCULT:
-	  (void) snprintf( grpName, 11, "occult_%03hu", stateIndex );
+	  (void) snprintf( grpName, 11, "occult_%03hu", state_index );
 	  break;
      default:
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );

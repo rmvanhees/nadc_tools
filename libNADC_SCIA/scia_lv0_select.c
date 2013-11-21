@@ -92,7 +92,7 @@ unsigned int SCIA_LV0_SELECT_MDS_SOURCE( int source,
      register unsigned int nr = 0u;
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  if ( source == (int) info[indx_info[ni]].packetID ) 
+	  if ( source == (int) info[indx_info[ni]].packet_type ) 
 	       indx_info[nr++] = indx_info[ni];
      }
      return nr;
@@ -130,9 +130,9 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_info *info,
 
      register const struct mds0_info *info_ptr;
 
-     /* check if stateIndex is strictly increasing (duplicates are allowed) */
+     /* check if state_index is strictly increasing (duplicates are allowed) */
      for ( ni = 1; ni < nr_indx; ni++ ) {
-	  if (info[indx_info[ni-1]].stateIndex > info[indx_info[ni]].stateIndex) 
+	  if (info[indx_info[ni-1]].state_index > info[indx_info[ni]].state_index) 
 	       break;
      }
      if ( ni == nr_indx ) return nr_indx;
@@ -145,9 +145,9 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_info *info,
 	  for ( nj = ni+1;  nj < nr_indx; nj++ ) {
 	       if ( indx_info[nj] == UINT_MAX ) continue;
 
-	       if ( info_ptr->packetID == info[indx_info[nj]].packetID 
+	       if ( info_ptr->packet_type == info[indx_info[nj]].packet_type
 /* 		    && CMP_MJD(info_ptr->mjd, info[indx_info[nj]].mjd) == 0 */
-		    && info_ptr->stateIndex == info[indx_info[nj]].stateIndex
+		    && info_ptr->state_index == info[indx_info[nj]].state_index
 		    && info_ptr->bcps == info[indx_info[nj]].bcps )
 		    indx_info[nj] = UINT_MAX;
 	  }
@@ -159,11 +159,11 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_info *info,
      if ( nr_indx == nr ) return nr_indx;
 
      /* compose message to user */
-     if ( (int) info[indx_info[0]].packetID == SCIA_AUX_PACKET ) {
+     if ( (int) info[indx_info[0]].packet_type == SCIA_AUX_PACKET ) {
 	  (void) snprintf( msg, 64, 
 			   "rejected %-u duplicated Auxiliary packages", 
 			   nr_indx - nr );
-     } else if ( (int) info[indx_info[0]].packetID == SCIA_DET_PACKET ) {
+     } else if ( (int) info[indx_info[0]].packet_type == SCIA_DET_PACKET ) {
 	  (void) snprintf( msg, 64, 
 			   "rejected %-u duplicated Detector packages", 
 			   nr_indx - nr );
@@ -264,52 +264,11 @@ unsigned int SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
 
 	  register bool found = FALSE;
 	  do {
-	       if ( stateID[ns] == info[indx_info[ni]].stateID )
+	       if ( stateID[ns] == info[indx_info[ni]].state_id )
 		    found = TRUE;
 	  } while( ! found && ++ns < (short) stateID_nr );
 	  if ( found ) indx_info[nr++] = indx_info[ni];
 
-     }
-     return nr;
-}
-
-/*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV0_SELECT_MDS_CHANNEL
-.PURPOSE     select info-records on presence of channel data
-.INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_CHANNEL( chan_mask, info, 
-                                                   nr_indx, indx_info );
-     input:  
-            unsigned char chan_mask : channel mask
-	    struct mds0_info *info  : structure for info-records
-	    unsigned int nr_indx    : (at first call) number of info-records
-    output:  
-            unsigned int *indx_info : (at first call) array of size nr_indx
-                                      initialized as [0,1,2,...,nr_indx-1]
-
-.RETURNS     number of selected info-records
-.COMMENTS    static function
--------------------------*/
-static
-unsigned int SCIA_LV0_SELECT_MDS_CHANNEL( unsigned char chan_mask, 
-					  const struct mds0_info *info, 
-					  unsigned int nr_indx, 
-					  unsigned int *indx_info )
-       /*@modifies indx_info@*/
-{
-     register unsigned int ni;
-     register unsigned int nr = 0u;
-
-     for ( ni = 0; ni < nr_indx; ni++ ) {
-	  register unsigned short nc = 0;
-	  register unsigned int nii = indx_info[ni];
-
-	  register bool found = FALSE;
-	  do {
-	       found = SELECTED_CHANNEL( chan_mask,
-					 info[nii].cluster[nc].chanID );
-	  } while ( ! found && ++nc < (unsigned short) info[nii].numClusters );
-	  if ( found ) indx_info[nr++] = nii;
      }
      return nr;
 }
@@ -360,10 +319,6 @@ unsigned int SCIA_LV0_SELECT_MDS( int source, struct param_record param,
      if ( param.stateID_nr != PARAM_UNSET ) {
 	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( param.stateID_nr, param.stateID,
 					       info, nr_indx, indx_info );
-     }
-     if ( source == SCIA_DET_PACKET && param.chan_mask != BAND_ALL ) {
-	  nr_indx = SCIA_LV0_SELECT_MDS_CHANNEL( param.chan_mask, 
-						 info, nr_indx, indx_info );
      }
      if ( nr_indx == 0 ) goto done;
 /*
