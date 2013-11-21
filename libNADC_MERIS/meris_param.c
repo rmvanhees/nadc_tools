@@ -296,9 +296,9 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
  * strip path to program
  */
      if ( (cpntr = strrchr( argv[0], '/' )) != NULL ) {
-	  (void) strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-	  (void) strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
      }
 /*
  * get command-line parameters
@@ -457,7 +457,7 @@ void MERIS_SHOW_PARAM( int instrument __attribute ((unused)),
  * show time of call
  */
      (void) time( tp );
-     (void) strlcpy( cbuff, ctime( tp ), MAX_STRING_LENGTH );
+     (void) nadc_strlcpy( cbuff, ctime( tp ), MAX_STRING_LENGTH );
      cbuff[strlen(cbuff)-1] = '\0';
      nadc_write_text( outfl, ++nr, "ProcessingDate", cbuff );
 /*
