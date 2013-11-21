@@ -40,10 +40,10 @@
               1.0   22-Aug-2001 Created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -88,13 +88,13 @@ unsigned int ENVI_RD_PDS_INFO( FILE *fd, /*@out@*/ char *keyword,
  * get keyword name
  */
      nchar = min_t( size_t, PDS_KEYWORD_LENGTH, (sep - line + 1));
-     (void) strlcpy( keyword, line, nchar );
+     (void) nadc_strlcpy( keyword, line, nchar );
 /*
  * get keyword value (including double-quotes)
  */
      ++sep; 
      nchar = min_t( size_t, PDS_KEYVAL_LENGTH, (newline - sep + 1));
-     (void) strlcpy( keyvalue, sep, nchar );
+     (void) nadc_strlcpy( keyvalue, sep, nchar );
 
  done:
      return nbyte;

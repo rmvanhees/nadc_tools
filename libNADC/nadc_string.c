@@ -20,9 +20,10 @@
 .KEYWORDS    string functions
 .LANGUAGE    ANSI C
 .COMMENTS    Compatible with *BSD
-             contains: strlcpy, strlcat
+             contains: strlcpy, strlcat, nadc_rstrip
 .ENVIRONment None
-.VERSION     1.0     10-Jul-2003   originate from the Linux kernel source
+.VERSION     2.0     03-Nov-2013   renamed function to avoid name conflicts, RvH
+             1.0     10-Jul-2003   originate from the Linux kernel source
 ------------------------------------------------------------*/
 /*
  * Define _POSIX_SOURCE to indicate
@@ -49,10 +50,10 @@
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
-.IDENTifer   strlcpy
+.IDENTifer   nadc_strlcpy
 .PURPOSE     copy a NULL-terminated string into a sized buffer
 .INPUT/OUTPUT
-  call as   nchar = strlcpy( dest, src, size );
+  call as   nchar = nadc_strlcpy( dest, src, size );
 
      input:  
              char   *src  :   where to copy the string from
@@ -66,7 +67,7 @@
              of course, the buffer size is zero). It does not pad
              out the result like strncpy() does.
 -------------------------*/
-size_t strlcpy( char *dest, /*@unique@*/ const char *src, size_t size )
+size_t nadc_strlcpy( char *dest, /*@unique@*/ const char *src, size_t size )
 {
      size_t ret = strlen( src );
 
@@ -79,10 +80,10 @@ size_t strlcpy( char *dest, /*@unique@*/ const char *src, size_t size )
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   strlcat
+.IDENTifer   nadc_strlcat
 .PURPOSE     append a length-limited, NULL-terminated string to another
 .INPUT/OUTPUT
-  call as   nchar = strlcat( dest, src, size );
+  call as   nchar = nadc_strlcat( dest, src, size );
 
      input:  
              char   *src  :   where to copy the string from
@@ -96,9 +97,9 @@ size_t strlcpy( char *dest, /*@unique@*/ const char *src, size_t size )
              of course, the buffer size is zero). It does not pad
              out the result like strncpy() does.
 -------------------------*/
-size_t strlcat( char *dest, const char *src, size_t count )
+size_t nadc_strlcat( char *dest, const char *src, size_t count )
 {
-     const char prognm[] = "strlcat";
+     const char prognm[] = "nadc_strlcat";
 
      size_t dsize = strlen( dest );
      size_t len = strlen( src );
@@ -119,10 +120,10 @@ size_t strlcat( char *dest, const char *src, size_t count )
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   rstrip
+.IDENTifer   nadc_rstrip
 .PURPOSE     return copy of string with trailing whitespace removed
 .INPUT/OUTPUT
-  call as   rstrip( dest, src );
+  call as   nadc_rstrip( dest, src );
      input:  
              char   *src  :   where to copy the string from
     output:  
@@ -131,7 +132,7 @@ size_t strlcat( char *dest, const char *src, size_t count )
 .RETURNS     nothing
 .COMMENTS    none
 -------------------------*/
-void rstrip( /*@out@*/ char *dest, const char *src )
+void nadc_rstrip( /*@out@*/ char *dest, const char *src )
 {
      size_t len = strlen( src );
 

@@ -28,15 +28,16 @@
              array *xa  :    pointer to array
 
 .RETURNS     value of the kk-th smallest value of an array
-.COMMENTS    Contains SELECTs, SELECTi, SELECTr, SELECTd
+.COMMENTS    Contains SELECTuc, SELECTs, SELECTi, SELECTr, SELECTd
 	     "x" specifies the data type of the input array, as follows:
 	     \hspace*{3ex} "s" \hspace*{2ex} short
 	     \hspace*{3ex} "i" \hspace*{2ex} integer
 	     \hspace*{3ex} "r" \hspace*{2ex} float
 	     \hspace*{3ex} "d" \hspace*{2ex} double
 .ENVIRONment None
-.VERSION     1.3     29-Sep-2011   little stylistic changes, RvH
-             1.2     29-Dec-1997   little stylistic changes, RvH
+.VERSION     1.4     10-Nov-2013   added function for unsigned char, RvH
+             1.3     29-Sep-2011   little stylistic changes, RvH
+	     1.2     29-Dec-1997   little stylistic changes, RvH
              1.1     01-Dec-1997   Changed dimensions to size_t, RvH
              1.0     03-Nov-1995   Created by R.M. van Hees
 ------------------------------------------------------------*/
@@ -56,6 +57,66 @@
 /*+++++ Macros +++++*/
 #define FOREVER    for(;;)
 #define SWAP(a,b)  {temp = (a); (a) = (b); (b) = temp;}
+
+/*
+ * here start the code of function SELECTs
+ */
+unsigned char SELECTuc( const size_t kk, const size_t dim, 
+			const unsigned char *ca )
+{
+     register size_t ll, hh;
+     register unsigned char test, temp;
+
+     size_t  low = 1;
+     size_t  high = dim;
+
+     unsigned char *ucbuff;
+
+     if ( dim == 0 ) return 0;
+     if ( dim == 1 ) return ca[0];
+     ucbuff = (unsigned char *) malloc( (dim+1) * sizeof(char) );
+     ucbuff[0] = 0;
+     (void) memcpy( ucbuff+1, ca, dim * sizeof(char) );
+
+     FOREVER {
+	  if ( high <= low+1 ) {
+	       if ( high == low+1 && ucbuff[low] < ucbuff[high] )
+		    SWAP( ucbuff[low], ucbuff[high] );
+	       break;
+	  } else {
+	       size_t mid = (low + high) / 2;
+
+	       SWAP( ucbuff[mid], ucbuff[low+1] );
+	       if ( ucbuff[low] > ucbuff[high] ) {
+		    SWAP( ucbuff[low], ucbuff[high] );
+	       }
+	       if ( ucbuff[low+1] > ucbuff[high] ) {
+		    SWAP( ucbuff[low+1], ucbuff[high] );
+	       }
+	       if ( ucbuff[low] > ucbuff[low+1] ) {
+		    SWAP( ucbuff[low], ucbuff[low+1] );
+	       }
+	       ll = low + 1;
+	       hh = high;
+	       test = ucbuff[ll];
+	       FOREVER {
+		    do ll++; while ( ucbuff[ll] < test );
+		    do hh--; while ( ucbuff[hh] > test );
+
+		    if ( hh < ll ) break;
+		    SWAP( ucbuff[ll], ucbuff[hh] );
+	       }
+	       ucbuff[low+1] = ucbuff[hh];
+	       ucbuff[hh] = test;
+	       if ( hh <= kk ) low = ll;
+	       if ( hh >= kk ) high = hh - 1;
+	  }
+     }
+     temp = ucbuff[kk];
+     free( ucbuff );
+
+     return temp;
+}
 
 /*
  * here start the code of function SELECTs

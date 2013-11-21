@@ -37,10 +37,10 @@
              1.0     30-Jul-1999   Created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -65,7 +65,7 @@ short NADC_USRINDX( const char str_range[], int max_indx, short *indices )
 	  (void) NADC_USRINP( INT16_T, str_range, max_indx, indices, &num );
      } else {
 	  nchar = cpntr - str_range;
-	  (void) strlcpy( cbuff, str_range, nchar );
+	  (void) nadc_strlcpy( cbuff, str_range, nchar );
 	  (void) sprintf( cbuff, "%s%-d%s", cbuff, max_indx-1, cpntr+1 );
 	  (void) NADC_USRINP( INT16_T, cbuff, max_indx, indices, &num );
 

@@ -60,10 +60,10 @@
               1.0   27-Jun-1993 Created by R.M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System Headers +++++*/
 #include <stdio.h>
@@ -139,8 +139,8 @@ void NADC_USRINP( int type, const char *string, int maxval,
 		    (void) strcpy( cval, str_ptr );
 		    *str_ptr = '\0';
 	       } else { 
-		    (void) strlcpy( cval, str_ptr, 
-				    (size_t)(pntcm - str_ptr)+1 );
+		    (void) nadc_strlcpy( cval, str_ptr, 
+					 (size_t)(pntcm - str_ptr)+1 );
 		    str_ptr = pntcm + 1;
 	       }
 	       switch( type ) {
@@ -171,8 +171,8 @@ void NADC_USRINP( int type, const char *string, int maxval,
 /*
  * It contains a ":" before a "," !
  */
-	       (void) strlcpy( cmval[nr], str_ptr, 
-			       (size_t)(pnt2d - str_ptr)+1 );
+	       (void) nadc_strlcpy( cmval[nr], str_ptr, 
+				    (size_t)(pnt2d - str_ptr)+1 );
 	       nr++;
 	       str_ptr = pnt2d + 1;
 	       pnt2d = strchr( str_ptr, ':' );
@@ -182,8 +182,8 @@ void NADC_USRINP( int type, const char *string, int maxval,
  */
 	       if ( pntcm == NULL ) {
 		    if ( pnt2d != NULL ) {                        /*get CEND*/
-			 (void) strlcpy( cmval[nr], str_ptr, 
-					 (size_t)(pnt2d - str_ptr)+1 );
+			 (void) nadc_strlcpy( cmval[nr], str_ptr, 
+					      (size_t)(pnt2d - str_ptr)+1 );
 			 nr++;
 			 str_ptr = pnt2d + 1;
 			 pnt2d = strchr( str_ptr, ':' );
@@ -204,14 +204,14 @@ void NADC_USRINP( int type, const char *string, int maxval,
  * The string still contains a "," 
  */
 		    if ( pnt2d != NULL && pnt2d < pntcm ) {       /*get CEND*/
-			 (void) strlcpy( cmval[nr], str_ptr, 
-					 (size_t)(pnt2d - str_ptr)+1 );
+			 (void) nadc_strlcpy( cmval[nr], str_ptr, 
+					      (size_t)(pnt2d - str_ptr)+1 );
 			 nr++;
 			 str_ptr = pnt2d + 1;
 			 pnt2d = strchr( str_ptr, ':' );
 		    } else {                                 /*set CINCR = 1*/
-			 (void) strlcpy( cmval[nr], str_ptr,
-					 (size_t)(pntcm - str_ptr)+1 );
+			 (void) nadc_strlcpy( cmval[nr], str_ptr,
+					      (size_t)(pntcm - str_ptr)+1 );
 			 nr++;
 			 (void) strcpy( cmval[nr], "1" );
 		    }
@@ -219,8 +219,8 @@ void NADC_USRINP( int type, const char *string, int maxval,
 			      NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM,
 					       "a:b:c:d,.." );
 		    } else {                                     /*get CINCR*/
-			 (void) strlcpy( cmval[nr], str_ptr, 
-					 (size_t) (pntcm - str_ptr)+1 );
+			 (void) nadc_strlcpy( cmval[nr], str_ptr, 
+					      (size_t) (pntcm - str_ptr)+1 );
 			 nr++;
 			 str_ptr = pntcm + 1;
 		    }
