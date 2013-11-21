@@ -134,7 +134,7 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
 	       pntr = PQgetvalue( res, 0, 0 );
 	       absOrbit = (int) strtol( pntr, (char **)NULL, 10 );
 	       pntr = PQgetvalue( res, 0, 1 );
-	       (void) strlcpy( l1b_version, pntr, 8 );
+	       (void) nadc_strlcpy( l1b_version, pntr, 8 );
 	  } else 
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
 				"input level 1b product not available" );
@@ -143,7 +143,7 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
 /*
  * no error and not yet stored, then proceed
  */
-     (void) strlcpy( prod_version, hdr->software_version, 8 );
+     (void) nadc_strlcpy( prod_version, hdr->software_version, 8 );
      if ( (pntr = strchr( prod_version, '(' )) != NULL ) *pntr = '\0';
      if ( hdr->numRec > 0 ) {
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, SQL_INSERT_ALL,

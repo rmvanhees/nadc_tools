@@ -103,7 +103,7 @@ int main ( int argc, char *argv[] )
 	  else if ( strncmp( argv[na], "-replace", 8 ) == 0 )
 	       flag_replace = TRUE;
      } while ( ++na < argc-1 );
-     (void) strlcpy( flname, argv[argc-1], MAX_STRING_LENGTH );
+     (void) nadc_strlcpy( flname, argv[argc-1], MAX_STRING_LENGTH );
 /*
  * read records from TOGOMI product
  */
