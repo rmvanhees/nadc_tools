@@ -123,12 +123,15 @@ int NADC_FRESCO_WR_SQL_META( PGconn *conn, const struct fresco_hdr *hdr )
  * check presence of SCIA or GOME L1b product in database
  */
      if ( strncmp( hdr->l1b_product, "SCI_NL__1P", 10 ) == 0 ) {
-	  (void) strlcpy( l1b_product, hdr->l1b_product, ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( l1b_product, 
+			       hdr->l1b_product, ENVI_FILENAME_SIZE );
 	  SCIA_CHECK_SQL_LV1B_NAME( conn, l1b_product );
      } else {
-	  (void) strlcpy( l1b_product, hdr->l1b_product, ERS2_FILENAME_SIZE );
-	  GOME_CHECK_SQL_LV1B_NAME( conn, hdr->l1b_product, hdr->validity_start, 
-			       hdr->validity_stop, l1b_product );
+	  (void) nadc_strlcpy( l1b_product, 
+			       hdr->l1b_product, ERS2_FILENAME_SIZE );
+	  GOME_CHECK_SQL_LV1B_NAME( conn, hdr->l1b_product, 
+				    hdr->validity_start, 
+				    hdr->validity_stop, l1b_product );
      }
 /*
  * obtain orbit number from meta__1P table
@@ -145,7 +148,7 @@ int NADC_FRESCO_WR_SQL_META( PGconn *conn, const struct fresco_hdr *hdr )
 	       pntr = PQgetvalue( res, 0, 0 );
 	       absOrbit = (int) strtol( pntr, (char **)NULL, 10 );
 	       pntr = PQgetvalue( res, 0, 1 );
-	       (void) strlcpy( l1b_version, pntr, 10 );
+	       (void) nadc_strlcpy( l1b_version, pntr, 10 );
 	  } else 
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
 				"input level 1b product not available" );
