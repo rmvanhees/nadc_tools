@@ -97,18 +97,18 @@ int main( int argc, char *argv[] )
 	       else
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
 	  } while( ++nr < (argc-1) );
-	  (void) strlcpy( flname, argv[argc-1], MAX_STRING_LENGTH );
+	  (void) nadc_strlcpy( flname, argv[argc-1], MAX_STRING_LENGTH );
      } else if ( argc == 2 ) {
-	  (void) strlcpy( flname, argv[1], MAX_STRING_LENGTH );
+	  (void) nadc_strlcpy( flname, argv[1], MAX_STRING_LENGTH );
      } else
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
 /*
  * strip path of file-name & remove extension ".gz"
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
      }
 /*
  * read the IMAP HDO product
@@ -119,9 +119,9 @@ int main( int argc, char *argv[] )
      if ( hdr.numProd > 1 ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
 			   "no more than one orbit per ingest" );
-     (void) strlcpy( hdr.product, ctemp, SHORT_STRING_LENGTH );
+     (void) nadc_strlcpy( hdr.product, ctemp, SHORT_STRING_LENGTH );
      NADC_RECEIVEDATE( flname, hdr.receive_date );
-     hdr.file_size = NADC_FILESIZE( flname );
+     hdr.file_size = nadc_file_size( flname );
      hdr.numRec = SCIA_RD_NC_HDO_REC( ncid, &rec );
      if ( (retval = nc_close( ncid )) != NC_NOERR )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );

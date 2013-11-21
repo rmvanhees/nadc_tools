@@ -1,21 +1,16 @@
-set (IMAP_CH4_SRCS scia_rd_imap_ch4.c)
-set (IMAP_HDO_SRCS scia_rd_imap_hdo.c)
-set (IMAP_LIBS nadc)
+add_definitions (-D_WITH_NC4)
 
-if (NETCDF_FOUND)
-   add_definitions (-D_WITH_NC4)
-
-   list (APPEND IMAP_CH4_SRCS
-        scia_rd_nc_ch4.c
-        scia_wr_nc_ch4.c
-   )
-   list (APPEND IMAP_HDO_SRCS
-        scia_rd_nc_hdo.c
-        scia_wr_nc_hdo.c
-   )
-   list (APPEND IMAP_LIBS ${NETCDF_LIBRARIES})
-endif ()
-list (APPEND IMAP_LIBS ${HDF5_C_LIBRARIES})
+set (IMAP_CH4_SRCS 
+    scia_rd_imap_ch4.c
+    scia_rd_nc_ch4.c
+    scia_wr_nc_ch4.c
+)
+set (IMAP_HDO_SRCS 
+    scia_rd_imap_hdo.c
+    scia_rd_nc_hdo.c
+    scia_wr_nc_hdo.c
+)
+set (IMAP_LIBS nadc ${NETCDF_LIBRARIES} ${HDF5_C_LIBRARIES})
 
 set (IMAP_CH4_SQL_SRCS "")
 set (IMAP_HDO_SQL_SRCS "")
@@ -45,15 +40,13 @@ add_executable(scia_imap_hdo scia_imap_hdo.c
 
 target_link_libraries(scia_imap_hdo ${IMAP_LIBS})
 
-if (NETCDF_FOUND)
-   add_executable(adaguc_imap_ch4 adaguc_imap_ch4.c ${IMAP_CH4_SRCS})
+add_executable(adaguc_imap_ch4 adaguc_imap_ch4.c ${IMAP_CH4_SRCS})
 
-   target_link_libraries(adaguc_imap_ch4 ${IMAP_LIBS})
+target_link_libraries(adaguc_imap_ch4 ${IMAP_LIBS})
 
-   add_executable(adaguc_imap_hdo adaguc_imap_hdo.c ${IMAP_HDO_SRCS})
+add_executable(adaguc_imap_hdo adaguc_imap_hdo.c ${IMAP_HDO_SRCS})
 
-   target_link_libraries(adaguc_imap_hdo ${IMAP_LIBS})
-endif ()
+target_link_libraries(adaguc_imap_hdo ${IMAP_LIBS})
 
 ## Installation instructions
 install (
