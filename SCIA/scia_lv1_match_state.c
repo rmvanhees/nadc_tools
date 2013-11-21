@@ -173,7 +173,7 @@ void SCIA_LV1_MATCH_STATE( PGconn *conn, bool be_verbose,
 					   (char **) NULL, 10 );
 	  stateRow[nr].jday = DATETIME_2_JULIAN( pntr, musec );
 	  pntr = PQgetvalue( res, nr, i_softv );
-	  (void) strlcpy( stateRow[nr].softVersion, pntr, 4 );
+	  (void) nadc_strlcpy( stateRow[nr].softVersion, pntr, 4 );
 	  stateRow[nr].indxState = USHRT_MAX;
 	  stateRow[nr].dtMatch = 30 / SecPerDay;
      }

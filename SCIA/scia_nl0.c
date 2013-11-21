@@ -61,8 +61,13 @@
 #define _SCIA_LEVEL_0
 #include <nadc_scia.h>
 
+#ifdef COLOR_TTY
 #define RESET    "\033[0m"
 #define BOLDRED  "\033[1m\033[31m"
+#else
+#define RESET    ""
+#define BOLDRED  ""
+#endif
 
 /*+++++ Global Variables +++++*/
 /* 
@@ -154,7 +159,7 @@ int main( int argc, char *argv[] )
      ENVI_RD_MPH( fd, &mph );
      if ( IS_ERR_STAT_FATAL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MPH" );
-     if ( mph.tot_size != NADC_FILESIZE( param.infile ) )
+     if ( mph.tot_size != nadc_file_size( param.infile ) )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "file size check failed" );
      if ( param.write_ascii == PARAM_SET ) {
 	  ENVI_WR_ASCII_MPH( param, &mph );
@@ -213,11 +218,7 @@ int main( int argc, char *argv[] )
  *
  * first try to read the MDS info data
  */
-     num_info = 0;
-     if ( param.use_infodb == PARAM_SET )
-	  num_info = SCIA_LV0_RD_H5_INFO_DB( param.infile, &info );
-     if ( num_info == 0 )
-	  num_info = SCIA_LV0_RD_MDS_INFO( fd, num_dsd, dsd, &info );
+     num_info = SCIA_LV0_RD_MDS_INFO( fd, num_dsd, dsd, &info );
      if ( IS_ERR_STAT_FATAL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "RD_MDS_INFO" );
      if ( param.write_ascii == PARAM_SET ) {
@@ -268,7 +269,7 @@ int main( int argc, char *argv[] )
 					    totalPMD-sumPMD, &pmd );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
-	       sqlState[numState].stateID = infoDet[sumDet].stateID;
+	       sqlState[numState].stateID = infoDet[sumDet].state_id;
 
 	       /* set DateTime and StateID of current state */
 	       (void) memcpy( &sqlState[numState].mjd, &infoDet[sumDet].mjd,
@@ -330,15 +331,15 @@ int main( int argc, char *argv[] )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
-	       SCIA_LV0_WR_H5_AUX( param, mds_info[num].stateIndex, 
+	       SCIA_LV0_WR_H5_AUX( param, mds_info[num].state_index, 
 				   numAux, aux );
 	  } else if ( param.write_ascii == PARAM_SET ) {
- 	       SCIA_LV0_WR_ASCII_AUX( param, mds_info[num].stateIndex, 
+ 	       SCIA_LV0_WR_ASCII_AUX( param, mds_info[num].state_index, 
 				      numAux, aux );
 	  } else {
 	       register unsigned int nr, total;
 
-	       (void) fprintf( stdout, "%02d:", mds_info[num].stateID );
+	       (void) fprintf( stdout, "%02d:", mds_info[num].state_id );
 	       for ( total = nr = 0; nr < numAux; nr++ )
 		    total += aux[nr].fep_hdr.crc_errs;
 	       if ( total == 0 )
@@ -380,14 +381,15 @@ int main( int argc, char *argv[] )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_DET" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
-	       SCIA_LV0_WR_H5_DET( param, mds_info+num, numDet, det );
+	       SCIA_LV0_WR_H5_DET( param, mds_info[num].state_index, 
+				   numDet, det );
 	  } else if ( param.write_ascii == PARAM_SET ) {
-	       SCIA_LV0_WR_ASCII_DET( param, mds_info[num].stateIndex, 
+	       SCIA_LV0_WR_ASCII_DET( param, mds_info[num].state_index, 
 				      numDet, det );
 	  } else {
 	       register unsigned int nr, total;
 
-	       (void) fprintf( stdout, "%02d:", mds_info[num].stateID );
+	       (void) fprintf( stdout, "%02d:", mds_info[num].state_id );
 	       for ( total = nr = 0; nr < numDet; nr++ )
 		    total += det[nr].fep_hdr.crc_errs;
 	       if ( total == 0 )
@@ -428,15 +430,15 @@ int main( int argc, char *argv[] )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMD" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
-	       SCIA_LV0_WR_H5_PMD( param, mds_info[num].stateIndex, 
+	       SCIA_LV0_WR_H5_PMD( param, mds_info[num].state_index, 
 				   numPMD, pmd );
 	  } else if ( param.write_ascii == PARAM_SET ) {
-	       SCIA_LV0_WR_ASCII_PMD( param, mds_info[num].stateIndex, 
+	       SCIA_LV0_WR_ASCII_PMD( param, mds_info[num].state_index, 
 				      numPMD, pmd );
 	  } else {
 	       register unsigned int nr, total;
 
-	       (void) fprintf( stdout, "%02d:", mds_info[num].stateID );
+	       (void) fprintf( stdout, "%02d:", mds_info[num].state_id );
 	       for ( total = nr = 0; nr < numPMD; nr++ )
 		    total += pmd[nr].fep_hdr.crc_errs;
 	       if ( total == 0 )
