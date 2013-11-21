@@ -79,19 +79,17 @@ int IDL_STDCALL _GET_LV0_MDS_INFO ( int argc, void *argv[] )
 
      unsigned int num_info;
 
-     struct mph_envi  mph;
      struct dsd_envi  dsd;
      struct mds0_info *info;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 2 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
 
-     mph = *(struct mph_envi *) argv[0];
-     dsd = *(struct dsd_envi *) argv[1];
-     info = (struct mds0_info *) argv[2];
+     dsd = *(struct dsd_envi *) argv[0];
+     info = (struct mds0_info *) argv[1];
 
-     num_info = GET_SCIA_LV0_MDS_INFO( fd_nadc, mph, &dsd, info );
+     num_info = GET_SCIA_LV0_MDS_INFO( fd_nadc, &dsd, info );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "GET_SCIA_LV0_MDS_INFO" );
 
@@ -153,8 +151,8 @@ int IDL_STDCALL _SCIA_LV0_RD_AUX ( int argc, void *argv[] )
 }
 
 static inline
-void UNPACK_LV0_PIXEL_VAL( const struct chan_src *pixel,
-                           /*@out@*/ unsigned int *data )
+void _UNPACK_LV0_PIXEL_DATA( const struct chan_src *pixel,
+			     /*@out@*/ unsigned int *data )
 {
      register unsigned short np = 0;
 
@@ -180,16 +178,15 @@ int IDL_STDCALL _SCIA_LV0_RD_DET ( int argc, void *argv[] )
 {
      const char prognm[] = "_SCIA_LV0_RD_DET";
 
-     register unsigned int n_ch, n_cl;
+     register unsigned short n_ch, n_cl;
 
      signed char cbuff;
-     unsigned char chan_mask;
-     unsigned int  num_clus;
+     unsigned char  chan_mask;
+     unsigned int   num_clus;
 
      register unsigned int nr = 0;
      register unsigned int offs = 0;
 
-     unsigned int sz_data = 0;
      unsigned int num_det;
      unsigned int *data;
 
@@ -241,23 +238,18 @@ int IDL_STDCALL _SCIA_LV0_RD_DET ( int argc, void *argv[] )
      chan_mask = (unsigned char) cbuff;
      det   = (struct IDL_mds0_det *) argv[3];
      data  = (unsigned int *) argv[4];
-/*
- * we need SCIA_LV0_RD_DET to do dynamic memory allocation
- */
+
+     /* we need SCIA_LV0_RD_DET to do dynamic memory allocation */
      nadc_stat = NADC_STAT_SUCCESS;
      for ( nr = 0; nr < num_det; nr++ ) {
-	  for ( n_cl = 0; n_cl < (unsigned int) info[nr].numClusters; n_cl++ )
-	       sz_data += info[nr].cluster[n_cl].length;
-/*
- * read one detector MDS into memory
- */
 	  Use_Extern_Alloc = FALSE;
+
+	  /* read one detector MDS into memory */
 	  SCIA_LV0_RD_DET( fd_nadc, info+nr, 1, chan_mask, &C_det );
 	  Use_Extern_Alloc = TRUE;
 	  if ( IS_ERR_STAT_FATAL ) return -1;
-/*
- * copy C-struct to IDL-struct
- */
+
+	  /* copy C-struct to IDL-struct */
 	  det[nr].bcps = C_det->bcps;
 	  det[nr].num_chan = C_det->num_chan; 
 	  (void) memcpy( det[nr].orbit_vector, C_det->orbit_vector, 
@@ -294,22 +286,16 @@ int IDL_STDCALL _SCIA_LV0_RD_DET ( int argc, void *argv[] )
 		    det[nr].data_src[n_ch].pixel[n_cl].length =
 			 C_det->data_src[n_ch].pixel[n_cl].length;
 
-		    if ( (offs+C_det->data_src[n_ch].pixel[n_cl].length)
-			 > sz_data ) goto done;
-		    UNPACK_LV0_PIXEL_VAL( &C_det->data_src[n_ch].pixel[n_cl],
-					  data+offs );
+		    _UNPACK_LV0_PIXEL_DATA( &C_det->data_src[n_ch].pixel[n_cl],
+					    data+offs );
 		    offs += C_det->data_src[n_ch].pixel[n_cl].length;
 	       }
 	  }
-/*
- * release memory
- */
+
+	  /* release memory */
 	  SCIA_LV0_FREE_MDS_DET( 1, C_det );
      }
      return num_det;
- done:
-     SCIA_LV0_FREE_MDS_DET( 1, C_det );
-     return -1;
 }
 
 int IDL_STDCALL _SCIA_LV0_RD_PMD ( int argc, void *argv[] )
