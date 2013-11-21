@@ -100,7 +100,6 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
      register int nr;
 
      char    cbuff[MAX_STRING_LENGTH];
-     char    string[SHORT_STRING_LENGTH];
      time_t  tp[1];
 
      unsigned int majnum, minnum, relnum;
@@ -174,18 +173,18 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 	  (void) strcpy( cbuff, "" );
 	  if ( param.write_aux == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoAuxiliary", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoAuxiliary", SHORT_STRING_LENGTH );
 	  }
 	  if ( param.write_det == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoDetector", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoDetector", SHORT_STRING_LENGTH );
 	  }
 	  if ( param.write_pmd == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoPMD", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoPMD", SHORT_STRING_LENGTH );
 	  }
 	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
 	  (void) H5LTset_attribute_string( file_id, "/", 
@@ -194,53 +193,53 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
  * spectral bands
  */
 	  if ( (param.chan_mask & BAND_ALL) != UCHAR_ZERO ) {
-	       (void) strcpy( string, "" );
+	       (void) strcpy( cbuff, "" );
 	       if ( (param.chan_mask & BAND_ONE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "1", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "1", SHORT_STRING_LENGTH );
 	       }	  
 	       if ( (param.chan_mask & BAND_TWO) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "2", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "2", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_THREE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "3", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "3", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_FOUR) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "4", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "4", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_FIVE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "5", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "5", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_SIX) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "6", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( cbuff, "6", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_SEVEN) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "7", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "7", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_EIGHT) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "8", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "8", SHORT_STRING_LENGTH );
 	       }
-	       if ( strlen( string ) == 0 )
+	       if ( strlen( cbuff ) == 0 )
 		    (void) H5LTset_attribute_string( file_id, "/", 
 						     "Bands", "FALSE" );
 	       else
 		    (void) H5LTset_attribute_string( file_id, "/", 
-						     "Bands", string );
+						     "Bands", cbuff );
 	  } else
 	       (void) H5LTset_attribute_string( file_id, "/", "Bands", "ALL" );
 /*
@@ -267,43 +266,43 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 /*
  * selected Key DSD's
  */
-	  (void) strcpy( string, "" );
+	  (void) strcpy( cbuff, "" );
 	  if ( param.write_ads == PARAM_UNSET ) {
-	       if ( strlen( string ) > 0 ) 
-		    (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-	       (void) strlcat( string, "NoADS", SHORT_STRING_LENGTH );
+	       if ( strlen( cbuff ) > 0 )
+		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoADS", SHORT_STRING_LENGTH );
 	  }
 	  if ( param.write_gads == PARAM_UNSET ) {
-	       if ( strlen( string ) > 0 ) 
-		    (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-	       (void) strlcat( string, "NoGADS", SHORT_STRING_LENGTH );
+	       if ( strlen( cbuff ) > 0 ) 
+		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoGADS", SHORT_STRING_LENGTH );
 	  }
-	  if ( strlen( string ) == 0 ) (void) strcpy( string, "ALL" );
+	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
 	  (void) H5LTset_attribute_string( file_id, "/", "KeyDataSets", 
-					   string );
+					   cbuff );
 /*
  * selected measurement data sets
  */
 	  (void) strcpy( cbuff, "" );
 	  if ( param.write_limb == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoLimb", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoLimb", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_moni == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoMonitoring", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoMonitoring", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_nadir == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoNadir", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoNadir", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_occ == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoOcc", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoOcc", MAX_STRING_LENGTH );
 	  }
 	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
 	  (void) H5LTset_attribute_string( file_id, "/", 
@@ -328,53 +327,53 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
  * spectral bands
  */
 	  if ( (param.chan_mask & BAND_ALL) != UCHAR_ZERO ) {
-	       (void) strcpy( string, "" );
+	       (void) strcpy( cbuff, "" );
 	       if ( (param.chan_mask & BAND_ONE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "1", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "1", SHORT_STRING_LENGTH );
 	       }	  
 	       if ( (param.chan_mask & BAND_TWO) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "2", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "2", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_THREE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "3", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "3", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_FOUR) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "4", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "4", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_FIVE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "5", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "5", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_SIX) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "6", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "6", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_SEVEN) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "7", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "7", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_EIGHT) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "8", SHORT_STRING_LENGTH );
+		    if ( strlen( cbuff ) > 0 ) 
+			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, "8", SHORT_STRING_LENGTH );
 	       }
-	       if ( strlen( string ) == 0 )
+	       if ( strlen( cbuff ) == 0 )
 		    (void) H5LTset_attribute_string( file_id, "/", "Bands", 
 						     "FALSE" );
 	       else
 		    (void) H5LTset_attribute_string( file_id, "/", "Bands",
-						     string );
+						     cbuff );
 	  } else
 	       (void) H5LTset_attribute_string( file_id, "/", "Bands", "ALL" );
 /*
@@ -419,9 +418,9 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 	       (void) strcpy( cbuff, "" );
 	       for ( nr = 0; nr < MAX_NUM_STATE; nr++ ) {
 		    if (Get_Bit_LL(param.clus_mask,(unsigned char)nr) == 0ULL)
-			 (void) strlcat( cbuff, "0", MAX_STRING_LENGTH );
+			 (void) nadc_strlcat( cbuff, "0", MAX_STRING_LENGTH );
 		    else
-			 (void) strlcat( cbuff, "1", MAX_STRING_LENGTH );
+			 (void) nadc_strlcat( cbuff, "1", MAX_STRING_LENGTH );
 	       }
 	       (void) H5LTset_attribute_string( file_id, "/", "Clusters", 
 						cbuff );
@@ -433,13 +432,13 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 	       (void) H5LTset_attribute_string( file_id, "/", "Calibration", 
 						"FALSE" );
 	  } else {
-	       SCIA_GET_CALIB( param.calib_scia, string );
-	       if ( strlen(string) == 0 ) {
+	       SCIA_GET_CALIB( param.calib_scia, cbuff );
+	       if ( strlen(cbuff) == 0 ) {
 		    (void) H5LTset_attribute_string( file_id, "/", 
 						     "Calibration", "FALSE" );
 	       } else {
 		    (void) H5LTset_attribute_string( file_id, "/", 
-						     "Calibration", string );
+						     "Calibration", cbuff );
 	       }
 	  }
 	  break;

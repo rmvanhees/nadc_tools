@@ -88,6 +88,8 @@ const struct clusdef_rec clusDefThree[NCLUSDEF_THREE] = {
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 unsigned short GET_SCIA_CLUSDEF( unsigned char stateID, 
                                  /*@out@*/ struct clusdef_rec *clusDef )
+       /*@globals clusDefOne, clusDefThree;@*/
+       /*@modifies clusDef@*/
 {
      const char prognm[] = "GET_CLUSTERDEF";
 

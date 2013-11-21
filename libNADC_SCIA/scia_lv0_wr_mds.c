@@ -117,7 +117,7 @@ void SCIA_LV0_WR_MDS_ANNOTATION( FILE *fd,
      hdr_pntr += ENVI_USHRT;
      (void) memcpy( hdr_pntr, &fep_hdr.rs_errs, ENVI_USHRT );
      hdr_pntr += ENVI_USHRT;
-     (void) strlcpy( hdr_pntr, SpareFEP, 2 );
+     (void) nadc_strlcpy( hdr_pntr, SpareFEP, 2 );
 /*
  * write header data
  */

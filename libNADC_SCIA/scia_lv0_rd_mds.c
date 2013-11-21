@@ -949,7 +949,7 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
      }
 #endif
      /* obtain cluster definition (not implemented for absOrbit < 4151) */
-     numClusDef = GET_SCIA_CLUSDEF( info->stateID, clusDef );
+     numClusDef = GET_SCIA_CLUSDEF( info->state_id, clusDef );
 /*
  * read ISP Detector Data Source Packet
  */

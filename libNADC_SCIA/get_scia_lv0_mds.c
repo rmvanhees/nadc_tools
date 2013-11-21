@@ -74,12 +74,12 @@ unsigned int GET_SCIA_LV0_STATE_AUX( FILE *fd, const struct mds0_info *info,
 {
      register unsigned int naux = 0u;
 
-     const unsigned short stateIndex = (info == NULL ? 0 : info->stateIndex);
+     const unsigned short state_index = (info == NULL ? 0 : info->state_index);
 
      if ( numInfo == 0u || info == NULL ) return 0u;
 
      while( ++naux < numInfo ) {
-	  if ( info[naux].stateIndex != stateIndex ) break;
+	  if ( info[naux].state_index != state_index ) break;
      }
      (void) SCIA_LV0_RD_AUX( fd, info, naux, aux_out );
 
@@ -109,12 +109,12 @@ unsigned int GET_SCIA_LV0_STATE_DET( unsigned char chan_mask,
 {
      register unsigned int ndet = 0u;
 
-     const unsigned short stateIndex = (info == NULL ? 0 : info->stateIndex);
+     const unsigned short state_index = (info == NULL ? 0 : info->state_index);
 
      if ( numInfo == 0u || info == NULL ) return 0u;
 
      while( ++ndet < numInfo ) {
-	  if ( info[ndet].stateIndex != stateIndex ) break;
+	  if ( info[ndet].state_index != state_index ) break;
      }
      (void) SCIA_LV0_RD_DET( fd, info, ndet, chan_mask, det_out );
 
@@ -143,12 +143,12 @@ unsigned int GET_SCIA_LV0_STATE_PMD( FILE *fd, const struct mds0_info *info,
 {
      register unsigned int npmd = 0u;
 
-     const unsigned short stateIndex = (info == NULL ? 0 : info->stateIndex);
+     const unsigned short state_index = (info == NULL ? 0 : info->state_index);
 
      if ( numInfo == 0u || info == NULL ) return 0u;
 
      while( ++npmd < numInfo ) {
-	  if ( info[npmd].stateIndex != stateIndex ) break;
+	  if ( info[npmd].state_index != state_index ) break;
      }
      (void) SCIA_LV0_RD_PMD( fd, info, npmd, pmd_out );
 
