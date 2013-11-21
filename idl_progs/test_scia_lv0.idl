@@ -20,7 +20,7 @@ IF status NE 0 THEN NADC_ERR_TRACE
 
 ; process PMD source packets
 PRINT, 'SCIA_LV0_RD_MDS_PMD'
-SCIA_LV0_RD_PMD, info, mds_pmd, status=status
+SCIA_LV0_RD_PMD, info, mds_pmd, status=status, state_id=6
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; read Detector source packets

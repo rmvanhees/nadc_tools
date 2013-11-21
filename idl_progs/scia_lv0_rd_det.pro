@@ -190,6 +190,34 @@
 ;                    use new function GET_LV0_MDS_STATE
 ;-
 ;---------------------------------------------------------------------------
+FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, chan_mask
+ compile_opt idl2,logical_predicate 
+
+ ; obtain Sciamachy cluster definition
+ SCIA_CLUSDEF, state_id, orbit
+
+ duration = ULONG(!scia.duration)
+ IF category EQ 2 OR category EQ 26 THEN BEGIN
+    duration -= 2
+    num_scan = FIX(duration / 27)
+    duration -= (num_scan-1) * 3
+ ENDIF
+ 
+ sz_data = 0UL
+ FOR ncl = 0, !scia.num_clus-1 DO BEGIN
+    IF (chan_mask AND ISHFT(1B, (!scia.clusDef[ncl].chan_id-1))) EQ 0B THEN $
+       CONTINUE
+
+    intg = ULONG(!scia.clusDef[ncl].intg)
+    IF !scia.clusDef[ncl].pet EQ 0.03125 $
+       AND !scia.clusDef[ncl].coaddf > 1 THEN intg *= 2
+
+    sz_data += !scia.clusDef[ncl].length * (duration / intg)
+ ENDFOR
+
+ RETURN, sz_data
+END
+
 PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
                      state_id=state_id, state_posit=state_posit, $
                      indx_state=indx_state, num_state=num_state, $
@@ -249,21 +277,21 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
 ; allocate memory for the Detector MDS records
   mds_det = replicate( {mds0_det}, num_det )
 
+; obtain orbit number
+  SCIA_RD_MPH, mph
+
 ; determine size of the data array
-  sz_data = 0ul
-  FOR nd = 0, num_det-1 DO BEGIN
-     IF channels[0] NE NotSet AND channels[0] NE 0 THEN BEGIN
-        FOR n_cl = 0, info_det[nd].num_clus-1 DO BEGIN
-           indx = WHERE( channels EQ info_det[nd].cluster[n_cl].chan_id, cnt )
-           IF cnt GT 0 THEN BEGIN
-              sz_data += ULONG(info_det[nd].cluster[n_cl].length)
-           ENDIF
-        ENDFOR
-     ENDIF ELSE BEGIN
-        FOR n_cl = 0, info_det[nd].num_clus-1 DO BEGIN
-           sz_data += ULONG(info_det[nd].cluster[n_cl].length)
-        ENDFOR
-     ENDELSE
+  sz_data = 0UL
+  FOR nd = 0L, num_det-1 DO BEGIN
+     sz_data += _GET_LV0_DET_SIZE( info_det[nd].state_id, $
+                                   info_det[nd].category,$
+                                   mph.abs_orbit, chan_mask )
+
+     state_index = info_det[nd].state_index
+     REPEAT BEGIN
+        nd += 1L
+        IF nd GE num_det THEN break
+     ENDREP UNTIL info_det[nd].state_index NE state_index
   ENDFOR
   data = ULONARR( sz_data )
 
@@ -291,6 +319,5 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
      ENDFOR
   ENDFOR
 
-  data = NotSet
   RETURN
 END

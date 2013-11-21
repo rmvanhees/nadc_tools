@@ -15,6 +15,7 @@ set (IDL_COMMON_SRCS
     readbinarystructure.pro
     scia_apply_memcorr.pro
     scia_apply_nlincorr.pro
+    scia_clusdef.pro
     scia_date2mjd.pro
     scia_decode_memcorr.pro
     scia_decode_nlcorr.pro
@@ -41,6 +42,7 @@ set (IDL_COMMON_SRCS
 )
 
 set (IDL_LEVEL0_SRCS
+    get_lv0_det_size.pro
     get_lv0_mds_collo.pro
     get_lv0_mds_data.pro
     get_lv0_mds_hk.pro
