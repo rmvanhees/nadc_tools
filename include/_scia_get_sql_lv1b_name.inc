@@ -54,8 +54,8 @@ void SCIA_GET_SQL_LV1B_NAME( unsigned int absOrbit, unsigned short fileCounter,
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) {
-	  (void) strlcpy( l1b_product, PQgetvalue(res,0,0), 
-			  ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( l1b_product, PQgetvalue(res,0,0), 
+		 	       ENVI_FILENAME_SIZE );
      } else {
 	  PQclear( res );
 	  (void) snprintf( sql_query, SQL_STR_SIZE, 
@@ -65,8 +65,8 @@ void SCIA_GET_SQL_LV1B_NAME( unsigned int absOrbit, unsigned short fileCounter,
 	       NADC_GOTO_ERROR(prognm, NADC_ERR_SQL, PQresultErrorMessage(res));
 
 	  if ( (nrow = PQntuples( res )) != 0 )
-	       (void) strlcpy( l1b_product, PQgetvalue(res,0,0), 
-			       ENVI_FILENAME_SIZE );
+	       (void) nadc_strlcpy( l1b_product, PQgetvalue(res,0,0), 
+			            ENVI_FILENAME_SIZE );
      }
  done:
      PQclear( res );

@@ -182,16 +182,16 @@ unsigned int NADC_RD_PDS_HDR( FILE *fd, unsigned int num_items,
 		    if ( ni == num_items )
 			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
 	       }
-	       (void) strlcpy( pds_items[ni].value, 
-			       keyvalue, PDS_KEYVAL_LENGTH );
+	       (void) nadc_strlcpy( pds_items[ni].value, 
+			   	    keyvalue, PDS_KEYVAL_LENGTH );
 	  } else {
 	       nbyte += ENVI_RD_PDS_INFO( fd, keyword, keyvalue );
 	       if ( IS_ERR_STAT_FATAL ) 
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
 	       if ( strcmp( keyword, pds_items[ni].key ) != 0 )
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-	       (void) strlcpy( pds_items[ni].value, 
-			       keyvalue, PDS_KEYVAL_LENGTH );
+	       (void) nadc_strlcpy( pds_items[ni].value, 
+			            keyvalue, PDS_KEYVAL_LENGTH );
 	  }
      }
 done:

@@ -21,7 +21,8 @@
 .LANGUAGE    ANSI-C
 .PURPOSE     macros and structures for SCIAMACHY level 0 modules
 .ENVIRONment none
-.VERSION      1.4   31-Mar-2003	modified include for C++ code
+.VERSION      1.5   31-Oct-2013	new mds0_info record, RvH
+              1.4   31-Mar-2003	modified include for C++ code
               1.3   20-Dec-2002	added bcps to mds0_info 
                                 and align the structure, RvH
               1.2   19-Mar-2002	replaced confusing bench_obm with bench_rad, 
@@ -369,15 +370,18 @@ struct sph0_scia
  */
 struct mds0_info
 {
-     unsigned char   packetID;
+     struct mjd_envi mjd;
+     unsigned char   packet_type;
      unsigned char   category;
-     unsigned char   stateID;
-     unsigned char   sizeCheck;
+     unsigned char   state_id;
+     unsigned char   quality;
      unsigned short  crc_errors;
      unsigned short  rs_errors;
-     unsigned short  stateIndex;
+     unsigned short  bcps;
+     unsigned short  state_index;
+     unsigned short  packet_length;
+     unsigned int    on_board_time;
      unsigned int    offset;
-     struct mjd_envi mjd;
 };
 
 struct mds0_aux
@@ -412,33 +416,23 @@ struct mds0_pmd
      struct pmd_src    data_src;
 };
 
-#define SCIA_INFO_DB_NAME  "scia_lv0_info.h5"
-struct offs_size_rec
-{
-     unsigned int   offset;
-     unsigned int   length;
-};
-
-struct h5_mds0_info
-{
-     unsigned char   packetID;
-     unsigned char   category;
-     unsigned char   stateID;
-     unsigned char   numClusters;
-     unsigned short  length;
-     unsigned short  bcps;
-     unsigned short  stateIndex;
-     unsigned int    offset;
-     struct mjd_envi mjd;
-};
-
 /*
  * prototype declarations of Sciamachy level 0 functions
  */
 extern unsigned short GET_SCIA_CLUSDEF( unsigned char, 
 					/*@out@*/ struct clusdef_rec *clusDef )
-       /*@globals clusDefOne, clusDefThree, nadc_stat, nadc_err_stack;@*/
+       /*@globals nadc_stat, nadc_err_stack;@*/
        /*@modifies clusDef, nadc_stat, nadc_err_stack@*/;
+
+extern bool CLUSDEF_INVALID( unsigned char, unsigned short );
+extern unsigned short CLUSDEF_DURATION( unsigned char, unsigned short );
+extern unsigned short CLUSDEF_NUM_DET( unsigned char, unsigned short );
+extern unsigned short CLUSDEF_INTG_MIN( unsigned char, unsigned short );
+extern unsigned short CLUSDEF_DSR_SIZE( unsigned char, 
+					unsigned short,
+					unsigned short );
+extern unsigned short CLUSDEF_CLCON( unsigned char, unsigned short,
+				     /*@out@*/ struct clusdef_rec * );
 
 #if defined _STDIO_H || defined _STDIO_H_
 extern void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi,
@@ -456,8 +450,7 @@ extern unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int,
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *info@*/;
 
-extern unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, struct mph_envi,
-					   const struct dsd_envi *, 
+extern unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *, 
 					   struct mds0_info *info )
        /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, stderr, nadc_stat, nadc_err_stack, fd, info@*/;
@@ -597,22 +590,18 @@ extern void SCIA_LV0_WR_H5_SPH( struct param_record,
 				const struct sph0_scia * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void SCIA_LV0_WR_H5_AUX( struct param_record, unsigned int, 
+extern void SCIA_LV0_WR_H5_AUX( struct param_record, unsigned short, 
 				unsigned int, const struct mds0_aux * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void SCIA_LV0_WR_H5_DET( struct param_record, const struct mds0_info *, 
+extern void SCIA_LV0_WR_H5_DET( struct param_record, unsigned short,
 				unsigned int, const struct mds0_det * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void SCIA_LV0_WR_H5_PMD( struct param_record, unsigned int, 
+extern void SCIA_LV0_WR_H5_PMD( struct param_record, unsigned short, 
 				unsigned int, const struct mds0_pmd * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern unsigned int SCIA_LV0_RD_H5_INFO_DB( const char *,
-					    struct mds0_info **info )
-       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack, *info@*/;
 #endif /* _HDF5_H */
 
 #ifdef LIBPQ_FE_H
