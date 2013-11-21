@@ -21,9 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     convert L0 MDS_DET to L1C structure
 .INPUT/OUTPUT
-  call as    nr_mds = GET_SCIA_LV0C_MDS( nr_det, det, mds_1c );
+  call as    nr_mds = GET_SCIA_LV0C_MDS( num_det, det, mds_1c );
      input:  
-	     unsigned int nr_det       : number of MDS_DET structures
+	     unsigned int num_det      : number of MDS_DET structures
              struct mds0_det *det      : Detector MDS records (level 0)
     output:  
              struct mds1c_scia *mds_1c : level 1c MDS records
@@ -58,39 +58,34 @@
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 static inline
-unsigned short GET_INFO_CLUSDEF( unsigned short stateIndex, 
-                                 unsigned int nr_info, 
-                                 const struct mds0_info *info,
-                                 /*@NULL@*/ /*@out@*/
-                                 struct clusdef_rec *clusDef )
+unsigned short _GET_NUM_CLUSDEF( unsigned int num_det, 
+				 const struct mds0_det *det )
 {
      register unsigned char ncl, nch;
-     register unsigned int  ni;
+     register unsigned int  nd;
 
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     /* initialize return value */
      unsigned short numClus = 0;
 
      for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
-          unsigned char clusIDmx = 0;
-          for ( ni = 0; ni < nr_info; ni++ ) {
-               if ( info[ni].stateIndex != stateIndex ) continue;
+          register unsigned char clusIDmx = 0;
 
-               for ( ncl = 0 ; ncl < info[ni].numClusters; ncl++ ) {
-                    if ( info[ni].cluster[ncl].chanID == nch 
-                         && info[ni].cluster[ncl].clusID == clusIDmx ) {
-                         clusIDmx = info[ni].cluster[ncl].clusID;
-                         if ( clusDef != NULL ) {
-                              clusDef[numClus+clusIDmx].chanID = 
-                                   info[ni].cluster[ncl].chanID;
-                              clusDef[numClus+clusIDmx].clusID =
-                                   info[ni].cluster[ncl].clusID;
-                              clusDef[numClus+clusIDmx].start  =
-                                   info[ni].cluster[ncl].start;
-                              clusDef[numClus+clusIDmx].length =
-                                   info[ni].cluster[ncl].length;
-                         }
-                         clusIDmx += UCHAR_ONE;
-                    }
-               }
+          for ( nd = 0; nd < num_det; nd++ ) {
+	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+		    if ( det[nd].data_src[nch].hdr.channel.field.id != nch )
+			 continue;
+
+		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+		    chan_src = det[nd].data_src[nch].pixel;
+		    
+		    for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+			 if ( chan_src[ncl].cluster_id > clusIDmx )
+			      clusIDmx = chan_src[ncl].cluster_id;
+		    }
+	       }
           }
           numClus += clusIDmx;
      }
@@ -98,66 +93,251 @@ unsigned short GET_INFO_CLUSDEF( unsigned short stateIndex,
 }
 
 static inline
-unsigned short GET_DET_BCPS( const struct clusdef_rec *clusDef, 
-			     unsigned int num_det, const struct mds0_det *det )
+unsigned short _GET_LV0_CLUSDEF( unsigned int num_det, 
+                                 const struct mds0_det *det,
+				 struct clusdef_rec *clusDef )
 {
-     register unsigned short nr, nch, ncl;
+     register unsigned char ncl, nch;
+     register unsigned int  nd;
 
-     for ( nr = 0; nr < num_det; nr++ ) {
-	  for ( nch = 0; nch < det[nr].num_chan; nch++ ) {
-	       if ( det[nr].data_src[nch].hdr.channel.field.id == clusDef->chanID ) {
-		    for ( ncl = 0; ncl < det[nr].data_src[nch].hdr.channel.field.clusters; ncl++) {
-			 if ( det[nr].data_src[nch].pixel[ncl].cluster_id == clusDef->clusID )
-			      return det[nr].data_src[nch].hdr.bcps;
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     /* initialize return value */
+     unsigned short numClus = 0;
+
+     (void) memset( clusDef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
+
+     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+          register unsigned char clusIDmx = 0;
+
+          for ( nd = 0; nd < num_det; nd++ ) {
+	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+		    if ( det[nd].data_src[nch].hdr.channel.field.id != nch )
+			 continue;
+
+		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+		    chan_src = det[nd].data_src[nch].pixel;
+		    
+		    for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+			 unsigned short indx = 
+			      numClus + chan_src[ncl].cluster_id;
+			 
+			 if ( chan_src[ncl].cluster_id > clusIDmx )
+			      clusIDmx = chan_src[ncl].cluster_id;
+			 clusDef[indx].chanID = nch;
+			 clusDef[indx].clusID = chan_src[ncl].cluster_id;
+			 clusDef[indx].start  = chan_src[ncl].start;
+			 clusDef[indx].length = chan_src[ncl].length;
 		    }
 	       }
-	  }
+          }
+          numClus += clusIDmx;
      }
-     (void) fprintf( stderr, "*** WARNING *** [GET_DET_BCPS] no BCPS found\n" );
+     return numClus;
+}
+
+static inline
+unsigned short _GET_LV0_BCPS( unsigned int num_det, 
+			      const struct mds0_det *det,
+			      unsigned char chanID,
+			      unsigned char clusID )
+{
+     register unsigned char ncl, nch;
+     register unsigned int  nd;
+
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     for ( nd = 0; nd < num_det; nd++ ) {
+	  for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+	       if ( det[nd].data_src[nch].hdr.channel.field.id != chanID )
+		    continue;
+
+	       nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+	       chan_src = det[nd].data_src[nch].pixel;
+		    
+	       for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+		    if ( chan_src[ncl].cluster_id == clusID ) 
+			 return det[nd].data_src[nch].hdr.bcps;
+	       }
+          }
+     }
      return 0;
 }
 
 static inline
-void UNPACK_LV0_PIXEL_VAL( const struct chan_src *pixel,
-                           /*@out@*/ unsigned int *data )
+unsigned char _GET_LV0_COADDF( unsigned int num_det, 
+			       const struct mds0_det *det,
+			       unsigned char chanID,
+			       unsigned char clusID )
 {
-     register unsigned short np = 0;
+     register unsigned char ncl, nch;
+     register unsigned int  nd;
 
-     register unsigned char *cpntr = pixel->data;
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
 
-     if ( pixel->co_adding == (unsigned char) 1 ) {
-          do {
-               *data++ = (unsigned int) cpntr[1]
-                    + ((unsigned int) cpntr[0] << 8);
-               cpntr += 2;
-          } while ( ++np < pixel->length );
-     } else {
-          do {
-               *data++ = (unsigned int) cpntr[2]
-                    + ((unsigned int) cpntr[1] << 8)
-                    + ((unsigned int) cpntr[0] << 16);
-               cpntr += 3;
-          } while ( ++np < pixel->length );
+     for ( nd = 0; nd < num_det; nd++ ) {
+	  for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+	       if ( det[nd].data_src[nch].hdr.channel.field.id != chanID )
+		    continue;
+
+	       nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+	       chan_src = det[nd].data_src[nch].pixel;
+		    
+	       for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+		    if ( chan_src[ncl].cluster_id == clusID ) 
+			 return chan_src[ncl].co_adding;
+	       }
+          }
+     }
+     return 0;
+}
+
+static inline
+float _GET_LV0_PET( unsigned int num_det, 
+		    const struct mds0_det *det,
+		    unsigned char chanID,
+		    unsigned char clusID )
+{
+     register unsigned char ncl, nch;
+     register unsigned int  nd;
+
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     for ( nd = 0; nd < num_det; nd++ ) {
+	  for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+	       if ( det[nd].data_src[nch].hdr.channel.field.id != chanID )
+		    continue;
+
+	       nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+	       chan_src = det[nd].data_src[nch].pixel;
+		    
+	       for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+		    if ( chan_src[ncl].cluster_id == clusID ) {
+			 unsigned short vir_chan_b, firstPixel;
+			 float pet[2];			      
+
+			 GET_SCIA_LV0_DET_PET( det[nd].data_src[nch].hdr, 
+					       pet, &vir_chan_b );
+
+			 if ( chanID != 2 ) {
+			      firstPixel = chan_src[ncl].start % CHANNEL_SIZE;
+			 } else {
+			      firstPixel = 2 * CHANNEL_SIZE
+				   - chan_src[ncl].start - chan_src[ncl].length;
+			      vir_chan_b = CHANNEL_SIZE - vir_chan_b;
+			 }
+			 if ( vir_chan_b == 0 || firstPixel < vir_chan_b )
+			      return pet[0];
+			 else 
+			      return pet[1];
+		    }
+	       }
+          }
+     }
+     return -1.f;
+}
+
+static inline
+unsigned short _GET_LV0_NUM_OBS( unsigned int num_det, 
+				 const struct mds0_det *det,
+				 unsigned char chanID,
+				 unsigned char clusID )
+{
+     register unsigned char ncl, nch;
+     register unsigned int  nd;
+
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     /* initialize return value */
+     unsigned short num_obs = 0;
+
+     for ( nd = 0; nd < num_det; nd++ ) {
+	  for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+	       if ( det[nd].data_src[nch].hdr.channel.field.id != chanID )
+		    continue;
+
+	       nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+	       chan_src = det[nd].data_src[nch].pixel;
+		    
+	       for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+		    if ( chan_src[ncl].cluster_id == clusID ) num_obs++;
+	       }
+	  }
+     }
+     return num_obs;
+}
+
+static inline
+void _GET_LV0_PIXELVAL( unsigned int num_det, 
+			const struct mds0_det *det,
+			unsigned char chanID,
+			unsigned char clusID,
+			float *pixel_val )
+{
+     register unsigned char ncl, nch;
+     register unsigned int  nd;
+
+     unsigned short nr_clus;
+     const struct chan_src *chan_src;
+
+     for ( nd = 0; nd < num_det; nd++ ) {
+	  for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
+	       if ( det[nd].data_src[nch].hdr.channel.field.id != chanID )
+		    continue;
+
+	       nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
+	       chan_src = det[nd].data_src[nch].pixel;
+		    
+	       for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
+		    if ( chan_src[ncl].cluster_id == clusID ) {
+			 register unsigned short np = 0;
+			 register unsigned int data;
+			 register unsigned char *cpntr = chan_src[ncl].data;
+
+			 if ( chan_src[ncl].co_adding == (unsigned char) 1 ) {
+			      do {
+				   data = (unsigned int) cpntr[1]
+					+ ((unsigned int) cpntr[0] << 8);
+				   cpntr += 2;
+
+				   *pixel_val++ = (float) data;
+			      } while ( ++np < chan_src[ncl].length );
+			 } else {
+			      do {
+				   data = (unsigned int) cpntr[2]
+					+ ((unsigned int) cpntr[1] << 8)
+					+ ((unsigned int) cpntr[0] << 16);
+				   cpntr += 3;
+
+				   *pixel_val++ = (float) data;
+			      } while ( ++np < chan_src[ncl].length );
+			 }
+		    }
+	       }
+	  }
      }
 }
 
+
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned short GET_SCIA_LV0C_MDS( unsigned int nr_det, 
+unsigned short GET_SCIA_LV0C_MDS( unsigned int num_det, 
 				  const struct mds0_info *info,
 				  const struct mds0_det *det, 
 				  struct mds1c_scia **mds_out )
 {
      const char prognm[] = "GET_SCIA_LV0C_MDS";
 
-     register unsigned short nch, ncl, np;
+     register unsigned short np;
      register unsigned short numClus = 0;
 
-     register unsigned int   nc, nd = 0;
-     register unsigned int   offs, nrpix;
+     register unsigned int   nc, nd, ndd;
 
      register struct mds1c_scia *mds_pntr;
-
-     unsigned int   ubuff[CHANNEL_SIZE];
 
      unsigned short num_mds = 0;
 
@@ -177,13 +357,13 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int nr_det,
 /*
  * determine the required number of level 1c MDS
  */
+     ndd = 0;
      do {
-	  if ( nd == 0 || info[nd-1].stateIndex != info[nd].stateIndex ) {
-	       num_mds += GET_INFO_CLUSDEF( info[nd].stateIndex, 
-					    nr_det, info, NULL );
-	  }
-     } while ( ++nd < nr_det );
-     if ( num_mds == 0 ) return 0;
+	  nd = ndd;
+	  while ( ++ndd < num_det 
+		  && info[ndd].stateIndex == info[nd].stateIndex );
+	  num_mds += _GET_NUM_CLUSDEF( ndd-nd, det+nd );
+     } while ( ndd < num_det );
 /*
  * allocate memory to store output records
  */
@@ -197,133 +377,80 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int nr_det,
 /*
  * reorganise level 0 Detector MDS into level 1c structure
  */
-     nd = 0;
+     ndd = 0;
      do {
-	  if ( nd == 0 || info[nd-1].stateIndex != info[nd].stateIndex ) {
-	       const unsigned char stateID = info[nd].stateID;
-	       const double dsec_const  = det[nd].isp.secnd 
-		    + det[nd].isp.musec / 1e6 + ri[stateID-1] / 256.;
+	  const unsigned char stateID = info[ndd].stateID;
+	  const double dsec_const  = det[ndd].isp.secnd 
+	       + det[ndd].isp.musec / 1e6 + ri[stateID-1] / 256.;
 
-	       numClus = GET_INFO_CLUSDEF( info[nd].stateIndex, 
-					   nr_det, info, clusDef );
+	  nd = ndd;
+	  while ( ++ndd < num_det 
+		  && info[ndd].stateIndex == info[nd].stateIndex );
+	  numClus = _GET_LV0_CLUSDEF( ndd-nd, det+nd, clusDef );
 
-	       /* set pointer to mds-records of next state */
-	       if ( nd > 0 ) mds_pntr += numClus;
-
-	       /* initialise mds-records of this state */
-	       nc = 0;
-	       do {
-		    double dsec = dsec_const 
-			 + GET_DET_BCPS( clusDef+nc, nr_det-nd, det+nd ) / 16.;
-
-		    mds_pntr[nc].mjd.days  = det[nd].isp.days;
-		    mds_pntr[nc].mjd.secnd = (unsigned int) dsec;
-		    mds_pntr[nc].mjd.musec = 
-			 (unsigned int)(1e6 * (dsec - mds_pntr[nc].mjd.secnd));
-		    mds_pntr[nc].rad_units_flag = CHAR_ZERO;
-		    mds_pntr[nc].quality_flag = CHAR_ZERO;
-		    mds_pntr[nc].type_mds = GET_SCIA_MDS_TYPE( stateID );
-		    mds_pntr[nc].coaddf = UCHAR_ZERO;
-		    mds_pntr[nc].category = det[nd].data_hdr.category;
-		    mds_pntr[nc].state_id = stateID;
-		    mds_pntr[nc].chan_id = clusDef[nc].chanID;
-		    mds_pntr[nc].clus_id = clusDef[nc].clusID;
-		    mds_pntr[nc].dur_scan = 0;              /* FIX THIS */
-		    mds_pntr[nc].num_obs = 0;
-		    mds_pntr[nc].num_pixels = clusDef[nc].length;
-		    mds_pntr[nc].dsr_length = 0u;
-		    mds_pntr[nc].orbit_phase = -999.f;
-		    mds_pntr[nc].pet = -1.f;
-
-                    /* allocate memory for pixel ID and values */
-		    mds_pntr[nc].pixel_ids = (unsigned short *)
-			 malloc( clusDef[nc].length * sizeof( short ));
-		    if ( mds_pntr[nc].pixel_ids == NULL ) {
-			 NADC_ERROR(prognm, NADC_ERR_ALLOC, "pixel_ids");
-			 return 0; /* Oeps, we can't release (mds_1c) memory */
-		    }
-                    /* store pixel IDs */
-		    for ( np = 0; np < clusDef[nc].length; np++ )
-			 mds_pntr[nc].pixel_ids[np] = clusDef[nc].start + np;
-
-                    /* make sure to initialize these pointers to NULL */
-		    mds_pntr[nc].pixel_wv     = NULL;
-		    mds_pntr[nc].pixel_wv_err = NULL;
-		    mds_pntr[nc].pixel_val    = NULL;
-		    mds_pntr[nc].pixel_err    = NULL;
-		    mds_pntr[nc].geoC = NULL;
-		    mds_pntr[nc].geoL = NULL;
-		    mds_pntr[nc].geoN = NULL;
-	       } while( ++nc < numClus );
-	  }
-          /* store detector readouts in L1c MDS */
-	  nch = 0;
+	  /* initialise mds-records of this state */
+	  nc = 0;
 	  do {
-	       const unsigned char chanID = 
-		    det[nd].data_src[nch].hdr.channel.field.id;
-	       const unsigned short clusters =
-                    det[nd].data_src[nch].hdr.channel.field.clusters;
+	       double dsec = dsec_const 
+		    + _GET_LV0_BCPS( ndd-nd, det+nd, clusDef[nc].chanID,
+				     clusDef[nc].clusID ) / 16.;
 
-	       for ( ncl = 0; ncl < clusters; ncl++ ) {
-		    unsigned char clusID = 
-			 det[nd].data_src[nch].pixel[ncl].cluster_id;
+	       mds_pntr[nc].mjd.days  = det[nd].isp.days;
+	       mds_pntr[nc].mjd.secnd = (unsigned int) dsec;
+	       mds_pntr[nc].mjd.musec = 
+		    (unsigned int)(1e6 * (dsec - mds_pntr[nc].mjd.secnd));
+	       mds_pntr[nc].rad_units_flag = CHAR_ZERO;
+	       mds_pntr[nc].quality_flag = CHAR_ZERO;
+	       mds_pntr[nc].type_mds = GET_SCIA_MDS_TYPE( stateID );
+	       mds_pntr[nc].coaddf = _GET_LV0_COADDF( ndd-nd, det+nd, 
+						      clusDef[nc].chanID,
+						      clusDef[nc].clusID );
+	       mds_pntr[nc].category = det[nd].data_hdr.category;
+	       mds_pntr[nc].state_id = stateID;
+	       mds_pntr[nc].chan_id = clusDef[nc].chanID;
+	       mds_pntr[nc].clus_id = clusDef[nc].clusID;
+	       mds_pntr[nc].dur_scan = 0;              /* FIX THIS */
+	       mds_pntr[nc].num_obs = _GET_LV0_NUM_OBS( ndd-nd, det+nd, 
+							clusDef[nc].chanID,
+							clusDef[nc].clusID );
+	       mds_pntr[nc].num_pixels = clusDef[nc].length;
+	       mds_pntr[nc].dsr_length = 0u;
+	       mds_pntr[nc].orbit_phase = -999.f;
+	       mds_pntr[nc].pet = _GET_LV0_PET( ndd-nd, det+nd, 
+						clusDef[nc].chanID,
+						clusDef[nc].clusID );
 
-		    nc = 0;
-		    do {
-			 if ( clusDef[nc].chanID == chanID
-			      && clusDef[nc].clusID == clusID ) break;
-		    } while( ++nc < numClus );
-		    if ( nc == numClus ) {
-			 char   msg[80];
-
-			 (void) snprintf( msg, 80, 
-					  "impossible combination of chanID [%-hhu] and clusID [%-hhu] for cluster %-hu", 
-					  chanID, clusID, ncl );
-			 NADC_ERROR( prognm, NADC_ERR_FATAL, msg );
-			 return 0;              /* Oeps, another memory leak */
-		    }
-		    if ( mds_pntr[nc].coaddf == UCHAR_ZERO ) {
-			 mds_pntr[nc].coaddf =
-			      det[nd].data_src[nch].pixel[ncl].co_adding;
-		    }
-		    if ( mds_pntr[nc].pet < 0.f ) {
-			 unsigned short vir_chan_b, firstPixel;
-			 float pet[2];			      
-
-			 GET_SCIA_LV0_DET_PET( det[nd].data_src[nch].hdr, pet,
-					       &vir_chan_b );
-
-			 if ( (int) mds_pntr[nc].chan_id != 2 ) {
-			      firstPixel = clusDef[nc].start % CHANNEL_SIZE;
-			 } else {
-			      firstPixel = 2 * CHANNEL_SIZE
-				   - clusDef[nc].start - clusDef[nc].length;
-			      vir_chan_b = CHANNEL_SIZE - vir_chan_b;
-			 }
-			 if ( vir_chan_b == 0 || firstPixel < vir_chan_b )
-			      mds_pntr[nc].pet = pet[0];
-			 else {
-			      mds_pntr[nc].pet = pet[1];
-			 }
-		    }
-		    offs = mds_pntr[nc].num_obs * mds_pntr[nc].num_pixels;
-		    nrpix = ++(mds_pntr[nc].num_obs) * mds_pntr[nc].num_pixels;
-                    /* allocate memory for pixel values */
-		    mds_pntr[nc].pixel_val = (float *)
-			 realloc( mds_pntr[nc].pixel_val, 
-				  nrpix * sizeof(float) );
-		    if ( mds_pntr[nc].pixel_val == NULL ) {
-			 NADC_ERROR( prognm, NADC_ERR_ALLOC, "pixel_val" );
-			 return 0;              /* Oeps, another memory leak */
-		    }
-                    /* store pixel values */
-		    UNPACK_LV0_PIXEL_VAL( det[nd].data_src[nch].pixel+ncl,
-					  ubuff );
-		    for ( np = 0; np < mds_pntr[nc].num_pixels; np++ )
-			 mds_pntr[nc].pixel_val[offs+np] = (float) ubuff[np];
+	       /* allocate memory for pixel ID and values */
+	       mds_pntr[nc].pixel_ids = (unsigned short *)
+		    malloc( mds_pntr[nc].num_pixels * sizeof(short) );
+	       mds_pntr[nc].pixel_val = (float *)
+		    malloc( mds_pntr[nc].num_obs * mds_pntr[nc].num_pixels * sizeof(float) );
+	       if ( mds_pntr[nc].pixel_ids == NULL 
+		    || mds_pntr[nc].pixel_val == NULL ) {
+		    NADC_ERROR(prognm, NADC_ERR_ALLOC, "pixel_ids/pixel_val");
+		    return 0; /* Oeps, we can't release (mds_1c) memory */
 	       }
-	  } while( ++nch < det[nd].num_chan );
-     } while ( ++nd < nr_det );
+	       /* store pixel IDs */
+	       for ( np = 0; np < clusDef[nc].length; np++ )
+		    mds_pntr[nc].pixel_ids[np] = clusDef[nc].start + np;
+
+	       /* store pixel values */
+	       _GET_LV0_PIXELVAL( ndd-nd, det+nd, 
+				 clusDef[nc].chanID, clusDef[nc].clusID,
+				 mds_pntr[nc].pixel_val );
+
+	       /* make sure to initialize these pointers to NULL */
+	       mds_pntr[nc].pixel_wv     = NULL;
+	       mds_pntr[nc].pixel_wv_err = NULL;
+	       mds_pntr[nc].pixel_err    = NULL;
+	       mds_pntr[nc].geoC = NULL;
+	       mds_pntr[nc].geoL = NULL;
+	       mds_pntr[nc].geoN = NULL;
+	  } while( ++nc < numClus );
+
+	  /* set pointer to mds-records of next state */
+	  mds_pntr += numClus;
+     } while ( ndd < num_det );
 /*
  * set return values
  */

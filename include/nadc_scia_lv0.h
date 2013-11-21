@@ -367,27 +367,17 @@ struct sph0_scia
  * -------------------------
  * structure used to store info about level 0 MDSs
  */
-struct info_clus
-{
-     unsigned char  chanID;
-     unsigned char  clusID;
-     unsigned char  coAdding;
-     unsigned short start;
-     unsigned short length;
-};
-
 struct mds0_info
 {
      unsigned char   packetID;
      unsigned char   category;
      unsigned char   stateID;
-     unsigned char   numClusters;
-     unsigned short  length;
-     unsigned short  bcps;
+     unsigned char   sizeCheck;
+     unsigned short  crc_errors;
+     unsigned short  rs_errors;
      unsigned short  stateIndex;
      unsigned int    offset;
      struct mjd_envi mjd;
-     struct info_clus cluster[MAX_CLUSTER];
 };
 
 struct mds0_aux

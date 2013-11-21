@@ -61,8 +61,13 @@
 #define _SCIA_LEVEL_0
 #include <nadc_scia.h>
 
+#ifdef COLOR_TTY
 #define RESET    "\033[0m"
 #define BOLDRED  "\033[1m\033[31m"
+#else
+#define RESET    ""
+#define BOLDRED  ""
+#endif
 
 /*+++++ Global Variables +++++*/
 /* 
