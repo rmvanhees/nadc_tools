@@ -52,7 +52,8 @@ void SCIA_CHECK_SQL_LV1B_NAME( PGconn *conn, char *l1b_product )
           NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) goto done;
-     (void) strlcpy( l1b_product, PQgetvalue( res, 0, 0 ), ENVI_FILENAME_SIZE );
+     (void) nadc_strlcpy( l1b_product, 
+                          PQgetvalue( res, 0, 0 ), ENVI_FILENAME_SIZE );
      (void) snprintf( sql_query, SQL_STR_SIZE, 
 		      "changed input L1b product to: %s", l1b_product );
      NADC_ERROR( prognm, NADC_ERR_NONE, sql_query );

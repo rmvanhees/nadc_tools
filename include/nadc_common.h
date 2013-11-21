@@ -451,16 +451,18 @@ extern void NADC_INTERPOL_d( float, float, float, unsigned int, const float *,
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack, Y@*/;
 
+extern unsigned char SELECTuc( const size_t, const size_t, 
+			       const unsigned char * );
 extern short  SELECTs( const size_t, const size_t, const short  * );
 extern int    SELECTi( const size_t, const size_t, const int    * );
 extern float  SELECTr( const size_t, const size_t, const float  * );
 extern double SELECTd( const size_t, const size_t, const double * );
 
-#ifndef export_IDL_DEF
-extern size_t strlcpy( /*@out@*/ char *, /*@unique@*/ const char *, size_t );
-extern size_t strlcat( /*@out@*/ char *, /*@unique@*/ const char *, size_t );
-#endif
-extern void rstrip( /*@out@*/ char *, /*@unique@*/ const char * );
+extern size_t nadc_strlcpy( /*@out@*/ char *, 
+			    /*@unique@*/ const char *, size_t );
+extern size_t nadc_strlcat( /*@out@*/ char *, 
+			    /*@unique@*/ const char *, size_t );
+extern void nadc_rstrip( /*@out@*/ char *, /*@unique@*/ const char * );
 
 extern void Set_Bit_LL( unsigned long long *, unsigned char );
 extern unsigned long long Get_Bit_LL( unsigned long long, unsigned char )
@@ -517,9 +519,13 @@ extern void NADC_RECEIVEDATE( const char *, /*@out@*/ char *datetime )
 extern bool NADC_CHECK_FOR_SAA( const double, const double )
      __attribute__ ((const));
 
-extern unsigned int NADC_FILESIZE( const char * );
+extern unsigned int nadc_file_size( const char * );
 
-extern int NADC_FILES_EQUAL( const char *, const char * )
+extern bool nadc_file_equal( const char *, const char * )
+       /*@globals  errno;@*/
+       /*@modifies errno@*/;
+
+extern bool nadc_file_exists( const char * )
        /*@globals  errno;@*/
        /*@modifies errno@*/;
 
