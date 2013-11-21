@@ -135,26 +135,26 @@ void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
  * strip path of file-name
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
      }
 /*
  * initialize IMAP header structure
  */
-     (void) strlcpy( hdr->product, ctemp, ENVI_FILENAME_SIZE );
+     (void) nadc_strlcpy( hdr->product, ctemp, ENVI_FILENAME_SIZE );
      NADC_RECEIVEDATE( flname, hdr->receive_date );
      (void) strcpy( hdr->creation_date, hdr->receive_date );
      (void) strcpy( hdr->l1b_product, "" );
      (void) strcpy( hdr->validity_start, "" );
      (void) strcpy( hdr->validity_stop, "" );
-     (void) strlcpy( hdr->software_version, ctemp+9, 4 );
+     (void) nadc_strlcpy( hdr->software_version, ctemp+9, 4 );
      if ( (cpntr = strrchr( ctemp, '_' )) != NULL ) {
 	  char str_magic[5], str_orbit[6];
 
-	  (void) strlcpy( str_magic, cpntr+1, 5 );
+	  (void) nadc_strlcpy( str_magic, cpntr+1, 5 );
 	  while ( --cpntr > ctemp ) if ( *cpntr == '_' ) break;
-	  (void) strlcpy( str_orbit, cpntr+1, 6 );
+	  (void) nadc_strlcpy( str_orbit, cpntr+1, 6 );
 	  hdr->counter[0] = 
 	       (unsigned short) strtoul( str_magic, (char **) NULL, 10 );
 	  hdr->orbit[0]   = 
@@ -165,7 +165,7 @@ void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
      }
      hdr->numProd   = 1u;
      hdr->numRec    = 0u;
-     hdr->file_size = NADC_FILESIZE( flname );
+     hdr->file_size = nadc_file_size( flname );
      imap_out[0] = NULL;
 /*
  * open IMAP product in original HDF5 format

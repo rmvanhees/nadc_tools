@@ -179,7 +179,8 @@ int main ( int argc, char *argv[] )
 	  struct imap_hdr hdr_tmp;
 	  struct imap_rec *rec_tmp = NULL;
 	  
-	  (void) strlcpy( flname, param.name_infiles[na], MAX_STRING_LENGTH );
+	  (void) nadc_strlcpy( flname, 
+			       param.name_infiles[na], MAX_STRING_LENGTH );
 	  (void) SCIA_RD_IMAP_HDO( flname, &hdr_tmp, &rec_tmp );
 #ifdef _WITH_SQL
 	  SCIA_GET_SQL_LV1B_NAME( hdr_tmp.orbit[0], hdr_tmp.counter[0], 
@@ -246,8 +247,8 @@ int main ( int argc, char *argv[] )
 
 	  jdayStart = Adaguc2gomeJDAY( param.clipStart );
 	  jdayStop  = Adaguc2gomeJDAY( param.clipStop );
-	  (void) strlcpy( hdr.validity_start, param.clipStart, 16 );
-	  (void) strlcpy( hdr.validity_stop, param.clipStop, 16 );
+	  (void) nadc_strlcpy( hdr.validity_start, param.clipStart, 16 );
+	  (void) nadc_strlcpy( hdr.validity_stop, param.clipStop, 16 );
 
 	  for ( ilow = 0; ilow < hdr.numRec; ilow++ ) 
 	       if ( jday[ilow] >= jdayStart ) break;
