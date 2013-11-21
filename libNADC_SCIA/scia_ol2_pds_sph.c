@@ -155,15 +155,15 @@ void SCIA_OL2_RD_SPH( FILE *fd, const struct mph_envi mph,
 /*
  * fill sph2_scia struct
  */
-     (void) strlcpy( sph->descriptor, sph2_items[0].value+1, 
-		     (size_t) sph2_items[0].length );
+     (void) nadc_strlcpy( sph->descriptor, sph2_items[0].value+1, 
+			  (size_t) sph2_items[0].length );
      (void) sscanf( sph2_items[1].value, "%hd", &sph->stripline );
      (void) sscanf( sph2_items[2].value, "%hd", &sph->slice_pos );
      (void) sscanf( sph2_items[3].value, "%hu", &sph->no_slice );
-     (void) strlcpy( sph->start_time, sph2_items[4].value+1, 
-		     (size_t) sph2_items[4].length );
-     (void) strlcpy( sph->stop_time, sph2_items[5].value+1, 
-		     (size_t) sph2_items[5].length );
+     (void) nadc_strlcpy( sph->start_time, sph2_items[4].value+1, 
+			  (size_t) sph2_items[4].length );
+     (void) nadc_strlcpy( sph->stop_time, sph2_items[5].value+1, 
+			  (size_t) sph2_items[5].length );
      (void) sscanf( sph2_items[6].value, "%d", &ibuff );
      sph->start_lat = ibuff / 1e6;
      (void) sscanf( sph2_items[7].value, "%d", &ibuff );
@@ -172,103 +172,103 @@ void SCIA_OL2_RD_SPH( FILE *fd, const struct mph_envi mph,
      sph->stop_lat = ibuff / 1e6;
      (void) sscanf( sph2_items[9].value, "%d", &ibuff );
      sph->stop_lon = ibuff / 1e6;
-     (void) strlcpy( sph->decont, sph2_items[10].value+1, 
-		     (size_t) sph2_items[10].length );
-     (void) strlcpy( sph->dbserver, sph2_items[11].value+1, 
-		     (size_t) sph2_items[11].length );
-     (void) strlcpy( sph->errorsum, sph2_items[12].value+1, 
-		     (size_t) sph2_items[12].length );
+     (void) nadc_strlcpy( sph->decont, sph2_items[10].value+1, 
+			  (size_t) sph2_items[10].length );
+     (void) nadc_strlcpy( sph->dbserver, sph2_items[11].value+1, 
+			  (size_t) sph2_items[11].length );
+     (void) nadc_strlcpy( sph->errorsum, sph2_items[12].value+1, 
+			  (size_t) sph2_items[12].length );
      (void) sscanf( sph2_items[13].value, "%hu", &sph->no_nadir_win );
-     (void) strlcpy( sph->nadir_win_uv0, sph2_items[14].value+1, 
-		     (size_t) sph2_items[14].length );
-     (void) strlcpy( sph->nadir_win_uv1, sph2_items[15].value+1, 
-		     (size_t) sph2_items[15].length );
-     (void) strlcpy( sph->nadir_win_uv2, sph2_items[16].value+1, 
-		     (size_t) sph2_items[16].length );
-     (void) strlcpy( sph->nadir_win_uv3, sph2_items[17].value+1, 
-		     (size_t) sph2_items[17].length );
-     (void) strlcpy( sph->nadir_win_uv4, sph2_items[18].value+1, 
-		     (size_t) sph2_items[18].length );
-     (void) strlcpy( sph->nadir_win_uv5, sph2_items[19].value+1, 
-		     (size_t) sph2_items[19].length );
-     (void) strlcpy( sph->nadir_win_uv6, sph2_items[20].value+1, 
-		     (size_t) sph2_items[20].length );
-     (void) strlcpy( sph->nadir_win_uv7, sph2_items[21].value+1, 
-		     (size_t) sph2_items[21].length );
-     (void) strlcpy( sph->nadir_win_uv8, sph2_items[22].value+1, 
-		     (size_t) sph2_items[22].length );
-     (void) strlcpy( sph->nadir_win_uv9, sph2_items[23].value+1, 
-		     (size_t) sph2_items[23].length );
-     (void) strlcpy( sph->nadir_win_ir0, sph2_items[24].value+1, 
-		     (size_t) sph2_items[24].length );
-     (void) strlcpy( sph->nadir_win_ir1, sph2_items[25].value+1, 
-		     (size_t) sph2_items[25].length );
-     (void) strlcpy( sph->nadir_win_ir2, sph2_items[26].value+1, 
-		     (size_t) sph2_items[26].length );
-     (void) strlcpy( sph->nadir_win_ir3, sph2_items[27].value+1, 
-		     (size_t) sph2_items[27].length );
-     (void) strlcpy( sph->nadir_win_ir4, sph2_items[28].value+1, 
-		     (size_t) sph2_items[28].length );
-     (void) strlcpy( sph->nadir_win_ir5, sph2_items[29].value+1, 
-		     (size_t) sph2_items[29].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv0, sph2_items[14].value+1, 
+			  (size_t) sph2_items[14].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv1, sph2_items[15].value+1, 
+			  (size_t) sph2_items[15].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv2, sph2_items[16].value+1, 
+			  (size_t) sph2_items[16].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv3, sph2_items[17].value+1, 
+			  (size_t) sph2_items[17].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv4, sph2_items[18].value+1, 
+			  (size_t) sph2_items[18].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv5, sph2_items[19].value+1, 
+			  (size_t) sph2_items[19].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv6, sph2_items[20].value+1, 
+			  (size_t) sph2_items[20].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv7, sph2_items[21].value+1, 
+			  (size_t) sph2_items[21].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv8, sph2_items[22].value+1, 
+			  (size_t) sph2_items[22].length );
+     (void) nadc_strlcpy( sph->nadir_win_uv9, sph2_items[23].value+1, 
+			  (size_t) sph2_items[23].length );
+     (void) nadc_strlcpy( sph->nadir_win_ir0, sph2_items[24].value+1, 
+			  (size_t) sph2_items[24].length );
+     (void) nadc_strlcpy( sph->nadir_win_ir1, sph2_items[25].value+1, 
+			  (size_t) sph2_items[25].length );
+     (void) nadc_strlcpy( sph->nadir_win_ir2, sph2_items[26].value+1, 
+			  (size_t) sph2_items[26].length );
+     (void) nadc_strlcpy( sph->nadir_win_ir3, sph2_items[27].value+1, 
+			  (size_t) sph2_items[27].length );
+     (void) nadc_strlcpy( sph->nadir_win_ir4, sph2_items[28].value+1, 
+			  (size_t) sph2_items[28].length );
+     (void) nadc_strlcpy( sph->nadir_win_ir5, sph2_items[29].value+1, 
+			  (size_t) sph2_items[29].length );
      (void) sscanf( sph2_items[30].value, "%hu", &sph->no_limb_win );
-     (void) strlcpy( sph->limb_win_pth, sph2_items[31].value+1, 
-		     (size_t) sph2_items[31].length );
-     (void) strlcpy( sph->limb_win_uv0, sph2_items[32].value+1, 
-		     (size_t) sph2_items[32].length );
-     (void) strlcpy( sph->limb_win_uv1, sph2_items[33].value+1, 
-		     (size_t) sph2_items[33].length );
-     (void) strlcpy( sph->limb_win_uv2, sph2_items[34].value+1, 
-		     (size_t) sph2_items[34].length );
-     (void) strlcpy( sph->limb_win_uv3, sph2_items[35].value+1, 
-		     (size_t) sph2_items[35].length );
-     (void) strlcpy( sph->limb_win_uv4, sph2_items[36].value+1, 
-		     (size_t) sph2_items[36].length );
-     (void) strlcpy( sph->limb_win_uv5, sph2_items[37].value+1, 
-		     (size_t) sph2_items[37].length );
-     (void) strlcpy( sph->limb_win_uv6, sph2_items[38].value+1, 
-		     (size_t) sph2_items[38].length );
-     (void) strlcpy( sph->limb_win_uv7, sph2_items[39].value+1, 
-		     (size_t) sph2_items[39].length );
-     (void) strlcpy( sph->limb_win_ir0, sph2_items[40].value+1, 
-		     (size_t) sph2_items[40].length );
-     (void) strlcpy( sph->limb_win_ir1, sph2_items[41].value+1, 
-		     (size_t) sph2_items[41].length );
-     (void) strlcpy( sph->limb_win_ir2, sph2_items[42].value+1, 
-		     (size_t) sph2_items[42].length );
-     (void) strlcpy( sph->limb_win_ir3, sph2_items[43].value+1, 
-		     (size_t) sph2_items[43].length );
-     (void) strlcpy( sph->limb_win_ir4, sph2_items[44].value+1, 
-		     (size_t) sph2_items[44].length );
+     (void) nadc_strlcpy( sph->limb_win_pth, sph2_items[31].value+1, 
+			  (size_t) sph2_items[31].length );
+     (void) nadc_strlcpy( sph->limb_win_uv0, sph2_items[32].value+1, 
+			  (size_t) sph2_items[32].length );
+     (void) nadc_strlcpy( sph->limb_win_uv1, sph2_items[33].value+1, 
+			  (size_t) sph2_items[33].length );
+     (void) nadc_strlcpy( sph->limb_win_uv2, sph2_items[34].value+1, 
+			  (size_t) sph2_items[34].length );
+     (void) nadc_strlcpy( sph->limb_win_uv3, sph2_items[35].value+1, 
+			  (size_t) sph2_items[35].length );
+     (void) nadc_strlcpy( sph->limb_win_uv4, sph2_items[36].value+1, 
+			  (size_t) sph2_items[36].length );
+     (void) nadc_strlcpy( sph->limb_win_uv5, sph2_items[37].value+1, 
+			  (size_t) sph2_items[37].length );
+     (void) nadc_strlcpy( sph->limb_win_uv6, sph2_items[38].value+1, 
+			  (size_t) sph2_items[38].length );
+     (void) nadc_strlcpy( sph->limb_win_uv7, sph2_items[39].value+1, 
+			  (size_t) sph2_items[39].length );
+     (void) nadc_strlcpy( sph->limb_win_ir0, sph2_items[40].value+1, 
+			  (size_t) sph2_items[40].length );
+     (void) nadc_strlcpy( sph->limb_win_ir1, sph2_items[41].value+1, 
+			  (size_t) sph2_items[41].length );
+     (void) nadc_strlcpy( sph->limb_win_ir2, sph2_items[42].value+1, 
+			  (size_t) sph2_items[42].length );
+     (void) nadc_strlcpy( sph->limb_win_ir3, sph2_items[43].value+1, 
+			  (size_t) sph2_items[43].length );
+     (void) nadc_strlcpy( sph->limb_win_ir4, sph2_items[44].value+1, 
+			  (size_t) sph2_items[44].length );
      (void) sscanf( sph2_items[45].value, "%hu", &sph->no_occl_win );
-     (void) strlcpy( sph->occl_win_pth, sph2_items[46].value+1, 
-		     (size_t) sph2_items[46].length );
-     (void) strlcpy( sph->occl_win_uv0, sph2_items[47].value+1, 
-		     (size_t) sph2_items[47].length );
-     (void) strlcpy( sph->occl_win_uv1, sph2_items[48].value+1, 
-		     (size_t) sph2_items[48].length );
-     (void) strlcpy( sph->occl_win_uv2, sph2_items[49].value+1, 
-		     (size_t) sph2_items[49].length );
-     (void) strlcpy( sph->occl_win_uv3, sph2_items[50].value+1, 
-		     (size_t) sph2_items[50].length );
-     (void) strlcpy( sph->occl_win_uv4, sph2_items[51].value+1, 
-		     (size_t) sph2_items[51].length );
-     (void) strlcpy( sph->occl_win_uv5, sph2_items[52].value+1, 
-		     (size_t) sph2_items[52].length );
-     (void) strlcpy( sph->occl_win_uv6, sph2_items[53].value+1, 
-		     (size_t) sph2_items[53].length );
-     (void) strlcpy( sph->occl_win_uv7, sph2_items[54].value+1, 
-		     (size_t) sph2_items[54].length );
-     (void) strlcpy( sph->occl_win_ir2, sph2_items[55].value+1, 
-		     (size_t) sph2_items[55].length );
-     (void) strlcpy( sph->occl_win_ir3, sph2_items[56].value+1, 
-		     (size_t) sph2_items[56].length );
-     (void) strlcpy( sph->occl_win_ir4, sph2_items[57].value+1, 
-		     (size_t) sph2_items[57].length );
-     (void) strlcpy( sph->occl_win_ir0, sph2_items[58].value+1, 
-		     (size_t) sph2_items[58].length );
-     (void) strlcpy( sph->occl_win_ir1, sph2_items[59].value+1, 
-		     (size_t) sph2_items[59].length );
+     (void) nadc_strlcpy( sph->occl_win_pth, sph2_items[46].value+1, 
+			  (size_t) sph2_items[46].length );
+     (void) nadc_strlcpy( sph->occl_win_uv0, sph2_items[47].value+1, 
+			  (size_t) sph2_items[47].length );
+     (void) nadc_strlcpy( sph->occl_win_uv1, sph2_items[48].value+1, 
+			  (size_t) sph2_items[48].length );
+     (void) nadc_strlcpy( sph->occl_win_uv2, sph2_items[49].value+1, 
+			  (size_t) sph2_items[49].length );
+     (void) nadc_strlcpy( sph->occl_win_uv3, sph2_items[50].value+1, 
+			  (size_t) sph2_items[50].length );
+     (void) nadc_strlcpy( sph->occl_win_uv4, sph2_items[51].value+1, 
+			  (size_t) sph2_items[51].length );
+     (void) nadc_strlcpy( sph->occl_win_uv5, sph2_items[52].value+1, 
+			  (size_t) sph2_items[52].length );
+     (void) nadc_strlcpy( sph->occl_win_uv6, sph2_items[53].value+1, 
+			  (size_t) sph2_items[53].length );
+     (void) nadc_strlcpy( sph->occl_win_uv7, sph2_items[54].value+1, 
+			  (size_t) sph2_items[54].length );
+     (void) nadc_strlcpy( sph->occl_win_ir2, sph2_items[55].value+1, 
+			  (size_t) sph2_items[55].length );
+     (void) nadc_strlcpy( sph->occl_win_ir3, sph2_items[56].value+1, 
+			  (size_t) sph2_items[56].length );
+     (void) nadc_strlcpy( sph->occl_win_ir4, sph2_items[57].value+1, 
+			  (size_t) sph2_items[57].length );
+     (void) nadc_strlcpy( sph->occl_win_ir0, sph2_items[58].value+1, 
+			  (size_t) sph2_items[58].length );
+     (void) nadc_strlcpy( sph->occl_win_ir1, sph2_items[59].value+1, 
+			  (size_t) sph2_items[59].length );
 }
 
 /*+++++++++++++++++++++++++

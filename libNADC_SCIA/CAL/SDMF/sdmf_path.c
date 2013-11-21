@@ -66,13 +66,13 @@ char *SDMF_PATH( const char version[] )
 	  char *env31_str = getenv( "SDMF31_PATH" );
 
 	  if ( env24_str != NULL ) {
-	       (void) strlcpy( sdmf24_path, env24_str, 80 );
+	       (void) nadc_strlcpy( sdmf24_path, env24_str, 80 );
 	  }
 	  if ( env30_str != NULL ) {
-	       (void) strlcpy( sdmf30_path, env30_str, 80 );
+	       (void) nadc_strlcpy( sdmf30_path, env30_str, 80 );
 	  }
 	  if ( env31_str != NULL ) {
-	       (void) strlcpy( sdmf31_path, env31_str, 80 );
+	       (void) nadc_strlcpy( sdmf31_path, env31_str, 80 );
 	  }
 	  init = FALSE;
      }

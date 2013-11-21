@@ -31,10 +31,10 @@
               1.0   09-Nov-1999 created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -150,7 +150,7 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
 /*
  * read data buffer to SRS structure
  */
-	  (void) strlcpy( srs[nr_dsr].sun_spec_id, srs_pntr, 3 );
+	  (void) nadc_strlcpy( srs[nr_dsr].sun_spec_id, srs_pntr, 3 );
 	  srs_pntr += 2;
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  (void) memcpy( srs[nr_dsr].wvlen_sun, srs_pntr, nr_byte );

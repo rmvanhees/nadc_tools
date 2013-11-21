@@ -84,7 +84,7 @@ void SCIA_LV2_RD_SPH( FILE *fd, const struct mph_envi mph,
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
      if ( strcmp( keyword, "SPH_DESCRIPTOR" ) != 0 )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-     (void) strlcpy( sph->descriptor, keyvalue+1, 29 );
+     (void) nadc_strlcpy( sph->descriptor, keyvalue+1, 29 );
 /*
  * field 2
  */
@@ -120,7 +120,7 @@ void SCIA_LV2_RD_SPH( FILE *fd, const struct mph_envi mph,
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
      if ( strcmp( keyword, "START_TIME" ) != 0 )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-     (void) strlcpy( sph->start_time, keyvalue+1, UTC_STRING_LENGTH );
+     (void) nadc_strlcpy( sph->start_time, keyvalue+1, UTC_STRING_LENGTH );
 /*
  * field 6
  */
@@ -129,7 +129,7 @@ void SCIA_LV2_RD_SPH( FILE *fd, const struct mph_envi mph,
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
      if ( strcmp( keyword, "STOP_TIME" ) != 0 )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-     (void) strlcpy( sph->stop_time, keyvalue+1, UTC_STRING_LENGTH );
+     (void) nadc_strlcpy( sph->stop_time, keyvalue+1, UTC_STRING_LENGTH );
 /*
  * field 7
  */
@@ -179,7 +179,7 @@ void SCIA_LV2_RD_SPH( FILE *fd, const struct mph_envi mph,
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
      if ( strcmp( keyword, "FITTING_ERROR_SUM" ) != 0 )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-     (void) strlcpy( sph->fit_error, keyvalue+1, 5 );
+     (void) nadc_strlcpy( sph->fit_error, keyvalue+1, 5 );
 /*
  * field 13
  */
@@ -277,7 +277,7 @@ void SCIA_LV2_RD_SPH( FILE *fd, const struct mph_envi mph,
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
 	  if ( strcmp( keyword, cbuff ) != 0 )
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-	  (void) strlcpy( sph->doas_mol[nr], keyvalue+1, 9 );
+	  (void) nadc_strlcpy( sph->doas_mol[nr], keyvalue+1, 9 );
      }
 /*
  * field 49
@@ -298,7 +298,7 @@ void SCIA_LV2_RD_SPH( FILE *fd, const struct mph_envi mph,
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
 	  if ( strcmp( keyword, cbuff ) != 0 )
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
-	  (void) strlcpy( sph->bias_mol[nr], keyvalue+1, 9 );
+	  (void) nadc_strlcpy( sph->bias_mol[nr], keyvalue+1, 9 );
      }
 /*
  * check number of bytes read

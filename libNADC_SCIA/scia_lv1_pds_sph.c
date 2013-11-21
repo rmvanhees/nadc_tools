@@ -127,15 +127,15 @@ void SCIA_LV1_RD_SPH( FILE *fd, const struct mph_envi mph,
 /*
  * fill sph1_scia struct
  */
-     (void) strlcpy( sph->descriptor, sph1_items[0].value+1, 
-		     (size_t) sph1_items[0].length );
+     (void) nadc_strlcpy( sph->descriptor, sph1_items[0].value+1, 
+			  (size_t) sph1_items[0].length );
      (void) sscanf( sph1_items[1].value, "%hd", &sph->stripline );
      (void) sscanf( sph1_items[2].value, "%hd", &sph->slice_pos );
      (void) sscanf( sph1_items[3].value, "%hu", &sph->no_slice );
-     (void) strlcpy( sph->start_time, sph1_items[4].value+1, 
-		     (size_t) sph1_items[4].length );
-     (void) strlcpy( sph->stop_time, sph1_items[5].value+1, 
-		     (size_t) sph1_items[5].length );
+     (void) nadc_strlcpy( sph->start_time, sph1_items[4].value+1, 
+			  (size_t) sph1_items[4].length );
+     (void) nadc_strlcpy( sph->stop_time, sph1_items[5].value+1, 
+			  (size_t) sph1_items[5].length );
      (void) sscanf( sph1_items[6].value, "%d", &ibuff );
      sph->start_lat = ibuff / 1e6;
      (void) sscanf( sph1_items[7].value, "%d", &ibuff );
@@ -144,20 +144,20 @@ void SCIA_LV1_RD_SPH( FILE *fd, const struct mph_envi mph,
      sph->stop_lat = ibuff / 1e6;
      (void) sscanf( sph1_items[9].value, "%d", &ibuff );
      sph->stop_lon = ibuff / 1e6;
-     (void) strlcpy( sph->init_version, sph1_items[10].value, 
-		     (size_t) sph1_items[10].length+1 );
-     (void) strlcpy( sph->key_data, sph1_items[11].value+1, 
-		     (size_t) sph1_items[11].length );
-     (void) strlcpy( sph->m_factor, sph1_items[12].value+1, 
-		     (size_t) sph1_items[12].length );
-     (void) strlcpy( sph->spec_cal, sph1_items[13].value+1, 
-		     (size_t) sph1_items[13].length );
-     (void) strlcpy( sph->saturate, sph1_items[14].value+1, 
-		     (size_t) sph1_items[14].length );
-     (void) strlcpy( sph->dead_pixel, sph1_items[15].value+1, 
-		     (size_t) sph1_items[15].length );
-     (void) strlcpy( sph->dark_check, sph1_items[16].value+1, 
-		     (size_t) sph1_items[16].length );
+     (void) nadc_strlcpy( sph->init_version, sph1_items[10].value, 
+			  (size_t) sph1_items[10].length+1 );
+     (void) nadc_strlcpy( sph->key_data, sph1_items[11].value+1, 
+			  (size_t) sph1_items[11].length );
+     (void) nadc_strlcpy( sph->m_factor, sph1_items[12].value+1, 
+			  (size_t) sph1_items[12].length );
+     (void) nadc_strlcpy( sph->spec_cal, sph1_items[13].value+1, 
+			  (size_t) sph1_items[13].length );
+     (void) nadc_strlcpy( sph->saturate, sph1_items[14].value+1, 
+			  (size_t) sph1_items[14].length );
+     (void) nadc_strlcpy( sph->dead_pixel, sph1_items[15].value+1, 
+			  (size_t) sph1_items[15].length );
+     (void) nadc_strlcpy( sph->dark_check, sph1_items[16].value+1, 
+			  (size_t) sph1_items[16].length );
      (void) sscanf( sph1_items[17].value, "%hu", &sph->no_nadir );
      (void) sscanf( sph1_items[18].value, "%hu", &sph->no_limb );
      (void) sscanf( sph1_items[19].value, "%hu", &sph->no_occult );
