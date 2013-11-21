@@ -45,10 +45,10 @@
               1.0   05-Feb-1999 created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -203,14 +203,15 @@ short GOME_LV1_RD_SMCD( unsigned char source, FILE *infl,
 /*
  * read Level 0 data MPH
  */
-	  (void) strlcpy( smcd->mph0.ProductConfidenceData, mph_buff, 3 );
-	  (void) strlcpy( smcd->mph0.UTC_MPH_Generation, mph_buff+2, 25 );
-	  (void) strlcpy( smcd->mph0.ProcessorSoftwareVersion, mph_buff+26, 9);
+	  (void) nadc_strlcpy( smcd->mph0.ProductConfidenceData, mph_buff, 3 );
+	  (void) nadc_strlcpy( smcd->mph0.UTC_MPH_Generation, mph_buff+2, 25 );
+	  (void) nadc_strlcpy( smcd->mph0.ProcessorSoftwareVersion, 
+			       mph_buff+26, 9);
 /*
  * read Level 0 data SPH
  */
-	  (void) strlcpy( smcd->sph0.sph_5, sph_buff, 2 );
-	  (void) strlcpy( smcd->sph0.sph_6, sph_buff+1, 21 );
+	  (void) nadc_strlcpy( smcd->sph0.sph_5, sph_buff, 2 );
+	  (void) nadc_strlcpy( smcd->sph0.sph_6, sph_buff+1, 21 );
 /*
  * Get subset counter, PMD and Peltier values
  */

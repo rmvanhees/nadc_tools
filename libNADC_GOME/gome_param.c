@@ -325,16 +325,16 @@ int Conv_Date( const char in_date[], /*@out@*/ char out_date[] )
 
      if ( (pntr = strchr( in_date, '-' )) != NULL ) {
 	  if ( (pntr - in_date) == 4 ) 
-	       (void) strlcpy( year, in_date, 5 );
+	       (void) nadc_strlcpy( year, in_date, 5 );
 	  else if ( (pntr - in_date) == 2 )
-	       (void) strlcpy( day, in_date, 3 );
+	       (void) nadc_strlcpy( day, in_date, 3 );
 	  else
 	       return NADC_ERR_FATAL;
 	  in_date = pntr + 1;
      }
      if ( (pntr = strchr( in_date, '-' )) != NULL ) {
 	  if ( (pntr - in_date) == 3 ) {
-	       (void) strlcpy( mon, in_date, 4 );
+	       (void) nadc_strlcpy( mon, in_date, 4 );
 	  } else if ( (pntr - in_date) == 2 ) {
 	       int mon_num;
 	       const char *mon_str[] =
@@ -351,9 +351,9 @@ int Conv_Date( const char in_date[], /*@out@*/ char out_date[] )
 	  in_date = pntr + 1;
      }
      if ( strlen( in_date ) == 2 )
-	  (void) strlcpy( day, in_date, 3 );
+	  (void) nadc_strlcpy( day, in_date, 3 );
      else if ( strlen( in_date ) == 4 )
-	  (void) strlcpy( year, in_date, 5 );
+	  (void) nadc_strlcpy( year, in_date, 5 );
      else
 	  return NADC_ERR_FATAL;
 
@@ -543,9 +543,9 @@ void GOME_SET_PARAM( int argc, char *argv[], int instrument,
  * strip path to program
  */
      if ( (cpntr = strrchr( argv[0], '/' )) != NULL ) {
-	  (void) strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-	  (void) strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
      }
 /*
  * get command-line parameters
@@ -919,7 +919,7 @@ void GOME_SHOW_PARAM( int instrument, const struct param_record param )
  * show time of call
  */
      (void) time( tp );
-     (void) strlcpy( cbuff, ctime( tp ), MAX_STRING_LENGTH );
+     (void) nadc_strlcpy( cbuff, ctime( tp ), MAX_STRING_LENGTH );
      cbuff[strlen(cbuff)-1] = '\0';
      nadc_write_text( outfl, ++nr, "ProcessingDate", cbuff );
 /*

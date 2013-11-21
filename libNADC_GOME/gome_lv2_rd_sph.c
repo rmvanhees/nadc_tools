@@ -37,10 +37,10 @@
               1.0   18-Mar-1999	Created by R. M. van Hees 
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -135,9 +135,9 @@ void GOME_LV2_RD_SPH( FILE *infl, const struct fsr2_gome *fsr,
 	  do {
 	       (void) memcpy( mol_string, sph_pntr, 6 );
 	       sph_pntr += 6;
-               (void) strlcpy( buff, mol_string, 2 );
+               (void) nadc_strlcpy( buff, mol_string, 2 );
                sph->mol_win[nr] = (short) atoi( buff );
-               (void) strlcpy( sph->mol_name[nr], mol_string+1, 6 );
+               (void) nadc_strlcpy( sph->mol_name[nr], mol_string+1, 6 );
 	  } while ( ++nr < sph->nmol );
      }
      (void) memcpy( &sph->height, sph_pntr, GOME_FLOAT );

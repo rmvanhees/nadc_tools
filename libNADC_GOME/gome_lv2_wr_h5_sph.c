@@ -37,10 +37,10 @@
               1.0   20-May-1999 copied from GOME_lv1/group_sph.c, RvH
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <string.h>
@@ -96,9 +96,9 @@ void GOME_LV2_WR_H5_SPH( struct param_record param,
      NADC_WR_HDF5_Attribute( grp_id, "Number of Molecules", 
 			    H5T_NATIVE_SHORT, 1, &adim, &sph->nmol );
 
-     (void) strlcpy( cbuff, sph->mol_name[0], LVL2_MAX_NMOL );
+     (void) nadc_strlcpy( cbuff, sph->mol_name[0], LVL2_MAX_NMOL );
      for ( nr = 1; nr < sph->nmol; nr++ )
-	  (void) strlcat( cbuff, sph->mol_name[nr], (6 * LVL2_MAX_NMOL) );
+	  (void) nadc_strlcat( cbuff, sph->mol_name[nr], (6 * LVL2_MAX_NMOL) );
      adim = (hsize_t) strlen( cbuff );
      NADC_WR_HDF5_Attribute( grp_id, "Molecule Pair Names", 
 			    H5T_C_S1, 1, &adim, cbuff );
