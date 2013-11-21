@@ -97,7 +97,7 @@ void SCIA_WR_SQL_CO_META( PGconn *conn, const struct imlm_hdr *hdr )
 /*
  * check presence of SCIA L1b in database
  */
-     (void) strlcpy( l1b_product, hdr->l1b_product, ENVI_FILENAME_SIZE );
+     (void) nadc_strlcpy( l1b_product, hdr->l1b_product, ENVI_FILENAME_SIZE );
      SCIA_CHECK_SQL_LV1B_NAME( conn, l1b_product );
 /* 
  * obtain next value for serial pk_meta

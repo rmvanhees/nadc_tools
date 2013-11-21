@@ -135,7 +135,7 @@ void Read_IMLM_Header( const char flname[], /*@out@*/ struct imlm_hdr *hdr )
 		    (void) snprintf( hdr->creation_date, 28,
                                      "%s %s", sciaDate, sciaTime );
 		    cpntr[1] = '\0';
-		    (void) strlcpy( hdr->contact, line+15, 64 );
+		    (void) nadc_strlcpy( hdr->contact, line+15, 64 );
 	       } else if ( strncmp( line+2, "Level-2", 7 ) == 0 ) {
 		    (void) sscanf( line, "# Level-2 format version: %s",
 				   hdr->product_format );
@@ -278,19 +278,19 @@ void SCIA_RD_IMLM( const char *flname, struct imlm_hdr *hdr,
  * strip path of file-name & remove extension ".gz"
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
      }
      if ( (cpntr = strstr( ctemp, ".gz" )) != NULL ) *cpntr = '\0';
 /*
  * initialize IMLM header structure
  */
-     (void) strlcpy( hdr->product, ctemp, 42 );
+     (void) nadc_strlcpy( hdr->product, ctemp, 42 );
      NADC_RECEIVEDATE( flname, hdr->receive_date );
      (void) strcpy( hdr->creation_date, "" );
      (void) strcpy( hdr->software_version, "" );
-     hdr->file_size = NADC_FILESIZE( flname );
+     hdr->file_size = nadc_file_size( flname );
      hdr->numRec    = 0u;
      imlm_out[0] = NULL;
 /*
