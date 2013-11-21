@@ -183,13 +183,13 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 	  if ( param.flag_subset == PARAM_SET ) {
 	       (void) strcpy( string, "" );
 	       if ( (param.write_subset & SUBSET_EAST) != UCHAR_ZERO )
-		    (void) strlcat( string, "E", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( string, "E", SHORT_STRING_LENGTH );
 	       if ( (param.write_subset & SUBSET_CENTER) != UCHAR_ZERO )
-		    (void) strlcat( string, "C", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( string, "C", SHORT_STRING_LENGTH );
 	       if ( (param.write_subset & SUBSET_WEST) != UCHAR_ZERO )
-		    (void) strlcat( string, "W", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( string, "W", SHORT_STRING_LENGTH );
 	       if ( (param.write_subset & SUBSET_BACK) != UCHAR_ZERO )
-		    (void) strlcat( string, "B", SHORT_STRING_LENGTH );
+		    (void) nadc_strlcat( string, "B", SHORT_STRING_LENGTH );
 	       (void) H5LTset_attribute_string( file_id, "/", 
 						"GroundPixelType", string );
 	  } else {
@@ -202,33 +202,33 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 	  (void) strcpy( cbuff, "" );
 	  if ( param.write_limb == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoLimb", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoLimb", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_moni == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoMonitor", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoMonitor", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_moon == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoMoon", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoMoon", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_nadir == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoNadir", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoNadir", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_occ == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoOcc", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoOcc", MAX_STRING_LENGTH );
 	  }
 	  if ( param.write_sun == PARAM_UNSET ) {
 	       if ( strlen( cbuff ) > 0 ) 
-		    (void) strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) strlcat( cbuff, "NoSun", MAX_STRING_LENGTH );
+		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
+	       (void) nadc_strlcat( cbuff, "NoSun", MAX_STRING_LENGTH );
 	  }
 	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
 	  (void) H5LTset_attribute_string( file_id, "/", 
@@ -240,33 +240,33 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 	       (void) strcpy( string, "" );
 	       if ( (param.chan_mask & BAND_ONE_A) != UCHAR_ZERO ) {
 		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "1a", SHORT_STRING_LENGTH );
+			 (void) nadc_strlcat( string, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( string, "1a", SHORT_STRING_LENGTH );
 	       }	  
 	       if ( (param.chan_mask & BAND_ONE_B) != UCHAR_ZERO ) {
 		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "1b", SHORT_STRING_LENGTH );
+			 (void) nadc_strlcat( string, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( string, "1b", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_TWO_A) != UCHAR_ZERO ) {
 		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "2a", SHORT_STRING_LENGTH );
+			 (void) nadc_strlcat( string, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( string, "2a", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_TWO_B) != UCHAR_ZERO ) {
 		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "2b", SHORT_STRING_LENGTH );
+			 (void) nadc_strlcat( string, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( string, "2b", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_THREE) != UCHAR_ZERO ) {
 		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "3", SHORT_STRING_LENGTH );
+			 (void) nadc_strlcat( string, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( string, "3", SHORT_STRING_LENGTH );
 	       }
 	       if ( (param.chan_mask & BAND_FOUR) != UCHAR_ZERO ) {
 		    if ( strlen( string ) > 0 ) 
-			 (void) strlcat( string, ",", SHORT_STRING_LENGTH );
-		    (void) strlcat( string, "4", SHORT_STRING_LENGTH );
+			 (void) nadc_strlcat( string, ",", SHORT_STRING_LENGTH);
+		    (void) nadc_strlcat( string, "4", SHORT_STRING_LENGTH );
 	       }
 	       if ( strlen( string ) == 0 ) {
 		    (void) H5LTset_attribute_string( file_id, "/", 
