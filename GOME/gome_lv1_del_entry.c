@@ -87,9 +87,9 @@ void GOME_LV1_DEL_ENTRY( PGconn *conn, const char *flname,
  * strip path of file-name & remove extension ".gz"
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
      }
 /*
  * check if file is already stored in meta-table
