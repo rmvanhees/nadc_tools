@@ -20,8 +20,8 @@
 .KEYWORDS    SCIA level 0 - ASCII dump
 .LANGUAGE    ANSI C
 .PURPOSE     Dump Measurement Data Sets in ASCII
-.COMMENTS    contains SCIA_WR_ASCII_LV0_AUX, SCIA_WR_ASCII_LV0_PMD, 
-                SCIA_LV0_WR_ASCII_AUX, SCIA_LV0_WR_ASCII_PMD, 
+.COMMENTS    contains SCIA_LV0_WR_ASCII_AUX, SCIA_LV0_WR_ASCII_PMD, 
+                SCIA_LV1_WR_ASCII_AUX, SCIA_LV1_WR_ASCII_PMD, 
 		SCIA_LV0_WR_ASCII_DET
 .ENVIRONment None
 .VERSION      1.7   13-Oct-2003 no longer write empty Auxiliary and PMD MDS 
@@ -280,135 +280,98 @@ void WRITE_PIXEL_BLOCK( FILE *outfl, unsigned int nr,
      free( data );
 }
 
-/*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-/*+++++++++++++++++++++++++
-.IDENTifer   SCIA_WR_ASCII_LV0_AUX
-.PURPOSE     dump content of Auxiliary data packets to file
-.INPUT/OUTPUT
-  call as   SCIA_WR_ASCII_LV0_AUX( outfl, nr, aux );
-     input:
-            FILE  *outfl         : (open) stream pointer
-	    unsigned int nr      : number of Auxiliary data packets
-	    struct mds0_aux *aux : pointer to Auxiliary data packets
-
-.RETURNS     nothing (check global error status)
-.COMMENTS    none
--------------------------*/
-void SCIA_WR_ASCII_LV0_AUX( FILE  *outfl, unsigned int nr,
-			    const struct mds0_aux *aux )
+static
+void WRITE_PMTC_FRAMES( FILE  *outfl, unsigned int nr, 
+			const struct pmtc_frame *pmtc_frame )
 {
-     register unsigned int  nb, np;
-/*
- * Auxiliary: [ISP] packet header and data header
- */
-     WRITE_PACKET_HDR( outfl, nr, aux->packet_hdr );
-     WRITE_DATA_HDR( outfl, nr, aux->data_hdr );
-     WRITE_PMTC_HDR( outfl, nr, &aux->pmtc_hdr );
-/*
- * Auxiliary: [ISP] Packet Data Field (Source Data)
- */
-     for ( np = 0; np < NUM_LV0_AUX_PMTC_FRAME; np++ ) {
-	  if ( aux->data_src.pmtc[np].bcp[0].sync == USHRT_ZERO ) break;
+     register unsigned short nf = 0;
 
-	  for ( nb = 0; nb < NUM_LV0_AUX_BCP; nb++ ) {
-	       nadc_write_ushort( outfl, ++nr, "SYNC", 
-				  aux->data_src.pmtc[np].bcp[nb].sync );
+     do {
+	  register unsigned short nb = 0;
+
+	  if ( pmtc_frame[nf].bcp->sync == USHRT_ZERO ) break;
+
+	  do {
+	       nadc_write_ushort( outfl, nr, "SYNC", 
+				  pmtc_frame[nf].bcp[nb].sync );
 	       nadc_write_ushort( outfl, nr, "Broadcast counter", 
-				  aux->data_src.pmtc[np].bcp[nb].bcps );
+				  pmtc_frame[nf].bcp[nb].bcps );
 
 	       nadc_write_uchar( outfl, nr, "AU flag", 
-			 aux->data_src.pmtc[np].bcp[nb].flags.field.au );
+			 pmtc_frame[nf].bcp[nb].flags.field.au );
 	       nadc_write_uchar( outfl, nr, "EU flag", 
-			 aux->data_src.pmtc[np].bcp[nb].flags.field.eu );
+			 pmtc_frame[nf].bcp[nb].flags.field.eu );
 	       nadc_write_uchar( outfl, nr, "D flag", 
-			 aux->data_src.pmtc[np].bcp[nb].flags.field.d );
+			 pmtc_frame[nf].bcp[nb].flags.field.d );
 	       nadc_write_uchar( outfl, nr, "M flag", 
-			 aux->data_src.pmtc[np].bcp[nb].flags.field.m );
+			 pmtc_frame[nf].bcp[nb].flags.field.m );
 	       nadc_write_uchar( outfl, nr, "PHASE", 
-			 aux->data_src.pmtc[np].bcp[nb].flags.field.phase );
+			 pmtc_frame[nf].bcp[nb].flags.field.phase );
 	       nadc_write_uchar( outfl, nr, "Pointing counter", 
-			 aux->data_src.pmtc[np].bcp[nb].flags.field.pointing);
+			 pmtc_frame[nf].bcp[nb].flags.field.pointing);
 
 	       nadc_write_uint( outfl, nr, 
 				"Azimuth encoder counter", 
-			 aux->data_src.pmtc[np].bcp[nb].azi_encode_cntr );
+			 pmtc_frame[nf].bcp[nb].azi_encode_cntr );
 	       nadc_write_uint( outfl, nr, 
 				"Elevation encoder counter", 
-		         aux->data_src.pmtc[np].bcp[nb].ele_encode_cntr );
+		         pmtc_frame[nf].bcp[nb].ele_encode_cntr );
 
 	       nadc_write_ushort( outfl, nr, 
 				  "Azimuth counter zero error", 
-			 aux->data_src.pmtc[np].bcp[nb].azi_cntr_error );
+			 pmtc_frame[nf].bcp[nb].azi_cntr_error );
 	       nadc_write_ushort( outfl, nr,  
 				  "Elevation counter zero error", 
-			 aux->data_src.pmtc[np].bcp[nb].ele_cntr_error );
+			 pmtc_frame[nf].bcp[nb].ele_cntr_error );
 	       nadc_write_ushort( outfl, nr,  
 				  "Azimuth scanner control error", 
-			 aux->data_src.pmtc[np].bcp[nb].azi_scan_error );
+			 pmtc_frame[nf].bcp[nb].azi_scan_error );
 	       nadc_write_ushort( outfl, nr,   
 				  "Elevation scanner control error", 
-			 aux->data_src.pmtc[np].bcp[nb].ele_scan_error );
-	  }
+			 pmtc_frame[nf].bcp[nb].ele_scan_error );
+	  } while ( ++nb < NUM_LV0_AUX_BCP );
 	  nadc_write_ushort( outfl, nr, "Bench temp_1 (Radiator OBM)",
-			     aux->data_src.pmtc[np].bench_rad.field.temp );
+			     pmtc_frame[nf].bench_rad.field.temp );
 	  nadc_write_uchar( outfl, nr, "Optical bench control status 1",
-			    aux->data_src.pmtc[np].bench_rad.field.stat );
+			    pmtc_frame[nf].bench_rad.field.stat );
 	  nadc_write_ushort( outfl, nr, "Bench temp_2 (ELV scanner, Nadir)",
-			     aux->data_src.pmtc[np].bench_elv.field.temp );
+			     pmtc_frame[nf].bench_elv.field.temp );
 	  nadc_write_uchar( outfl, nr, "Optical bench control status 2",
-			    aux->data_src.pmtc[np].bench_elv.field.stat );
+			    pmtc_frame[nf].bench_elv.field.stat );
 	  nadc_write_ushort( outfl, nr, "Bench temp_3 (AZ scanner, Limb)",
-			     aux->data_src.pmtc[np].bench_az.field.temp );
+			     pmtc_frame[nf].bench_az.field.temp );
 	  nadc_write_uchar( outfl, nr, "Optical bench control status 3",
-			    aux->data_src.pmtc[np].bench_az.field.stat );
-     }
+			    pmtc_frame[nf].bench_az.field.stat );
+     } while ( nr++, ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
-/*+++++++++++++++++++++++++
-.IDENTifer   SCIA_WR_ASCII_LV0_PMD
-.PURPOSE     dump content of PMD data packets to file
-.INPUT/OUTPUT
-  call as   SCIA_WR_ASCII_LV0_PMD( outfl, nr, pmd );
-     input:
-            FILE  *outfl         : (open) stream pointer
-	    unsigned int nr      : number of PMD data packets
-            struct mds0_pmd *pmd : pointer to PMD records
-
-.RETURNS     nothing (check global error status)
-.COMMENTS    none
--------------------------*/
-void SCIA_WR_ASCII_LV0_PMD( FILE  *outfl, unsigned int nr,
-			    const struct mds0_pmd *pmd )
+static
+void WRITE_PMD_SRC( FILE  *outfl, unsigned short nr,
+		    const struct pmd_src pmd_src )
 {
      register unsigned int nd;
 
      const unsigned int dims[2] = {2, PMD_NUMBER};
 /*
- * Auxiliary: [ISP] packet header and data header
- */
-     WRITE_PACKET_HDR( outfl, nr, pmd->packet_hdr );
-     WRITE_DATA_HDR( outfl, nr, pmd->data_hdr );
-/*
  * PMD [ISP] Packet Data Field (Source Data)
  */
-     nadc_write_ushort( outfl, nr, "PMD temperature (HK)", 
-			 pmd->data_src.temp );
-     for ( nd = 0; nd < NUM_LV0_PMD_PACKET; nd++ ) {
-	  if ( pmd->data_src.packet[nd].sync == USHRT_ZERO ) break;
+     nadc_write_ushort( outfl, nr, "PMD temperature (HK)", pmd_src.temp );
+     for ( nd = 0; nd < NUM_LV0_PMD_PACKET; nd++, nr++ ) {
+	  if ( pmd_src.packet[nd].sync == USHRT_ZERO ) break;
 
-	  nadc_write_ushort( outfl, ++nr, "SYNC", 
-			     pmd->data_src.packet[nd].sync );
+	  nadc_write_ushort( outfl, nr, "SYNC", pmd_src.packet[nd].sync );
 	  nadc_write_arr_ushort( outfl, nr, "PMD data", 2, dims, 
-				 pmd->data_src.packet[nd].data[0] );
+				 pmd_src.packet[nd].data[0] );
 	  nadc_write_ushort( outfl, nr, "Broadcast Counter (MDI)", 
-			     pmd->data_src.packet[nd].bcps );
+			     pmd_src.packet[nd].bcps );
 	  nadc_write_ushort( outfl, nr, "Interface Status (IS)", 
-			     pmd->data_src.packet[nd].time.field.is );
+			     pmd_src.packet[nd].time.field.is );
 	  nadc_write_ushort( outfl, nr, "Delta Time", 
-			     pmd->data_src.packet[nd].time.field.delta );
+			     pmd_src.packet[nd].time.field.delta );
      }
 }
 
+/*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_WR_ASCII_AUX
 .PURPOSE     dump content of Auxiliary data packets
@@ -445,7 +408,10 @@ void SCIA_LV0_WR_ASCII_AUX( struct param_record param, unsigned int stateIndx,
 			 "Level 0 Measurement Data Sets" );
      for ( na = 0; na < nr_aux; na++, aux++ ) {
 	  WRITE_ANNOTIATION( outfl, 0, aux->isp, aux->fep_hdr );
-	  SCIA_WR_ASCII_LV0_AUX( outfl, 0, aux );
+
+	  WRITE_PACKET_HDR( outfl, 0, aux->packet_hdr );
+	  WRITE_DATA_HDR( outfl, 0, aux->data_hdr );
+	  WRITE_PMTC_FRAMES( outfl, 1, aux->data_src );
      }
      (void) fclose( outfl );
 }
@@ -486,7 +452,9 @@ void SCIA_LV0_WR_ASCII_PMD( struct param_record param, unsigned int stateIndx,
 			 "Level 0 Measurement Data Sets" );
      for ( np = 0; np < nr_pmd; np++, pmd++ ) {
 	  WRITE_ANNOTIATION( outfl, 0, pmd->isp, pmd->fep_hdr );
-	  SCIA_WR_ASCII_LV0_PMD( outfl, 0, pmd );
+	  WRITE_PACKET_HDR( outfl, 0, pmd->packet_hdr );
+	  WRITE_DATA_HDR( outfl, 0, pmd->data_hdr );
+	  WRITE_PMD_SRC( outfl, 1, pmd->data_src );
      }
      (void) fclose( outfl );
 }
@@ -558,6 +526,89 @@ void SCIA_LV0_WR_ASCII_DET( struct param_record param, unsigned int stateIndx,
 				       data_src.pixel[n_clus] );
 	       }
 	  }
+     }
+     (void) fclose( outfl );
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer  SCIA_LV1_WR_ASCII_AUX
+.PURPOSE    dump -- in ASCII Format -- the Lv0 Auxiliary records
+.INPUT/OUTPUT
+  call as   SCIA_LV1_WR_ASCII_AUX( param, num_dsr, aux );
+     input:
+            struct param_record param : struct holding user-defined settings
+	    unsigned int num_dsr      : number of data sets
+	    struct mds1_aux *aux      : pointer to Auxiliary records
+            
+.RETURNS     Nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    None
+-------------------------*/
+void SCIA_LV1_WR_ASCII_AUX( struct param_record param,
+			    unsigned int nr_aux, const struct mds1_aux *aux )
+{
+     const char prognm[] = "SCIA_LV1_WR_ASCII_AUX";
+
+     register unsigned int na;
+
+     char date_str[UTC_STRING_LENGTH];
+
+     FILE *outfl = CRE_ASCII_File( param.outfile, "aux" );
+     if ( outfl == NULL || IS_ERR_STAT_FATAL )
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+/*
+ * write ASCII dump of MDS record
+ */
+     nadc_write_header( outfl, 999, param.infile, "Auxiliary Data Packets" );
+     for ( na = 0; na < nr_aux; na++, aux++ ) {
+	  (void) MJD_2_ASCII( aux->mjd.days, aux->mjd.secnd,
+			      aux->mjd.musec, date_str );
+	  nadc_write_text( outfl, 0, "Date", date_str );
+	  nadc_write_uchar( outfl, 0, "MDS DSR attached", aux->flag_mds );
+
+	  WRITE_PACKET_HDR( outfl, 0, aux->packet_hdr );
+	  WRITE_DATA_HDR( outfl, 0, aux->data_hdr );
+	  WRITE_PMTC_FRAMES( outfl, 1, aux->data_src );
+     }
+     (void) fclose( outfl );
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer  SCIA_LV1_WR_ASCII_PMD
+.PURPOSE    dump -- in ASCII Format -- the Lv0 PMD records
+.INPUT/OUTPUT
+  call as   SCIA_LV1_WR_ASCII_PMD( param, num_dsr, pmd );
+     input:
+            struct param_record param : struct holding user-defined settings
+	    unsigned int num_dsr      : number of data sets
+	    struct mds1_pmd *pmd      : pointer to PMD records
+            
+.RETURNS     Nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    None
+-------------------------*/
+void SCIA_LV1_WR_ASCII_PMD( struct param_record param,
+			    unsigned int nr_pmd, const struct mds1_pmd *pmd )
+{
+     const char prognm[] = "SCIA_LV1_WR_ASCII_PMD";
+
+     register unsigned int np;
+
+     char  date_str[UTC_STRING_LENGTH];
+
+     FILE *outfl = CRE_ASCII_File( param.outfile, "pmd" );
+     if ( outfl == NULL || IS_ERR_STAT_FATAL )
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+/*
+ * write ASCII dump of MDS record
+ */
+     nadc_write_header( outfl, 999, param.infile, "PMD Data Packets" );
+     for ( np = 0; np < nr_pmd; np++, pmd++ ) {
+	  (void) MJD_2_ASCII( pmd->mjd.days, pmd->mjd.secnd,
+			      pmd->mjd.musec, date_str );
+	  nadc_write_text( outfl, 0, "Date", date_str );
+	  nadc_write_uchar( outfl, 0, "MDS DSR attached", pmd->flag_mds );
+	  WRITE_PACKET_HDR( outfl, 0, pmd->packet_hdr );
+	  WRITE_DATA_HDR( outfl, 0, pmd->data_hdr );
+	  WRITE_PMD_SRC( outfl, 1, pmd->data_src );
      }
      (void) fclose( outfl );
 }

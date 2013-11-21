@@ -320,20 +320,6 @@ struct state1_scia
      float          orbit_phase;
 };
 
-struct pmd_scia
-{
-     struct mjd_envi mjd;
-     unsigned char flag_mds;
-     struct mds0_pmd mds0;
-};
-
-struct aux_scia
-{
-     struct mjd_envi mjd;
-     unsigned char flag_mds;
-     struct mds0_aux mds0;
-};
-
 struct lcpn_scia
 {
      struct mjd_envi mjd;
@@ -597,11 +583,11 @@ extern void SCIA_LV1_WR_ASFP( FILE *fp, unsigned int,
        /*@modifies errno, fp@*/;
 extern unsigned int SCIA_LV1_RD_AUX( FILE *fp, unsigned int, 
 				     const struct dsd_envi *,
-		                     /*@out@*/ struct aux_scia **aux )
+		                     /*@out@*/ struct mds1_aux **aux )
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *aux@*/;
 extern void SCIA_LV1_WR_AUX( FILE *fp, unsigned int, 
-			     const struct aux_scia * )
+			     const struct mds1_aux * )
        /*@globals  errno;@*/
        /*@modifies errno, fp@*/;
 extern unsigned int SCIA_LV1_RD_BASE( FILE *fp, unsigned int, 
@@ -669,11 +655,11 @@ extern void SCIA_LV1_WR_LCPN( FILE *fp, unsigned int,
        /*@modifies errno, fp@*/;
 extern unsigned int SCIA_LV1_RD_PMD( FILE *fp, unsigned int, 
 				     const struct dsd_envi *,
-		                     /*@out@*/ struct pmd_scia **pmd )
+		                     /*@out@*/ struct mds1_pmd **pmd )
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *pmd@*/;
 extern void SCIA_LV1_WR_PMD( FILE *fp, unsigned int, 
-			     const struct pmd_scia * )
+			     const struct mds1_pmd * )
        /*@globals  errno;@*/
        /*@modifies errno, fp@*/;
 extern unsigned int SCIA_LV1_RD_PPG( FILE *fp, unsigned int, 
@@ -1035,14 +1021,6 @@ extern void SCIA_LV1_WR_ASCII_STATE( struct param_record, unsigned int,
 				     const struct state1_scia * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
-extern void SCIA_LV1_WR_ASCII_PMD( struct param_record, unsigned int, 
-				   const struct pmd_scia * )
-       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
-extern void SCIA_LV1_WR_ASCII_AUX( struct param_record, unsigned int, 
-				   const struct aux_scia * )
-       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 extern void SCIA_LV1_WR_ASCII_LCPN( struct param_record, unsigned int, 
 				    const struct lcpn_scia * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
@@ -1155,9 +1133,9 @@ extern void SCIA_LV1_WR_H5_ASFP( struct param_record, unsigned int,
 extern void SCIA_LV1_WR_H5_STATE( struct param_record, unsigned int,
 				  const struct state1_scia * );
 extern void SCIA_LV1_WR_H5_PMD( struct param_record, unsigned int,
-				const struct pmd_scia * );
+				const struct mds1_pmd * );
 extern void SCIA_LV1_WR_H5_AUX( struct param_record, unsigned int,
-				const struct aux_scia * );
+				const struct mds1_aux * );
 extern void SCIA_LV1_WR_H5_LCPN( struct param_record, unsigned int,
 				 const struct lcpn_scia * );
 extern void SCIA_LV1_WR_H5_DARK( struct param_record, unsigned int,

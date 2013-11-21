@@ -50,7 +50,7 @@
 #include <swap_bytes.h>
 
 static
-void Sun2Intel_AUX( struct aux_scia *aux )
+void Sun2Intel_AUX( struct mds1_aux *aux )
 {
      aux->mjd.days = byte_swap_32( aux->mjd.days );
      aux->mjd.secnd = byte_swap_u32( aux->mjd.secnd );
@@ -69,7 +69,7 @@ void Sun2Intel_AUX( struct aux_scia *aux )
 	    unsigned int num_dsd  :  number of DSDs
 	    struct dsd_envi *dsd  :  structure for the DSDs
     output:
-            struct aux_scia **aux :  structure for auxiliary data packets
+            struct mds1_aux **aux :  structure for auxiliary data packets
 
 .RETURNS     number of data set records read (unsigned int)
 	     error status passed by global variable ``nadc_stat''
@@ -77,13 +77,13 @@ void Sun2Intel_AUX( struct aux_scia *aux )
 -------------------------*/
 unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd, 
 			      const struct dsd_envi *dsd,
-			      struct aux_scia **aux_out )
+			      struct mds1_aux **aux_out )
 {
      unsigned int indx_dsd;
 
      unsigned int nr_dsr = 0;
 
-     struct aux_scia *aux;
+     struct mds1_aux *aux;
 
      const char prognm[]   = "SCIA_LV1_RD_AUX";
      const char dsd_name[] = "AUXILIARY_PACKETS";
@@ -100,8 +100,8 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
           return 0u;
      }
      if ( ! Use_Extern_Alloc ) {
-	  aux_out[0] = (struct aux_scia *) 
-	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct aux_scia));
+	  aux_out[0] = (struct mds1_aux *) 
+	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct mds1_aux));
      }
      if ( (aux = aux_out[0]) == NULL )  
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "aux" );
@@ -117,7 +117,7 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
 	  if ( fread( &aux->flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
-	  SCIA_LV0_RD_LV1_AUX( fd, &aux->mds0 );
+	  SCIA_LV0_RD_LV1_AUX( fd, aux );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX" );
 /*
@@ -126,8 +126,7 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_AUX( aux );
 #endif
-	  aux++;
-     } while ( ++nr_dsr < dsd[indx_dsd].num_dsr );
+     } while ( aux++, ++nr_dsr < dsd[indx_dsd].num_dsr );
 /*
  * set return values
  */
@@ -143,18 +142,18 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
      input:
             FILE *fd              :  stream pointer
 	    unsigned int num_aux  :  number of Auxiliary records
-            struct aux_scia *aux  :  structure for auxiliary data packets
+            struct mds1_aux *aux  :  structure for auxiliary data packets
 
 .RETURNS     nothing
 	     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV1_WR_AUX( FILE *fd, unsigned int num_aux,
-		      const struct aux_scia *aux_in )
+		      const struct mds1_aux *aux_in )
 {
      const char prognm[] = "SCIA_LV1_WR_AUX";
 
-     struct aux_scia aux;
+     struct mds1_aux aux;
 
      struct dsd_envi dsd = {
           "AUXILIARY_PACKETS", "A",
@@ -171,22 +170,14 @@ void SCIA_LV1_WR_AUX( FILE *fd, unsigned int num_aux,
  * write data set records
  */
      do {
-	  (void) memcpy( &aux, aux_in, sizeof( struct aux_scia ) );
+	  (void) memcpy( &aux, aux_in, sizeof( struct mds1_aux ) );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_AUX( &aux );
 #endif
-
-	  if ( fwrite( &aux.mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
-	  dsd.size += sizeof( struct mjd_envi );
-	  if ( fwrite( &aux.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
-	  dsd.size += ENVI_UCHAR;
-	  dsd.size += SCIA_LV0_WR_LV1_AUX( fd, aux.mds0 );
+	  dsd.size += SCIA_LV0_WR_LV1_AUX( fd, aux );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_RETURN_ERROR(prognm,NADC_ERR_FATAL,"SCIA_LV0_WR_LV1_AUX");
-	  aux_in++;
-     } while ( ++dsd.num_dsr < num_aux );
+     } while ( aux_in++, ++dsd.num_dsr < num_aux );
 /*
  * update list of written DSD records
  */

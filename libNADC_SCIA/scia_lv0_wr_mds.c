@@ -263,94 +263,80 @@ unsigned int SCIA_LV0_WR_MDS_PMTC_HDR( FILE *fd,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV0_WR_AUX_SRC
+.IDENTifer   SCIA_LV0_WR_PMTC_FRAME
 .PURPOSE     write source data of Auxilirary MDS
 .INPUT/OUTPUT
-  call as   nr_bye = SCIA_LV0_WR_AUX_SRC( fd, aux_src );
+  call as   nr_bye = SCIA_LV0_WR_PMTC_FRAME( fd, pmtc_frame );
      input:  
             FILE *fd                : stream pointer
     output:  
-            struct aux_src *aux_src : Auxilirary Source data
+            struct pmtc_frame *pmtc_frame : PMTC frame
 
 .RETURNS     number of bytes written (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned int SCIA_LV0_WR_MDS_AUX_SRC( FILE *fd, 
-				      const struct aux_src aux_src_in )
+unsigned int SCIA_LV0_WR_MDS_PMTC_FRAME( FILE *fd, 
+				      const struct pmtc_frame pmtc_frame_in )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     register unsigned short nb, nf;
+     register unsigned short nb = 0;
 
      char *src_pntr;
      char src_char[AUX_DATA_SRC_LENGTH];
 
      unsigned long long llbuff;
 
-     struct aux_src aux_src;
+     struct pmtc_frame pmtc_frame;
 
-     (void) memcpy( &aux_src, &aux_src_in, sizeof( struct aux_src ));
+     (void) memcpy( &pmtc_frame, &pmtc_frame_in, sizeof(struct pmtc_frame) );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_AUX_SRC( &aux_src );
+     Sun2Intel_MDS_PMTC_FRAME( &pmtc_frame );
 #endif
-     nf = 0;
      src_pntr = src_char;
      do {
-	  nb = 0;
-	  do {
-	       (void) memcpy( src_pntr, &aux_src.pmtc[nf].bcp[nb].sync, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( src_pntr, &aux_src.pmtc[nf].bcp[nb].bcps, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( src_pntr, 
-			      &aux_src.pmtc[nf].bcp[nb].flags.two_byte, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].sync, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].bcps, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].flags.two_byte, 
+			 ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
 /*
  * write azi_encode and ele_encode to a 64-bit integer, and write only 48-bits
  */
-	       llbuff = aux_src.pmtc[nf].bcp[nb].azi_encode_cntr;
-	       llbuff <<= 20;
-	       llbuff |= aux_src.pmtc[nf].bcp[nb].ele_encode_cntr;
+	  llbuff = pmtc_frame.bcp[nb].azi_encode_cntr;
+	  llbuff <<= 20;
+	  llbuff |= pmtc_frame.bcp[nb].ele_encode_cntr;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       llbuff = byte_swap_u64( llbuff );
+	  llbuff = byte_swap_u64( llbuff );
 #endif
-	       llbuff >>= 8;
-	       (void) memcpy( src_pntr, &llbuff, sizeof(unsigned long long) );
-	       src_pntr += (ENVI_USHRT + ENVI_UINT);
+	  llbuff >>= 8;
+	  (void) memcpy( src_pntr, &llbuff, sizeof(unsigned long long) );
+	  src_pntr += (ENVI_USHRT + ENVI_UINT);
 
-	       (void) memcpy( src_pntr, 
-			      &aux_src.pmtc[nf].bcp[nb].azi_cntr_error, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( src_pntr, 
-			      &aux_src.pmtc[nf].bcp[nb].ele_cntr_error, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( src_pntr, 
-			      &aux_src.pmtc[nf].bcp[nb].azi_scan_error, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( src_pntr, 
-			      &aux_src.pmtc[nf].bcp[nb].ele_scan_error, 
-			      ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	  } while ( ++nb < NUM_LV0_AUX_BCP );
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].azi_cntr_error, 
+			 ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].ele_cntr_error, 
+			 ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].azi_scan_error, 
+			 ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( src_pntr, &pmtc_frame.bcp[nb].ele_scan_error,
+			 ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+     } while ( ++nb < NUM_LV0_AUX_BCP );
 	  
-	  (void) memcpy( src_pntr, &aux_src.pmtc[nf].bench_rad.two_byte, 
-			 ENVI_USHRT );
-	  src_pntr += ENVI_USHRT;
-	  (void) memcpy( src_pntr, &aux_src.pmtc[nf].bench_elv.two_byte, 
-			 ENVI_USHRT );
-	  src_pntr += ENVI_USHRT;
-	  (void) memcpy( src_pntr, &aux_src.pmtc[nf].bench_az.two_byte, 
-			 ENVI_USHRT );
-	  src_pntr += ENVI_USHRT;
-     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
+     (void) memcpy( src_pntr, &pmtc_frame.bench_rad.two_byte, ENVI_USHRT );
+     src_pntr += ENVI_USHRT;
+     (void) memcpy( src_pntr, &pmtc_frame.bench_elv.two_byte, ENVI_USHRT );
+     src_pntr += ENVI_USHRT;
+     (void) memcpy( src_pntr, &pmtc_frame.bench_az.two_byte, ENVI_USHRT );
+     src_pntr += ENVI_USHRT;
 /*
  * write packet data header data
  */
@@ -583,6 +569,8 @@ void SCIA_LV0_WR_ONE_AUX( FILE *fd, const struct mds0_info *info,
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
      const char prognm[] = "SCIA_LV0_WR_ONE_AUX";
+
+     register unsigned short nf = 0;
 /*
  * rewind data file
  */
@@ -617,9 +605,11 @@ void SCIA_LV0_WR_ONE_AUX( FILE *fd, const struct mds0_info *info,
 /*
  * write ISP Auxiliary data source packet
  */
-     (void) SCIA_LV0_WR_MDS_AUX_SRC( fd, aux.data_src );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_AUX_SRC" );
+     do {
+	  (void) SCIA_LV0_WR_MDS_PMTC_FRAME( fd, aux.data_src[nf] );
+	  if ( IS_ERR_STAT_FATAL ) 
+	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_FRAME" );
+     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
 /*+++++++++++++++++++++++++
@@ -921,17 +911,26 @@ unsigned int SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *info,
   call as   nr_byte = SCIA_LV0_WR_LV1_AUX( fd, aux );
      input:  
             FILE   *fd             : (open) stream pointer
-            struct mds0_aux aux    : Auxiliary MDS records
+            struct mds1_aux aux    : Auxiliary MDS records
 
 .RETURNS     number of bytes written (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds0_aux aux )
+unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds1_aux aux )
 {
+     const char prognm[] = "SCIA_LV0_WR_LV1_AUX";
+
+     register unsigned short nf = 0;
+
      unsigned int nr, nr_byte = 0u;
 
-     const char prognm[] = "SCIA_LV0_WR_LV1_AUX";
+     if ( fwrite( &aux.mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "mjd" );
+     nr_byte += sizeof( struct mjd_envi );
+     if ( fwrite( &aux.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "flags_mds" );
+     nr_byte += ENVI_UCHAR;
 /*
  * write Packet Header
  */
@@ -962,10 +961,12 @@ unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds0_aux aux )
 /*
  * write ISP AUX data source packet
  */
-     nr = SCIA_LV0_WR_MDS_AUX_SRC( fd, aux.data_src );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_AUX_SRC" );
-     nr_byte += nr;
+     do {
+	  nr = SCIA_LV0_WR_MDS_PMTC_FRAME( fd, aux.data_src[nf] );
+	  if ( IS_ERR_STAT_FATAL ) 
+	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_FRAME" );
+	  nr_byte += nr;
+     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
  done:
      return nr_byte;
 }
@@ -977,17 +978,24 @@ unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds0_aux aux )
   call as   nr_byte = SCIA_LV0_WR_LV1_PMD( fd, pmd );
      input:  
             FILE   *fd             : (open) stream pointer
-            struct mds0_pmd pmd    : PMD MDS records
+            struct mds1_pmd pmd    : PMD MDS records
 
 .RETURNS     number of bytes written (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_WR_LV1_PMD( FILE *fd, const struct mds0_pmd pmd )
+unsigned int SCIA_LV0_WR_LV1_PMD( FILE *fd, const struct mds1_pmd pmd )
 {
      unsigned int nr, nr_byte = 0u;
 
      const char prognm[] = "SCIA_LV0_WR_LV1_PMD";
+
+     if ( fwrite( &pmd.mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "mjd" );
+     nr_byte += sizeof( struct mjd_envi );
+     if ( fwrite( &pmd.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "flag_mds" );
+     nr_byte += ENVI_UCHAR;
 /*
  * write Packet Header
  */

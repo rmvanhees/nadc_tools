@@ -54,24 +54,26 @@
 
 #define NFIELDS    6
 
-static const size_t aux_size = sizeof( struct aux_scia );
+static const size_t aux_size = sizeof( struct mds1_aux );
 static const size_t aux_offs[NFIELDS] = {
-     HOFFSET( struct aux_scia, mjd ),
-     HOFFSET( struct aux_scia, flag_mds ),
-     HOFFSET( struct aux_scia, mds0.packet_hdr ),
-     HOFFSET( struct aux_scia, mds0.data_hdr ),
-     HOFFSET( struct aux_scia, mds0.pmtc_hdr ),
-     HOFFSET( struct aux_scia, mds0.data_src )
+     HOFFSET( struct mds1_aux, mjd ),
+     HOFFSET( struct mds1_aux, flag_mds ),
+     HOFFSET( struct mds1_aux, packet_hdr ),
+     HOFFSET( struct mds1_aux, data_hdr ),
+     HOFFSET( struct mds1_aux, pmtc_hdr ),
+     HOFFSET( struct mds1_aux, data_src )
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_LV1_WR_H5_AUX( struct param_record param, unsigned int nr_aux,
-			 const struct aux_scia *aux )
+			 const struct mds1_aux *aux )
 {
      const char prognm[] = "SCIA_LV1_WR_H5_AUX";
 
-     hid_t   ads_id;
+     hid_t   ads_id, tid_pmtc;
      hid_t   aux_type[NFIELDS];
+
+     hsize_t adim;
 
      const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
      const char *aux_names[NFIELDS] = {
@@ -95,7 +97,10 @@ void SCIA_LV1_WR_H5_AUX( struct param_record param, unsigned int nr_aux,
      aux_type[2] = H5Topen( param.hdf_file_id, "packet_hdr", H5P_DEFAULT );
      aux_type[3] = H5Topen( param.hdf_file_id, "data_hdr", H5P_DEFAULT );
      aux_type[4] = H5Topen( param.hdf_file_id, "pmtc_hdr", H5P_DEFAULT );
-     aux_type[5] = H5Topen( param.hdf_file_id, "aux_src", H5P_DEFAULT );
+     tid_pmtc = H5Topen( param.hdf_file_id, "pmtc_frame", H5P_DEFAULT );
+     adim = NUM_LV0_AUX_PMTC_FRAME;
+     aux_type[5] = H5Tarray_create( tid_pmtc, 1, &adim );
+     (void) H5Tclose( tid_pmtc );
 /*
  * create table
  */

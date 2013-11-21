@@ -626,7 +626,7 @@ static void SCIA_WRITE_STATE( const struct param_record param,
  */
 static void SCIA_WRITE_PMD( const struct param_record param, 
 			    unsigned int num_pmd,
-			    const struct pmd_scia *pmd )
+			    const struct mds1_pmd *pmd )
 {
      const char prognm[] = "SCIA_WRITE_PMD";
 
@@ -652,7 +652,7 @@ static void SCIA_WRITE_PMD( const struct param_record param,
  */
 static void SCIA_WRITE_AUX( const struct param_record param, 
 			    unsigned int num_aux,
-			    const struct aux_scia *aux )
+			    const struct mds1_aux *aux )
 {
      const char prognm[] = "SCIA_WRITE_AUX";
 

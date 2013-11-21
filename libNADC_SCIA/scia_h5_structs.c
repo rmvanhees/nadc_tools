@@ -234,7 +234,7 @@ void CRE_SCIA_H5_STRUCTS_LV01( hid_t file_id )
 void CRE_SCIA_LV1_H5_STRUCTS( struct param_record param )
 {
      hid_t   coord_id, mjd_id, type_id;
-     hid_t   arr_id, pmtc_id;
+     hid_t   arr_id;
      hsize_t adim;
 	  
 /*
@@ -304,21 +304,6 @@ void CRE_SCIA_LV1_H5_STRUCTS( struct param_record param )
 		       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      (void) H5Tclose( type_id );
 /*
- * Auxiliary data source packets
- */
-     pmtc_id = H5Topen( param.hdf_file_id, "pmtc_frame", H5P_DEFAULT );
-
-     type_id = H5Tcreate( H5T_COMPOUND, sizeof( struct aux_src ));
-     adim = NUM_LV0_AUX_PMTC_FRAME;
-     arr_id = H5Tarray_create( pmtc_id, 1, &adim );
-     (void) H5Tinsert( type_id, "pmtc",
-		       HOFFSET(struct aux_src, pmtc), arr_id );
-     (void) H5Tclose( arr_id );
-     (void) H5Tcommit( param.hdf_file_id, "aux_src", type_id,
-		       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-     (void) H5Tclose( type_id );
-     (void) H5Tclose( pmtc_id );
-/*
  * Clcon structure
  */
      type_id = H5Tcreate( H5T_COMPOUND, sizeof( struct Clcon_scia ));
@@ -377,7 +362,7 @@ void CRE_SCIA_LV1_H5_STRUCTS( struct param_record param )
 		       HOFFSET(struct Sigc_scia, stray), 
 		       H5T_NATIVE_UCHAR );
      (void) H5Tinsert( type_id, "det", 
-		       HOFFSET(struct Sigc_scia, det.four_byte), 
+		       HOFFSET(struct Sigc_scia, det), 
 		       H5T_NATIVE_UINT );
      (void) H5Tpack( type_id );
      (void) H5Tcommit( param.hdf_file_id, "Sigc", type_id,

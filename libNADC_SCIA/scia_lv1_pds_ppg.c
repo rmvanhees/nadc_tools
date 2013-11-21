@@ -88,10 +88,12 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
      const char prognm[]   = "SCIA_LV1_RD_PPG";
 
      char         *ppg_char, *ppg_pntr;
-     size_t       dsr_size, nr_byte;
+     size_t       dsr_size;
      unsigned int indx_dsd;
 
      const char dsd_name[] = "PPG_ETALON";
+
+     const size_t  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 /*
  * get index to data set descriptor
  */
@@ -122,7 +124,6 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
 /*
  * read data buffer to PPG structure
  */
-     nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
      (void) memcpy( &ppg->ppg_fact, ppg_pntr, nr_byte );
      ppg_pntr += nr_byte;
      (void) memcpy( &ppg->etalon_fact, ppg_pntr, nr_byte );
@@ -131,9 +132,8 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
      ppg_pntr += nr_byte;
      (void) memcpy( &ppg->wls_deg_fact, ppg_pntr, nr_byte );
      ppg_pntr += nr_byte;
-     nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_UCHAR;
-     (void) memcpy( &ppg->bad_pixel, ppg_pntr, nr_byte );
-     ppg_pntr += nr_byte;
+     (void) memcpy( &ppg->bad_pixel, ppg_pntr, SCIENCE_PIXELS );
+     ppg_pntr += SCIENCE_PIXELS;
 /*
  * check if we read the whole DSR
  */

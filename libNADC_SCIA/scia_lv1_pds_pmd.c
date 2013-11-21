@@ -51,7 +51,7 @@
 #include <swap_bytes.h>
 
 static
-void Sun2Intel_PMD( struct pmd_scia *pmd )
+void Sun2Intel_PMD( struct mds1_pmd *pmd )
 {
      pmd->mjd.days = byte_swap_32( pmd->mjd.days );
      pmd->mjd.secnd = byte_swap_u32( pmd->mjd.secnd );
@@ -70,7 +70,7 @@ void Sun2Intel_PMD( struct pmd_scia *pmd )
 	    unsigned int num_dsd  :  number of DSDs
 	    struct dsd_envi *dsd  :  structure for the DSDs
     output:
-            struct pmd_scia **pmd :  structure for PMD data packets
+            struct mds1_pmd **pmd :  structure for PMD data packets
 
 .RETURNS     number of data set records read (unsigned int)
 	     error status passed by global variable ``nadc_stat''
@@ -78,13 +78,13 @@ void Sun2Intel_PMD( struct pmd_scia *pmd )
 -------------------------*/
 unsigned int SCIA_LV1_RD_PMD( FILE *fd, unsigned int num_dsd, 
 			      const struct dsd_envi *dsd,
-			      struct pmd_scia **pmd_out )
+			      struct mds1_pmd **pmd_out )
 {
      unsigned int indx_dsd;
 
      unsigned int nr_dsr = 0;
 
-     struct pmd_scia *pmd;
+     struct mds1_pmd *pmd;
 
      const char prognm[] = "SCIA_LV1_RD_PMD";
      const char dsd_name[] = "PMD_PACKETS";
@@ -101,8 +101,8 @@ unsigned int SCIA_LV1_RD_PMD( FILE *fd, unsigned int num_dsd,
           return 0u;
      }
      if ( ! Use_Extern_Alloc ) {
-	  pmd_out[0] = (struct pmd_scia *) 
-	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct pmd_scia));
+	  pmd_out[0] = (struct mds1_pmd *) 
+	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct mds1_pmd));
      }
      if ( (pmd = pmd_out[0]) == NULL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pmd" );
@@ -118,7 +118,7 @@ unsigned int SCIA_LV1_RD_PMD( FILE *fd, unsigned int num_dsd,
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
 	  if ( fread( &pmd->flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
-	  SCIA_LV0_RD_LV1_PMD( fd, &pmd->mds0 );
+	  SCIA_LV0_RD_LV1_PMD( fd, pmd );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMD" );
 /*
@@ -144,18 +144,18 @@ unsigned int SCIA_LV1_RD_PMD( FILE *fd, unsigned int num_dsd,
      input:
             FILE *fd              :  stream pointer
 	    unsigned int num_pmd  :  number of PMD records
-            struct pmd_scia *pmd :  structure for PMD data packets
+            struct mds1_pmd *pmd :  structure for PMD data packets
 
 .RETURNS     nothing
 	     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV1_WR_PMD( FILE *fd, unsigned int num_pmd,
-		      const struct pmd_scia *pmd_in )
+		      const struct mds1_pmd *pmd_in )
 {
      const char prognm[] = "SCIA_LV1_WR_PMD";
 
-     struct pmd_scia pmd;
+     struct mds1_pmd pmd;
 
      struct dsd_envi dsd = {
           "PMD_PACKETS", "A",
@@ -172,21 +172,14 @@ void SCIA_LV1_WR_PMD( FILE *fd, unsigned int num_pmd,
  * write data set records
  */
      do {
-	  (void) memcpy( &pmd, pmd_in, sizeof( struct pmd_scia ) );
+	  (void) memcpy( &pmd, pmd_in, sizeof( struct mds1_pmd ) );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_PMD( &pmd );
 #endif
-	  if ( fwrite( &pmd.mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
-	  dsd.size += sizeof( struct mjd_envi );
-	  if ( fwrite( &pmd.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
-	  dsd.size += ENVI_UCHAR;
-	  dsd.size += SCIA_LV0_WR_LV1_PMD( fd, pmd.mds0 );
+	  dsd.size += SCIA_LV0_WR_LV1_PMD( fd, pmd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm,NADC_ERR_FATAL,"SCIA_LV0_WR_LV1_PMD");
-	  pmd_in++;
-     } while ( ++dsd.num_dsr < num_pmd );
+	       NADC_RETURN_ERROR( prognm,NADC_ERR_FATAL,"SCIA_LV0_WR_LV1_PMD" );
+     } while ( pmd_in++, ++dsd.num_dsr < num_pmd );
 /*
  * update list of written DSD records
  */

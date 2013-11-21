@@ -301,7 +301,7 @@ void SCIA_LV1_WR_ASCII_PPG( struct param_record param,
      nadc_write_arr_float( outfl, ++nr, "Etalon correction factor", 
 			    2, count, 5, ppg->etalon_fact );
      nadc_write_arr_float( outfl, ++nr, "Etalon residue", 
-			    2, count, 5, ppg->etalon_resid );
+			    -2, count, 5, ppg->etalon_resid );
      nadc_write_arr_float( outfl, ++nr, "WLS degradation factor", 
 			    2, count, 5, ppg->wls_deg_fact );
      nadc_write_arr_uchar( outfl, ++nr, "Bad pixel mask", 

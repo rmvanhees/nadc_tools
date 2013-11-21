@@ -22,7 +22,6 @@
 .PURPOSE     Dump Annotation Data Sets in ASCII
 .RETURNS     Nothing
 .COMMENTS    contains SCIA_LV1_WR_ASCII_SQADS, SCIA_LV1_WR_ASCII_STATE, 
-                SCIA_LV1_WR_ASCII_PMD, SCIA_LV1_WR_ASCII_AUX, 
 		SCIA_LV1_WR_ASCII_LCPN, SCIA_LV1_WR_ASCII_DARK, 
 		SCIA_LV1_WR_ASCII_PPGN, SCIA_LV1_WR_ASCII_SCPN, 
 		SCIA_LV1_WR_ASCII_SRSN
@@ -250,88 +249,6 @@ void SCIA_LV1_WR_ASCII_STATE( struct param_record param, unsigned int num_dsr,
 			     state[nd].num_dsr );
 	  nadc_write_uint( outfl, nr, "Length of DSR", 
 			     state[nd].length_dsr );
-     }
-     (void) fclose( outfl );
-}
-
-/*+++++++++++++++++++++++++
-.IDENTifer  SCIA_LV1_WR_ASCII_PMD
-.PURPOSE    dump -- in ASCII Format -- the Lv0 PMD records
-.INPUT/OUTPUT
-  call as   SCIA_LV1_WR_ASCII_PMD( param, num_dsr, pmd );
-     input:
-            struct param_record param : struct holding user-defined settings
-	    unsigned int num_dsr      : number of data sets
-	    struct pmd_scia *pmd      : pointer to PMD records
-            
-.RETURNS     Nothing, error status passed by global variable ``nadc_stat''
-.COMMENTS    None
--------------------------*/
-void SCIA_LV1_WR_ASCII_PMD( struct param_record param, unsigned int num_dsr,
-			    const struct pmd_scia *pmd )
-{
-     register unsigned int nd, nr;
-
-     char date_str[UTC_STRING_LENGTH];
-
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PMD";
-
-     FILE *outfl = CRE_ASCII_File( param.outfile, "pmd" );
-
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
-/*
- * write ASCII dump of PMD record
- */
-     nadc_write_header( outfl, 0, param.infile, "PMD Data Packets" );
-     for ( nd = 0; nd < num_dsr; nd++, pmd++ ) {
-	  nr = 0;
-	  (void) MJD_2_ASCII( pmd->mjd.days, pmd->mjd.secnd,
-			      pmd->mjd.musec, date_str );
-	  nadc_write_text( outfl, ++nr, "Date", date_str );
-	  nadc_write_uchar( outfl, ++nr, "MDS DSR attached", pmd->flag_mds );
-	  SCIA_WR_ASCII_LV0_PMD( outfl, ++nr, &pmd->mds0 );
-     }
-     (void) fclose( outfl );
-}
-
-/*+++++++++++++++++++++++++
-.IDENTifer  SCIA_LV1_WR_ASCII_AUX
-.PURPOSE    dump -- in ASCII Format -- the Lv0 Auxiliary records
-.INPUT/OUTPUT
-  call as   SCIA_LV1_WR_ASCII_AUX( param, num_dsr, aux );
-     input:
-            struct param_record param : struct holding user-defined settings
-	    unsigned int num_dsr      : number of data sets
-	    struct aux_scia *aux      : pointer to Auxiliary records
-            
-.RETURNS     Nothing, error status passed by global variable ``nadc_stat''
-.COMMENTS    None
--------------------------*/
-void SCIA_LV1_WR_ASCII_AUX( struct param_record param, unsigned int num_dsr,
-			    const struct aux_scia *aux )
-{
-     register unsigned int nd, nr;
-
-     char date_str[UTC_STRING_LENGTH];
-
-     const char prognm[] = "SCIA_LV1_WR_ASCII_AUX";
-
-     FILE *outfl = CRE_ASCII_File( param.outfile, "aux" );
-
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
-/*
- * write ASCII dump of AUX record
- */
-     nadc_write_header( outfl, 0, param.infile, "Auxiliary Data Packets" );
-     for ( nd = 0; nd < num_dsr; nd++, aux++ ) {
-	  nr = 0;
-	  (void) MJD_2_ASCII( aux->mjd.days, aux->mjd.secnd,
-			      aux->mjd.musec, date_str );
-	  nadc_write_text( outfl, ++nr, "Date", date_str );
-	  nadc_write_uchar( outfl, ++nr, "MDS DSR attached", aux->flag_mds );
-	  SCIA_WR_ASCII_LV0_AUX( outfl, ++nr, &aux->mds0 );
      }
      (void) fclose( outfl );
 }

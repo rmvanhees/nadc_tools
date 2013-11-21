@@ -55,34 +55,30 @@ void Sun2Intel_MDS_CHAN_HDR( struct chan_hdr *chan_hdr )
 }
 
 static inline
-void Sun2Intel_MDS_AUX_SRC( struct aux_src *aux_src )
+void Sun2Intel_MDS_PMTC_FRAME( struct pmtc_frame *pmtc_frame )
 {
-     register unsigned short nb, nf;
+     register unsigned short nb = 0;
 
-     nf = 0;
      do {
-	  nb = 0;
-	  do {
-	       aux_src->pmtc[nf].bcp[nb].bcps =
-		    byte_swap_u16( aux_src->pmtc[nf].bcp[nb].bcps );
+	  pmtc_frame->bcp[nb].bcps =
+	       byte_swap_u16( pmtc_frame->bcp[nb].bcps );
 
-	       aux_src->pmtc[nf].bcp[nb].azi_cntr_error =
-		    byte_swap_u16( aux_src->pmtc[nf].bcp[nb].azi_cntr_error );
-	       aux_src->pmtc[nf].bcp[nb].ele_cntr_error =
-		    byte_swap_u16( aux_src->pmtc[nf].bcp[nb].ele_cntr_error );
-	       aux_src->pmtc[nf].bcp[nb].azi_scan_error =
-		    byte_swap_u16( aux_src->pmtc[nf].bcp[nb].azi_scan_error );
-	       aux_src->pmtc[nf].bcp[nb].ele_scan_error =
-		    byte_swap_u16( aux_src->pmtc[nf].bcp[nb].ele_scan_error );
-	  } while ( ++nb < NUM_LV0_AUX_BCP );
+	  pmtc_frame->bcp[nb].azi_cntr_error =
+	       byte_swap_u16( pmtc_frame->bcp[nb].azi_cntr_error );
+	  pmtc_frame->bcp[nb].ele_cntr_error =
+	       byte_swap_u16( pmtc_frame->bcp[nb].ele_cntr_error );
+	  pmtc_frame->bcp[nb].azi_scan_error =
+	       byte_swap_u16( pmtc_frame->bcp[nb].azi_scan_error );
+	  pmtc_frame->bcp[nb].ele_scan_error =
+	       byte_swap_u16( pmtc_frame->bcp[nb].ele_scan_error );
+     } while ( ++nb < NUM_LV0_AUX_BCP );
 	  
-	  aux_src->pmtc[nf].bench_rad.two_byte =
-		    byte_swap_u16( aux_src->pmtc[nf].bench_rad.two_byte );
-	  aux_src->pmtc[nf].bench_elv.two_byte =
-		    byte_swap_u16( aux_src->pmtc[nf].bench_elv.two_byte );
-	  aux_src->pmtc[nf].bench_az.two_byte =
-		    byte_swap_u16( aux_src->pmtc[nf].bench_az.two_byte );
-     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
+     pmtc_frame->bench_rad.two_byte =
+	  byte_swap_u16( pmtc_frame->bench_rad.two_byte );
+     pmtc_frame->bench_elv.two_byte =
+	  byte_swap_u16( pmtc_frame->bench_elv.two_byte );
+     pmtc_frame->bench_az.two_byte = 
+	  byte_swap_u16( pmtc_frame->bench_az.two_byte );
 }
 
 static inline

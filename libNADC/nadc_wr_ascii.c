@@ -41,6 +41,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 /*+++++ Local Headers +++++*/
 #include <nadc_common.h>
@@ -70,14 +71,14 @@ FILE *CRE_ASCII_File( const char filebase[], const char ext[] )
 /*
  * check size of output filename
  */
-     if ( (strlen( filebase) + strlen( ext )) > MAX_STRING_LENGTH ) {
+     if ( (strlen(filebase) + strlen(ext)) > MAX_STRING_LENGTH ) {
           (void) snprintf( flname, MAX_STRING_LENGTH,
 			   "Filename too long (max: %d)\n", 
 			   (int) MAX_STRING_LENGTH );
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
      }
      (void) snprintf( flname, MAX_STRING_LENGTH, "%s.%s", filebase, ext );
-     if ( (outfl = fopen( flname, "w")) == NULL )
+     if ( (outfl = fopen( flname, "w" )) == NULL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_CRE, flname);
  done:
      return outfl;
@@ -864,8 +865,12 @@ void nadc_write_arr_float( FILE *fp, unsigned int key_num,
 
 	  for ( ny = 0; ny < val_count[1]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
-		    (void) fprintf( fp, str_fmt, *key_val++ );
+	       for ( nx = 0; nx < val_count[0]; nx++ ) {
+		    if ( isnormal( *key_val ) )
+			 (void) fprintf( fp, str_fmt, *key_val++ );
+		    else
+			 (void) fprintf( fp, " NaN" );
+	       }
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
@@ -884,9 +889,13 @@ void nadc_write_arr_float( FILE *fp, unsigned int key_num,
 
 	  for ( nx = 0; nx < val_count[0]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
-		    (void) fprintf( fp, str_fmt, 
-				    key_val[nx + ny * val_count[0]] );
+	       for ( ny = 0; ny < val_count[1]; ny++ ) {
+		    if ( isnormal(key_val[nx + ny * val_count[0]] ) )
+			 (void) fprintf( fp, str_fmt, 
+					 key_val[nx + ny * val_count[0]] );
+		    else
+			 (void) fprintf( fp, " NaN" ); 
+	       }
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {

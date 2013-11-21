@@ -25,7 +25,7 @@
      input:  
              struct param_record param : struct holding user-defined settings
 	     unsigned int nr_pmd       : number of PMD data packets
-	     struct pmd_scia *pmd      : structure with PMD data packets
+	     struct mds1_pmd *pmd      : structure with PMD data packets
 
 .RETURNS     Nothing
 .COMMENTS    None
@@ -54,18 +54,18 @@
 
 #define NFIELDS    5
 
-static const size_t pmd_size = sizeof( struct pmd_scia );
+static const size_t pmd_size = sizeof( struct mds1_pmd );
 static const size_t pmd_offs[NFIELDS] = {
-     HOFFSET( struct pmd_scia, mjd ),
-     HOFFSET( struct pmd_scia, flag_mds ),
-     HOFFSET( struct pmd_scia, mds0.packet_hdr ),
-     HOFFSET( struct pmd_scia, mds0.data_hdr ),
-     HOFFSET( struct pmd_scia, mds0.data_src )
+     HOFFSET( struct mds1_pmd, mjd ),
+     HOFFSET( struct mds1_pmd, flag_mds ),
+     HOFFSET( struct mds1_pmd, packet_hdr ),
+     HOFFSET( struct mds1_pmd, data_hdr ),
+     HOFFSET( struct mds1_pmd, data_src )
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_LV1_WR_H5_PMD( struct param_record param, unsigned int nr_pmd,
-			 const struct pmd_scia *pmd )
+			 const struct mds1_pmd *pmd )
 {
      const char prognm[] = "SCIA_LV1_WR_H5_PMD";
 

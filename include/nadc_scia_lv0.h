@@ -46,7 +46,7 @@ extern "C" {
 
 #define DET_DATA_HDR_LENGTH     66
 #define PMD_DATA_HDR_LENGTH     12
-#define AUX_DATA_SRC_LENGTH     1630
+#define AUX_DATA_SRC_LENGTH     326
 #define PMD_DATA_SRC_LENGTH     6802
 #define NUM_LV0_AUX_BCP         ((unsigned short) 16)
 #define NUM_LV0_AUX_PMTC_FRAME  ((unsigned short) 5)
@@ -213,11 +213,6 @@ struct pmtc_frame
      union bench_cntrl bench_rad;
      union bench_cntrl bench_elv;
      union bench_cntrl bench_az;
-};
-
-struct aux_src
-{
-     struct pmtc_frame pmtc[NUM_LV0_AUX_PMTC_FRAME];
 };
 
 /*
@@ -391,7 +386,17 @@ struct mds0_aux
      struct packet_hdr packet_hdr;
      struct data_hdr   data_hdr;
      struct pmtc_hdr   pmtc_hdr;
-     struct aux_src    data_src;
+     struct pmtc_frame data_src[NUM_LV0_AUX_PMTC_FRAME];
+};
+
+struct mds1_aux
+{
+     struct mjd_envi mjd;
+     unsigned char flag_mds;
+     struct packet_hdr packet_hdr;
+     struct data_hdr   data_hdr;
+     struct pmtc_hdr   pmtc_hdr;
+     struct pmtc_frame data_src[NUM_LV0_AUX_PMTC_FRAME];
 };
 
 struct mds0_det
@@ -411,6 +416,15 @@ struct mds0_pmd
 {
      struct mjd_envi   isp;
      struct fep_hdr    fep_hdr;
+     struct packet_hdr packet_hdr;
+     struct data_hdr   data_hdr;
+     struct pmd_src    data_src;
+};
+
+struct mds1_pmd
+{
+     struct mjd_envi mjd;
+     unsigned char flag_mds;
      struct packet_hdr packet_hdr;
      struct data_hdr   data_hdr;
      struct pmd_src    data_src;
@@ -500,26 +514,26 @@ extern unsigned int GET_SCIA_LV0_STATE_PMD( FILE *, const struct mds0_info *,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, pmd_out@*/;
 
-extern void SCIA_LV0_RD_LV1_AUX( FILE *fd, /*@out@*/ struct mds0_aux *aux )
+extern void SCIA_LV0_RD_LV1_AUX( FILE *fd, /*@out@*/ struct mds1_aux *aux )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *aux@*/;
-extern unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds0_aux )
+extern unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds1_aux )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/;
 
-extern void SCIA_LV0_RD_LV1_PMD( FILE *fd, /*@out@*/ struct mds0_pmd *pmd )
+extern void SCIA_LV0_RD_LV1_PMD( FILE *fd, /*@out@*/ struct mds1_pmd *pmd )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *pmd@*/;
-extern unsigned int SCIA_LV0_WR_LV1_PMD( FILE *fd, const struct mds0_pmd )
+extern unsigned int SCIA_LV0_WR_LV1_PMD( FILE *fd, const struct mds1_pmd )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/;
 
-extern void SCIA_WR_ASCII_LV0_AUX( FILE *fd, unsigned int,
-				   const struct mds0_aux * )
+extern void SCIA_LV1_WR_ASCII_AUX( struct param_record param, unsigned int,
+				   const struct mds1_aux * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, fd@*/;
-extern void SCIA_WR_ASCII_LV0_PMD( FILE *fd, unsigned int,
-				   const struct mds0_pmd * )
+extern void SCIA_LV1_WR_ASCII_PMD( struct param_record param, unsigned int,
+				   const struct mds1_pmd * )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, fd@*/;
 #endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */

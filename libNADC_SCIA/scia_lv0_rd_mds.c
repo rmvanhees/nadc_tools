@@ -410,26 +410,27 @@ void SCIA_LV0_RD_MDS_PMTC_HDR( FILE *fd,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV0_RD_AUX_SRC
+.IDENTifer   SCIA_LV0_RD_PMTC_FRAME
 .PURPOSE     read source data of Auxilirary MDS
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_AUX_SRC( fd, aux_src );
+  call as   SCIA_LV0_RD_PMTC_FRAME( fd, pmtc_frame );
      input:  
-            FILE *fd                : stream pointer
+            FILE *fd                      : stream pointer
     output:  
-            struct aux_src *aux_src : Auxilirary Source data
+            struct pmtc_frame *pmtc_frame : PMTC frame
 
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    static function
 -------------------------*/
-static
-void SCIA_LV0_RD_MDS_AUX_SRC( FILE *fd, /*@out@*/ struct aux_src *aux_src )
+static inline
+void SCIA_LV0_RD_MDS_PMTC_FRAME( FILE *fd, 
+				 /*@out@*/ struct pmtc_frame *pmtc_frame )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack, fd, *aux_src@*/
+       /*@modifies errno, nadc_stat, nadc_err_stack, fd, *pmtc_frame@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_AUX_SRC";
+     const char prognm[] = "SCIA_LV0_RD_PMTC_FRAME";
      
-     register unsigned short nb, nf;
+     register unsigned short nb;
 
      char *src_pntr;
      char src_char[AUX_DATA_SRC_LENGTH];
@@ -440,83 +441,75 @@ void SCIA_LV0_RD_MDS_AUX_SRC( FILE *fd, /*@out@*/ struct aux_src *aux_src )
 /*
  * initialize output structure to zero
  */
-     (void) memset( aux_src, 0, sizeof( struct aux_src ));
+     (void) memset( pmtc_frame, 0, sizeof( struct pmtc_frame ));
 /*
  * read packet data header data
  */
      if ( fread( src_char, AUX_DATA_SRC_LENGTH, 1, fd ) != 1 )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, "" );
 
-     nf = 0;
      src_pntr = src_char;
+     nb = 0;
      do {
-	  nb = 0;
-	  do {
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].sync, 
-			      src_pntr, ENVI_USHRT );
+	  (void) memcpy( &pmtc_frame->bcp[nb].sync, src_pntr, ENVI_USHRT );
 /*
  * check data integrity
  */
-	       if ( aux_src->pmtc[nf].bcp[nb].sync != USHRT_ZERO
-		    && aux_src->pmtc[nf].bcp[nb].sync != AUX_SYNC ) {
-		    NADC_RETURN_ERROR( prognm, NADC_WARN_PDS_RD, 
-				       "incorrect AUX Sync value(s) found" );
-	       }
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].bcps, 
-			      src_pntr, ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].flags.two_byte, 
-			      src_pntr, ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &ubuff, src_pntr, ENVI_UINT );
-	       aux_src->pmtc[nf].bcp[nb].azi_encode_cntr = 
+	  if ( pmtc_frame->bcp[nb].sync != USHRT_ZERO
+	       && pmtc_frame->bcp[nb].sync != AUX_SYNC ) {
+	       NADC_RETURN_ERROR( prognm, NADC_WARN_PDS_RD, 
+				  "incorrect AUX Sync value(s) found" );
+	  }
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &pmtc_frame->bcp[nb].bcps, src_pntr, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &pmtc_frame->bcp[nb].flags.two_byte, 
+			 src_pntr, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &ubuff, src_pntr, ENVI_UINT );
+	  pmtc_frame->bcp[nb].azi_encode_cntr = 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-		    (byte_swap_u32( ubuff ) >> 4) & (~0U >> 12);
+	       (byte_swap_u32( ubuff ) >> 4) & (~0U >> 12);
 #else
-		    (ubuff >> 4) & (~0U >> 12);
+	       (ubuff >> 4) & (~0U >> 12);
 #endif
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &ubuff, src_pntr, ENVI_UINT );
-	       aux_src->pmtc[nf].bcp[nb].ele_encode_cntr = 
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &ubuff, src_pntr, ENVI_UINT );
+	  pmtc_frame->bcp[nb].ele_encode_cntr = 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-		    byte_swap_u32( ubuff ) & (~0U >> 12);
+	       byte_swap_u32( ubuff ) & (~0U >> 12);
 #else
-	            ubuff & (~0U >> 12);
+	       ubuff & (~0U >> 12);
 #endif
-	       src_pntr += ENVI_UINT;
+	  src_pntr += ENVI_UINT;
 	       
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].azi_cntr_error, 
-			      src_pntr, ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].ele_cntr_error, 
-			      src_pntr, ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].azi_scan_error, 
-			      src_pntr, ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	       (void) memcpy( &aux_src->pmtc[nf].bcp[nb].ele_scan_error, 
-			      src_pntr, ENVI_USHRT );
-	       src_pntr += ENVI_USHRT;
-	  } while ( ++nb < NUM_LV0_AUX_BCP );
+	  (void) memcpy( &pmtc_frame->bcp[nb].azi_cntr_error, 
+			 src_pntr, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &pmtc_frame->bcp[nb].ele_cntr_error, 
+			 src_pntr, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &pmtc_frame->bcp[nb].azi_scan_error, 
+			 src_pntr, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+	  (void) memcpy( &pmtc_frame->bcp[nb].ele_scan_error, 
+			 src_pntr, ENVI_USHRT );
+	  src_pntr += ENVI_USHRT;
+     } while ( ++nb < NUM_LV0_AUX_BCP );
 	  
-	  (void) memcpy( &aux_src->pmtc[nf].bench_rad.two_byte, 
-			 src_pntr, ENVI_USHRT );
-	  src_pntr += ENVI_USHRT;
-	  (void) memcpy( &aux_src->pmtc[nf].bench_elv.two_byte, 
-			 src_pntr, ENVI_USHRT );
-	  src_pntr += ENVI_USHRT;
-	  (void) memcpy( &aux_src->pmtc[nf].bench_az.two_byte, 
-			 src_pntr, ENVI_USHRT );
-	  src_pntr += ENVI_USHRT;
-     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
+     (void) memcpy( &pmtc_frame->bench_rad.two_byte, src_pntr, ENVI_USHRT );
+     src_pntr += ENVI_USHRT;
+     (void) memcpy( &pmtc_frame->bench_elv.two_byte, src_pntr, ENVI_USHRT );
+     src_pntr += ENVI_USHRT;
+     (void) memcpy( &pmtc_frame->bench_az.two_byte, src_pntr, ENVI_USHRT );
+     src_pntr += ENVI_USHRT;
 
      if ( (src_pntr - src_char) != AUX_DATA_SRC_LENGTH ) {
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, 
 			     "Auxiliary Source Data" );
      }
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_AUX_SRC( aux_src );
+     Sun2Intel_MDS_PMTC_FRAME( pmtc_frame );
 #endif
 }
 
@@ -821,6 +814,8 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, aux@*/
 {
      const char prognm[] = "SCIA_LV0_RD_ONE_AUX";
+
+     register unsigned short nf;
 /*
  * rewind/read input data file
  */
@@ -858,9 +853,12 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
 /*
  * read ISP Auxiliary data source packet
  */
-     SCIA_LV0_RD_MDS_AUX_SRC( fd, &aux->data_src );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX_SRC" );
+     nf = 0;
+     do {
+	  SCIA_LV0_RD_MDS_PMTC_FRAME( fd, &aux->data_src[nf] );
+	  if ( IS_ERR_STAT_FATAL ) 
+	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
+     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
 /*+++++++++++++++++++++++++
@@ -1316,14 +1314,16 @@ void SCIA_LV0_FREE_MDS_DET( unsigned int num_det, struct mds0_det *det )
      input:  
             FILE   *fd             : (open) stream pointer
     output:  
-            struct mds0_aux *aux   : Auxiliary MDS records
+            struct mds1_aux *aux   : Auxiliary MDS records
 
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds0_aux *aux )
+void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 {
      const char prognm[] = "SCIA_LV0_RD_LV1_AUX";
+
+     register unsigned short nf;
 /*
  * read Packet Header
  */
@@ -1351,9 +1351,12 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds0_aux *aux )
 /*
  * read ISP AUX data source packet
  */
-     SCIA_LV0_RD_MDS_AUX_SRC( fd, &aux->data_src );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX_SRC" );
+     nf = 0;
+     do {
+	  SCIA_LV0_RD_MDS_PMTC_FRAME( fd, &aux->data_src[nf] );
+	  if ( IS_ERR_STAT_FATAL ) 
+	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
+     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
 /*+++++++++++++++++++++++++
@@ -1364,12 +1367,12 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds0_aux *aux )
      input:  
             FILE   *fd             : (open) stream pointer
     output:  
-            struct mds0_pmd *pmd   : PMD MDS records
+            struct mds1_pmd *pmd   : PMD MDS records
 
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds0_pmd *pmd )
+void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds1_pmd *pmd )
 {
      const char prognm[] = "SCIA_LV0_RD_LV1_PMD";
 /*

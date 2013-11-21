@@ -69,7 +69,7 @@
 #define NFIELD_GEOL  14
 #define NFIELD_GEON  12
 #define NFIELD_L0HDR  6
-#define NFIELD_POLV   9
+#define NFIELD_POLV   7
 #define NFIELD_SIG    3
 #define NFIELD_SIGC   2
 #define NFIELD_LV1    7
@@ -398,7 +398,7 @@ void SCIA_WR_H5_POLV( hid_t grp_id, hbool_t compress,
 {
      register unsigned int nr;
 
-     hid_t   polV_type[NFIELD_POLV];
+     hid_t   tid_gdf, polV_type[NFIELD_POLV];
      hsize_t adim;
 
      const size_t polV_size = sizeof( struct polV_scia );
@@ -408,19 +408,26 @@ void SCIA_WR_H5_POLV( hid_t grp_id, hbool_t compress,
 	  HOFFSET( struct polV_scia, U ),
 	  HOFFSET( struct polV_scia, error_U ),
 	  HOFFSET( struct polV_scia, rep_wv ),
-	  HOFFSET( struct polV_scia, gdf.beta ),
-	  HOFFSET( struct polV_scia, gdf.p_bar ),
-	  HOFFSET( struct polV_scia, gdf.w0 ),
+	  HOFFSET( struct polV_scia, gdf ),
 	  HOFFSET( struct polV_scia, intg_time )
      };
      const char *polV_names[NFIELD_POLV] = {
-          "Q", "error_Q", "U", "error_U", "rep_wv", "gdf.p_bar", "gdf.beta", 
-	  "gdf,w0", "intg_time"
+          "Q", "error_Q", "U", "error_U", "rep_wv", "gdf", "intg_time"
      };
 /*
  * check number of records
  */
      if ( nr_polV == 0 ) return;
+/*
+ * create compound gdf_para
+ */
+     tid_gdf = H5Tcreate( H5T_COMPOUND, sizeof(struct gdf_para) );
+     (void) H5Tinsert( tid_gdf, "p_bar", 
+		       HOFFSET(struct gdf_para, p_bar), H5T_NATIVE_FLOAT );
+     (void) H5Tinsert( tid_gdf, "beta", 
+		       HOFFSET(struct gdf_para, beta), H5T_NATIVE_FLOAT );
+     (void) H5Tinsert( tid_gdf, "w0", 
+		       HOFFSET(struct gdf_para, w0), H5T_NATIVE_FLOAT );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -431,10 +438,9 @@ void SCIA_WR_H5_POLV( hid_t grp_id, hbool_t compress,
      polV_type[3] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
      adim = NUM_FRAC_POLV+1;
      polV_type[4] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     polV_type[5] = H5Tcopy( H5T_NATIVE_FLOAT );
-     polV_type[6] = H5Tcopy( H5T_NATIVE_FLOAT );
-     polV_type[7] = H5Tcopy( H5T_NATIVE_FLOAT );
-     polV_type[8] = H5Tcopy( H5T_NATIVE_USHORT );
+     polV_type[5] = H5Tcopy( tid_gdf );
+     polV_type[6] = H5Tcopy( H5T_NATIVE_USHORT );
+     (void) H5Tclose( tid_gdf );
 /*
  * create table
  */

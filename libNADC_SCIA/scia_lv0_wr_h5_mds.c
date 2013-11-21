@@ -167,7 +167,84 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
 	  hsize_t chunk_sz = 1;
 	  hsize_t adim;
 	  hid_t   dtype_id;
-	  hid_t   tid, tid_bcp, tid_frame;
+	  hid_t   tid, tid_bcp, tid_mjd, tid_fep, tid_packet, tid_data, 
+	       tid_pmtc, tid_frame;
+
+ 	  /* create compound mjd_envi */
+	  tid_mjd = H5Tcreate( H5T_COMPOUND, sizeof(struct mjd_envi) );
+	  (void) H5Tinsert( tid_mjd, "days", 
+			    HOFFSET(struct mjd_envi, days), H5T_NATIVE_INT );
+	  (void) H5Tinsert( tid_mjd, "secnd",
+			    HOFFSET(struct mjd_envi, secnd), H5T_NATIVE_UINT );
+	  (void) H5Tinsert( tid_mjd, "musec",
+			    HOFFSET(struct mjd_envi, musec), H5T_NATIVE_UINT );
+
+	  /* create compound fep_hdr */
+	  tid_fep = H5Tcreate( H5T_COMPOUND, sizeof(struct fep_hdr) );
+	  (void) H5Tinsert( tid_fep, "gsrt",
+			    HOFFSET(struct fep_hdr, gsrt), tid_mjd );
+	  (void) H5Tinsert( tid_fep, "isp_length",
+			    HOFFSET(struct fep_hdr, isp_length),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_fep, "crc_errs",
+			    HOFFSET(struct fep_hdr, crc_errs),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_fep, "rs_errs",
+			    HOFFSET( struct fep_hdr, rs_errs),
+			    H5T_NATIVE_USHORT );
+
+	  /* create compound packet_hdr */
+	  tid_packet = H5Tcreate( H5T_COMPOUND, sizeof(struct packet_hdr) );
+	  (void) H5Tinsert( tid_packet, "api",
+			    HOFFSET(struct packet_hdr, api),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_packet, "seq_cntrl",
+			    HOFFSET(struct packet_hdr, seq_cntrl),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_packet, "length",
+			    HOFFSET(struct packet_hdr, length),
+			    H5T_NATIVE_USHORT );
+
+	  /* create compound data_hdr */
+	  tid_data = H5Tcreate( H5T_COMPOUND, sizeof(struct data_hdr) );
+	  (void) H5Tinsert( tid_data, "category",
+			    HOFFSET(struct data_hdr, category),
+			    H5T_NATIVE_UCHAR );
+	  (void) H5Tinsert( tid_data, "data_hdr.state_id",
+			    HOFFSET(struct data_hdr, state_id),
+			    H5T_NATIVE_UCHAR );
+	  (void) H5Tinsert( tid_data, "data_hdr.length",
+			    HOFFSET(struct data_hdr, length),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_data, "data_hdr.rdv",
+			    HOFFSET(struct data_hdr, rdv),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_data, "data_hdr.id",
+			    HOFFSET(struct data_hdr, id),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_data, "on_board_time",
+			    HOFFSET(struct data_hdr, on_board_time),
+			    H5T_NATIVE_UINT );
+
+	  /* create compound pmtc_hdr */
+	  tid_pmtc = H5Tcreate( H5T_COMPOUND, sizeof(struct pmtc_hdr) );
+	  (void) H5Tinsert( tid_pmtc, "pmtc_1",
+			    HOFFSET(struct pmtc_hdr, pmtc_1),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_pmtc, "scanner_mode",
+			    HOFFSET(struct pmtc_hdr, scanner_mode),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_pmtc, "az_param",
+			    HOFFSET(struct pmtc_hdr, az_param),
+			    H5T_NATIVE_UINT );
+ 	  (void) H5Tinsert( tid_pmtc, "elv_param",
+			    HOFFSET(struct pmtc_hdr, elv_param),
+			    H5T_NATIVE_UINT );
+	  adim = 6;
+	  dtype_id = H5Tarray_create( H5T_NATIVE_CHAR, 1, &adim );
+	  (void) H5Tinsert( tid_pmtc, "factor",
+			    HOFFSET(struct pmtc_hdr, factor), dtype_id );
+	  (void) H5Tclose( dtype_id );
 
 	  /* create compound aux_bcp */
 	  tid_bcp = H5Tcreate( H5T_COMPOUND, sizeof(struct aux_bcp) );
@@ -178,7 +255,7 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
 			    HOFFSET( struct aux_bcp, bcps ),
 			    H5T_NATIVE_USHORT );
 	  (void) H5Tinsert( tid_bcp, "flags",
-			    HOFFSET( struct aux_bcp, flags.two_byte ),
+			    HOFFSET( struct aux_bcp, flags ),
 			    H5T_NATIVE_USHORT );
 	  (void) H5Tinsert( tid_bcp, "azi_encode_cntr",
 			    HOFFSET( struct aux_bcp, azi_encode_cntr ),
@@ -207,6 +284,7 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
 			    HOFFSET( struct pmtc_frame, bcp ),
 			    dtype_id );
 	  (void) H5Tclose( dtype_id );
+	  (void) H5Tclose( tid_bcp );
 	  (void) H5Tinsert( tid_frame, "bench_rad",
 			    HOFFSET( struct pmtc_frame, bench_rad ),
 			    H5T_NATIVE_USHORT);
@@ -219,89 +297,31 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
 
 	  /* create compound mds0_aux */
 	  tid = H5Tcreate( H5T_COMPOUND, sizeof(struct mds0_aux) );
-	  (void) H5Tinsert( tid, "isp.days",
-			    HOFFSET( struct mds0_aux, isp.days ),
-			    H5T_NATIVE_INT );
-	  (void) H5Tinsert( tid, "isp.secnd",
-			    HOFFSET( struct mds0_aux, isp.secnd ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "isp.musec",
-			    HOFFSET( struct mds0_aux, isp.musec ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.days",
-			    HOFFSET( struct mds0_aux, fep_hdr.gsrt.days ),
-			    H5T_NATIVE_INT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.secnd",
-			    HOFFSET( struct mds0_aux, fep_hdr.gsrt.secnd ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.musec",
-			    HOFFSET( struct mds0_aux, fep_hdr.gsrt.musec ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.isp_length",
-			    HOFFSET( struct mds0_aux, fep_hdr.isp_length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "fep_hdr.crc_errs",
-			    HOFFSET( struct mds0_aux, fep_hdr.crc_errs ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "fep_hdr.rs_errs",
-			    HOFFSET( struct mds0_aux, fep_hdr.rs_errs ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.api",
-			    HOFFSET( struct mds0_aux, packet_hdr.api ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.seq_cntrl",
-			    HOFFSET( struct mds0_aux, packet_hdr.seq_cntrl ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.length",
-			    HOFFSET( struct mds0_aux, packet_hdr.length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.category",
-			    HOFFSET( struct mds0_aux, data_hdr.category ),
-			    H5T_NATIVE_UCHAR );
-	  (void) H5Tinsert( tid, "data_hdr.state_id",
-			    HOFFSET( struct mds0_aux, data_hdr.state_id ),
-			    H5T_NATIVE_UCHAR );
-	  (void) H5Tinsert( tid, "data_hdr.length",
-			    HOFFSET( struct mds0_aux, data_hdr.length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.rdv",
-			    HOFFSET( struct mds0_aux, data_hdr.rdv ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.id",
-			    HOFFSET( struct mds0_aux, data_hdr.id ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.on_board_time",
-			    HOFFSET( struct mds0_aux, data_hdr.on_board_time ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "pmtc_hdr.pmtc_1",
-			    HOFFSET( struct mds0_aux, pmtc_hdr.pmtc_1 ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "pmtc_hdr.scanner_mode",
-			    HOFFSET( struct mds0_aux, pmtc_hdr.scanner_mode ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "pmtc_hdr.az_param",
-			    HOFFSET( struct mds0_aux, pmtc_hdr.az_param ),
-			    H5T_NATIVE_UINT );
- 	  (void) H5Tinsert( tid, "pmtc_hdr.elv_param",
-			    HOFFSET( struct mds0_aux, pmtc_hdr.elv_param ),
-			    H5T_NATIVE_UINT );
-	  adim = 6;
-	  dtype_id = H5Tarray_create( H5T_NATIVE_CHAR, 1, &adim );
-	  (void) H5Tinsert( tid, "pmtc_hdr.factor",
-			    HOFFSET( struct mds0_aux, pmtc_hdr.factor ),
-			    dtype_id );
-	  (void) H5Tclose( dtype_id );
+	  (void) H5Tinsert( tid, "isp",
+			    HOFFSET(struct mds0_aux, isp), tid_mjd );
+	  (void) H5Tinsert( tid, "fep_hdr",
+			    HOFFSET(struct mds0_aux, fep_hdr), tid_fep );
+	  (void) H5Tinsert( tid, "packet_hdr",
+			    HOFFSET(struct mds0_aux, packet_hdr), tid_packet );
+	  (void) H5Tinsert( tid, "data_hdr",
+			    HOFFSET(struct mds0_aux, data_hdr), tid_data );
+	  (void) H5Tinsert( tid, "pmtc_hdr",
+			    HOFFSET(struct mds0_aux, pmtc_hdr), tid_pmtc );
 	  adim = NUM_LV0_AUX_PMTC_FRAME;
 	  dtype_id = H5Tarray_create( tid_frame, 1, &adim );
-	  (void) H5Tinsert( tid, "data_src.pmtc",
-			    HOFFSET( struct mds0_aux, data_src.pmtc ),
+	  (void) H5Tinsert( tid, "data_src",
+			    HOFFSET(struct mds0_aux, data_src),
 			    dtype_id );
 	  (void) H5Tclose( dtype_id );
+	  (void) H5Tclose( tid_frame );
+	  (void) H5Tclose( tid_pmtc );
+	  (void) H5Tclose( tid_data );
+	  (void) H5Tclose( tid_packet );
+	  (void) H5Tclose( tid_fep );
+	  (void) H5Tclose( tid_mjd );
 
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );
 	  (void) H5Tclose( tid );
-	  (void) H5Tclose( tid_bcp );
-	  (void) H5Tclose( tid_frame );
 	  if ( ptable == H5I_BADID )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
      } else {
@@ -379,25 +399,80 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index,
           hsize_t chunk_sz = 1;
           hsize_t dims[2];
           hid_t   dtype_id;
-          hid_t   tid, tid_data, tid_src;
+	  hid_t   tid, tid_mjd, tid_fep, tid_packet, tid_hdr, tid_data, tid_src;
+
+ 	  /* create compound mjd_envi */
+	  tid_mjd = H5Tcreate( H5T_COMPOUND, sizeof(struct mjd_envi) );
+	  (void) H5Tinsert( tid_mjd, "days", 
+			    HOFFSET(struct mjd_envi, days), H5T_NATIVE_INT );
+	  (void) H5Tinsert( tid_mjd, "secnd",
+			    HOFFSET(struct mjd_envi, secnd), H5T_NATIVE_UINT );
+	  (void) H5Tinsert( tid_mjd, "musec",
+			    HOFFSET(struct mjd_envi, musec), H5T_NATIVE_UINT );
+
+	  /* create compound fep_hdr */
+	  tid_fep = H5Tcreate( H5T_COMPOUND, sizeof(struct fep_hdr) );
+	  (void) H5Tinsert( tid_fep, "gsrt",
+			    HOFFSET(struct fep_hdr, gsrt), tid_mjd );
+	  (void) H5Tinsert( tid_fep, "isp_length",
+			    HOFFSET(struct fep_hdr, isp_length),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_fep, "crc_errs",
+			    HOFFSET(struct fep_hdr, crc_errs),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_fep, "rs_errs",
+			    HOFFSET( struct fep_hdr, rs_errs),
+			    H5T_NATIVE_USHORT );
+
+	  /* create compound packet_hdr */
+	  tid_packet = H5Tcreate( H5T_COMPOUND, sizeof(struct packet_hdr) );
+	  (void) H5Tinsert( tid_packet, "api",
+			    HOFFSET(struct packet_hdr, api),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_packet, "seq_cntrl",
+			    HOFFSET(struct packet_hdr, seq_cntrl),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_packet, "length",
+			    HOFFSET(struct packet_hdr, length),
+			    H5T_NATIVE_USHORT );
+
+	  /* create compound data_frame */
+	  tid_hdr = H5Tcreate( H5T_COMPOUND, sizeof(struct data_hdr) );
+	  (void) H5Tinsert( tid_hdr, "category",
+			    HOFFSET(struct data_hdr, category),
+			    H5T_NATIVE_UCHAR );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.state_id",
+			    HOFFSET(struct data_hdr, state_id),
+			    H5T_NATIVE_UCHAR );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.length",
+			    HOFFSET(struct data_hdr, length),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.rdv",
+			    HOFFSET(struct data_hdr, rdv),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.id",
+			    HOFFSET(struct data_hdr, id),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_hdr, "on_board_time",
+			    HOFFSET(struct data_hdr, on_board_time),
+			    H5T_NATIVE_UINT );
 
 	  /* create compound pmd_data */
 	  tid_data = H5Tcreate( H5T_COMPOUND, sizeof(struct pmd_data) );
 	  (void) H5Tinsert( tid_data, "sync",
-			    HOFFSET( struct pmd_data, sync ),
+			    HOFFSET(struct pmd_data, sync), 
 			    H5T_NATIVE_USHORT );
 	  dims[0] = 2;
 	  dims[1] = PMD_NUMBER;
 	  dtype_id = H5Tarray_create( H5T_NATIVE_USHORT, 2, dims );
 	  (void) H5Tinsert( tid_data, "data",
-			    HOFFSET( struct pmd_data, data ),
-			    dtype_id );
+			    HOFFSET(struct pmd_data, data), dtype_id );
 	  (void) H5Tclose( dtype_id );
 	  (void) H5Tinsert( tid_data, "bcps",
 			    HOFFSET( struct pmd_data, bcps ),
 			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid_data, "time.two_byte",
-			    HOFFSET( struct pmd_data, time.two_byte ),
+	  (void) H5Tinsert( tid_data, "time",
+			    HOFFSET( struct pmd_data, time ),
 			    H5T_NATIVE_USHORT );
 
 	  /* create compound pmd_src */
@@ -415,63 +490,21 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index,
   
 	  /* create compound mds0_pmd */
 	  tid = H5Tcreate( H5T_COMPOUND, sizeof(struct mds0_pmd) );
-	  (void) H5Tinsert( tid, "isp.days",
-			    HOFFSET( struct mds0_pmd, isp.days ),
-			    H5T_NATIVE_INT );
-	  (void) H5Tinsert( tid, "isp.secnd",
-			    HOFFSET( struct mds0_pmd, isp.secnd ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "isp.musec",
-			    HOFFSET( struct mds0_pmd, isp.musec ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.days",
-			    HOFFSET( struct mds0_pmd, fep_hdr.gsrt.days ),
-			    H5T_NATIVE_INT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.secnd",
-			    HOFFSET( struct mds0_pmd, fep_hdr.gsrt.secnd ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.musec",
-			    HOFFSET( struct mds0_pmd, fep_hdr.gsrt.musec ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.isp_length",
-			    HOFFSET( struct mds0_pmd, fep_hdr.isp_length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "fep_hdr.crc_errs",
-			    HOFFSET( struct mds0_pmd, fep_hdr.crc_errs ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "fep_hdr.rs_errs",
-			    HOFFSET( struct mds0_pmd, fep_hdr.rs_errs ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.api",
-			    HOFFSET( struct mds0_pmd, packet_hdr.api ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.seq_cntrl",
-			    HOFFSET( struct mds0_pmd, packet_hdr.seq_cntrl ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.length",
-			    HOFFSET( struct mds0_pmd, packet_hdr.length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.category",
-			    HOFFSET( struct mds0_pmd, data_hdr.category ),
-			    H5T_NATIVE_UCHAR );
-	  (void) H5Tinsert( tid, "data_hdr.state_id",
-			    HOFFSET( struct mds0_pmd, data_hdr.state_id ),
-			    H5T_NATIVE_UCHAR );
-	  (void) H5Tinsert( tid, "data_hdr.length",
-			    HOFFSET( struct mds0_pmd, data_hdr.length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.rdv",
-			    HOFFSET( struct mds0_pmd, data_hdr.rdv ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.id",
-			    HOFFSET( struct mds0_pmd, data_hdr.id ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.on_board_time",
-			    HOFFSET( struct mds0_pmd, data_hdr.on_board_time ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "packet",
-			    HOFFSET( struct mds0_pmd, data_src ),
-			    tid_src );	
+	  (void) H5Tinsert( tid, "isp",
+			    HOFFSET(struct mds0_pmd, isp), tid_mjd );
+	  (void) H5Tinsert( tid, "fep_hdr",
+			    HOFFSET(struct mds0_pmd, fep_hdr), tid_fep );
+	  (void) H5Tinsert( tid, "packet_hdr",
+			    HOFFSET(struct mds0_pmd, packet_hdr), tid_packet );
+	  (void) H5Tinsert( tid, "data_hdr",
+			    HOFFSET(struct mds0_pmd, data_hdr), tid_hdr );
+	  (void) H5Tinsert( tid, "data_src",
+			    HOFFSET(struct mds0_pmd, data_src), tid_src );	
+	  (void) H5Tclose( tid_mjd );
+	  (void) H5Tclose( tid_fep );
+	  (void) H5Tclose( tid_packet );
+	  (void) H5Tclose( tid_hdr );
+	  (void) H5Tclose( tid_src );
 
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );
 	  (void) H5Tclose( tid );
@@ -565,7 +598,83 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
      if ( H5LTfind_dataset( grpID, "mds0_det" ) == 0 ) {
 	  hsize_t adim;
 	  hid_t   dtype_id;
-	  hid_t   tid;
+	  hid_t   tid, tid_mjd, tid_fep, tid_packet, tid_hdr, tid_pmtc;
+
+ 	  /* create compound mjd_envi */
+	  tid_mjd = H5Tcreate( H5T_COMPOUND, sizeof(struct mjd_envi) );
+	  (void) H5Tinsert( tid_mjd, "days", 
+			    HOFFSET(struct mjd_envi, days), H5T_NATIVE_INT );
+	  (void) H5Tinsert( tid_mjd, "secnd",
+			    HOFFSET(struct mjd_envi, secnd), H5T_NATIVE_UINT );
+	  (void) H5Tinsert( tid_mjd, "musec",
+			    HOFFSET(struct mjd_envi, musec), H5T_NATIVE_UINT );
+
+	  /* create compound fep_hdr */
+	  tid_fep = H5Tcreate( H5T_COMPOUND, sizeof(struct fep_hdr) );
+	  (void) H5Tinsert( tid_fep, "gsrt",
+			    HOFFSET(struct fep_hdr, gsrt), tid_mjd );
+	  (void) H5Tinsert( tid_fep, "isp_length",
+			    HOFFSET(struct fep_hdr, isp_length),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_fep, "crc_errs",
+			    HOFFSET(struct fep_hdr, crc_errs),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_fep, "rs_errs",
+			    HOFFSET( struct fep_hdr, rs_errs),
+			    H5T_NATIVE_USHORT );
+
+	  /* create compound packet_hdr */
+	  tid_packet = H5Tcreate( H5T_COMPOUND, sizeof(struct packet_hdr) );
+	  (void) H5Tinsert( tid_packet, "api",
+			    HOFFSET(struct packet_hdr, api),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_packet, "seq_cntrl",
+			    HOFFSET(struct packet_hdr, seq_cntrl),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_packet, "length",
+			    HOFFSET(struct packet_hdr, length),
+			    H5T_NATIVE_USHORT );
+
+	  /* create compound pmtc_hdr */
+	  tid_pmtc = H5Tcreate( H5T_COMPOUND, sizeof(struct pmtc_hdr) );
+	  (void) H5Tinsert( tid_pmtc, "pmtc_1",
+			    HOFFSET(struct pmtc_hdr, pmtc_1),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_pmtc, "scanner_mode",
+			    HOFFSET(struct pmtc_hdr, scanner_mode),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_pmtc, "az_param",
+			    HOFFSET(struct pmtc_hdr, az_param),
+			    H5T_NATIVE_UINT );
+ 	  (void) H5Tinsert( tid_pmtc, "elv_param",
+			    HOFFSET(struct pmtc_hdr, elv_param),
+			    H5T_NATIVE_UINT );
+	  adim = 6;
+	  dtype_id = H5Tarray_create( H5T_NATIVE_CHAR, 1, &adim );
+	  (void) H5Tinsert( tid_pmtc, "factor",
+			    HOFFSET(struct pmtc_hdr, factor), dtype_id );
+	  (void) H5Tclose( dtype_id );
+
+	  /* create compound data_frame */
+	  tid_hdr = H5Tcreate( H5T_COMPOUND, sizeof(struct data_hdr) );
+	  (void) H5Tinsert( tid_hdr, "category",
+			    HOFFSET(struct data_hdr, category),
+			    H5T_NATIVE_UCHAR );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.state_id",
+			    HOFFSET(struct data_hdr, state_id),
+			    H5T_NATIVE_UCHAR );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.length",
+			    HOFFSET(struct data_hdr, length),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.rdv",
+			    HOFFSET(struct data_hdr, rdv),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_hdr, "data_hdr.id",
+			    HOFFSET(struct data_hdr, id),
+			    H5T_NATIVE_USHORT );
+	  (void) H5Tinsert( tid_hdr, "on_board_time",
+			    HOFFSET(struct data_hdr, on_board_time),
+			    H5T_NATIVE_UINT );
 
 	  /* create compound mds0_det */
 	  tid = H5Tcreate( H5T_COMPOUND, sizeof(struct mds0_det) );
@@ -581,78 +690,21 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 			    HOFFSET( struct mds0_det, orbit_vector ),
 			    dtype_id );
 	  (void) H5Tclose( dtype_id );
-	  (void) H5Tinsert( tid, "isp.days",
-			    HOFFSET( struct mds0_det, isp.days ),
-			    H5T_NATIVE_INT );
-	  (void) H5Tinsert( tid, "isp.secnd",
-			    HOFFSET( struct mds0_det, isp.secnd ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "isp.musec",
-			    HOFFSET( struct mds0_det, isp.musec ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.days",
-			    HOFFSET( struct mds0_det, fep_hdr.gsrt.days ),
-			    H5T_NATIVE_INT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.secnd",
-			    HOFFSET( struct mds0_det, fep_hdr.gsrt.secnd ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.gsrt.musec",
-			    HOFFSET( struct mds0_det, fep_hdr.gsrt.musec ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "fep_hdr.isp_length",
-			    HOFFSET( struct mds0_det, fep_hdr.isp_length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "fep_hdr.crc_errs",
-			    HOFFSET( struct mds0_det, fep_hdr.crc_errs ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "fep_hdr.rs_errs",
-			    HOFFSET( struct mds0_det, fep_hdr.rs_errs ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.api",
-			    HOFFSET( struct mds0_det, packet_hdr.api ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.seq_cntrl",
-			    HOFFSET( struct mds0_det, packet_hdr.seq_cntrl ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "packet_hdr.length",
-			    HOFFSET( struct mds0_det, packet_hdr.length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.category",
-			    HOFFSET( struct mds0_det, data_hdr.category ),
-			    H5T_NATIVE_UCHAR );
-	  (void) H5Tinsert( tid, "data_hdr.state_id",
-			    HOFFSET( struct mds0_det, data_hdr.state_id ),
-			    H5T_NATIVE_UCHAR );
-	  (void) H5Tinsert( tid, "data_hdr.length",
-			    HOFFSET( struct mds0_det, data_hdr.length ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.rdv",
-			    HOFFSET( struct mds0_det, data_hdr.rdv ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.id",
-			    HOFFSET( struct mds0_det, data_hdr.id ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "data_hdr.on_board_time",
-			    HOFFSET( struct mds0_det, data_hdr.on_board_time ),
-			    H5T_NATIVE_UINT );
-	  (void) H5Tinsert( tid, "pmtc_hdr.pmtc_1",
-			    HOFFSET( struct mds0_det, pmtc_hdr.pmtc_1 ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "pmtc_hdr.scanner_mode",
-			    HOFFSET( struct mds0_det, pmtc_hdr.scanner_mode ),
-			    H5T_NATIVE_USHORT );
-	  (void) H5Tinsert( tid, "pmtc_hdr.az_param",
-			    HOFFSET( struct mds0_det, pmtc_hdr.az_param ),
-			    H5T_NATIVE_UINT );
- 	  (void) H5Tinsert( tid, "pmtc_hdr.elv_param",
-			    HOFFSET( struct mds0_det, pmtc_hdr.elv_param ),
-			    H5T_NATIVE_UINT );
-	  adim = 6;
-	  dtype_id = H5Tarray_create( H5T_NATIVE_CHAR, 1, &adim );
-	  (void) H5Tinsert( tid, "pmtc_hdr.factor",
-			    HOFFSET( struct mds0_det, pmtc_hdr.factor ),
-			    dtype_id );
-	  (void) H5Tclose( dtype_id );
+	  (void) H5Tinsert( tid, "isp",
+			    HOFFSET(struct mds0_det, isp), tid_mjd );
+	  (void) H5Tinsert( tid, "fep_hdr",
+			    HOFFSET(struct mds0_det, fep_hdr), tid_fep );
+	  (void) H5Tinsert( tid, "packet_hdr",
+			    HOFFSET(struct mds0_det, packet_hdr), tid_packet );
+	  (void) H5Tinsert( tid, "data_hdr",
+			    HOFFSET( struct mds0_det, data_hdr ), tid_hdr );
+	  (void) H5Tinsert( tid, "pmtc_hdr",
+			    HOFFSET( struct mds0_det, pmtc_hdr ), tid_pmtc );
+	  (void) H5Tclose( tid_mjd );
+	  (void) H5Tclose( tid_fep );
+	  (void) H5Tclose( tid_packet );
+	  (void) H5Tclose( tid_hdr );
+	  (void) H5Tclose( tid_pmtc );
 
 	  chunk_sz = nr_det;
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );

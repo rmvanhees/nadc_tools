@@ -154,7 +154,7 @@ void GET_SCIA_LV0_MDS_TEMP( int source, const void *mds_lv0, float *temp )
 
 	  for ( nf = 0; nf < NUM_LV0_AUX_PMTC_FRAME; nf++ ) {
 	       radTemp = 
-		    GET_SCIA_LV0_AUX_radTemp(aux->data_src.pmtc[nf].bench_rad);
+		    GET_SCIA_LV0_AUX_radTemp(aux->data_src[nf].bench_rad);
 	       temp[nf] = isnormal(radTemp) ? (float)(0.7 + radTemp) : NAN;
 	  }
      } else if ( source == SCIA_DET_PACKET ) {
@@ -274,9 +274,9 @@ double GET_SCIA_LV0_MDS_TIME( int source, const void *mds_lv0 )
                register unsigned short nj = 0;
 
                do {
-                    if ( aux->data_src.pmtc[ni].bcp[nj].sync == AUX_SYNC ) {
+                    if ( aux->data_src[ni].bcp[nj].sync == AUX_SYNC ) {
                          found = TRUE;
-                         delay = aux->data_src.pmtc[ni].bcp[nj].bcps / 16.;
+                         delay = aux->data_src[ni].bcp[nj].bcps / 16.;
                     }
                } while ( ! found && ++nj < NUM_LV0_AUX_BCP );
           } while ( ! found && ++ni < NUM_LV0_AUX_PMTC_FRAME );
@@ -370,8 +370,8 @@ void GET_SCIA_LV0_MDS_TIME_ARR( int source, const void *mds_lv0,
 	       register unsigned short nj = 0;
 
 	       do {
-		    if ( aux->data_src.pmtc[ni].bcp[nj].sync == AUX_SYNC ) {
-			 delay = aux->data_src.pmtc[ni].bcp[nj].bcps / 16.;
+		    if ( aux->data_src[ni].bcp[nj].sync == AUX_SYNC ) {
+			 delay = aux->data_src[ni].bcp[nj].bcps / 16.;
 
 			 *jday++ = aux->isp.days + (dsec + delay) / sec2day;
 		    } else
@@ -444,11 +444,11 @@ void GET_SCIA_LV0_MDS_ANGLES( const struct mds0_aux *aux,
      for ( nframe = 0; nframe < NUM_LV0_AUX_PMTC_FRAME; nframe++ ) {
 	  for ( nbcp = 0; nbcp < NUM_LV0_AUX_BCP; nbcp++ ) {
 	       *asmAngle = *esmAngle = NAN;
-	       if ( aux->data_src.pmtc[nframe].bcp[nbcp].sync == PMTC_SYNC ) {
+	       if ( aux->data_src[nframe].bcp[nbcp].sync == PMTC_SYNC ) {
 		    aziCntr = 
-			 aux->data_src.pmtc[nframe].bcp[nbcp].azi_encode_cntr;
+			 aux->data_src[nframe].bcp[nbcp].azi_encode_cntr;
 		    eleCntr = 
-			 aux->data_src.pmtc[nframe].bcp[nbcp].ele_encode_cntr;
+			 aux->data_src[nframe].bcp[nbcp].ele_encode_cntr;
 
 		    if ( aziCntr != 0u )
 			 *asmAngle = (float) (aziOff + scaleFactor * aziCntr);
@@ -550,7 +550,7 @@ void GET_SCIA_LV0_STATE_OBMtemp( bool sost_obm, unsigned short num_aux,
 	       register double az_buff, elv_buff;
 
 	       do {
-		    pmtc_ptr = aux->data_src.pmtc+nf;
+		    pmtc_ptr = &aux->data_src[nf];
 		    az_buff = GET_SCIA_LV0_AUX_azTemp( pmtc_ptr->bench_az );
 		    elv_buff = GET_SCIA_LV0_AUX_elvTemp( pmtc_ptr->bench_elv );
 
@@ -569,7 +569,7 @@ void GET_SCIA_LV0_STATE_OBMtemp( bool sost_obm, unsigned short num_aux,
 	       register double rad_buff;
 
 	       do {
-		    pmtc_ptr = aux->data_src.pmtc+nf;
+		    pmtc_ptr = &aux->data_src[nf];
 		    rad_buff = GET_SCIA_LV0_AUX_azTemp( pmtc_ptr->bench_rad );
 		    
 		    if ( isnormal( rad_buff ) ) {

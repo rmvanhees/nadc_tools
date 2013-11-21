@@ -535,8 +535,8 @@ int main( int argc, char *argv[] )
      struct asfp_scia   *asfp;
      struct sfp_scia    *sfp;
      struct state1_scia *state, *mds_state;
-     struct pmd_scia    *pmd;
-     struct aux_scia    *aux;
+     struct mds1_pmd    *pmd;
+     struct mds1_aux    *aux;
      struct lcpn_scia   *lcpn;
      struct ppgn_scia   *ppgn;
      struct dark_scia   *dark;
