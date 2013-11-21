@@ -316,16 +316,16 @@ unsigned int NADC_RD_TOGOMI( const char *flname, struct togomi_hdr *hdr,
  * strip path of file-name & remove extension ".gz"
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
      }
      if ( (cpntr = strstr( ctemp, ".gz" )) != NULL ) *cpntr = '\0';
 /*
  * initialize TOGOMI header structure
  */
      NADC_RECEIVEDATE( flname, hdr->receive_date );
-     (void) strlcpy( hdr->product, ctemp, 26 );
+     (void) nadc_strlcpy( hdr->product, ctemp, 26 );
      (void) strcpy( hdr->creation_date, "" );
      (void) strcpy( hdr->software_version, "" );
      (void) strcpy( hdr->lv1c_version, "" );
