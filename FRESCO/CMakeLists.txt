@@ -37,9 +37,18 @@ if (NETCDF_FOUND)
 endif ()
 
 ## Installation instructions
+if (NETCDF_FOUND)
 install (
   TARGETS adaguc_fresco nadc_fresco
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+else ()
+install (
+  TARGETS nadc_fresco
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+endif ()
