@@ -90,9 +90,9 @@ int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *flname,
  * strip path of file-name
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( ctemp, flname, SHORT_STRING_LENGTH );
      }
 /*
  * check if product is already in database
@@ -132,15 +132,15 @@ int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *flname,
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), ctemp );
 /* procCenter  */
-     (void) strlcpy( ctemp, sph->inref+22, 3 );
+     (void) nadc_strlcpy( ctemp, sph->inref+22, 3 );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), ctemp );
 /* procDate */
-     (void) strlcpy( ctemp, sph->inref+24, 9 );
+     (void) nadc_strlcpy( ctemp, sph->inref+24, 9 );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%sTIMESTAMP \'%s",
 		      strcpy(cbuff,sql_query), ctemp );
 /* procTime */
-     (void) strlcpy( ctemp, sph->inref+32, 7 );
+     (void) nadc_strlcpy( ctemp, sph->inref+32, 7 );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s %s\',",
 		      strcpy(cbuff,sql_query), ctemp );
 /* softVersion */
@@ -169,7 +169,7 @@ int GOME_LV2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *flname,
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s000,",
 		      strcpy(cbuff,sql_query), ctemp+20 );
 /* absOrbit */
-     (void) strlcpy( ctemp, sph->inref+5, 6 );
+     (void) nadc_strlcpy( ctemp, sph->inref+5, 6 );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
 		      strcpy(cbuff,sql_query), ctemp );
 /* numDataSets */

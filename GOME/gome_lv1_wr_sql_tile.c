@@ -412,7 +412,7 @@ void _INSERT_ONE_LV1_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			   pcd->pmd[13].value[pg], pcd->pmd[14].value[pg], 
 			   pcd->pmd[15].value[pg] );
      }
-     numChar = strlcat( sql_query, ")", SQL_STR_SIZE );
+     numChar = nadc_strlcat( sql_query, ")", SQL_STR_SIZE );
      if ( be_verbose )
        (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
@@ -546,7 +546,7 @@ void _UPDATE_ONE_LV1_TILE( PGconn *conn, bool be_verbose,
 				pcd[nii].pmd[14].value[pg], 
 				pcd[nii].pmd[15].value[pg] );
 	  }
-	  numChar = strlcat( sql_query, ")", SQL_STR_SIZE );
+	  numChar = nadc_strlcat( sql_query, ")", SQL_STR_SIZE );
 	  if ( be_verbose )
 	       (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
