@@ -140,15 +140,15 @@ void MERIS_RD_SPH( FILE *fd, const struct mph_envi mph,
 /*
  * fill sph_meris struct
  */
-     (void) strlcpy( sph->descriptor, sph_items[0].value+1, 
-		     (size_t) sph_items[0].length );
+     (void) nadc_strlcpy( sph->descriptor, sph_items[0].value+1, 
+			  (size_t) sph_items[0].length );
      (void) sscanf( sph_items[1].value, "%hd", &sph->stripline );
      (void) sscanf( sph_items[2].value, "%hd", &sph->slice_pos );
      (void) sscanf( sph_items[3].value, "%hu", &sph->num_slices );
-     (void) strlcpy( sph->start_time, sph_items[4].value+1, 
-		     (size_t) sph_items[4].length );
-     (void) strlcpy( sph->stop_time, sph_items[5].value+1, 
-		     (size_t) sph_items[5].length );
+     (void) nadc_strlcpy( sph->start_time, sph_items[4].value+1, 
+			  (size_t) sph_items[4].length );
+     (void) nadc_strlcpy( sph->stop_time, sph_items[5].value+1, 
+			  (size_t) sph_items[5].length );
      (void) sscanf( sph_items[6].value, "%d", &ibuff );
      sph->first_first_lat = ibuff / 1e6;
      (void) sscanf( sph_items[7].value, "%d", &ibuff );
@@ -190,10 +190,10 @@ void MERIS_RD_SPH( FILE *fd, const struct mph_envi mph,
      (void) sscanf( sph_items[27].value, "%f", &sph->thres_format_err );
 
      (void) sscanf( sph_items[29].value, "%hu", &sph->num_bands );
-     (void) strlcpy( sph->band_wavelen, sph_items[30].value+1, 
-		     (size_t) sph_items[30].length );
-     (void) strlcpy( sph->bandwidth, sph_items[31].value+1, 
-		     (size_t) sph_items[31].length );
+     (void) nadc_strlcpy( sph->band_wavelen, sph_items[30].value+1, 
+			  (size_t) sph_items[30].length );
+     (void) nadc_strlcpy( sph->bandwidth, sph_items[31].value+1, 
+			  (size_t) sph_items[31].length );
      (void) sscanf( sph_items[32].value, "%d", &ibuff );
      sph->inst_fov = ibuff / 1e6;
      (void) sscanf( sph_items[33].value, "%d", &ibuff );
