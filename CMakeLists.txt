@@ -164,7 +164,7 @@ add_custom_target(uninstall
 ##
 ## =============================================================================
 ## Compiler flags
-set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wstrict-prototypes -Wdeclaration-after-statement")
+set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-align -Wcast-qual -Wc++-compat -Wstrict-prototypes -Wdeclaration-after-statement")
 
 check_c_compiler_flag (-Wdisabled-optimization HAS_DISABLED_OPTIMIZATION)
 if (HAS_DISABLED_OPTIMIZATION)
@@ -207,13 +207,16 @@ add_subdirectory (libNADC_MERIS)
 add_subdirectory (libNADC_SCIA)
 add_subdirectory (FRESCO)
 add_subdirectory (GOME)
-add_subdirectory (IMAP)
-add_subdirectory (IMLM)
 add_subdirectory (MERIS)
 add_subdirectory (SCIA)
-add_subdirectory (TOGOMI)
-add_subdirectory (TOSOMI)
 add_subdirectory (include)
+## only build when netCDF is available
+if (NETCDF_FOUND)
+   add_subdirectory (IMAP)
+   add_subdirectory (IMLM)
+   add_subdirectory (TOGOMI)
+   add_subdirectory (TOSOMI)
+endif ()
 ## check for IDL and shared libraries
 if (IDL_FOUND AND BUILD_SHARED_LIBS)
    add_subdirectory (libNADC_IDL)

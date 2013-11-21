@@ -136,11 +136,11 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
 
 ; select Detector source packets
   IF STRCMP( mds_type, 'DET' ) EQ 1 THEN $
-     indx = WHERE( info_all.packet_id EQ 1, num_info ) $
+     indx = WHERE( info_all.packet_type EQ 1, num_info ) $
   ELSE IF STRCMP( mds_type, 'AUX' ) EQ 1 THEN $
-     indx = WHERE( info_all.packet_id EQ 2, num_info ) $
+     indx = WHERE( info_all.packet_type EQ 2, num_info ) $
   ELSE IF STRCMP( mds_type, 'PMD' ) EQ 1 THEN $
-     indx = WHERE( info_all.packet_id EQ 3, num_info ) $
+     indx = WHERE( info_all.packet_type EQ 3, num_info ) $
   ELSE BEGIN
      num_info = 0
      MESSAGE, 'Wrong value for mds_type provided...', /INFO
@@ -204,35 +204,6 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
         RETURN, -1
   ENDIF
 
-; select packages on channel ID
-  IF channels[0] NE NotSet THEN BEGIN
-     nr_chan = N_ELEMENTS( channels )
-     nr_info = N_ELEMENTS( info_mds )
-
-     num_info = 0
-     FOR ni = 0, nr_info-1 DO BEGIN
-        chan_ids = info_mds[ni].cluster.chan_id
-        nc = 0
-        REPEAT BEGIN
-           indx = WHERE( chan_ids EQ channels[nc], count )
-        ENDREP UNTIL ( count GT 0 OR ++nc GE nr_chan )
-
-        IF count GT 0 THEN BEGIN
-           IF num_info GT 0 THEN BEGIN
-              indx_all = [indx_all, ni]
-              num_info += count
-           ENDIF ELSE BEGIN
-              indx_all = ni
-              num_info = count
-           ENDELSE
-        ENDIF
-     ENDFOR
-     IF num_info GT 0 THEN BEGIN
-        info_mds = info_mds[indx_all[UNIQ(indx_all, SORT(indx_all))]]
-        num_info = N_ELEMENTS( info_mds )
-     ENDIF
-  ENDIF
-
 ; selection on relative index
   IF posit[0] NE NotSet THEN BEGIN
      IF N_ELEMENTS( posit ) EQ 1 THEN BEGIN
@@ -266,15 +237,15 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
   ENDIF
 
 ; selection on state index
-  num_state = N_ELEMENTS(UNIQ(info_mds.stateIndex))
-  indx_state = info_mds[UNIQ(info_mds.stateIndex)].stateIndex
+  num_state = N_ELEMENTS(UNIQ(info_mds.state_index))
+  indx_state = info_mds[UNIQ(info_mds.state_index)].state_index
   IF state_posit[0] NE NotSet THEN BEGIN
      nr_posit = N_ELEMENTS( state_posit )
 
      num_info = 0
      FOR nr = 0, nr_posit-1 DO BEGIN
         IF state_posit[nr] LT num_state THEN BEGIN
-           indx = WHERE( info_mds.stateIndex EQ indx_state[state_posit[nr]],$
+           indx = WHERE( info_mds.state_index EQ indx_state[state_posit[nr]],$
                          count )
            IF num_info EQ 0 THEN $
               indx_all = indx $
@@ -290,8 +261,8 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
         indx_state = -1
         RETURN, -1
      ENDELSE
-     num_state = N_ELEMENTS(UNIQ(info_mds.stateIndex))
-     indx_state = info_mds[UNIQ(info_mds.stateIndex)].stateIndex
+     num_state = N_ELEMENTS(UNIQ(info_mds.state_index))
+     indx_state = info_mds[UNIQ(info_mds.state_index)].state_index
   ENDIF
 
   RETURN, info_mds
