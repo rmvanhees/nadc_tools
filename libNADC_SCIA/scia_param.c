@@ -157,9 +157,6 @@ struct nadc_opt {
      { "-meta", NULL, 
        "write (in ASCII format) NL-SCIA-DC meta-Database information",
        0, {ALL_INSTR, 0, 0, 0} },
-     { "-info-db", NULL, 
-      "use info-record database scia_lv0_info.h5 in directory: ./ or DATA_DIR",
-       1, {SCIA_LEVEL_0, 0, 0, 0} },
      { "-pds_1b", NULL, "write output in Payload Data Segment 1B format",
        1, {SCIA_LEVEL_1, 0, 0, 0} },
      { "-pds_1c", NULL, "write output in Payload Data Segment 1C format",
@@ -247,7 +244,7 @@ struct nadc_opt {
        2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0, 0} },
 /* spectral band/channel selection */
      { "--chan", "[=1,2,...,8]", "write data of selected spectral bands",
-       2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0, 0} },
+       1, {SCIA_LEVEL_1, 0, 0, 0} },
      { "--clus", "=[1,2,...,64]", "write data of selected clusters",
        1, {SCIA_LEVEL_1, 0, 0, 0} },
 /* keydata patch */
@@ -258,8 +255,6 @@ struct nadc_opt {
 /* MDS calibration */
      { "--cal", "[=0,1,...,9]", "apply spectral calibration, impies L1c format",
        1, {SCIA_LEVEL_1, 0, 0, 0} },
-     { "-o", " <outfile>", "(default: <infile> + appropriate extension)",
-       0, {ALL_INSTR, 0, 0, 0} },
      { "--output", "=<outfile>", "(default: <infile> + appropriate extension)",
        0, {ALL_INSTR, 0, 0, 0} },
 /* last and empty entry */
@@ -422,16 +417,16 @@ int Conv_Date( const char in_date[], /*@out@*/ char out_date[] )
 
      if ( (pntr = strchr( in_date, '-' )) != NULL ) {
 	  if ( (pntr - in_date) == 4 ) 
-	       (void) strlcpy( year, in_date, 5 );
+	       (void) nadc_strlcpy( year, in_date, 5 );
 	  else if ( (pntr - in_date) == 2 )
-	       (void) strlcpy( day, in_date, 3 );
+	       (void) nadc_strlcpy( day, in_date, 3 );
 	  else
 	       return NADC_ERR_FATAL;
 	  in_date = pntr + 1;
      }
      if ( (pntr = strchr( in_date, '-' )) != NULL ) {
 	  if ( (pntr - in_date) == 3 ) {
-	       (void) strlcpy( mon, in_date, 4 );
+	       (void) nadc_strlcpy( mon, in_date, 4 );
 	  } else if ( (pntr - in_date) == 2 ) {
 	       int mon_num;
 	       const char *mon_str[] =
@@ -448,9 +443,9 @@ int Conv_Date( const char in_date[], /*@out@*/ char out_date[] )
 	  in_date = pntr + 1;
      }
      if ( strlen( in_date ) == 2 )
-	  (void) strlcpy( day, in_date, 3 );
+	  (void) nadc_strlcpy( day, in_date, 3 );
      else if ( strlen( in_date ) == 4 )
-	  (void) strlcpy( year, in_date, 5 );
+	  (void) nadc_strlcpy( year, in_date, 5 );
      else
 	  return NADC_ERR_FATAL;
 
@@ -656,9 +651,9 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
  * strip path to program
  */
      if ( (cpntr = strrchr( argv[0], '/' )) != NULL ) {
-	  (void) strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-	  (void) strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
      }
 /*
  * get command-line parameters
@@ -767,30 +762,39 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 			 Do_Not_Extract_MDS( instrument, param );
 		    }
 		    param->write_pmd = PARAM_SET;
-	       } else if ( strncmp( argv[narg]+1, "limb", 4 ) == 0 ) {
-		    if ( ! select_mds ) {
-			 select_mds = TRUE;
-			 Do_Not_Extract_MDS( instrument, param );
-		    }
-		    param->write_limb = PARAM_SET;
-	       } else if ( strncmp( argv[narg]+1, "moni", 4 ) == 0 ) {
-		    if ( ! select_mds ) {
-			 select_mds = TRUE;
-			 Do_Not_Extract_MDS( instrument, param );
-		    }
-		    param->write_moni = PARAM_SET;
 	       } else if ( strncmp( argv[narg]+1, "nadir", 5 ) == 0 ) {
 		    if ( ! select_mds ) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS( instrument, param );
 		    }
 		    param->write_nadir = PARAM_SET;
+	       } else if ( strncmp( argv[narg]+1, "limb", 4 ) == 0 ) {
+		    if ( ! select_mds ) {
+			 select_mds = TRUE;
+			 Do_Not_Extract_MDS( instrument, param );
+		    }
+		    param->write_limb = PARAM_SET;
 	       } else if ( strncmp( argv[narg]+1, "occ", 3 ) == 0 ) {
 		    if ( ! select_mds ) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS( instrument, param );
 		    }
 		    param->write_occ = PARAM_SET;
+	       } else if ( strncmp( argv[narg]+1, "moni", 4 ) == 0 ) {
+		    if ( ! select_mds ) {
+			 select_mds = TRUE;
+			 Do_Not_Extract_MDS( instrument, param );
+		    }
+		    param->write_moni = PARAM_SET;
+	       } else if ( strncmp( argv[narg]+1, "no_nadir", 8 ) == 0 ) {
+		    if ( ! select_mds ) select_mds = TRUE;
+		    param->write_nadir = PARAM_UNSET;
+	       } else if ( strncmp( argv[narg]+1, "no_limb", 7 ) == 0 ) {
+		    if ( ! select_mds ) select_mds = TRUE;
+		    param->write_limb = PARAM_UNSET;
+	       } else if ( strncmp( argv[narg]+1, "no_occ", 6 ) == 0 ) {
+		    if ( ! select_mds ) select_mds = TRUE;
+		    param->write_occ = PARAM_UNSET;
 	       } else if ( strncmp( argv[narg]+1, "no_pmd", 6 ) == 0 ) {
 		    param->write_pmd = PARAM_UNSET;
 	       } else if ( strncmp( argv[narg]+1, "no_polV", 7 ) == 0 ) {
@@ -906,24 +910,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 			 SCIA_SET_CALIB( cpntr+1, &param->calib_scia );
 	       }
 	  }
-	  if ( strncmp( argv[narg], "-o", 2 ) == 0 ) {
-	       if ( ++narg >= argc || argv[narg][0] == '-' ) 
-		    NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
-
-	       if ( param->flag_outfile == PARAM_UNSET ) {
-		    (void) snprintf( outfile, MAX_STRING_LENGTH, 
-				     "%s", argv[narg] );
-		    if ( (cpntr = strstr( outfile, ".h5" )) != NULL )
-			 *cpntr = '\0';
-		    if ( (cpntr = strstr( outfile, ".hdf" )) != NULL )
-			 *cpntr = '\0';
-		    if ( (cpntr = strstr( outfile, ".txt" )) != NULL )
-			 *cpntr = '\0';
-		    if ( (cpntr = strstr( outfile, ".child" )) != NULL )
-			 *cpntr = '\0';
-		    param->flag_outfile = PARAM_SET;
-	       }
-	  } else if ( strncmp( argv[narg]+2, "output=", 7 ) == 0 ) {
+	  if ( strncmp( argv[narg]+2, "output=", 7 ) == 0 ) {
 	       if ( strlen( argv[narg]+9 ) == 0 )
 		    NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
 
@@ -1015,7 +1002,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 	       (void) strcat( param->outfile, ".child" );
 
 	  if ( (instrument == SCIA_PATCH_1 || param->write_pds == PARAM_SET)
-	       && NADC_FILES_EQUAL( param->infile, param->outfile ) ) {
+	       && nadc_file_equal( param->infile, param->outfile ) ) {
 	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, 
 				  "input file same as output file" );
 	  }
@@ -1070,7 +1057,7 @@ void SCIA_SHOW_PARAM( int instrument, const struct param_record param )
  * show time of call
  */
      (void) time( tp );
-     (void) strlcpy( cbuff, ctime( tp ), MAX_STRING_LENGTH );
+     (void) nadc_strlcpy( cbuff, ctime( tp ), MAX_STRING_LENGTH );
      cbuff[strlen(cbuff)-1] = '\0';
      nadc_write_text( outfl, ++nr, "ProcessingDate", cbuff );
 /*

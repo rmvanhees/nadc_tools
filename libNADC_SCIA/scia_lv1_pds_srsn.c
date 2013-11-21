@@ -32,10 +32,10 @@
               1.0   09-Nov-1999 created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -158,7 +158,7 @@ unsigned int SCIA_LV1_RD_SRSN( FILE *fd, unsigned int num_dsd,
 	  srsn_pntr += ENVI_UINT;
 	  (void) memcpy( &srsn->flag_mds, srsn_pntr, ENVI_UCHAR );
 	  srsn_pntr += ENVI_UCHAR;
-	  (void) strlcpy( srsn->sun_spec_id, srsn_pntr, 3 );
+	  (void) nadc_strlcpy( srsn->sun_spec_id, srsn_pntr, 3 );
 	  srsn_pntr += 2;
 	  (void) memcpy( &srsn->flag_neu, srsn_pntr, ENVI_UCHAR );
 	  srsn_pntr += ENVI_UCHAR;

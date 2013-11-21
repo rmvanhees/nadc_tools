@@ -33,10 +33,10 @@
               1.0   24-Jul-2002 created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_C_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -359,11 +359,11 @@ void SCIA_LV1C_UPDATE_CALOPT( int is_scia_lv1c,
 	  char *pntr = strrchr( param.infile, '/' );
 
 	  if ( pntr != NULL )
-	       (void) strlcpy(calopt->l1b_prod_name, pntr+1, 
-			      ENVI_FILENAME_SIZE);
+	       (void) nadc_strlcpy(calopt->l1b_prod_name, pntr+1, 
+				   ENVI_FILENAME_SIZE);
 	  else
-	       (void) strlcpy( calopt->l1b_prod_name, param.infile, 
-			       ENVI_FILENAME_SIZE );
+	       (void) nadc_strlcpy( calopt->l1b_prod_name, param.infile, 
+				    ENVI_FILENAME_SIZE );
 
 	  if ( param.flag_geoloc == PARAM_SET ) {
 	       calopt->geo_filter = (signed char) -1;

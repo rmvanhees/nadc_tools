@@ -140,10 +140,12 @@ void SCIA_LV1_INIT_DSD( unsigned char write_lv1c, unsigned int num_dsd_in,
      } else {
 	  nr_in = nr_out= 0;
 	  do {
-	       (void) strlcpy( dsd_out[nr_out].name, dsd_in[nr_in].name, 29 );
-	       (void) strlcpy( dsd_out[nr_out].type, dsd_in[nr_in].type, 2 );
-	       (void) strlcpy( dsd_out[nr_out].flname, 
-			       dsd_in[nr_in].flname, ENVI_FILENAME_SIZE );
+	       (void) nadc_strlcpy( dsd_out[nr_out].name, 
+				    dsd_in[nr_in].name, 29 );
+	       (void) nadc_strlcpy( dsd_out[nr_out].type, 
+				    dsd_in[nr_in].type, 2 );
+	       (void) nadc_strlcpy( dsd_out[nr_out].flname, 
+				    dsd_in[nr_in].flname, ENVI_FILENAME_SIZE );
 	       nr_out++;
 	  } while ( strncmp( dsd_in[nr_in++].name, "STATES", 6 ) );
 /*
@@ -151,58 +153,59 @@ void SCIA_LV1_INIT_DSD( unsigned char write_lv1c, unsigned int num_dsd_in,
  */
 	  while ( dsd_in[nr_in].type[0] != 'M' ) nr_in++;
 
-	  (void) strlcpy( dsd_out[nr_out].name, "CAL_OPTIONS", 29 );
-	  (void) strlcpy( dsd_out[nr_out++].type, "G", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "CAL_OPTIONS", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].type, "G", 2 );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "NADIR", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "NADIR", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "NADIR_PMD", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "NADIR_PMD", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "NADIR_FRAC_POL", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "NADIR_FRAC_POL", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "LIMB", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "LIMB", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "LIMB_PMD", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "LIMB_PMD", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "LIMB_FRAC_POL", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "LIMB_FRAC_POL", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "OCCULTATION", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "OCCULTATION", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "OCCULTATION_PMD", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "OCCULTATION_PMD", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "OCCULTATION_FRAC_POL", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, 
+			       "OCCULTATION_FRAC_POL", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 
-	  (void) strlcpy( dsd_out[nr_out].name, "MONITORING", 29 );
-	  (void) strlcpy( dsd_out[nr_out].type, "M", 2 );
-	  (void) strlcpy( dsd_out[nr_out++].flname, 
-			  "NOT USED", ENVI_FILENAME_SIZE );
+	  (void) nadc_strlcpy( dsd_out[nr_out].name, "MONITORING", 29 );
+	  (void) nadc_strlcpy( dsd_out[nr_out].type, "M", 2 );
+	  (void) nadc_strlcpy( dsd_out[nr_out++].flname, 
+			       "NOT USED", ENVI_FILENAME_SIZE );
 	  do {
 	       if ( dsd_in[nr_in].type[0] == 'R' ) {
 		    (void) memcpy( &dsd_out[nr_out++], &dsd_in[nr_in], 
@@ -217,8 +220,8 @@ void SCIA_LV1_INIT_DSD( unsigned char write_lv1c, unsigned int num_dsd_in,
      do {
 	  if ( dsd_out[nr_out].type[0] != 'R' ) {
 	       if ( dsd_out[nr_out].type[0] == 'M' ) {
-		    (void) strlcpy( dsd_out[nr_out].flname, 
-				    "NOT USED", ENVI_FILENAME_SIZE );
+		    (void) nadc_strlcpy( dsd_out[nr_out].flname, 
+					 "NOT USED", ENVI_FILENAME_SIZE );
 	       }
 	       dsd_out[nr_out].offset = 0u;
 	       dsd_out[nr_out].size = 0u;

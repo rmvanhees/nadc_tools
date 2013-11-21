@@ -226,11 +226,12 @@ void initFileParam( const unsigned int calib_flag, FILE *fp,
  */
      fileParam->flagInitPhase = TRUE;                      /* not used, yet */
      fileParam->fp = fp;
-     (void) strlcpy( fileParam->procName, mph.product, ENVI_FILENAME_SIZE );
-     (void) strlcpy( fileParam->procStage, mph.proc_stage, 2 );
+     (void) nadc_strlcpy( fileParam->procName, 
+			  mph.product, ENVI_FILENAME_SIZE );
+     (void) nadc_strlcpy( fileParam->procStage, mph.proc_stage, 2 );
      /* KB: Added for mfactors, needed for selection according to start time */
-     (void) strlcpy( fileParam->sensing_start, mph.sensing_start, 
-		     UTC_STRING_LENGTH );
+     (void) nadc_strlcpy( fileParam->sensing_start, 
+			  mph.sensing_start, UTC_STRING_LENGTH );
      fileParam->absOrbit = mph.abs_orbit;
      fileParam->calibFlag = calib_flag;
 /*
@@ -249,15 +250,16 @@ void initFileParam( const unsigned int calib_flag, FILE *fp,
      fileParam->alpha0_asm = sip.alpha0_asm;
      fileParam->alpha0_esm = sip.alpha0_esm;
      fileParam->lambda_end_gdf = sip.lambda_end_gdf;
-     (void) strlcpy( fileParam->do_use_limb_dark, sip.do_use_limb_dark, 2 );
-     (void) strlcpy( fileParam->do_pixelwise, sip.do_pixelwise, 
-		     SCIENCE_CHANNELS+1 );
-     (void) strlcpy( fileParam->do_pol_point, sip.do_pol_point, 
-		     NUM_FRAC_POLV+1 );
-     (void) strlcpy( fileParam->do_var_lc_cha, sip.do_var_lc_cha, 
-		     4 * SCIENCE_CHANNELS + 1 );
-     (void) strlcpy( fileParam->do_stray_lc_cha, sip.do_stray_lc_cha, 
-		     4 * SCIENCE_CHANNELS + 1 );
+     (void) nadc_strlcpy( fileParam->do_use_limb_dark, 
+			  sip.do_use_limb_dark, 2 );
+     (void) nadc_strlcpy( fileParam->do_pixelwise, sip.do_pixelwise, 
+			  SCIENCE_CHANNELS+1 );
+     (void) nadc_strlcpy( fileParam->do_pol_point, sip.do_pol_point, 
+			  NUM_FRAC_POLV+1 );
+     (void) nadc_strlcpy( fileParam->do_var_lc_cha, sip.do_var_lc_cha, 
+			  4 * SCIENCE_CHANNELS + 1 );
+     (void) nadc_strlcpy( fileParam->do_stray_lc_cha, sip.do_stray_lc_cha, 
+			  4 * SCIENCE_CHANNELS + 1 );
      (void) memcpy( fileParam->electron_bu, sip.electrons_bu,
 		    SCIENCE_CHANNELS * sizeof(float) );
      (void) memcpy( fileParam->level_2_smr, sip.level_2_smr, 

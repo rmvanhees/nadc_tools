@@ -30,7 +30,6 @@ set (SCIA_LV0_SRCS
     get_scia_lv0_mds.c
     get_scia_lv0_mds_hk.c
     get_scia_lv0_mds_info.c
-    scia_lv0_h5_info.c
     scia_lv0_mds_info.c
     scia_lv0_pds_sph.c
     scia_lv0_rd_mds.c
@@ -157,6 +156,7 @@ set (NADC_SCIA_SRCS
     scia_codecalib.c
     scia_codepatch.c
     scia_cre_h5_file.c
+    scia_clusDef.c
     scia_h5_structs.c
     scia_param.c
     scia_pds_lads.c

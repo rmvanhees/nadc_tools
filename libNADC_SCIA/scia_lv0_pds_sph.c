@@ -118,8 +118,8 @@ void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi mph,
 /*
  * fill sph0_scia struct
  */
-     (void) strlcpy( sph->descriptor, sph0_items[0].value+1, 
-		     (size_t) sph0_items[0].length );
+     (void) nadc_strlcpy( sph->descriptor, sph0_items[0].value+1, 
+			  (size_t) sph0_items[0].length );
      (void) sscanf( sph0_items[1].value, "%d", &ibuff );
      sph->start_lat = ibuff / 1e6;
      (void) sscanf( sph0_items[2].value, "%d", &ibuff );
@@ -144,10 +144,10 @@ void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi mph,
      (void) sscanf( sph0_items[18].value, "%d", &sph->num_rs_isps );
      (void) sscanf( sph0_items[19].value, "%lf", &sph->rs_thres );
 /* spare */
-     (void) strlcpy( sph->tx_rx_polar, sph0_items[21].value+1,
-		     (size_t) sph0_items[21].length );
-     (void) strlcpy( sph->swath, sph0_items[22].value+1, 
-		     (size_t) sph0_items[22].length );
+     (void) nadc_strlcpy( sph->tx_rx_polar, sph0_items[21].value+1,
+			  (size_t) sph0_items[21].length );
+     (void) nadc_strlcpy( sph->swath, sph0_items[22].value+1, 
+			  (size_t) sph0_items[22].length );
 }
 
 /*+++++++++++++++++++++++++
