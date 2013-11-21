@@ -1,21 +1,17 @@
-set (IMLM_CO_SRCS  scia_rd_imlm.c)
-set (IMLM_H2O_SRCS scia_rd_imlm.c)
-set (IMLM_LIBS nadc)
+add_definitions (-D_WITH_NC4)
 
-if (NETCDF_FOUND)
-   add_definitions (-D_WITH_NC4)
+set (IMLM_CO_SRCS
+    scia_rd_imlm.c
+    scia_rd_nc_co.c
+    scia_wr_nc_co.c
+)
 
-   list (APPEND IMLM_CO_SRCS
-        scia_rd_nc_co.c
-        scia_wr_nc_co.c
-   )
-   list (APPEND IMLM_H2O_SRCS
-        scia_rd_nc_h2o.c
-        scia_wr_nc_h2o.c
-   )
-   list (APPEND IMLM_LIBS ${NETCDF_LIBRARIES})
-endif ()
-list (APPEND IMLM_LIBS ${HDF5_C_LIBRARIES})
+set (IMLM_H2O_SRCS
+    scia_rd_imlm.c
+    scia_rd_nc_h2o.c
+    scia_wr_nc_h2o.c
+)
+set (IMLM_LIBS nadc ${NETCDF_LIBRARIES} ${HDF5_C_LIBRARIES})
 
 set (IMLM_CO_SQL_SRCS "")
 set (IMLM_H2O_SQL_SRCS "")
@@ -45,15 +41,13 @@ add_executable(scia_imlm_h2o scia_imlm_h2o.c
 
 target_link_libraries(scia_imlm_h2o ${IMLM_LIBS} -lm)
 
-if (NETCDF_FOUND)
-   add_executable(adaguc_imlm_co adaguc_imlm_co.c ${IMLM_CO_SRCS})
+add_executable(adaguc_imlm_co adaguc_imlm_co.c ${IMLM_CO_SRCS})
 
-   target_link_libraries(adaguc_imlm_co ${IMLM_LIBS})
+target_link_libraries(adaguc_imlm_co ${IMLM_LIBS})
 
-   add_executable(adaguc_imlm_h2o adaguc_imlm_h2o.c ${IMLM_H2O_SRCS})
+add_executable(adaguc_imlm_h2o adaguc_imlm_h2o.c ${IMLM_H2O_SRCS})
 
-   target_link_libraries(adaguc_imlm_h2o ${IMLM_LIBS})
-endif ()
+target_link_libraries(adaguc_imlm_h2o ${IMLM_LIBS})
 
 ## Installation instructions
 install (

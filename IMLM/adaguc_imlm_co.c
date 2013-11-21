@@ -223,7 +223,8 @@ int main( int argc, char *argv[] )
 	  struct imlm_hdr hdr_tmp;
 	  struct imlm_rec *rec_tmp = NULL;
 	  
-	  (void) strlcpy( flname, param.name_infiles[na], MAX_STRING_LENGTH );
+	  (void) nadc_strlcpy( flname, 
+			       param.name_infiles[na], MAX_STRING_LENGTH );
 	  if ( H5Fis_hdf5( flname ) ) {
 	       if ( (retval = nc_open(flname, NC_NOWRITE, &ncid)) != NC_NOERR )
 		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,nc_strerror(retval));
@@ -301,8 +302,8 @@ int main( int argc, char *argv[] )
 
 	  jdayStart = Adaguc2gomeJDAY( param.clipStart );
 	  jdayStop  = Adaguc2gomeJDAY( param.clipStop );
-	  (void) strlcpy( hdr.validity_start, param.clipStart, 16 );
-	  (void) strlcpy( hdr.validity_stop, param.clipStop, 16 );
+	  (void) nadc_strlcpy( hdr.validity_start, param.clipStart, 16 );
+	  (void) nadc_strlcpy( hdr.validity_stop, param.clipStop, 16 );
 
 	  for ( ilow = 0; ilow < hdr.numRec; ilow++ ) 
 	       if ( jday[ilow] >= jdayStart ) break;
