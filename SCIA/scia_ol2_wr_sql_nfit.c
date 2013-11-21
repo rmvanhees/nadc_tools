@@ -229,9 +229,9 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
  * strip path of file-name
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
      }
 /*
  * check if product is already in database

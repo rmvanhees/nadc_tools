@@ -96,7 +96,7 @@ void Adjust_JulianDay( const double jday_anx,
 
 	  MJD_2_ASCII( mjd2000+1, seconds, mu_sec, dateTime );
 
-	  (void) strlcpy( sciaDate, dateTime, 12 );
+	  (void) nadc_strlcpy( sciaDate, dateTime, 12 );
 
 	  NADC_ERROR( prognm, NADC_ERR_NONE, "adjust Julian Day(+1)");
      } else if ( jday > jday_anx+1 ) {
@@ -106,7 +106,7 @@ void Adjust_JulianDay( const double jday_anx,
 
 	  MJD_2_ASCII( mjd2000-1, seconds, mu_sec, dateTime );
 
-	  (void) strlcpy( sciaDate, dateTime, 12 );
+	  (void) nadc_strlcpy( sciaDate, dateTime, 12 );
 
 	  NADC_ERROR( prognm, NADC_ERR_NONE, "adjust Julian Day(-1)");
      }
@@ -455,9 +455,9 @@ int main( int argc, char *argv[] )
 	  else
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
 
-	  (void) strlcpy( flname, argv[2], MAX_STRING_LENGTH );
+	  (void) nadc_strlcpy( flname, argv[2], MAX_STRING_LENGTH );
      } else if ( argc == 2 ) {
-	  (void) strlcpy( flname, argv[1], MAX_STRING_LENGTH );
+	  (void) nadc_strlcpy( flname, argv[1], MAX_STRING_LENGTH );
      } else
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
 /*

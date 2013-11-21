@@ -96,9 +96,9 @@ void SCIA_OL2_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
  * strip path of file-name
  */
      if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-          (void) strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
      }
 /*
  * check if we have to reverse field "softVersion[2]" in table "stateinfo"
@@ -118,7 +118,7 @@ void SCIA_OL2_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
 /*
  * update field "softVersion[2]" in table "stateinfo"
  */
-     (void) strlcpy( procStage, sciafl+10, 2 );
+     (void) nadc_strlcpy( procStage, sciafl+10, 2 );
      for ( nr = 0; nr < nrow; nr++ ) {
           cpntr = PQgetvalue( res, nr, 0 );
           indx = (unsigned int) strtoul( cpntr, (char **)NULL, 10 );

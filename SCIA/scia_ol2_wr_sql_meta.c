@@ -131,7 +131,7 @@ void SCIA_OL2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), mph->product );
 /* l1b_product */
-     (void) strlcpy( ctemp, l1b_product, ENVI_FILENAME_SIZE );
+     (void) nadc_strlcpy( ctemp, l1b_product, ENVI_FILENAME_SIZE );
      SCIA_CHECK_SQL_LV1B_NAME( conn, ctemp );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), ctemp );
@@ -152,7 +152,7 @@ void SCIA_OL2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), mph->soft_version );
 /* fittingErrSum */
-     rstrip( str_quality, sph->errorsum );
+     nadc_rstrip( str_quality, sph->errorsum );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), str_quality );
 /* dateTimeStart */

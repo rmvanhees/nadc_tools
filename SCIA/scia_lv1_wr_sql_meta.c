@@ -135,15 +135,15 @@ void SCIA_LV1_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), sph->m_factor );
 /* spectralCal */
-     rstrip( str_quality, sph->spec_cal );
+     nadc_rstrip( str_quality, sph->spec_cal );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), str_quality );
 /* saturatedPix */
-     rstrip( str_quality, sph->saturate );
+     nadc_rstrip( str_quality, sph->saturate );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), str_quality );
 /* deadPixels */
-     rstrip( str_quality, sph->dead_pixel );
+     nadc_rstrip( str_quality, sph->dead_pixel );
      (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
 		      strcpy(cbuff,sql_query), str_quality );
 /* dateTimeStart */
