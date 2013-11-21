@@ -33,10 +33,10 @@
               1.0   31-Oct-2001	Created by R. M. van Hees 
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -158,13 +158,13 @@ void NADC_Err_Push( NADC_err_t mesg_num, const char *file_name,
  * store new message
  */
      nadc_err_stack.slots[nused].mesg_num = mesg_num;
-     (void) strlcpy( nadc_err_stack.slots[nused].file_name,
-		     file_name, SHORT_STRING_LENGTH );
-     (void) strlcpy( nadc_err_stack.slots[nused].func_name,
-		     func_name, SHORT_STRING_LENGTH );
+     (void) nadc_strlcpy( nadc_err_stack.slots[nused].file_name,
+			  file_name, SHORT_STRING_LENGTH );
+     (void) nadc_strlcpy( nadc_err_stack.slots[nused].func_name,
+			  func_name, SHORT_STRING_LENGTH );
      nadc_err_stack.slots[nused].line = line;
-     (void) strlcpy( nadc_err_stack.slots[nused].desc,
-		     desc, MAX_STRING_LENGTH );
+     (void) nadc_strlcpy( nadc_err_stack.slots[nused].desc,
+			  desc, MAX_STRING_LENGTH );
      nadc_err_stack.nused++;
 
      switch ( mesg_num ) {

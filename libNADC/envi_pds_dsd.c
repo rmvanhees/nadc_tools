@@ -136,15 +136,15 @@ unsigned int ENVI_RD_DSD( FILE *fd, const struct mph_envi mph,
 /*
  * fill dsd_envi struct
  */
-	  (void) strlcpy( dsd->name, dsd_items[0].value+1, 
-			  (nr_char = dsd_items[0].length) );
+	  (void) nadc_strlcpy( dsd->name, dsd_items[0].value+1, 
+			       (nr_char = dsd_items[0].length) );
 	  while( --nr_char > 0 && 
 		 (dsd->name[nr_char] == ' ' || dsd->name[nr_char] == '\0') );
 	  dsd->name[nr_char+1] = '\0';
-	  (void) strlcpy( dsd->type, dsd_items[1].value, 
-			  (size_t) dsd_items[1].length+1 );
-	  (void) strlcpy( dsd->flname, dsd_items[2].value+1, 
-			  (nr_char = dsd_items[2].length) );
+	  (void) nadc_strlcpy( dsd->type, dsd_items[1].value, 
+			       (size_t) dsd_items[1].length+1 );
+	  (void) nadc_strlcpy( dsd->flname, dsd_items[2].value+1, 
+			       (nr_char = dsd_items[2].length) );
 	  while ( --nr_char > 0 && 
 		  (dsd->flname[nr_char] == ' ' 
 		   ||  dsd->flname[nr_char] == '\0') );
@@ -189,12 +189,12 @@ void ENVI_WR_DSD( FILE *fd, unsigned int num_dsd,
  */
      nr_dsd = 0;
      do {
-	  (void) strlcpy( cbuff, dsd[nr_dsd].name, SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( cbuff, dsd[nr_dsd].name, SHORT_STRING_LENGTH );
 	  nr_char = strlen( cbuff );
 	  while( ++nr_char < dsd_items[0].length ) (void) strcat( cbuff, " " );
 	  NADC_WR_PDS_ITEM( dsd_items, cbuff );
 	  NADC_WR_PDS_ITEM( dsd_items+1, dsd[nr_dsd].type );
-	  (void) strlcpy( cbuff, dsd[nr_dsd].flname, SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( cbuff, dsd[nr_dsd].flname, SHORT_STRING_LENGTH );
 	  nr_char = strlen( cbuff );
 	  while( ++nr_char < dsd_items[2].length ) (void) strcat( cbuff, " " );
 	  NADC_WR_PDS_ITEM( dsd_items+2, cbuff );

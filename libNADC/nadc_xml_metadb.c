@@ -36,10 +36,10 @@
 .VERSION     1.0     14-Feb-2007   initial release by R. M. van Hees
 ------------------------------------------------------------*/
 /*
- * Define _POSIX_SOURCE to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  _POSIX_SOURCE 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
@@ -114,7 +114,7 @@ void NADC_GET_XML_METADB( FILE *fp, char *host, char *port,
 
 	  if ( (sep = strchr( line_strip, '=' )) != NULL ) {
 	       nchar = min_t(size_t, MAX_LINE_LENGTH, (sep - line_strip + 1));
-	       (void) strlcpy( keyword, line_strip, nchar );
+	       (void) nadc_strlcpy( keyword, line_strip, nchar );
 	       if ( strncmp( keyword, "host", 4 ) == 0 )
 		    (void) strcpy( host, ++sep );
 	       else if ( strncmp( keyword, "port", 4 ) == 0 )

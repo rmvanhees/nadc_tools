@@ -996,6 +996,7 @@ void nadc_write_header( FILE *fp, unsigned int key_num,
      nadc_write_text( fp, key_num, "Input filename", infl_name );
      nadc_write_text( fp, key_num, "Name of component", component );
      (void) time( tp );
-     (void) strlcpy( string, ctime( tp ), 25 );       /* do not copy newline */
+     /* do not copy newline */
+     (void) nadc_strlcpy( string, ctime( tp ), 25 );
      nadc_write_text( fp, key_num, "Creation date", string );
 }

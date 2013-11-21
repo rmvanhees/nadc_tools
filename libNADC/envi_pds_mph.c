@@ -130,34 +130,34 @@ void ENVI_RD_MPH( FILE *fd, struct mph_envi *mph )
 /*
  * fill mph_envi struct
  */
-     (void) strlcpy( mph->product, mph_items[0].value+1, 
-		     (size_t) mph_items[0].length );
-     (void) strlcpy( mph->proc_stage, mph_items[1].value, 
-		     (size_t) mph_items[1].length+1 );
-     (void) strlcpy( mph->ref_doc, mph_items[2].value+1, 
-		     (size_t) mph_items[2].length );
+     (void) nadc_strlcpy( mph->product, mph_items[0].value+1, 
+			  (size_t) mph_items[0].length );
+     (void) nadc_strlcpy( mph->proc_stage, mph_items[1].value, 
+			  (size_t) mph_items[1].length+1 );
+     (void) nadc_strlcpy( mph->ref_doc, mph_items[2].value+1, 
+			  (size_t) mph_items[2].length );
 /* spare */
-     (void) strlcpy( mph->acquis, mph_items[4].value+1, 
-		     (size_t) mph_items[4].length );
-     (void) strlcpy( mph->proc_center, mph_items[5].value+1, 
-		     (size_t) mph_items[5].length );
-     (void) strlcpy( mph->proc_time, mph_items[6].value+1, 
-		     (size_t) mph_items[6].length );
-     (void) strlcpy( mph->soft_version, mph_items[7].value+1, 
-		     (size_t) mph_items[7].length );
+     (void) nadc_strlcpy( mph->acquis, mph_items[4].value+1, 
+			  (size_t) mph_items[4].length );
+     (void) nadc_strlcpy( mph->proc_center, mph_items[5].value+1, 
+			  (size_t) mph_items[5].length );
+     (void) nadc_strlcpy( mph->proc_time, mph_items[6].value+1, 
+			  (size_t) mph_items[6].length );
+     (void) nadc_strlcpy( mph->soft_version, mph_items[7].value+1, 
+			  (size_t) mph_items[7].length );
 /* spare */
-     (void) strlcpy( mph->sensing_start, mph_items[9].value+1, 
-		     (size_t) mph_items[9].length );
-     (void) strlcpy( mph->sensing_stop, mph_items[10].value+1, 
-		     (size_t) mph_items[10].length );
+     (void) nadc_strlcpy( mph->sensing_start, mph_items[9].value+1, 
+			  (size_t) mph_items[9].length );
+     (void) nadc_strlcpy( mph->sensing_stop, mph_items[10].value+1, 
+			  (size_t) mph_items[10].length );
 /* spare */
-     (void) strlcpy( mph->phase, mph_items[12].value, 
-		     (size_t) mph_items[12].length+1 );
+     (void) nadc_strlcpy( mph->phase, mph_items[12].value, 
+			  (size_t) mph_items[12].length+1 );
      (void) sscanf( mph_items[13].value, "%hd", &mph->cycle );
      (void) sscanf( mph_items[14].value, "%d", &mph->rel_orbit );
      (void) sscanf( mph_items[15].value, "%d", &mph->abs_orbit );
-     (void) strlcpy( mph->state_vector, mph_items[16].value+1, 
-		     (size_t) mph_items[16].length );
+     (void) nadc_strlcpy( mph->state_vector, mph_items[16].value+1, 
+			  (size_t) mph_items[16].length );
      (void) sscanf( mph_items[17].value, "%lf", &mph->delta_ut );
      (void) sscanf( mph_items[18].value, "%lf", &mph->x_position );
      (void) sscanf( mph_items[19].value, "%lf", &mph->y_position );
@@ -165,22 +165,22 @@ void ENVI_RD_MPH( FILE *fd, struct mph_envi *mph )
      (void) sscanf( mph_items[21].value, "%lf", &mph->x_velocity );
      (void) sscanf( mph_items[22].value, "%lf", &mph->y_velocity );
      (void) sscanf( mph_items[23].value, "%lf", &mph->z_velocity );
-     (void) strlcpy( mph->vector_source, mph_items[24].value+1, 
-		     (size_t) mph_items[24].length );
+     (void) nadc_strlcpy( mph->vector_source, mph_items[24].value+1, 
+			  (size_t) mph_items[24].length );
 /* spare */
-     (void) strlcpy( mph->utc_sbt_time, mph_items[26].value+1, 
-		     (size_t) mph_items[26].length );
+     (void) nadc_strlcpy( mph->utc_sbt_time, mph_items[26].value+1, 
+			  (size_t) mph_items[26].length );
      (void) sscanf( mph_items[27].value, "%u", &mph->sat_binary_time );
      (void) sscanf( mph_items[28].value, "%u", &mph->clock_step );
 /* spare */
-     (void) strlcpy( mph->leap_utc, mph_items[30].value+1, 
-		     (size_t) mph_items[30].length );
+     (void) nadc_strlcpy( mph->leap_utc, mph_items[30].value+1, 
+			  (size_t) mph_items[30].length );
      (void) sscanf( mph_items[31].value, "%hd", &mph->leap_sign );
-     (void) strlcpy( mph->leap_err, mph_items[32].value, 
-		     (size_t) mph_items[32].length+1 );
+     (void) nadc_strlcpy( mph->leap_err, mph_items[32].value, 
+			  (size_t) mph_items[32].length+1 );
 /* spare */
-     (void) strlcpy( mph->product_err, mph_items[34].value, 
-		     (size_t) mph_items[34].length+1 );
+     (void) nadc_strlcpy( mph->product_err, mph_items[34].value, 
+			  (size_t) mph_items[34].length+1 );
      (void) sscanf( mph_items[35].value, "%u", &mph->tot_size );
      (void) sscanf( mph_items[36].value, "%u", &mph->sph_size );
      (void) sscanf( mph_items[37].value, "%u", &mph->num_dsd );

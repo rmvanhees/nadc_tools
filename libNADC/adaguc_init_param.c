@@ -171,9 +171,9 @@ void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
  * strip path to program
  */
      if ( (cpntr = strrchr( argv[0], '/' )) != NULL ) {
-	  (void) strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, ++cpntr, SHORT_STRING_LENGTH );
      } else {
-	  (void) strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
+	  (void) nadc_strlcpy( prog_master, argv[0], SHORT_STRING_LENGTH );
      }
 /*
  * initialize struct param
@@ -187,10 +187,10 @@ void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
      param->flag_outdir  = PARAM_UNSET;
      param->flag_clip    = PARAM_UNSET;
 
-     (void) strlcpy( param->prodClass, "CONS", 5 );
+     (void) nadc_strlcpy( param->prodClass, "CONS", 5 );
 
-     (void) strlcpy( param->clipStart, "19500101T000000", 16 );
-     (void) strlcpy( param->clipStop , "20500101T000000", 16 );
+     (void) nadc_strlcpy( param->clipStart, "19500101T000000", 16 );
+     (void) nadc_strlcpy( param->clipStop , "20500101T000000", 16 );
 
      param->num_infiles = 0;
      param->name_infiles[0] = NULL;
@@ -234,14 +234,14 @@ void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
 		      && narg+1 < argc ) {
 	       if ( strncmp( argv[narg]+2, "inputdir", 5 ) == 0 ) {
 		    param->flag_indir = PARAM_SET;
-		    (void) strlcpy( param->indir, argv[narg+1], 
+		    (void) nadc_strlcpy( param->indir, argv[narg+1], 
 				    MAX_STRING_LENGTH );
 	       } else if ( strncmp( argv[narg]+2, "outputdir", 6 ) == 0 ) {
 		    param->flag_outdir = PARAM_SET;
-		    (void) strlcpy( param->outdir, argv[narg+1], 
+		    (void) nadc_strlcpy( param->outdir, argv[narg+1], 
 				    MAX_STRING_LENGTH );
 	       } else if ( strncmp( argv[narg]+2, "class", 5 ) == 0 ) {
-		    (void) strlcpy( param->prodClass, argv[narg+1], 5 );
+		    (void) nadc_strlcpy( param->prodClass, argv[narg+1], 5 );
 	       } else if ( strncmp( argv[narg]+2, "clip", 4 ) == 0 ) {
 		    param->flag_clip = PARAM_SET;
 		    if ( strlen( argv[narg+1] ) == 8 ) {
@@ -263,10 +263,10 @@ void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
 		    }
 	       } else if ( strncmp( argv[narg]+2, "start", 5 ) == 0 ) {
 		    param->flag_clip = PARAM_SET;
-		    (void) strlcpy( param->clipStart, argv[narg+1], 16 );
+		    (void) nadc_strlcpy( param->clipStart, argv[narg+1], 16 );
 	       } else if ( strncmp( argv[narg]+2, "stop", 4 ) == 0 ) {
 		    param->flag_clip = PARAM_SET;
-		    (void) strlcpy( param->clipStop, argv[narg+1], 16 );
+		    (void) nadc_strlcpy( param->clipStop, argv[narg+1], 16 );
 	       }
 	       narg++;
 	  }

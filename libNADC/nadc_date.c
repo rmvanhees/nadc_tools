@@ -226,8 +226,8 @@ void ASCII_2_UTC( const char ASCII_DateTime[],
 /*
  * decomposition of input string into its date and time part
  */
-     (void) strlcpy( ASCII_Date, ASCII_DateTime, 12 );
-     (void) strlcpy( ASCII_Time, ASCII_DateTime+12, 13 );
+     (void) nadc_strlcpy( ASCII_Date, ASCII_DateTime, 12 );
+     (void) nadc_strlcpy( ASCII_Time, ASCII_DateTime+12, 13 );
 /*
  * decomposition of date and time string into numbers into the tm struct
  */
@@ -288,8 +288,8 @@ void ASCII_2_MJD( const char ASCII_DateTime[], int *mjd2000,
 /*
  * decomposition of input string into its date and time part
  */
-     (void) strlcpy( ASCII_Date, ASCII_DateTime, 12 );
-     (void) strlcpy( ASCII_Time, ASCII_DateTime+12, 16 );
+     (void) nadc_strlcpy( ASCII_Date, ASCII_DateTime, 12 );
+     (void) nadc_strlcpy( ASCII_Time, ASCII_DateTime+12, 16 );
 /*
  * decomposition of date and time string into numbers into the tm struct
  */
@@ -449,8 +449,8 @@ double DATETIME_2_JULIAN( const char dateTime[], unsigned int muSecond )
 /*
  * decomposition of input string into its date and time part
  */
-     (void) strlcpy( ASCII_Date, dateTime, 11 );
-     (void) strlcpy( ASCII_Time, dateTime+11, 16 );
+     (void) nadc_strlcpy( ASCII_Date, dateTime, 11 );
+     (void) nadc_strlcpy( ASCII_Time, dateTime+11, 16 );
 /*
  * decomposition of date and time string into numbers into the tm struct
  */

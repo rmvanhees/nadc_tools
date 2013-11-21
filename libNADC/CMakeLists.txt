@@ -32,8 +32,10 @@ set (NADC_COMMON_SRCS
     nadc_date.c 
     nadc_error.c 
     nadc_ext_h5_array.c
-    nadc_files_equal.c 
-    nadc_filesize.c nadc_fit.c
+    nadc_file_equal.c 
+    nadc_file_exists.c 
+    nadc_file_size.c 
+    nadc_fit.c
     nadc_flip.c
     nadc_gettime.c
     nadc_hdf5_api.c 
@@ -42,7 +44,8 @@ set (NADC_COMMON_SRCS
     nadc_interpol.c 
     nadc_pytable_api.c
     nadc_receivedate.c 
-    nadc_select.c nadc_string.c
+    nadc_select.c 
+    nadc_string.c
     nadc_usrindx.c 
     nadc_usrinp.c
     nadc_version.c
