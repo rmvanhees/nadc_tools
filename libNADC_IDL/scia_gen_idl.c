@@ -31,14 +31,12 @@
  * Define POSIX to indicate
  * that this is a POSIX program
  */
-#define  POSIX 2
-#define  _BSD_SOURCE            /* required for mkstemp */
+#define  _POSIX_SOURCE 2
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <unistd.h>
 
 /*+++++ Local Headers +++++*/
 #define _SCIA_COMMON
@@ -79,7 +77,7 @@ int IDL_STDCALL OpenFile( int argc, void *argv[] )
      return -1;
 }
 
-int IDL_STDCALL  CloseFile( void )
+int IDL_STDCALL CloseFile( void )
 {
      int stat = 0;
 
@@ -90,7 +88,7 @@ int IDL_STDCALL  CloseFile( void )
      return stat;
 }
 
-int IDL_STDCALL  Err_Clear( void )
+int IDL_STDCALL Err_Clear( void )
 {
      NADC_Err_Clear();
      return 0;
@@ -99,8 +97,6 @@ int IDL_STDCALL  Err_Clear( void )
 int IDL_STDCALL Err_Trace( int argc, void *argv[] )
 {
      const char prognm[] = "Err_Trace";
-
-     int fd;
 
      FILE *fd_log;
 
@@ -111,9 +107,6 @@ int IDL_STDCALL Err_Trace( int argc, void *argv[] )
 /*
  * create temporary file
  */
-     fd = mkstemp( log_name[0].s );
-     close( fd );
-
      fd_log = fopen( log_name[0].s, "a" );
      NADC_Err_Trace( fd_log );
      (void) fclose( fd_log );
@@ -123,32 +116,6 @@ int IDL_STDCALL Err_Trace( int argc, void *argv[] )
  done:
      return -1;
 }
-
-/* #include "../libSCIA/Inline/Y_interpol.inc" */
-
-/* int IDL_STDCALL _NADC_LIN_INTERPOL( int argc, void *argv[] ) */
-/* { */
-/*      const char prognm[] = "_NADC_LIN_INTERPOL"; */
-
-/*      unsigned int ynum; */
-
-/*      float xval, x_left, x_right; */
-/*      float *yval, *y_left, *y_right; */
-
-/*      if ( argc != 7 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg ); */
-/*      xval    = *(float *) argv[0]; */
-/*      x_left  = *(float *) argv[1]; */
-/*      x_right = *(float *) argv[2]; */
-/*      ynum    = *(unsigned int *) argv[3]; */
-/*      y_left  = (float *) argv[4]; */
-/*      y_right = (float *) argv[5]; */
-/*      yval    = (float *) argv[6]; */
-
-/*      Y_LinInterPol( xval, x_left, x_right, ynum, y_left, y_right, yval ); */
-/*      return 0; */
-/*  done:	        */
-/*      return -1;      */
-/* } */
 
 unsigned int IDL_STDCALL _SCIA_SET_CALIB( int argc, void *argv[] )
 {

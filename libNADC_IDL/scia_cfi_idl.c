@@ -25,16 +25,15 @@
 .VERSION     1.0   15-Feb-2010	Created by P. van der Meer
 ------------------------------------------------------------*/
 /*
- * Define POSIX to indicate
- * that this is a POSIX program
+ * Define _ISOC99_SOURCE to indicate
+ * that this is a ISO C99 program
  */
-#define  POSIX 2
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include <glob.h>
@@ -109,9 +108,9 @@ int INITIALISE_DORIS_GEO( const double MJD,
      if ( mjd_frac > (22.0+5./60.) ) mjd_int += 1;
      mjd_frac *= 3600.;
      MJD_2_YMD( (int) mjd_int - 1, mjd_frac, tmpstring );
-     (void) strlcpy( date1, tmpstring, 9 );
+     (void) nadc_strlcpy( date1, tmpstring, 9 );
      MJD_2_YMD( (int) mjd_int + 1, mjd_frac, tmpstring );
-     (void) strlcpy( date2, tmpstring, 9 );
+     (void) nadc_strlcpy( date2, tmpstring, 9 );
 
      {
 	  char utce[28], dut1e[9];
@@ -325,9 +324,9 @@ int INITIALISE_AUX_FRA( const double MJD, double *time_valid )
      mjd_frac *= 60 * 60;
      MJD_2_YMD( (int) mjd_int, mjd_frac, tmpstring );
 
-     (void) strlcpy( year , &tmpstring[0], 5 );
-     (void) strlcpy( month, &tmpstring[4], 3 );
-     (void) strlcpy( day  , &tmpstring[6], 3 );
+     (void) nadc_strlcpy( year , &tmpstring[0], 5 );
+     (void) nadc_strlcpy( month, &tmpstring[4], 3 );
+     (void) nadc_strlcpy( day  , &tmpstring[6], 3 );
 
      (void) snprintf( globstring, MAX_STRING_LENGTH,
 		      "%s/%4s/%2s/%2s/AUX_FRA_AX*",
@@ -337,8 +336,8 @@ int INITIALISE_AUX_FRA( const double MJD, double *time_valid )
 	  NADC_ERROR( prognm, NADC_ERR_NONE, "No AUX_FRA file found" );
 	  return PP_WARN;
      }
-     (void) strlcpy( aux_fra_file, globvor->gl_pathv[globvor->gl_pathc-1], 
-		     MAX_STRING_LENGTH );
+     (void) nadc_strlcpy( aux_fra_file, globvor->gl_pathv[globvor->gl_pathc-1], 
+			  MAX_STRING_LENGTH );
 /*
  *  Initialise Envisat Attitude calculation using the AUX_FRA file
  */

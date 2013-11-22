@@ -930,7 +930,7 @@ extern unsigned int GET_SCIA_LV1C_POLV( const struct state1_scia *,
     /*@globals errno, nadc_stat, nadc_err_stack@*/
     /*@modifies errno, nadc_stat, nadc_err_stack, mds_polV@*/;
 
-extern unsigned short GET_SCIA_MDS1_DATA( bool, unsigned char, 
+extern unsigned short SCIA_LV1_SCALE_MDS( bool, unsigned char, 
 					  const struct state1_scia *,
 					  /*@null@*/ const struct mds1_scia *,
 					  /*@null@*/ const struct mds1c_pmd *,

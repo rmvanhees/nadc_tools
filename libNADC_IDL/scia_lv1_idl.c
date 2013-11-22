@@ -88,8 +88,8 @@ int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
 
      unsigned int num_dsd;
 
-     struct dsd_envi  *dsd;
-     struct aux_scia *aux;
+     struct dsd_envi *dsd;
+     struct mds1_aux *aux;
 
      if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
@@ -97,7 +97,7 @@ int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
-     aux = (struct aux_scia *) argv[2];
+     aux = (struct mds1_aux *) argv[2];
 
      nr_aux = (int) SCIA_LV1_RD_AUX( fd_nadc, num_dsd, dsd, &aux );
      if ( IS_ERR_STAT_FATAL ) return -1;
@@ -248,7 +248,7 @@ int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
      unsigned int num_dsd;
 
      struct dsd_envi *dsd;
-     struct pmd_scia *pmd;
+     struct mds1_pmd *pmd;
 
      if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
@@ -256,7 +256,7 @@ int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
-     pmd = (struct pmd_scia *) argv[2];
+     pmd = (struct mds1_pmd *) argv[2];
 
      nr_pmd = (int) SCIA_LV1_RD_PMD( fd_nadc, num_dsd, dsd, &pmd );
      if ( IS_ERR_STAT_FATAL ) return -1;
@@ -1486,9 +1486,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 #define TO_JDAY(mjd) (mjd.days + \
 		      (mjd.secnd + mjd.musec / 1e6) / (60. * 60 * 24))
 
-int IDL_STDCALL _GET_SCIA_MDS1_DATA ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 {
-     const char prognm[] = "_GET_SCIA_MDS1_DATA";
+     const char prognm[] = "_SCIA_LV1_SCALE_MDS";
 
      register int ni, nr;
 
@@ -1583,7 +1583,7 @@ int IDL_STDCALL _GET_SCIA_MDS1_DATA ( int argc, void *argv[] )
 /*
  * extract science data from MDS 1c records
  */
-	  dim_Y = (int) GET_SCIA_MDS1_DATA( pmdScaling, C_mds1c->chan_id, 
+	  dim_Y = (int) SCIA_LV1_SCALE_MDS( pmdScaling, C_mds1c->chan_id, 
 					    &state, NULL, C_pmd1c, C_mds1c, 
 					    &sign );
 	  if ( IS_ERR_STAT_FATAL ) goto done;
@@ -1605,7 +1605,7 @@ int IDL_STDCALL _GET_SCIA_MDS1_DATA ( int argc, void *argv[] )
 /*
  * extract science data from MDS 1c records
  */
-	  dim_Y = (int) GET_SCIA_MDS1_DATA( pmdScaling, C_mds1c->chan_id, 
+	  dim_Y = (int) SCIA_LV1_SCALE_MDS( pmdScaling, C_mds1c->chan_id, 
 					    &state, C_mds1b, NULL, C_mds1c, 
 					    &sign );
 	  if ( IS_ERR_STAT_FATAL ) goto done;

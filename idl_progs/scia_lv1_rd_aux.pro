@@ -70,7 +70,7 @@ PRO SCIA_LV1_RD_AUX, dsd, aux, status=status
   num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
   num_aux = dsd[indx_dsd].num_dsr
   IF num_aux GT 0 THEN BEGIN
-     aux = REPLICATE( {aux_scia}, num_aux )
+     aux = REPLICATE( {mds1_aux}, num_aux )
      num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_AUX', $
                           num_dsd, dsd, aux, /CDECL )
 ; check error status

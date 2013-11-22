@@ -25,10 +25,10 @@
 .VERSION      1.0   17-Nov-2003	Created by R. M. van Hees 
 ------------------------------------------------------------*/
 /*
- * Define _ISOC99_SOURCE to indicate
- * that this is a ISO C99 program
+ * Define _POSIX_SOURCE to indicate
+ * that this is a POSIX program
  */
-#define  _ISOC99_SOURCE
+#define  _POSIX_SOURCE 2
 
 /*+++++ System headers +++++*/
 #include <stdlib.h>

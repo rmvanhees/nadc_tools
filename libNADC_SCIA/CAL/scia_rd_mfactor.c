@@ -41,7 +41,7 @@
  * Define _ISOC99_SOURCE to indicate
  * that this is a ISO C99 program
  */
-#define  _BSD_SOURCE
+#define  _ISOC99_SOURCE
 
 /*+++++ System headers +++++*/
 #include <stdio.h>

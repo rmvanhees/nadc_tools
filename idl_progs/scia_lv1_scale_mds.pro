@@ -17,7 +17,7 @@
 ;
 ;+
 ; NAME:   
-;       GET_SCIA_MDS1_DATA
+;       SCIA_LV1_SCALE_MDS
 ;
 ; PURPOSE:
 ;       read/calibrate MDS science data of a channel from one or more states
@@ -26,7 +26,7 @@
 ;       SCIA level 1b/1c data
 ;
 ; CALLING SEQUENCE:
-;       data = GET_SCIA_MDS1_DATA( dsd, stateID, chanID, meta=meta, $
+;       data = SCIA_LV1_SCALE_MDS( dsd, stateID, chanID, meta=meta, $
 ;                                  calib=calib, stateIndex=stateIndex, $
 ;                                  norm=norm, status=status )
 ;
@@ -90,7 +90,7 @@
 ;                    more checks build in for corrupted/in-complete products
 ;-
 ;---------------------------------------------------------------------------
-FUNCTION GET_SCIA_MDS1_DATA, dsd, stateID, chanID, status=status, $
+FUNCTION SCIA_LV1_SCALE_MDS, dsd, stateID, chanID, status=status, $
                              calib=calib, stateIndex=stateIndex, $
                              meta=meta, norm=norm, noPMD=noPMD
   compile_opt idl2,logical_predicate,hidden
@@ -114,7 +114,7 @@ FUNCTION GET_SCIA_MDS1_DATA, dsd, stateID, chanID, status=status, $
 
 ; check required parameters
   IF N_PARAMS() NE 3 THEN BEGIN
-     MESSAGE, ' Usage: data = GET_SCIA_MDS1_DATA( dsd, stateID, chanID' $
+     MESSAGE, ' Usage: data = SCIA_LV1_SCALE_MDS( dsd, stateID, chanID' $
               + ', meta=meta, calib=calib, stateIndex=stateIndex, norm=norm' $
               + ', noPMD=noPMD, status=status )', /INFO
      IF ARG_PRESENT( meta ) THEN meta = -1
@@ -192,7 +192,7 @@ FUNCTION GET_SCIA_MDS1_DATA, dsd, stateID, chanID, status=status, $
 
      data =  FLTARR( dim_X * dim_Y * dim_Z )
      data_glr = REPLICATE( {meta_rec}, (dim_Y * dim_Z) )
-     num = call_external( lib_name('libnadc_idl'), '_GET_SCIA_MDS1_DATA', $
+     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_SCALE_MDS', $
                           is_level_1c, pmdScaling, state[ns], clus_mask, $
                           calib_mask, data, data_glr, /CDECL )
      IF num NE (dim_Y * dim_Z) THEN BEGIN

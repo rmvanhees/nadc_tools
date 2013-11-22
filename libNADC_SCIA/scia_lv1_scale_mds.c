@@ -15,7 +15,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, 
    Boston, MA  02111-1307, USA.
 
-.IDENTifer   GET_SCIA_MDS1_DATA
+.IDENTifer   SCIA_LV1_SCALE_MDS
 .AUTHOR      R.M. van Hees
 .KEYWORDS    SCIA Level 1b/1c
 .LANGUAGE    ANSI C

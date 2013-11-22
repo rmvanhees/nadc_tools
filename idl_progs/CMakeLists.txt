@@ -66,7 +66,6 @@ set (IDL_LEVEL1_SRCS
     get_lv1_mds_data.pro
     get_lv1_mds_state.pro
     get_lv1_mds_time.pro
-    get_scia_mds1_data.pro
     get_scia_mds1_wave.pro
     gome_lv1_free_fcd.pro
     gome_lv1_pcd_pmd.pro
@@ -112,6 +111,7 @@ set (IDL_LEVEL1_SRCS
     scia_lv1_rd_srs.pro
     scia_lv1_rd_state.pro
     scia_lv1_rd_vlcp.pro
+    scia_lv1_scale_mds.pro
 )
 
 set (IDL_LEVEL2_SRCS
