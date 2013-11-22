@@ -169,7 +169,6 @@ set (NADC_IDL_EXMPL
 set (NADC_IDL_DEFS
     StructDefs/asfp_scia__define.pro
     StructDefs/aux_bcp__define.pro
-    StructDefs/aux_scia__define.pro
     StructDefs/base_scia__define.pro
     StructDefs/bias_scia__define.pro
     StructDefs/calopt_scia__define.pro
@@ -208,6 +207,8 @@ set (NADC_IDL_DEFS
     StructDefs/mds1c_pmd__define.pro
     StructDefs/mds1c_polv__define.pro
     StructDefs/mds1c_scia__define.pro
+    StructDefs/mds1_aux__define.pro
+    StructDefs/mds1_pmd__define.pro
     StructDefs/mds1_scia__define.pro
     StructDefs/mjd_scia__define.pro
     StructDefs/mph_scia__define.pro
@@ -217,7 +218,6 @@ set (NADC_IDL_DEFS
     StructDefs/pcd_gome__define.pro
     StructDefs/pmd_data__define.pro
     StructDefs/pmd_gome__define.pro
-    StructDefs/pmd_scia__define.pro
     StructDefs/pmd_src__define.pro
     StructDefs/pmtc_frame__define.pro
     StructDefs/pmtc_hdr__define.pro
