@@ -264,13 +264,13 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
      char msg[SHORT_STRING_LENGTH];
 
-     unsigned char  state_id = 0;
+     bool limb_flag;
 
-     /* Limb: number readouts per horizontal scan */
-     unsigned short start_scan = 0;
+     unsigned char  state_id = 0;
 
      unsigned short indx = 0;
      unsigned short bcps = 0;
+     unsigned short duration = 0;
      unsigned short bcps_in_scan = 0;
      unsigned short size_ref;
 
@@ -281,15 +281,13 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
 	  if ( info_pntr->state_index != indx ) {
 	       if ( state_id != 0 ) {
-		    unsigned short bcps_ref = 
-			 CLUSDEF_DURATION( state_id, absOrbit );
 		    unsigned short num_det_ref = 
 			 CLUSDEF_NUM_DET( state_id, absOrbit );
 
-		    if ( bcps != bcps_ref ) {
+		    if ( bcps != duration ) {
 			 (void) snprintf( msg, SHORT_STRING_LENGTH,
 	     "too short state record/state: %-u/%02hhu; BCPS %hu != %hu", 
-					  ni, state_id, bcps, bcps_ref );
+					  ni, state_id, bcps, duration );
 			 NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 			 _FLAG_INCOMPLETE_STATE( num_info, info, indx );
 		    } else if ( num_det != num_det_ref ) {
@@ -303,25 +301,22 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 	       num_det = 1;
 	       indx = info_pntr->state_index;
 	       state_id = info_pntr->state_id;
-	       bcps_in_scan = info_pntr->bcps;
-	       if ( info_pntr->category == 2
-		    || info_pntr->category == 26 
-		    || info_pntr->category == 27 ) {
-		    bcps_in_scan -= 2;
-		    start_scan = 2;
-	       } else
-		    start_scan = 0;
+	       duration = CLUSDEF_DURATION( state_id, absOrbit );
+	       limb_flag = ( info_pntr->category == 2
+			     || info_pntr->category == 26 
+			     || info_pntr->category == 27
+			     || (info_pntr->category == 31 
+				 && ((duration + 1) % 27) == 0) );
 	  } else {
 	       num_det++;
-	       if ( (info_pntr->category == 2 
-		     || info_pntr->category == 26
-		     || info_pntr->category == 27)
-		    && (info_pntr->bcps - start_scan) > 24 ) {
-		    start_scan += 24 + 3;
-	       }
-	       bcps_in_scan = info_pntr->bcps - start_scan;
 	  }
-//	  if ( state_id == 10 )
+	  if ( limb_flag ) {
+	       bcps_in_scan = info_pntr->bcps 
+		    - ((info_pntr->bcps / 27) * 27) - 2;
+	  } else
+	       bcps_in_scan = info_pntr->bcps;
+
+//	  if ( state_id == 28 )
 //	       (void) fprintf( stderr, "%5u: %3hhu %3hhu %4hu %4hu\n", ni, 
 //			       info_pntr->state_id, info_pntr->category, 
 //			       bcps_in_scan, info_pntr->bcps );
