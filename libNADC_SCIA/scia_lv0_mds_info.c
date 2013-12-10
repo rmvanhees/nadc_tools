@@ -264,10 +264,11 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
      char msg[SHORT_STRING_LENGTH];
 
-     bool limb_flag;
+     bool limb_flag = FALSE;
 
      unsigned char  state_id = 0;
 
+     unsigned short limb_scan = 0;
      unsigned short indx = 0;
      unsigned short bcps = 0;
      unsigned short duration = 0;
@@ -277,6 +278,8 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
      for ( ni = 0; ni < num_info; ni++, ++info_pntr ) {
 	  if ( info_pntr->packet_type != SCIA_DET_PACKET ) continue;
 
+//	  (void) fprintf( stderr, "%6u %2hhu %5hu\n", 
+//			  ni, info_pntr->state_id, absOrbit );
 	  if ( CLUSDEF_INVALID( info_pntr->state_id, absOrbit ) ) continue;
 
 	  if ( info_pntr->state_index != indx ) {
@@ -305,14 +308,32 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 	       limb_flag = ( info_pntr->category == 2
 			     || info_pntr->category == 26 
 			     || info_pntr->category == 27
+			     || (info_pntr->category == 4
+				 && ((duration + 1) % 27) == 0)
+			     || (info_pntr->category == 5
+				 && ((duration + 1) % 27) == 0)
+			     || (info_pntr->category == 7
+				 && ((duration + 1) % 27) == 0)
+			     || (info_pntr->category == 10
+				 && ((duration + 1) % 27) == 0)
+			     || (info_pntr->category == 11
+				 && ((duration + 1) % 67) == 0)
+			     || (info_pntr->category == 28
+				 && ((duration + 1) % 67) == 0)
+			     || (info_pntr->category == 29
+				 && ((duration + 1) % 67) == 0)
 			     || (info_pntr->category == 31 
 				 && ((duration + 1) % 27) == 0) );
+	       if ( limb_flag ) {
+		    limb_scan = (((duration + 1) % 27) == 0) ? 27 : 67;
+	       } else
+		    limb_scan = 0;
 	  } else {
 	       num_det++;
 	  }
 	  if ( limb_flag ) {
 	       bcps_in_scan = info_pntr->bcps 
-		    - ((info_pntr->bcps / 27) * 27) - 2;
+		    - ((info_pntr->bcps / limb_scan) * limb_scan) - 2;
 	  } else
 	       bcps_in_scan = info_pntr->bcps;
 
