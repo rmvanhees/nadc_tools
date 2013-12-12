@@ -227,9 +227,9 @@ void WRITE_CHANNEL_HDR( FILE *outfl, unsigned int nr,
 			     chan_hdr.command_vis.field.etf );
 	  nadc_write_uchar( outfl, nr, "Detector Mode", 
 			    chan_hdr.command_vis.field.mode );
-	  nadc_write_ushort( outfl, nr, "Section Address", 
+	  nadc_write_ushort( outfl, nr, "Section Address Sub-Channel", 
 			     chan_hdr.command_vis.field.sec );
-	  nadc_write_uchar( outfl, nr, "Ratio", 
+	  nadc_write_uchar( outfl, nr, "Ratio Pixel Exposure Time", 
 			    chan_hdr.command_vis.field.ratio );
 	  nadc_write_uchar( outfl, nr, "Control", 
 			    chan_hdr.command_vis.field.cntrl );

@@ -199,42 +199,66 @@ void _CHECK_INFO_STATE_ID( unsigned int num_info, struct mds0_info *info )
 
      char msg[SHORT_STRING_LENGTH];
 
-     unsigned char  state_id = 0;
+     unsigned char  state_id;
+     unsigned short indx_max = 0;
      unsigned short indx = 0;
-     size_t         num = 0;
-     unsigned char  *state_array;
+
 /*
  * handle special cases gracefully
  */
      if ( num_info < 2 ) return;
-
-     state_array = (unsigned char *) malloc( num_info * sizeof(char) );
-     
+/*
+ * obtain largest (valid) value for state_index
+ */
      for ( ni = 0; ni < num_info; ni++ ) {
 	  if ( info[ni].state_index == USHRT_MAX ) continue;
-	  if ( info[ni].state_index != indx ) {
-	       if ( ni > 0u ) {
-		    register unsigned short nj = ni - 1u;
+	  if ( info[ni].state_index > indx_max ) 
+	       indx_max = info[ni].state_index;
+     }
+/*
+ * check for unique state ID
+ */
+     for ( indx = 1; indx <= indx_max; indx++ ) {
+	  register unsigned short num_indx = 0;
 
-		    state_id = SELECTuc( (num+1)/2, num, state_array );
+	  bool uniq_id = TRUE;
+	  for ( ni = 0; ni < num_info; ni++ ) {
+	       if ( info[ni].state_index == indx ) {
+		    if ( num_indx == 0 )  {
+			 state_id = info[ni].state_id;
+		    } else if ( state_id != info[ni].state_id ) {
+			 uniq_id = FALSE;
+		    }
+		    num_indx++;
+	       }
+	  }
 
-		    while ( info[nj].state_index == indx ) {
-			 if ( info[nj].state_id != state_id ) {
-			      (void) snprintf( msg, SHORT_STRING_LENGTH,
-				"correct state_id record/state: %-u/%02hhu", 
-					       nj, state_id );
-			      NADC_ERROR( prognm, NADC_ERR_NONE, msg );
-			      info[nj].state_id = state_id;
-			 }
-			 if ( nj-- == 0 ) break;
+	  /* not unique => repair */
+	  if ( ! uniq_id ) {
+	       register unsigned short nj = 0;
+
+	       unsigned char *state_array = 
+		    (unsigned char *) malloc( (size_t) num_indx );
+
+	       for ( ni = 0; ni < num_info; ni++ ) {
+		    if ( info[ni].state_index == indx )
+			 state_array[nj++] = info[ni].state_id;
+	       }
+	       state_id = SELECTuc( (num_indx+1)/2, num_indx, state_array );
+
+	       for ( ni = 0; ni < num_info; ni++ ) {
+		    if ( info[ni].state_index == indx 
+			 && info[ni].state_id != state_id ) {
+			 (void) snprintf( msg, SHORT_STRING_LENGTH,
+				  "correct state_id record/state: %-u/%02hhu", 
+					  ni, state_id );
+			 NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+			 info[ni].state_id = state_id;
 		    }
 	       }
-	       indx = info[ni].state_index;
-	       num = 0;
-	  } 
-	  state_array[num++] = info[ni].state_id;
+	       free( state_array );
+	  }
      }
-     free( state_array );
 }
 
 /*+++++++++++++++++++++++++
@@ -337,7 +361,7 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 	  } else
 	       bcps_in_scan = info_pntr->bcps;
 
-//	  if ( state_id == 28 )
+//	  if ( state_id == 49 )
 //	       (void) fprintf( stderr, "%5u: %3hhu %3hhu %4hu %4hu\n", ni, 
 //			       info_pntr->state_id, info_pntr->category, 
 //			       bcps_in_scan, info_pntr->bcps );
