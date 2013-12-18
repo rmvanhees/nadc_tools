@@ -66,6 +66,7 @@
 #define SCIA_DET_WRONG_DSR_NUM   ((unsigned char) 0x2U)
 #define SCIA_DET_CORRUPT_MJD     ((unsigned char) 0x4U)
 #define SCIA_DET_WRONG_DURATION  ((unsigned char) 0x8U)
+#define SCIA_DET_MISSING_CLCON   ((unsigned char) 0x10U)
 
 /*+++++ Global Variables +++++*/
 	/* NONE */
@@ -304,7 +305,8 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
 //	  (void) fprintf( stderr, "%6u %2hhu %5hu\n", 
 //			  ni, info_pntr->state_id, absOrbit );
-	  if ( CLUSDEF_INVALID( info_pntr->state_id, absOrbit ) ) continue;
+	  if ( ! CLUSDEF_MTBL_VALID( info_pntr->state_id, absOrbit ) ) 
+	       continue;
 
 	  if ( info_pntr->state_index != indx ) {
 	       if ( state_id != 0 ) {
@@ -368,7 +370,7 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
 	  /* perform check on size of data-package */
 	  size_ref = CLUSDEF_DSR_SIZE( state_id, absOrbit, bcps_effective );
-	  if ( info_pntr->packet_length != size_ref ) {
+	  if ( size_ref > 0 && info_pntr->packet_length != size_ref ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
 		"wrong DSR size record/state: %-u/%02hhu; size DSR %hu != %hu", 
 			     ni, state_id, info_pntr->packet_length, size_ref );
@@ -376,6 +378,26 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 	       info_pntr->quality |= SCIA_DET_WRONG_DSR_SIZE;
 	  }
 	  bcps = info_pntr->bcps;
+     }
+
+     /* check last state */
+     if ( state_id != 0 ) {
+	  unsigned short num_det_ref = 
+	       CLUSDEF_NUM_DET( state_id, absOrbit );
+
+	  if ( bcps != duration ) {
+	       (void) snprintf( msg, SHORT_STRING_LENGTH,
+		   "too short state record/state: %-u/%02hhu; BCPS %hu != %hu", 
+				ni, state_id, bcps, duration );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       _FLAG_INCOMPLETE_STATE( num_info, info, indx );
+	  } else if ( num_det != num_det_ref ) {
+	       (void) snprintf( msg, SHORT_STRING_LENGTH,
+	      "incomplete state record/state: %-u/%02hhu; num DSR: %hu != %hu", 
+				ni, state_id, num_det, num_det_ref );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       _FLAG_INCOMPLETE_STATE( num_info, info, indx );
+	  } 
      }
 }
 
@@ -428,7 +450,8 @@ unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      _CHECK_INFO_STATE_ID( num_info, info );
 
      /* perform quality check on info-records */
-     _SET_INFO_QUALITY( absOrbit, num_info, info );
+     if ( CLUSDEF_DB_EXISTS() )
+	  _SET_INFO_QUALITY( absOrbit, num_info, info );
 
      return num_info;
 }

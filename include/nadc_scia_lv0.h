@@ -438,7 +438,8 @@ extern unsigned short GET_SCIA_CLUSDEF( unsigned char,
        /*@globals nadc_stat, nadc_err_stack;@*/
        /*@modifies clusDef, nadc_stat, nadc_err_stack@*/;
 
-extern bool CLUSDEF_INVALID( unsigned char, unsigned short );
+extern bool CLUSDEF_DB_EXISTS( void );
+extern bool CLUSDEF_MTBL_VALID( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_DURATION( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_NUM_DET( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_INTG_MIN( unsigned char, unsigned short );

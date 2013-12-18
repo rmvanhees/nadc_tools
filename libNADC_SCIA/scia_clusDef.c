@@ -20,7 +20,8 @@
 .KEYWORDS    SCIA level 0 data
 .LANGUAGE    ANSI C
 .PURPOSE     Perform L0 detector DSR checks
-.COMMENTS    contains CLUSDEF_INVALID, CLUSDEF_DSR_SIZE, CLUSDEF_INTG_MIN, 
+.COMMENTS    contains CLUSDEF_DB_EXISTS
+                      CLUSDEF_INVALID, CLUSDEF_DSR_SIZE, CLUSDEF_INTG_MIN, 
                       CLUSDEF_DURATION, CLUSDEF_NUM_DET, CLUSDEF_CLCON
 
              Uses state/cluster configuration database nadc_clusDef.h5
@@ -74,6 +75,8 @@ static struct scia_clusDef_rec {
      unsigned short readouts;
      unsigned char  clus_type;
 } clusDef[MAX_CLUSTER];
+
+static char clusDef_file[MAX_STRING_LENGTH] = "";
 
 static unsigned char  stateID_prev = 0;
 static unsigned short absOrbit_prev = 0;
@@ -162,7 +165,8 @@ done:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
 
-.RETURNS     succesful read return 1 else negative
+.RETURNS     succesful read return 0; empty mtbl-entry return 1;
+             unknown Clcon-entry return 2; else negative
 .COMMENTS    static function
 -------------------------*/
 static
@@ -188,7 +192,8 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
 	  sizeof( metaTable.num_info )
      };
 
-     char    h5_file[MAX_STRING_LENGTH];
+     int     res = 0;
+
      char    grpName[9];
 
      hid_t   fid = -1;
@@ -203,18 +208,13 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
      absOrbit_prev = absOrbit;
 
      /* open output HDF5-file */
-     (void) snprintf( h5_file, MAX_STRING_LENGTH, "./%s", name_clusDef_db );
-     if ( ! nadc_file_exists( h5_file ) ) {
-          (void) snprintf( h5_file, MAX_STRING_LENGTH, "%s/%s", 
-                           DATA_DIR, name_clusDef_db );
-	  if ( ! nadc_file_exists( h5_file ) ) {
-	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
-				"can not open file: %s", name_clusDef_db );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, msg );
-	  }
+     if ( ! CLUSDEF_DB_EXISTS() ) {
+	  (void) snprintf( msg, SHORT_STRING_LENGTH, 
+			   "can not open file: %s", clusDef_file );
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, msg );
      }
-     fid = H5Fopen( h5_file, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, h5_file );
+     fid = H5Fopen( clusDef_file, H5F_ACC_RDONLY, H5P_DEFAULT );
+     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, clusDef_file );
 
      /* open group with data of requested state */
      (void) snprintf( grpName, 9, "State_%02hhu", stateID );
@@ -223,25 +223,27 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
      } H5E_END_TRY;
      if ( gid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
 
-     /* read metaTable */
+     /* read metaTable record */
      stat = H5TBread_records( gid, "metaTable", absOrbit, 1,
 			      mtbl_size, mtbl_offs, mtbl_sizes, 
 			      &metaTable );
      if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "metaTable" );
 
-     if ( metaTable.indx_Clcon == 255 ) {
-	  (void) snprintf( msg, SHORT_STRING_LENGTH, 
-			   "no valid Clcon for orbit/state: %05hu/%02hhu", 
-			   absOrbit, stateID );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, msg );
+     /* read Clcon record */
+     if ( metaTable.duration == 0 ) {
+	  res = 1;
+     } else {
+	  if ( metaTable.indx_Clcon == 255 ) {
+	       res = 2;
+	  } else {
+	       if ( _SCIA_H5_RD_CLUSDEF( gid, metaTable.indx_Clcon ) < 0 )
+		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "clusDef" );
+	  }
      }
-
-     if ( _SCIA_H5_RD_CLUSDEF( gid, metaTable.indx_Clcon ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "clusDef" );
 
      (void) H5Gclose( gid );
      (void) H5Fclose( fid );
-     return 1;
+     return res;
 done:
      if ( gid > 0 ) (void) H5Gclose( gid );
      if ( fid > 0 ) (void) H5Fclose( fid );
@@ -250,29 +252,76 @@ done:
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
-.IDENTifer   CLUSDEF_INVALID
+.IDENTifer   CLUSDEF_DB_EXISTS
+.PURPOSE     check if state-cluster configuration database exists on the system
+.INPUT/OUTPUT
+  call as   stat = CUSDEF_INVALID();
+
+.RETURNS     return TRUE if database exists else FALSE
+.COMMENTS    none
+-------------------------*/
+bool CLUSDEF_DB_EXISTS( void )
+{
+//     const char prognm[] = "CLUSDEF_DB_EXISTS";
+
+     if ( *clusDef_file != '\0' ) return TRUE;
+
+     (void) snprintf( clusDef_file, MAX_STRING_LENGTH, "./%s", 
+		      name_clusDef_db );
+     if ( nadc_file_exists( clusDef_file ) ) return TRUE;
+
+     (void) snprintf( clusDef_file, MAX_STRING_LENGTH, "%s/%s", 
+		      DATA_DIR, name_clusDef_db );
+     if ( nadc_file_exists( clusDef_file ) ) return TRUE;
+
+     return FALSE;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   CLUSDEF_MTBL_VALID
 .PURPOSE     check if entry in nadc_clusDef database is valid
 .INPUT/OUTPUT
-  call as   stat = CUSDEF_INVALID( stateID, absOrbit );
+  call as   stat = CUSDEF_MTBL_VALID( stateID, absOrbit );
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
 
-.RETURNS     return TRUE if entry is invalid else TRUE
+.RETURNS     return TRUE if entry is valid else FALSE
 .COMMENTS    none
 -------------------------*/
-bool CLUSDEF_INVALID( unsigned char stateID, unsigned short absOrbit )
+bool CLUSDEF_MTBL_VALID( unsigned char stateID, unsigned short absOrbit )
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEF_INVALID";
+     const char prognm[] = "CLUSDEF_MTBL_VALID";
 
-     static bool res = FALSE;
+     static bool res = TRUE;
 
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) 
+	  char msg[SHORT_STRING_LENGTH];
+
+	  const int stat = _SET_SCIA_CLUSDEF( stateID, absOrbit );
+
+	  if ( stat == 2 ) {
+	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
+				"no valid Clcon for orbit/state: %05hu/%02hhu", 
+				absOrbit, stateID );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       res = TRUE;
-	  else
+	  } else if ( stat == 1 ) {
+	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
+				"empty entry for orbit/state: %05hu/%02hhu", 
+				absOrbit, stateID );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       res = FALSE;
+	  } else if ( stat < 0 ) {
+	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
+				"failed to read from %s: %05hu/%02hhu", 
+				name_clusDef_db, absOrbit, stateID );
+	       NADC_ERROR( prognm, NADC_ERR_FATAL, msg );
+	       res = FALSE;
+	  } else {                 /* successful read */
+	       res = TRUE;
+	  }
      }
      return res;
 }
@@ -299,13 +348,14 @@ unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID,
 {
 //     const char prognm[] = "CLUSDEF_DSR_SIZE";
 
-     register unsigned char  nch = 1;
+     register unsigned char nch = 1;
 
      unsigned short sz = 65;
 
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
 	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
      }
+     if ( metaTable.indx_Clcon == 255 ) return 0;
 
      do {
 	  register unsigned short ncl = 0;
