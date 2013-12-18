@@ -296,7 +296,7 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
      unsigned short indx = 0;
      unsigned short bcps = 0;
      unsigned short duration = 0;
-     unsigned short bcps_in_scan = 0;
+     unsigned short bcps_effective = 0;
      unsigned short size_ref;
 
      for ( ni = 0; ni < num_info; ni++, ++info_pntr ) {
@@ -340,14 +340,14 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 				 && ((duration + 1) % 27) == 0)
 			     || (info_pntr->category == 10
 				 && ((duration + 1) % 27) == 0)
+			     || (info_pntr->category == 31 
+				 && ((duration + 1) % 27) == 0)
 			     || (info_pntr->category == 11
 				 && ((duration + 1) % 67) == 0)
 			     || (info_pntr->category == 28
 				 && ((duration + 1) % 67) == 0)
 			     || (info_pntr->category == 29
-				 && ((duration + 1) % 67) == 0)
-			     || (info_pntr->category == 31 
-				 && ((duration + 1) % 27) == 0) );
+				 && ((duration + 1) % 67) == 0) );
 	       if ( limb_flag ) {
 		    limb_scan = (((duration + 1) % 27) == 0) ? 27 : 67;
 	       } else
@@ -356,18 +356,18 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 	       num_det++;
 	  }
 	  if ( limb_flag ) {
-	       bcps_in_scan = info_pntr->bcps 
-		    - ((info_pntr->bcps / limb_scan) * limb_scan) - 2;
+	       bcps_effective = info_pntr->bcps 
+		    - (3 * (info_pntr->bcps / limb_scan) + 2);
 	  } else
-	       bcps_in_scan = info_pntr->bcps;
+	       bcps_effective = info_pntr->bcps;
 
-//	  if ( state_id == 49 )
+//	  if ( state_id == 24 )
 //	       (void) fprintf( stderr, "%5u: %3hhu %3hhu %4hu %4hu\n", ni, 
 //			       info_pntr->state_id, info_pntr->category, 
-//			       bcps_in_scan, info_pntr->bcps );
+//			       bcps_effective, info_pntr->bcps );
 
 	  /* perform check on size of data-package */
-	  size_ref = CLUSDEF_DSR_SIZE( state_id, absOrbit, bcps_in_scan );
+	  size_ref = CLUSDEF_DSR_SIZE( state_id, absOrbit, bcps_effective );
 	  if ( info_pntr->packet_length != size_ref ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
 		"wrong DSR size record/state: %-u/%02hhu; size DSR %hu != %hu", 
