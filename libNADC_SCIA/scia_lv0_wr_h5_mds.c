@@ -508,7 +508,6 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index,
 
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );
 	  (void) H5Tclose( tid );
-	  (void) H5Tclose( tid_src );
 	  if ( ptable == H5I_BADID )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
      } else {

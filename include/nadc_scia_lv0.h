@@ -83,9 +83,9 @@ struct packet_hdr
      union {
 	  struct packet_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short op_mode:5, vcid:5, :6;
+	       unsigned char op_mode:5, vcid:5, :6;
 #else
-	       unsigned short :6, vcid:5, op_mode:5;
+	       unsigned char :6, vcid:5, op_mode:5;
 #endif
 	  } field;
 	  unsigned short two_byte;
@@ -105,9 +105,9 @@ struct data_hdr
      union {
 	  struct rdv_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short atc_id:6, hsm:2, config_id:8;
+	       unsigned char atc_id:6, hsm:2, config_id:8;
 #else
-	       unsigned short hsm:2, atc_id:6, config_id:8;
+	       unsigned char hsm:2, atc_id:6, config_id:8;
 #endif
 	  } field;
 	  unsigned short two_byte;
@@ -115,9 +115,9 @@ struct data_hdr
      union {
 	  struct id_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short :4, packet:4, overflow:4, :4;
+	       unsigned char :4, packet:4, overflow:4, :4;
 #else
-	       unsigned short packet:4, :4, :4, overflow:4;
+	       unsigned char packet:4, :4, :4, overflow:4;
 #endif
 	  } field;
 	  unsigned short two_byte;
@@ -133,10 +133,10 @@ struct pmtc_hdr
      union {
 	  struct pmtc_1_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short ndfm:2, :2, phase:4, 
+	       unsigned char ndfm:2, :2, phase:4, 
 		    sls:2, wls:2, apsm:2, ncwm:2;
 #else
-	       unsigned short phase:4, :2, ndfm:2,
+	       unsigned char phase:4, :2, ndfm:2,
 		    ncwm:2, apsm:2, wls:2, sls:2;
 #endif
 	  } field;
@@ -146,11 +146,25 @@ struct pmtc_hdr
      union {
 	  struct az_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned int repeat:12, basic:4, 
-		    h_w:4, rel:4, corr:4, invert:1, filter:1, centre:1, type:1;
+               unsigned short repeat:12;
+               unsigned char  basic:4;
+               unsigned char  h_w:4;
+               unsigned char  rel:4;
+               unsigned char  corr:4;
+               unsigned char  invert:1;
+               unsigned char  filter:1;
+               unsigned char  centre:1;
+               unsigned char  type:1;
 #else
-	       unsigned int type:1, centre:1, filter:1, invert:1, corr:4,
-		    rel:4, h_w:4, basic:4, repeat:12;
+               unsigned char  type:1;
+               unsigned char  centre:1;
+               unsigned char  filter:1;
+               unsigned char  invert:1;
+               unsigned char  corr:4;
+               unsigned char  rel:4;
+               unsigned char  h_w:4;
+               unsigned char  basic:4;
+               unsigned short repeat:12;
 #endif
 	  } field;
 	  unsigned int four_byte;
@@ -158,11 +172,25 @@ struct pmtc_hdr
      union {
 	  struct elv_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned int repeat:12, basic:4, 
-		    :4, rel:4, corr:4, invert:1, filter:1, centre:1, :1;
+               unsigned short repeat:12;
+               unsigned char  basic:4;
+               unsigned char  :4;
+               unsigned char  rel:4;
+               unsigned char  corr:4;
+               unsigned char  invert:1;
+               unsigned char  filter:1;
+               unsigned char  centre:1;
+               unsigned char  :1;
 #else
-	       unsigned int :1, centre:1, filter:1, invert:1, corr:4,
-		    rel:4, :4, basic:4, repeat:12;
+               unsigned char  :1;
+               unsigned char  centre:1;
+               unsigned char  filter:1;
+               unsigned char  invert:1;
+               unsigned char  corr:4;
+               unsigned char  rel:4;
+               unsigned char  :4;
+               unsigned char  basic:4;
+               unsigned short repeat:12;
 #endif
 	  } field;
 	  unsigned int four_byte;
@@ -181,9 +209,9 @@ struct aux_bcp
      union {
 	  struct flag_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short phase:4, m:1, d:1, eu:1, au:1, pointing:6, :2;
+	       unsigned char phase:4, m:1, d:1, eu:1, au:1, pointing:6, :2;
 #else
-	       unsigned short au:1, eu:1, d:1, m:1, phase:4, :2, pointing:6;
+	       unsigned char au:1, eu:1, d:1, m:1, phase:4, :2, pointing:6;
 #endif
 	  } field;
 	  unsigned short two_byte;
@@ -230,9 +258,9 @@ struct chan_hdr
      union {
 	  struct channel_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short lu:2, is:2, id:4, clusters:8;
+	       unsigned char lu:2, is:2, id:4, clusters:8;
 #else
-	       unsigned short id:4, is:2, lu:2, clusters:8;
+	       unsigned char id:4, is:2, lu:2, clusters:8;
 #endif
 	  } field;
 	  unsigned short two_byte;
@@ -240,9 +268,9 @@ struct chan_hdr
      union {
 	  struct ratio_hdr_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned short status:3, ratio:5, frame:8;
+	       unsigned char status:3, ratio:5, frame:8;
 #else
-	       unsigned short ratio:5, status:3, frame:8;
+	       unsigned char ratio:5, status:3, frame:8;
 #endif
 	  } field;
 	  unsigned short two_byte;
@@ -250,9 +278,17 @@ struct chan_hdr
      union {
 	  struct command_vis_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned int cntrl:2, ratio:5, sec:9, mode:2, etf:14;
+               unsigned char  cntrl:2;
+               unsigned char  ratio:5; 
+               unsigned short sec:9; 
+               unsigned char  mode:2;
+               unsigned short etf:14;
 #else
-	       unsigned int etf:14, mode:2, sec:9, ratio:5, cntrl:2;
+               unsigned short etf:14;
+               unsigned char  mode:2;
+               unsigned short sec:9;
+               unsigned char  ratio:5;
+               unsigned char  cntrl:2;
 #endif
 	  } field;
 	  unsigned int four_byte;
@@ -260,11 +296,23 @@ struct chan_hdr
      union {
 	  struct command_ir_bitfield {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       unsigned int cntrl:2, pet:4, :2, bias:3, :3, comp:2, 
-		    mode:2, etf:14;
+               unsigned char  cntrl:2;
+               unsigned char  pet:4;
+               unsigned char  :2;
+               unsigned char  bias:3;
+               unsigned char  :3;
+               unsigned char  comp:2;
+               unsigned char  mode:2;
+               unsigned short etf:14;
 #else
-	       unsigned int etf:14, mode:2, 
-		    comp:2, :3, bias:3, :2, pet:4, cntrl:2;
+               unsigned short etf:14;
+               unsigned char  mode:2;
+               unsigned char  comp:2;
+               unsigned char  :3;
+               unsigned char  bias:3;
+               unsigned char  :2;
+               unsigned char  pet:4;
+               unsigned char  cntrl:2;
 #endif
 	  } field;
 	  unsigned int four_byte;

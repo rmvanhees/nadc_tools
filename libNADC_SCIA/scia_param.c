@@ -98,8 +98,11 @@ struct nadc_env {
      unsigned short num_instr;
      int            id_instr[3];
 } nadc_envs[] = {
+     { "NO_INFO_CORRECTION", "=0/1", 
+       "\t[expert] do not perform validity checks on L0 info-records", 
+       1, {SCIA_LEVEL_0, 0, 0} },
      { "NO_CLUSTER_CORRECTION", "=0/1", 
-       "\tcheck/correct Detector MDS cluster definition", 
+       "\t[expert] do not perform validity checks on L0 detector DSRs", 
        1, {SCIA_LEVEL_0, 0, 0} },
      { "SCIA_CORR_PET", "=0/1", "\tcorrect PET of SCIA Epitaxx detectors",
        1, {SCIA_LEVEL_1, 0, 0} },

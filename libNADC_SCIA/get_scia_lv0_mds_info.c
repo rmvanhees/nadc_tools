@@ -78,12 +78,10 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
      const char prognm[] = "GET_SCIA_LV0_MDS_INFO";
 
      register char *cpntr;
-     register bool error_day = FALSE;
      register struct mds0_info *info_pntr = info;
 
-     char           *mds_start, *mds_char = NULL;
-     int            mjd_days = 0;
-     unsigned int   num_info = 0;
+     char          *mds_start, *mds_char = NULL;
+     unsigned int  num_info = 0;
 
      /* allocate memory to buffer source packages */
      if ( (mds_char = (char *) malloc( (size_t) dsd->size )) == NULL ) 
@@ -155,22 +153,11 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 	  info_pntr->bcps          = byte_swap_u16( info_pntr->bcps );
 	  info_pntr->packet_length = byte_swap_u16( info_pntr->packet_length );
 #endif
-	  /* check day: stop at the second successive read failure */
-	  if ( abs(info_pntr->mjd.days - mjd_days) > 1 ) {
-	       if ( error_day ) break;
-	       error_day = TRUE;
-	  } else if ( error_day ) {
-	       error_day = FALSE;
-	  }
-	  mjd_days = info_pntr->mjd.days;
-
 	  /* move to the next MDS */
 	  cpntr += info_pntr->packet_length - 11;
 	  if ( (cpntr - mds_char) > dsd->size ) break;
      } while ( ++info_pntr, ++num_info < dsd->num_dsr );
 done:
      if ( mds_char != NULL ) free( mds_char );
-
-     /* skip last read when flag eeror_day is set */
-     return (error_day ? num_info-1 : num_info);
+     return num_info;
 }
