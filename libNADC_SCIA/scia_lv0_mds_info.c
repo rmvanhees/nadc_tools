@@ -351,7 +351,7 @@ void _REPAIR_INFO_STATE_ID( unsigned short state_index,
 	  if ( info[ni].state_index == state_index 
 	       && info[ni].state_id != state_id ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-				"correct state_id record/state: %-u/%02hhu", 
+				"correct state_id [DSR/state]: %-u/%02hhu", 
 				ni, state_id );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       info[ni].state_id = state_id;
@@ -541,7 +541,9 @@ void _REPAIR_INFO_BCPS( unsigned short state_index,
 
      register unsigned int ni;
 
-     bool found_double = FALSE;
+     char msg[SHORT_STRING_LENGTH];
+
+     unsigned short found_double = 0;
 
      unsigned int offs, bcps;
      unsigned int num_index;
@@ -567,22 +569,28 @@ void _REPAIR_INFO_BCPS( unsigned short state_index,
      while ( ++ni < num_info ) {
 	  if ( info[ni].state_index != state_index ) break;
 	  if ( bcps == info[ni].bcps ) {
-	       found_double = TRUE;
+	       found_double++;
 	       info[ni].state_index = USHRT_MAX;
 	  } else {
 	       bcps = info[ni].bcps;
 	  }
      }
-     if ( found_double ) {
-	  char msg[SHORT_STRING_LENGTH];
-
+     if ( found_double > 0 ) {
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
-			   "removed double DSR from info-records: %-u/%02hhu", 
-					  state_index, info[offs].state_id );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	     "removed %-hu double DSR(s) from state [index/state]: %-u/%02hhu", 
+			   found_double, state_index, info[offs].state_id );
 
-	  _SET_QFLAG_STATE( REPAIR_INFO_UNIQUE, state_index, num_info, info );
+	  _SET_QFLAG_STATE( (REPAIR_INFO_SORT_BCPS & REPAIR_INFO_UNIQUE),
+			    state_index, num_info, info );
+     } else {
+	  (void) snprintf( msg, SHORT_STRING_LENGTH,
+		          "sorted DSR(s) from state [index/state]: %-u/%02hhu", 
+			   state_index, info[offs].state_id );
+
+	  _SET_QFLAG_STATE( REPAIR_INFO_SORT_BCPS, 
+			    state_index, num_info, info );
      }
+     NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 }
 
 /*+++++++++++++++++++++++++
@@ -602,8 +610,6 @@ static
 void _CHECK_INFO_BCPS( unsigned int num_info, struct mds0_info *info )
      /*@modifies info->quality, info->bcps @*/
 {
-     const char prognm[] = "_CHECK_INFO_BCPS";
-
      register unsigned int ni;
 
      unsigned short indx_max = 0;
@@ -627,15 +633,6 @@ void _CHECK_INFO_BCPS( unsigned int num_info, struct mds0_info *info )
 	  for ( ni = 0; ni < num_info; ni++ ) {
 	       if ( info[ni].state_index == indx ) {
 		    if ( bcps >= info[ni].bcps ) {
-			 char msg[SHORT_STRING_LENGTH];
-
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-				   "correct bcps state_index: %-u/%02hhu", 
-					  indx, info[ni].state_id );
-			 NADC_ERROR( prognm, NADC_ERR_NONE, msg );
-
-			 _SET_QFLAG_STATE( REPAIR_INFO_SORT_BCPS,
-					   indx, num_info, info );
 			 _REPAIR_INFO_BCPS( indx, num_info, info );
 			 break;
 		    }
@@ -699,14 +696,14 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
 		    if ( bcps != duration ) {
 			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-	     "too short state record/state: %-u/%02hhu; BCPS %hu != %hu", 
+	            "too short state [DSR/state]: %-u/%02hhu; BCPS %hu != %hu", 
 					  ni, state_id, bcps, duration );
 			 NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 			 _SET_QFLAG_STATE( REPAIR_INFO_NUM_DSR,
 					   indx, num_info, info );
 		    } else if ( num_det != num_det_ref ) {
 			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-	     "incomplete state record/state: %-u/%02hhu; num DSR: %hu != %hu", 
+	       "incomplete state [DSR/state]: %-u/%02hhu; num DSR: %hu != %hu", 
 					  ni, state_id, num_det, num_det_ref );
 			 NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 			 _SET_QFLAG_STATE( REPAIR_INFO_NUM_DSR,
@@ -758,7 +755,7 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 	  size_ref = CLUSDEF_DSR_SIZE( state_id, absOrbit, bcps_effective );
 	  if ( size_ref > 0 && info_pntr->packet_length != size_ref ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-		"wrong DSR size record/state: %-u/%02hhu; size DSR %hu != %hu", 
+		 "wrong DSR size [DSR/state]: %-u/%02hhu; size DSR %hu != %hu",
 			     ni, state_id, info_pntr->packet_length, size_ref );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       info_pntr->quality |= REPAIR_INFO_SIZE_DSR;
@@ -772,13 +769,13 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 
 	  if ( bcps != duration ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-		   "too short state record/state: %-u/%02hhu; BCPS %hu != %hu", 
+		    "too short state [DSR/state]: %-u/%02hhu; BCPS %hu != %hu", 
 				ni, state_id, bcps, duration );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       _SET_QFLAG_STATE( REPAIR_INFO_NUM_DSR, indx, num_info, info );
 	  } else if ( num_det != num_det_ref ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-	      "incomplete state record/state: %-u/%02hhu; num DSR: %hu != %hu", 
+	       "incomplete state [DSR/state]: %-u/%02hhu; num DSR: %hu != %hu", 
 				ni, state_id, num_det, num_det_ref );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       _SET_QFLAG_STATE( REPAIR_INFO_NUM_DSR, indx, num_info, info );
