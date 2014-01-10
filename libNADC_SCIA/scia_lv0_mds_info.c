@@ -475,7 +475,7 @@ unsigned int _SORT_INFO_PACKET_ID( unsigned int num_info,
 
      struct mds0_info *info_tmp;
 
-     if ( num_info == 0 ) return;
+     if ( num_info == 0 ) return 0;
 
      ni = 0;
      do {
