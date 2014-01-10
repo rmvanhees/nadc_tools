@@ -79,7 +79,7 @@
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++
 .IDENTifer   _SET_QFLAG_STATE
-.PURPOSE     set State quality of state
+.PURPOSE     set State quality of all DSR which belong to one state execution
 .INPUT/OUTPUT
   call as   _SET_QFLAG_STATE( qflag, index, num_info, info );
      input:  
@@ -106,7 +106,7 @@ void _SET_QFLAG_STATE( unsigned char qflag, unsigned short state_index,
 
 /*+++++++++++++++++++++++++
 .IDENTifer   _REPAIR_INFO_MJD
-.PURPOSE     sort info-records with ICU onboard time monotonically increasing
+.PURPOSE     sort DSRs with ICU onboard time monotonically increasing
 .INPUT/OUTPUT
   call as   _REPAIR_INFO_MJD( num_info, info );
      input:  
@@ -217,6 +217,8 @@ done:
 -------------------------*/
 static
 void _CHECK_INFO_MJD( unsigned int num_info, struct mds0_info *info )
+     /*@modifies nadc_stat, nadc_err_stack, info; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
      const char prognm[] = "_CHECK_INFO_MJD";
 
@@ -393,7 +395,8 @@ void _REPAIR_INFO_STATE_ID( unsigned short state_index,
 -------------------------*/
 static
 void _CHECK_INFO_STATE_ID( unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->quality, info->state_id @*/
+     /*@modifies nadc_stat, nadc_err_stack, info->quality, info->state_id; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
      const char prognm[] = "_CHECK_INFO_STATE_ID";
 
@@ -684,6 +687,8 @@ void _CHECK_INFO_BCPS( unsigned int num_info, struct mds0_info *info )
 static
 void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info, 
 			struct mds0_info *info )
+     /*@modifies nadc_stat, nadc_err_stack, info->quality; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
      const char prognm[] = "_SET_INFO_QUALITY";
 
@@ -858,15 +863,24 @@ unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 
      /* set State counter */
      _CHECK_INFO_MJD( num_info, info );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "_CHECK_INFO_MJD" );
      _SET_INFO_STATEINDEX( num_info, info );
      _CHECK_INFO_STATE_ID( num_info, info );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "_CHECK_INFO_STATE_ID" );
 
      num_info_det = _SORT_INFO_PACKET_ID( num_info, info );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "_SORT_INFO_PACKET_ID" );
 
      /* perform quality check on detector info-records */
      _CHECK_INFO_BCPS( num_info_det, info );
-     if ( CLUSDEF_DB_EXISTS() )
+     if ( CLUSDEF_DB_EXISTS() ) {
 	  _SET_INFO_QUALITY( absOrbit, num_info_det, info );
+	  if ( IS_ERR_STAT_FATAL )
+	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "_SET_INFO_QUALITY" );
+     }
 done:
      return num_info;
 }
