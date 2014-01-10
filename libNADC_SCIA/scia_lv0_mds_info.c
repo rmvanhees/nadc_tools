@@ -141,8 +141,11 @@ void shellsort_uint32( unsigned int length, unsigned int array[] )
 
 static inline
 void _REPAIR_INFO_MJD( unsigned int num_info, struct mds0_info *info )
-     /*@modifies info @*/
+     /*@modifies nadc_stat, nadc_err_stack, info; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
+     const char prognm[] = "_REPAIR_INFO_MJD";
+
      register unsigned int ni, no;
      register unsigned int val;
      
@@ -151,17 +154,23 @@ void _REPAIR_INFO_MJD( unsigned int num_info, struct mds0_info *info )
 
      struct mds0_info *info_tmp;
 
+     if ( num_info == 0 ) return;
+
      /* allocate memory */
      on_board_time = (unsigned int *) malloc( num_info * sizeof(int) );
+     if ( on_board_time == NULL )
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "on_board_time" );
 
      /* initialize arrays */
-     for ( ni = 0; ni < num_info; ni++ ) {
+     ni = 0;
+     do { 
 	  on_board_time[ni] = info[ni].on_board_time;
-     }
+     } while ( ++ni < num_info );
+
      shellsort_uint32( num_info, on_board_time );
 
      /* obtain unique values of onboard time */
-     val = on_board_time[0];
+     val = *on_board_time;
      for ( ni = 0; ni < num_info; ni++ ) {
 	  if ( on_board_time[ni] != val ) {
 	       val = (on_board_time[++num_obt] = on_board_time[ni]);
@@ -175,6 +184,8 @@ void _REPAIR_INFO_MJD( unsigned int num_info, struct mds0_info *info )
       */
      info_tmp = (struct mds0_info *)
 	  malloc( num_info * sizeof(struct mds0_info) );
+     if ( info_tmp == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "info_tmp" );
      (void) memcpy( info_tmp, info, num_info * sizeof(struct mds0_info) );
 
      /* sort info-records */
@@ -187,6 +198,7 @@ void _REPAIR_INFO_MJD( unsigned int num_info, struct mds0_info *info )
 	  }
      }
      free( info_tmp );
+done:
      free( on_board_time );
 }
 
@@ -223,7 +235,7 @@ void _CHECK_INFO_MJD( unsigned int num_info, struct mds0_info *info )
 	       char msg[SHORT_STRING_LENGTH];
 
       	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-      				"MJD of info-records not monotonic increasing");
+      				"MJD of DSRs not monotonic increasing");
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 
 	       _REPAIR_INFO_MJD( num_info, info );
@@ -321,13 +333,14 @@ void _SET_INFO_STATEINDEX( unsigned int num_info, struct mds0_info *info )
 static inline
 void _REPAIR_INFO_STATE_ID( unsigned short state_index,
 			    unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->quality, info->state_id @*/
+     /*@modifies nadc_stat, nadc_err_stack, info->quality, info->state_id; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
      const char prognm[] = "_REPAIR_INFO_STATE_ID";
 
      char msg[SHORT_STRING_LENGTH];
 
-     register unsigned short ni;
+     register unsigned int ni;
      register unsigned short num = 0;
 
      unsigned char state_id;
@@ -335,19 +348,24 @@ void _REPAIR_INFO_STATE_ID( unsigned short state_index,
 
      size_t num_index = 0;
 
-     for ( ni = 0; ni < num_info; ni++ ) {
-	  if ( info[ni].state_index == state_index ) num++;
-     }
-     state_array = (unsigned char *) malloc( (num_index = (size_t) num) );
+     if ( num_info == 0 ) return;
 
-     num = 0;
-     for ( ni = 0; ni < num_info; ni++ ) {
+     ni = 0;
+     do { 
+	  if ( info[ni].state_index == state_index ) num++;
+     } while ( ++ni < num_info );
+     state_array = (unsigned char *) malloc( (num_index = (size_t) num) );
+     if ( state_array == NULL )
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "state_array" );
+     num = 0; ni = 0;
+     do {
 	  if ( info[ni].state_index == state_index )
 	       state_array[num++] = info[ni].state_id;
-     }
+     } while ( ++ni < num_info );
      state_id = SELECTuc( (num_index+1)/2, num_index, state_array );
 
-     for ( ni = 0; ni < num_info; ni++ ) {
+     ni = 0;
+     do {
 	  if ( info[ni].state_index == state_index 
 	       && info[ni].state_id != state_id ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH,
@@ -356,7 +374,7 @@ void _REPAIR_INFO_STATE_ID( unsigned short state_index,
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       info[ni].state_id = state_id;
 	  }
-     }
+     } while ( ++ni < num_info );
      free( state_array );
 }
 
@@ -408,7 +426,7 @@ void _CHECK_INFO_STATE_ID( unsigned int num_info, struct mds0_info *info )
 			 char msg[SHORT_STRING_LENGTH];
 
 			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-				   "correct State ID state_index: %-u/%02hhu", 
+				  "correct State ID [index/state]: %-u/%02hhu", 
 					  indx, state_id );
 			 NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 
@@ -424,8 +442,7 @@ void _CHECK_INFO_STATE_ID( unsigned int num_info, struct mds0_info *info )
 
 /*+++++++++++++++++++++++++
 .IDENTifer   _SORT_INFO_PACKET_ID
-.PURPOSE     sort info-records of a state with bcps monotonically increasing
-             remove info-records with duplicate bcps values
+.PURPOSE     sort info-records on packet_id (DET, AUX, PMD) 
 .INPUT/OUTPUT
   call as   num_info_det = _SORT_INFO_PACKET_ID( num_info, info );
      input:  
@@ -440,6 +457,8 @@ void _CHECK_INFO_STATE_ID( unsigned int num_info, struct mds0_info *info )
 static
 unsigned int _SORT_INFO_PACKET_ID( unsigned int num_info, 
 				   struct mds0_info *info )
+     /*@modifies nadc_stat, nadc_err_stack, info; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
      const char prognm[] = "_SORT_INFO_PACKET_ID";
 
@@ -453,7 +472,10 @@ unsigned int _SORT_INFO_PACKET_ID( unsigned int num_info,
 
      struct mds0_info *info_tmp;
 
-     for ( ni = 0; ni < num_info; ni++ ) {
+     if ( num_info == 0 ) return;
+
+     ni = 0;
+     do {
 	  if ( info[ni].packet_type == SCIA_DET_PACKET )
 	       num_info_det++;
 	  else if ( info[ni].packet_type == SCIA_AUX_PACKET )
@@ -462,17 +484,20 @@ unsigned int _SORT_INFO_PACKET_ID( unsigned int num_info,
 	       num_info_pmd++;
 	  else
 	       num_info_undef++;
-     }
+     } while ( ++ni < num_info );
      if ( num_info_undef != 0 ) {
 	  char msg[SHORT_STRING_LENGTH];
 
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
-			   "info-records with undefined packet ID found" );
+			   "%-u DSRs with undefined packet ID found", 
+			   num_info_undef );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
      }
 
-     info_tmp = (struct mds0_info *)
+     info_tmp = (struct mds0_info *) 
 	  malloc( num_info * sizeof(struct mds0_info) );
+     if ( info_tmp == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "info_tmp" );
      (void) memcpy( info_tmp, info, num_info * sizeof(struct mds0_info) );
 
      /* sort info-records */
@@ -485,7 +510,7 @@ unsigned int _SORT_INFO_PACKET_ID( unsigned int num_info,
 	  }
      }
      free( info_tmp );
-
+done:
      return num_info_det;
 }
 
@@ -535,7 +560,7 @@ void shellsort_bcps( unsigned int length, struct mds0_info *info )
 static inline
 void _REPAIR_INFO_BCPS( unsigned short state_index,
 			unsigned int num_info, struct mds0_info *info )
-     /*@modifies info @*/
+     /*@modifies info->quality, info->bcps, info->state_index @*/
 {
      const char prognm[] = "_REPAIR_INFO_BCPS";
 
@@ -608,7 +633,7 @@ void _REPAIR_INFO_BCPS( unsigned short state_index,
 -------------------------*/
 static
 void _CHECK_INFO_BCPS( unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->quality, info->bcps @*/
+     /*@modifies info->quality, info->bcps, info->state_index @*/
 {
      register unsigned int ni;
 
