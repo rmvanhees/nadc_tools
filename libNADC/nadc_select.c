@@ -79,11 +79,7 @@ unsigned char SELECTuc( const size_t kk, const size_t dim,
      (void) memcpy( ucbuff+1, ca, dim * sizeof(char) );
 
      FOREVER {
-	  if ( high <= low+1 ) {
-	       if ( high == low+1 && ucbuff[low] < ucbuff[high] )
-		    SWAP( ucbuff[low], ucbuff[high] );
-	       break;
-	  } else {
+	  if ( high > (low + 1) ) {
 	       size_t mid = (low + high) / 2;
 
 	       SWAP( ucbuff[mid], ucbuff[low+1] );
@@ -102,14 +98,17 @@ unsigned char SELECTuc( const size_t kk, const size_t dim,
 	       FOREVER {
 		    do ll++; while ( ucbuff[ll] < test );
 		    do hh--; while ( ucbuff[hh] > test );
-
 		    if ( hh < ll ) break;
 		    SWAP( ucbuff[ll], ucbuff[hh] );
 	       }
 	       ucbuff[low+1] = ucbuff[hh];
 	       ucbuff[hh] = test;
-	       if ( hh <= kk ) low = ll;
 	       if ( hh >= kk ) high = hh - 1;
+	       if ( hh <= kk ) low = ll;
+	  } else {
+	       if ( high == low+1 && ucbuff[low] > ucbuff[high] )
+		    SWAP( ucbuff[low], ucbuff[high] );
+	       break;
 	  }
      }
      temp = ucbuff[kk];
@@ -138,7 +137,7 @@ short SELECTs( const size_t kk, const size_t dim, const short *sa )
 
      FOREVER {
 	  if ( high <= low+1 ) {
-	       if ( high == low+1 && sbuff[low] < sbuff[high] )
+	       if ( high == low+1 && sbuff[low] > sbuff[high] )
 		    SWAP( sbuff[low], sbuff[high] );
 	       break;
 	  } else {
@@ -196,7 +195,7 @@ int SELECTi( const size_t kk, const size_t dim, const int *ia )
 
      FOREVER {
 	  if ( high <= low+1 ) {
-	       if ( high == low+1 && ibuff[low] < ibuff[high] )
+	       if ( high == low+1 && ibuff[low] > ibuff[high] )
 		    SWAP( ibuff[low], ibuff[high] );
 	       break;
 	  } else {
@@ -254,7 +253,7 @@ float SELECTr( const size_t kk, const size_t dim, const float *ra )
 
      FOREVER {
 	  if ( high <= low+1 ) {
-	       if ( high == low+1 && rbuff[low] < rbuff[high] )
+	       if ( high == low+1 && rbuff[low] > rbuff[high] )
 		    SWAP( rbuff[low], rbuff[high] );
 	       break;
 	  } else {
@@ -312,7 +311,7 @@ double SELECTd( const size_t kk, const size_t dim, const double *da )
 
      FOREVER {
 	  if ( high <= low+1 ) {
-	       if ( high == low+1 && dbuff[low] < dbuff[high] )
+	       if ( high == low+1 && dbuff[low] > dbuff[high] )
 		    SWAP( dbuff[low], dbuff[high] );
 	       break;
 	  } else {

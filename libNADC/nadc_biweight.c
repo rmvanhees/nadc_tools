@@ -102,16 +102,15 @@ float _SELECT( const size_t kk, const size_t dim, float *rbuff )
 	       FOREVER {
 		    do ll++; while ( rbuff[ll] < test );
 		    do hh--; while ( rbuff[hh] > test );
-
 		    if ( hh < ll ) break;
 		    SWAP( rbuff[ll], rbuff[hh] );
 	       }
 	       rbuff[low+1] = rbuff[hh];
 	       rbuff[hh] = test;
-	       if ( hh <= kk ) low = ll;
 	       if ( hh >= kk ) high = hh - 1;
+	       if ( hh <= kk ) low = ll;
 	  } else {
-	       if ( high == low+1 && rbuff[low] < rbuff[high] )
+	       if ( high == (low + 1) && rbuff[low] > rbuff[high] )
 		    SWAP( rbuff[low], rbuff[high] );
 	       return rbuff[kk];
 	  }
