@@ -102,7 +102,7 @@ static const size_t sdmf_hist2_sizes[DIM_SDMF_HIST2] = {
 };
 
 /* structure calibration-state database (SDMF30) */
-#define DIM_MTBL_CALIB   18
+#define DIM_MTBL_CALIB   20
 struct mtbl_calib_rec 
 {
      double julianDay;                        /* taken from MDS_DET */

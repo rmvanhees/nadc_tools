@@ -442,6 +442,11 @@ extern void FREE_4D( /*@notnull@*/ /*@only@*/ void ****p )
 
 extern int BinarySearch( int, const int *, const int *, int );
 
+extern size_t NADC_BIWEIGHT( const size_t, const float *, 
+			     /*@out@*/ float *median,
+			     /*@out@*/ /*@null@*/ float *scale )
+     /*@globals  nadc_stat, nadc_err_stack, errno;@*/
+     /*@modifies nadc_stat, nadc_err_stack, errno, median, scale@*/;
 extern void NADC_INTERPOL( float, float, float, unsigned int, const float *, 
 			   const float *, /*@unique@*/ float *Y )
       /*@globals  nadc_stat, nadc_err_stack;@*/

@@ -45,7 +45,6 @@ set (SCIA_LV0_SRCS
 set (SCIA_LV1_SRCS
     get_scia_lv1c_geo.c
     get_scia_lv1c_mds.c
-    get_scia_lv1c_mean.c
     get_scia_lv1c_pmd.c
     get_scia_lv1c_polV.c
     is_scia_lv1c.c

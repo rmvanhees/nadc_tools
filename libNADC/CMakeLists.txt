@@ -24,9 +24,10 @@ set (NADC_ENVI_SRCS
 )
 set (NADC_COMMON_SRCS
     nadc_akima.c 
-    nadc_alloc.c 
+    nadc_alloc.c
     nadc_binsearch.c
-    nadc_bits.c 
+    nadc_bits.c
+    nadc_biweight.c
     nadc_check_for_saa.c 
     nadc_copyright.c
     nadc_date.c 

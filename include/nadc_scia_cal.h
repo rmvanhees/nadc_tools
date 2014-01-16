@@ -41,6 +41,7 @@ struct scia_straycorr {
      float **ghosts;
 };
 
+#if defined _STDIO_H || defined _STDIO_H_ || defined S_SPLINT_S
 struct file_rec {
      FILE *fp;
      char procName[ENVI_FILENAME_SIZE];
@@ -70,6 +71,7 @@ struct file_rec {
      float electron_bu[SCIENCE_CHANNELS];
      struct dsd_envi *dsd;
 };
+#endif
 
 struct wvlen_rec
 {
@@ -145,6 +147,7 @@ extern void SCIA_SRON_CAL_NLIN( unsigned short, struct mds1c_scia * )
      /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp,
        mds_1c->pixel_val@*/;
 
+#if defined _STDIO_H || defined _STDIO_H_ || defined S_SPLINT_S
 extern void SCIA_ATBD_FLAG_BDPM( const struct file_rec *fileParam,
 				 const struct state1_scia *, 
 				 struct mds1c_scia *mds_1c )
@@ -181,26 +184,6 @@ extern void SCIA_STATE_CAL_DARK( const struct file_rec *fileParam,
 extern void SCIA_ATBD_CAL_ETALON( const struct file_rec *,
 				  const struct state1_scia *, 
 				  struct mds1c_scia * );
-
-extern void SCIA_ATBD_CAL_MEM( unsigned char,
-			       const struct state1_scia *,
-			       const struct mds1_scia *,
-			       struct mds1c_scia * );
-
-extern void SCIA_ATBD_CAL_NLIN( unsigned char,
-				const struct state1_scia *,
-				const struct mds1_scia *,
-				struct mds1c_scia * );
-
-extern void SCIA_ATBD_CAL_STRAY( float, const struct state1_scia *, 
-				 const struct mds1_scia *,
-				 struct mds1c_scia * );
-
-extern void SCIA_SRON_CAL_NOISE( const struct file_rec *,
-				 const struct state1_scia *, 
-				 struct mds1c_scia *mds_1c )
-     /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-     /*@modifies errno, nadc_stat, nadc_err_stack, mds_1c->pixel_err@*/;
 
 extern void SCIA_SRON_CAL_TRANS( const struct file_rec *,
 				 const struct state1_scia *, 
@@ -249,6 +232,33 @@ extern void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
                                 struct mds1c_scia *mds_1c )
      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/;
 
+extern void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
+				 float, struct wvlen_rec *wvlen )
+      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
+      /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp,
+	wvlen->science, wvlen->error, wvlen->solar@*/;
+
+extern void SCIA_SRON_CAL_NOISE( const struct file_rec *,
+				 const struct state1_scia *, 
+				 struct mds1c_scia *mds_1c )
+     /*@globals  errno, nadc_stat, nadc_err_stack;@*/
+     /*@modifies errno, nadc_stat, nadc_err_stack, mds_1c->pixel_err@*/;
+#endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
+
+extern void SCIA_ATBD_CAL_MEM( unsigned char,
+			       const struct state1_scia *,
+			       const struct mds1_scia *,
+			       struct mds1c_scia * );
+
+extern void SCIA_ATBD_CAL_NLIN( unsigned char,
+				const struct state1_scia *,
+				const struct mds1_scia *,
+				struct mds1c_scia * );
+
+extern void SCIA_ATBD_CAL_STRAY( float, const struct state1_scia *, 
+				 const struct mds1_scia *,
+				 struct mds1c_scia * );
+
 extern void SCIA_ATBD_CAL_WAVE( const struct wvlen_rec, 
 				const struct state1_scia *,
 				struct mds1c_scia * );
@@ -263,12 +273,6 @@ extern void SCIA_SMR_CAL_RAD( unsigned short, unsigned short,
 			      /*@out@*/ float *smr )
       /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, smr@*/;
-
-extern void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
-				 float, struct wvlen_rec *wvlen )
-      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
-      /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp,
-	wvlen->science, wvlen->error, wvlen->solar@*/;
 
 #ifdef __cplusplus
   }

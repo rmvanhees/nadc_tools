@@ -379,11 +379,6 @@ extern void GET_SCIA_ROE_INFO( bool, const double, /*@out@*/ int *,
 			       /*@out@*/ bool *, /*@out@*/ float * );
 extern double GET_SCIA_ROE_JDAY( unsigned short );
 
-extern void GET_SCIA_LV1C_MEAN( bool, unsigned short, const struct mds1c_scia *,
-				/*@out@*/ unsigned short *, 
-				/*@out@*/ unsigned char *,  /*@out@*/ float *,
-				/*@out@*/ float *, /*@out@*/ float * );
-
 extern void SCIA_LV1C_FREE_MDS( int, unsigned int, 
 				/*@only@*/ struct mds1c_scia * );
 extern void SCIA_LV1C_FREE_MDS_PMD( int, /*@only@*/ struct mds1c_pmd * );
