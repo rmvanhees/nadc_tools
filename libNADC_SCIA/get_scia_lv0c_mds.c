@@ -62,6 +62,7 @@ unsigned short _GET_NUM_CLUSDEF( unsigned int num_det,
 				 const struct mds0_det *det )
 {
      register unsigned char ncl, nch;
+     register unsigned char nc = 1;
      register unsigned int  nd;
 
      unsigned short nr_clus;
@@ -70,12 +71,12 @@ unsigned short _GET_NUM_CLUSDEF( unsigned int num_det,
      /* initialize return value */
      unsigned short numClus = 0;
 
-     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+     do {
           register unsigned char clusIDmx = 0;
 
           for ( nd = 0; nd < num_det; nd++ ) {
 	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
-		    if ( det[nd].data_src[nch].hdr.channel.field.id != nch )
+		    if ( det[nd].data_src[nch].hdr.channel.field.id != nc )
 			 continue;
 
 		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
@@ -87,8 +88,9 @@ unsigned short _GET_NUM_CLUSDEF( unsigned int num_det,
 		    }
 	       }
           }
-          numClus += clusIDmx;
-     }
+          numClus += clusIDmx + 1;
+     } while ( ++nc <= SCIENCE_CHANNELS );
+
      return numClus;
 }
 
@@ -98,6 +100,7 @@ unsigned short _GET_LV0_CLUSDEF( unsigned int num_det,
 				 struct clusdef_rec *clusDef )
 {
      register unsigned char ncl, nch;
+     register unsigned char nc = 1;
      register unsigned int  nd;
 
      unsigned short nr_clus;
@@ -108,12 +111,12 @@ unsigned short _GET_LV0_CLUSDEF( unsigned int num_det,
 
      (void) memset( clusDef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
 
-     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+     do {
           register unsigned char clusIDmx = 0;
 
           for ( nd = 0; nd < num_det; nd++ ) {
 	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
-		    if ( det[nd].data_src[nch].hdr.channel.field.id != nch )
+		    if ( det[nd].data_src[nch].hdr.channel.field.id != nc )
 			 continue;
 
 		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
@@ -125,15 +128,15 @@ unsigned short _GET_LV0_CLUSDEF( unsigned int num_det,
 			 
 			 if ( chan_src[ncl].cluster_id > clusIDmx )
 			      clusIDmx = chan_src[ncl].cluster_id;
-			 clusDef[indx].chanID = nch;
+			 clusDef[indx].chanID = nc;
 			 clusDef[indx].clusID = chan_src[ncl].cluster_id;
 			 clusDef[indx].start  = chan_src[ncl].start;
 			 clusDef[indx].length = chan_src[ncl].length;
 		    }
 	       }
           }
-          numClus += clusIDmx;
-     }
+          numClus += clusIDmx + 1u;
+     } while ( ++nc <= SCIENCE_CHANNELS );
      return numClus;
 }
 
@@ -424,7 +427,8 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int num_det,
 	       mds_pntr[nc].pixel_ids = (unsigned short *)
 		    malloc( mds_pntr[nc].num_pixels * sizeof(short) );
 	       mds_pntr[nc].pixel_val = (float *)
-		    malloc( mds_pntr[nc].num_obs * mds_pntr[nc].num_pixels * sizeof(float) );
+		    malloc( mds_pntr[nc].num_obs * mds_pntr[nc].num_pixels 
+			    * sizeof(float) );
 	       if ( mds_pntr[nc].pixel_ids == NULL 
 		    || mds_pntr[nc].pixel_val == NULL ) {
 		    NADC_ERROR(prognm, NADC_ERR_ALLOC, "pixel_ids/pixel_val");
