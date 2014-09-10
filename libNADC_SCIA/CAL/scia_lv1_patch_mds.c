@@ -1079,7 +1079,7 @@ void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray,
 		    ghoststray[ns++] = intensity * spec_f[np];
 	       }
 	  }
-	  dim_pos = ns;
+	  dim_pos = (ns > 0) ? ns : 1;
 
 	  /* make sure the data is sorted */
 	  if ( positions[0] > positions[dim_pos-1] ) {
