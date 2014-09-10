@@ -125,9 +125,9 @@ PRO _SET_SCIA_CLUSDEF, state_id, orbit
   IF dd LT 0 THEN MESSAGE, 'Could not open dataset: metaTable'
   mtbl = H5D_READ( dd )
   H5D_CLOSE, dd
-  IF mtbl[orbit].indx_clusDef EQ 255B THEN BEGIN
-     indx = WHERE( mtbl.indx_clusDef NE 255B )
-     orbitList = mtbl[indx].absOrbit
+  IF mtbl[orbit].indx_CLcon EQ 255B THEN BEGIN
+     indx = WHERE( mtbl.indx_Clcon NE 255B )
+     orbitList = mtbl[indx].orbit
      diff = MIN( ABS(orbitList - orbit), ii )
      mtbl = mtbl[indx[ii]]
   ENDIF ELSE $
@@ -137,7 +137,7 @@ PRO _SET_SCIA_CLUSDEF, state_id, orbit
   IF dd LT 0 THEN MESSAGE, 'Could not open dataset: clusDef'
   space_id = H5D_GET_SPACE( dd )
   mem_space_id = H5S_CREATE_SIMPLE( [64,1] )
-  H5S_SELECT_HYPERSLAB, space_id, [0,mtbl.indx_clusDef], [64,1], /reset
+  H5S_SELECT_HYPERSLAB, space_id, [0,mtbl.indx_CLcon], [64,1], /reset
   clusDef = H5D_READ( dd, FILE_SPACE=space_id, MEMORY_SPACE=mem_space_id  )
   H5S_CLOSE, mem_space_id
   H5S_CLOSE, space_id
@@ -146,8 +146,8 @@ PRO _SET_SCIA_CLUSDEF, state_id, orbit
   H5G_CLOSE, gid
   H5F_CLOSE, fid
 
-  DEFSYSV, '!scia', {state_id: state_id, orbit: mtbl.absOrbit, $
-                     duration: mtbl.count, num_clus: mtbl.num_cluster, $
+  DEFSYSV, '!scia', {state_id: state_id, orbit: mtbl.orbit, $
+                     duration: mtbl.duration, num_clus: mtbl.num_clus, $
                      clusDef: clusDef}
  RETURN
 END

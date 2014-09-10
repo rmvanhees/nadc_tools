@@ -2,10 +2,8 @@
 @setup_nadc.idl
 
 ; open file
-data_dir = '/SCIA/LV1_07/W/'
+data_dir = '/SCIA/LV1_02/W/'
 flname = 'SCI_NL__1PWDPA20031114_103040_000060062021_00352_08923_6491.N1'
-data_dir = '/deos/krijger2/Verification/Verificatie_20130506/V7/'
-flname = 'SCI_NL__1PWDPA20020810_051658_000060132008_00263_02321_0195.N1'
 SCIA_HL_OPEN, data_dir + flname, dsd, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
 
@@ -124,19 +122,20 @@ SCIA_LV1_RD_MDS, dsd, mds, status=status, state_id=6, calib='0,1,2,3,4,N', $
 IF status NE 0 THEN NADC_ERR_TRACE
 
 PRINT, 'Do ATBD calibration'
-SCIA_LV1_RD_MDS, dsd, mds_atbd, status=status, state_id=6, calib='0'
+SCIA_LV1_RD_MDS, dsd, mds_atbd, status=status, state_id=6, channel=5, $
+                 calib='0,1,E'
 IF status NE 0 THEN NADC_ERR_TRACE
 
 PRINT, 'Do SDMF calibration'
-SCIA_LV1_RD_MDS, dsd, mds_sdmf, status=status, state_id=6, calib='0+'
+SETENV, 'USE_SDMF_VERSION=3.0'
+SCIA_LV1_RD_MDS, dsd, mds_sdmf, status=status, state_id=6, channel=5, $
+                 calib='0,1,E+'
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ;PRINT, 'Extract data'
-d_0 = get_lv1_mds_data( mds_raw, -1, channel=8 )
-d_1 = get_lv1_mds_data( mds_atbd, -1, channel=8 )
-d_2 = get_lv1_mds_data( mds_sdmf, -1, channel=8 )
-d_3 = get_lv1_mds_data( mds, -1, channel=8 )
-plot, (d_1 - d_3)[*,2,0], xs=3, ys=3, psym=-4
+d_1 = get_lv1_mds_data( mds_atbd, -1, errors=err_1 )
+d_2 = get_lv1_mds_data( mds_sdmf, -1, errors=err_2 )
+plot, (d_1 - d_2)[*,2,0], xs=3, ys=3, psym=-4
 
 ; close file
 IF SCIA_FCLOSE() NE 0 THEN $

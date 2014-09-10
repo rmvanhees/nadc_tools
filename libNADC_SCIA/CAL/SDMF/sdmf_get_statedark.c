@@ -23,7 +23,8 @@
 .COMMENTS    contains SDMF_get_StateDark, SDMF_get_StateDark_30
                       SDMF_get_StateDark_24
 .ENVIRONment None
-.VERSION     2.2     20-Sep-2012   added option to mimic algorithm of Hans 
+.VERSION     2.3     10-Sep-2014   do not fail on missing orbits (v3.0), RvH
+             2.2     20-Sep-2012   added option to mimic algorithm of Hans 
                                    Schrijver for dark noise (v2.4), RvH
              2.1     16-May-2012   back-ported SDMF v2.4 & 3.0, RvH
              2.0     14-May-2012   added test program, RvH
@@ -396,11 +397,10 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
 
      register unsigned short ival;
 
-     bool found = FALSE;
-
      hid_t   fid = -1;
      hid_t   gid = -1;
 
+     int  delta;
      int  numIndx;
      int  metaIndx[MAX_NUM_META_INDEX];
 
@@ -408,7 +408,8 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
      char sdmf_db[MAX_STRING_LENGTH];
      char grpName[STR_SZ_H5_GRP];
 
-     unsigned short total[SCIENCE_PIXELS];
+     unsigned short num_signal[SCIENCE_PIXELS];
+     unsigned short num_noise[SCIENCE_PIXELS];
      float rbuff[SCIENCE_PIXELS];
 
      struct mtbl_calib_rec *mtbl = NULL;
@@ -421,17 +422,18 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
 	  (channel == 0) ? 0 : (channel-1) * CHANNEL_SIZE,
 	  (channel == 0) ? SCIENCE_PIXELS-1 : channel * CHANNEL_SIZE - 1
      };
+     const int  MaxDiffOrbitNumber = 14;
 /*
  * initialize returned values
  */
      if ( channel == 0 ) {
 	  (void) memset( pet, 0, SCIENCE_CHANNELS * sizeof(float) );
-	  (void) memset( total, 0, SCIENCE_PIXELS * sizeof(short) );
+	  (void) memset( num_signal, 0, SCIENCE_PIXELS * sizeof(short) );
 	  (void) memset( darkSignal, 0, SCIENCE_PIXELS * sizeof(float) );
 	  (void) memset( darkNoise, 0, SCIENCE_PIXELS * sizeof(float) );
      } else {
 	  *pet = 0.f;
-	  (void) memset( total, 0, CHANNEL_SIZE * sizeof(short) );
+	  (void) memset( num_signal, 0, CHANNEL_SIZE * sizeof(short) );
 	  (void) memset( darkSignal, 0, CHANNEL_SIZE * sizeof(float) );
 	  (void) memset( darkNoise, 0, CHANNEL_SIZE * sizeof(float) );
      }
@@ -454,9 +456,33 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
  * select records and read metaTable info
  */
      numIndx = MAX_NUM_META_INDEX;
-     (void) SDMF_get_metaIndex( gid, orbit, &numIndx, metaIndx );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex" );
+
+     delta = 0;
+     do {
+	  (void) SDMF_get_metaIndex( gid, orbit+delta, &numIndx, metaIndx );
+	  if ( IS_ERR_STAT_FATAL )
+	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex" );
+	  if ( numIndx == 0 ) 
+	       delta = (delta > 0) ? (-delta) : (1 - delta);
+	  else
+	       break;
+     } while ( abs(delta) < MaxDiffOrbitNumber );
+
+     if ( numIndx < 1 ) {
+	  (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
+			   "\n\tSDMF Dark data (v3.0) no applicable data found for orbit: %d",
+			   orbit );
+	  NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+	  return FALSE;
+     } else {
+	  (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
+			   "\n\tapplied SDMF Dark data (v3.0) of orbit: %-d (%d)",
+			   orbit+delta, numIndx );
+	  NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     }
+/*
+ * read metaTable entry of orbit
+ */
      SDMF30_rd_metaTable( gid, &numIndx, metaIndx, &mtbl );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_rd_metaTable" );
@@ -495,14 +521,14 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
 	       for ( np = 0; np < SCIENCE_PIXELS; np++ ) {
 		    if ( isnormal( rbuff[np] ) ) {
 			 darkSignal[np] += rbuff[np];
-			 total[np]++;
+			 num_signal[np]++;
 		    }
 	       }
 	  } else {
 	       for ( np = 0; np < CHANNEL_SIZE; np++ ) {
 		    if ( isnormal( rbuff[np] ) ) {
 			 darkSignal[np] += rbuff[np];
-			 total[np]++;
+			 num_signal[np]++;
 		    }
 	       }
 	  }
@@ -513,31 +539,36 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "readoutPet" );
 	  if ( channel == 0 ) {
 	       for ( np = 0; np < SCIENCE_PIXELS; np++ ) {
-		    if ( isnormal( rbuff[np] ) )
+		    if ( isnormal( rbuff[np] ) ) {
 			 darkNoise[np] += (rbuff[np] * rbuff[np]);
+			 num_noise[np]++;
+		    }
 	       }
 	  } else {
 	       for ( np = 0; np < CHANNEL_SIZE; np++ ) {
-		    if ( isnormal( rbuff[np] ) )
+		    if ( isnormal( rbuff[np] ) ) {
 			 darkNoise[np] += (rbuff[np] * rbuff[np]);
+			 num_noise[np]++;
+		    }
 	       }
 	  }
      }
-     found = TRUE;
      if ( channel == 0 ) {
 	  for ( np = 0; np < SCIENCE_PIXELS; np++ ) {
 	       unsigned short ichan = (unsigned short)(np / CHANNEL_SIZE);
 	       unsigned short indx = (unsigned short) nlcorr.curve[np];
 
-	       if ( total[np] > 0 ) {
-		    darkSignal[np] /= total[np];
+	       if ( num_signal[np] > 0 ) {
+		    darkSignal[np] /= num_signal[np];
 		    ival = __ROUNDf_us( darkSignal[np] );
 		    if ( ichan < 5 )
 			 darkSignal[np] -= memcorr.matrix[ichan][ival];
 		    else
 			 darkSignal[np] -= nlcorr.matrix[indx][ival];
-		    darkNoise[np] = sqrtf(darkNoise[np] / total[np] );
-	       } else
+	       }
+	       if ( num_noise[np] > 0 )
+		    darkNoise[np] = sqrtf(darkNoise[np] / num_noise[np] );
+	       else
 		    darkNoise[np] = -1.f;
 	  }
      } else {
@@ -545,22 +576,20 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
 	       unsigned short indx = (unsigned short) 
 		    nlcorr.curve[np + (channel-1) * CHANNEL_SIZE];
 
-	       if ( total[np] > 0 ) {
-		    darkSignal[np] /= total[np];
+	       if ( num_signal[np] > 0 ) {
+		    darkSignal[np] /= num_signal[np];
 		    ival = __ROUNDf_us( darkSignal[np] );
 		    if ( channel < 6 )
 			 darkSignal[np] -= memcorr.matrix[channel-1][ival];
 		    else
 			 darkSignal[np] -= nlcorr.matrix[indx][ival];
-		    darkNoise[np] = sqrtf( darkNoise[np] / total[np] );
-	       } else
+	       }
+	       if ( num_noise[np] > 0 ) 
+		    darkNoise[np] = sqrtf( darkNoise[np] / num_noise[np] );
+	       else
 		    darkNoise[np] = -1.f;
 	  }
      }
-     (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
-		      "\n\tapplied SDMF Dark data (v3.0) of orbit: %-d (%-d)",
-		      mtbl->absOrbit, numIndx );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
 done:
      SCIA_FREE_H5_MEM( &memcorr );
      SCIA_FREE_H5_NLIN( &nlcorr );
@@ -569,7 +598,7 @@ done:
      if ( gid > 0 ) H5Gclose( gid );
      if ( fid > 0 ) H5Fclose( fid );
 
-     return found;
+     return TRUE;
 }
 
 /*+++++++++++++++++++++++++ SDMF version 3.1 ++++++++++++++++++++++++++++++*/

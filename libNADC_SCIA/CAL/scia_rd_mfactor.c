@@ -42,7 +42,7 @@
  * that this is a ISO C99 program
  */
 #define  _ISOC99_SOURCE
-#define  _BSD_SOURCE        /* needed voor scnadir */
+#define  _BSD_SOURCE        /* needed voor scandir */
 
 /*+++++ System headers +++++*/
 #include <stdio.h>

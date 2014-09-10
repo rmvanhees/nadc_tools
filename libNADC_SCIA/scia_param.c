@@ -250,14 +250,15 @@ struct nadc_opt {
        1, {SCIA_LEVEL_1, 0, 0, 0} },
      { "--clus", "=[1,2,...,64]", "write data of selected clusters",
        1, {SCIA_LEVEL_1, 0, 0, 0} },
+/* MDS calibration */
+     { "--cal", "[=0,1,...,9]", "apply spectral calibration, impies L1c format",
+       1, {SCIA_LEVEL_1, 0, 0, 0} },
 /* keydata patch */
      { "-no_patch", NULL, "do not apply any patches on annotation datasets",
        1, {SCIA_PATCH_1, 0, 0, 0} },
      { "--patch", "=[0,1,..,9]", "apply corrections on annotation datasets",
        1, {SCIA_PATCH_1, 0, 0, 0} },
-/* MDS calibration */
-     { "--cal", "[=0,1,...,9]", "apply spectral calibration, impies L1c format",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+/* name of output file */
      { "--output", "=<outfile>", "(default: <infile> + appropriate extension)",
        0, {ALL_INSTR, 0, 0, 0} },
 /* last and empty entry */
@@ -816,6 +817,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 		    param->patch_scia = SCIA_PATCH_NONE;
 	       }
 	  } else if ( argv[narg][0] == '-' && argv[narg][1] == '-' ) {
+	       /* perform selection on time-window */
 	       if ( strncmp( argv[narg]+2, "time", 4 ) == 0 ) {
 		    if ( param->flag_period == PARAM_UNSET ) {
 			 param->flag_period = PARAM_SET;
@@ -824,6 +826,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 			 if ( IS_ERR_STAT_FATAL )
 			      NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, "");
 		    }
+		    /* perform selection on geo-location */
 	       } else if ( strncmp( argv[narg]+2, "region", 6 ) == 0 ) {
 		    if ( param->flag_geoloc == PARAM_UNSET
 			 && (cpntr = strchr( argv[narg], '=' )) != NULL ) {
@@ -849,6 +852,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 			 }
 			 param->flag_geoloc = PARAM_SET;
 		    }
+		    /* perform selection on measurement category */
                } else if ( strncmp( argv[narg]+2, "cat", 3 ) == 0 ) {
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL ) 
 			 NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
@@ -856,6 +860,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 					MAX_NUM_STATE, param->catID, &num );
 		    if ( num > 0 && num < MAX_NUM_STATE )
 			 param->catID_nr = (unsigned char) num;
+		    /* perform selection on measurement state ID(s) */
 	       } else if ( strncmp( argv[narg]+2, "state", 4 ) == 0 ) {
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL ) 
 			 NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
@@ -863,6 +868,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 					MAX_NUM_STATE, param->stateID, &num );
 		    if ( num > 0 && num < MAX_NUM_STATE )
 			 param->stateID_nr = (unsigned char) num;
+		    /* perform selection on science channel(s) */
 	       } else if ( strncmp( argv[narg]+2, "chan", 4 ) == 0) {
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL ) { 
 			 param->chan_mask = BAND_NONE;
@@ -873,6 +879,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 						 NADC_ERR_PARAM, argv[narg] );
 			 }
 		    }
+		    /* perform selection on cluster ID(s) */
 	       } else if ( strncmp( argv[narg]+2, "clus", 4 ) == 0 ) {
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL ) { 
 			 param->clus_mask = 0ULL;
@@ -894,41 +901,38 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 						 NADC_ERR_PARAM, argv[narg] );
 			 }
 		    }
-/*
- * selected patches for Scia level 1b product
- */
-	       } else if ( strncmp( argv[narg]+2, "patch", 5 ) == 0 ) {
-		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL )
-			 param->patch_scia = SCIA_PATCH_ALL;
-		    else
-			 SCIA_SET_PATCH( cpntr+1, &param->patch_scia );
-/*
- * selected calibration steps
- */
+		    /* perform calibration on measurement data (L1b only) */
 	       } else if ( strncmp( argv[narg]+2, "cal", 3 ) == 0 ) {
 		    param->write_lv1c = PARAM_SET;
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL )
 			 param->calib_scia = SCIA_ATBD_CALIB;
 		    else
 			 SCIA_SET_CALIB( cpntr+1, &param->calib_scia );
+		    /* perform patches to calibration key data in L1b product */
+	       } else if ( strncmp( argv[narg]+2, "patch", 5 ) == 0 ) {
+		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL )
+			 param->patch_scia = SCIA_PATCH_ALL;
+		    else
+			 SCIA_SET_PATCH( cpntr+1, &param->patch_scia );
 	       }
-	  }
-	  if ( strncmp( argv[narg]+2, "output=", 7 ) == 0 ) {
-	       if ( strlen( argv[narg]+9 ) == 0 )
-		    NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
 
-	       if ( param->flag_outfile == PARAM_UNSET ) {
-		    (void) snprintf( outfile, MAX_STRING_LENGTH, 
-				     "%s", argv[narg]+9 );
-		    if ( (cpntr = strstr( outfile, ".h5" )) != NULL )
-			 *cpntr = '\0';
-		    if ( (cpntr = strstr( outfile, ".hdf" )) != NULL )
-			 *cpntr = '\0';
-		    if ( (cpntr = strstr( outfile, ".txt" )) != NULL )
-			 *cpntr = '\0';
-		    if ( (cpntr = strstr( outfile, ".child" )) != NULL )
-			 *cpntr = '\0';
-		    param->flag_outfile = PARAM_SET;
+	       if ( strncmp( argv[narg]+2, "output=", 7 ) == 0 ) {
+		    if ( strlen( argv[narg]+9 ) == 0 )
+			 NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
+
+		    if ( param->flag_outfile == PARAM_UNSET ) {
+			 (void) snprintf( outfile, MAX_STRING_LENGTH, 
+					  "%s", argv[narg]+9 );
+			 if ( (cpntr = strstr( outfile, ".h5" )) != NULL )
+			      *cpntr = '\0';
+			 if ( (cpntr = strstr( outfile, ".hdf" )) != NULL )
+			      *cpntr = '\0';
+			 if ( (cpntr = strstr( outfile, ".txt" )) != NULL )
+			      *cpntr = '\0';
+			 if ( (cpntr = strstr( outfile, ".child" )) != NULL )
+			      *cpntr = '\0';
+			 param->flag_outfile = PARAM_SET;
+		    }
 	       }
 	  }
      }
