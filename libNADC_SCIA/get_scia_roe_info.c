@@ -19,24 +19,12 @@
 .AUTHOR      R.M. van Hees
 .KEYWORDS    Envisat PDS 
 .LANGUAGE    ANSI C
-.PURPOSE     get orbit phase and SAA flag from ROE records
-.INPUT/OUTPUT
-  call as   GET_SCIA_ROE_INFO( eclipseMode, jday, 
-                               &absOrbit, &saaFlag, &orbitPhase );
-     input:
-             bool   eclipseMode :  TRUE  - orbit phase used for SDMF (v2.4)
-                                   FALSE - orbit phase as used by ESA
-	     double jday        :  julian Day (# days since 2000-01-01)
-    output:
-             int   *absOrbit    :  absolute orbit number
-             float *saaFlag     :  in-precise SAA flag
-             float *orbitPhase  :  orbit phase [0,1]
-
-.RETURNS     nothing
-             error status passed by global variable ``nadc_stat''
-.COMMENTS    None
+.PURPOSE     get orbit parameters from ROE records
+.RETURNS     depends on routine
+.COMMENTS    contains GET_SCIA_ROE_JDAY, GET_SCIA_ROE_INFO
 .ENVIRONment None
-.VERSION     2.0   18-Jan-2008  rewrite and combined different routines, RvH
+.VERSION     2.1   11-Sep-2014  updated documentation, fixed minor bugs, RvH
+             2.0   18-Jan-2008  rewrite and combined different routines, RvH
              1.1   18-Jan-2008  added GET_SCIA_ROE_ORBIT, RvH
              1.0   18-Dec-2007	created by R. M. van Hees 
 ------------------------------------------------------------*/
@@ -239,14 +227,33 @@ done:
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
+/*+++++++++++++++++++++++++
+.IDENTifer   GET_SCIA_ROE_INFO
+.PURPOSE     get orbit phase and SAA flag from ROE records
+.INPUT/OUTPUT
+  call as   GET_SCIA_ROE_INFO( eclipseMode, jday, 
+                               &absOrbit, &saaFlag, &orbitPhase );
+     input:
+             bool   eclipseMode :  TRUE  - orbit phase used for SDMF (v2.4)
+                                   FALSE - orbit phase as used by ESA
+	     double jday        :  Julian day (# days since 2000-01-01)
+    output:
+             int   *absOrbit    :  absolute orbit number
+             float *saaFlag     :  in-precise SAA flag
+             float *orbitPhase  :  orbit phase [0,1]
+
+.RETURNS     nothing
+             error status passed by global variable ``nadc_stat''
+.COMMENTS    none
+-------------------------*/
 void GET_SCIA_ROE_INFO( bool eclipseMode, const double jday, 
 			int *absOrbit, bool *saaFlag, float *orbitPhase )
 {
-     double tdiff;
-
      const double secPerDay = 60. * 60 * 24;
 
      static struct roe_rec roe;
+
+     double tdiff, phase;
 /*
  * initialise return values
  */
@@ -258,24 +265,38 @@ void GET_SCIA_ROE_INFO( bool eclipseMode, const double jday,
  */
      if ( _GET_ROE_ENTRY( jday, &roe ) < 0 ) return;
 
+     /* set absolute orbit number */
      *absOrbit = roe.orbit;
-     tdiff = (jday - roe.julianDay) * secPerDay - roe.eclipseEntry;
-     if ( ! eclipseMode ) {
-	  double orbitPhaseDiff = 0.5 *
-	       ((roe.eclipseEntry - roe.eclipseExit) / roe.period - 0.5);
 
-	  *orbitPhase =  (float)
-	       (fmod( tdiff, roe.period ) / roe.period + orbitPhaseDiff);
-     } else {
-	  *orbitPhase = fmodf( tdiff, roe.period ) / roe.period;
+     /* calculate orbit phase */
+     tdiff = (jday - roe.julianDay) * secPerDay - roe.eclipseEntry;
+     phase = fmod( tdiff, roe.period ) / roe.period;
+     if ( ! eclipseMode ) {
+	  phase += 0.5 *
+	       ((roe.eclipseEntry - roe.eclipseExit) / roe.period - 0.5);
      }
-     if ( *orbitPhase < 0.f ) *orbitPhase += 1.f;
-     if ( *orbitPhase > 0.5f ) 
+     *orbitPhase = ((phase >= 0) ? (float) phase : (float) (phase + 1));
+
+     /* set SAA flag */
+     tdiff = (jday - roe.julianDay) * secPerDay;
+     if ( tdiff > roe.eclipseExit && tdiff < roe.eclipseEntry )
 	  *saaFlag = (roe.saaDay == UCHAR_ZERO);
      else
 	  *saaFlag = (roe.saaEclipse == UCHAR_ZERO);
 }
 
+/*+++++++++++++++++++++++++
+.IDENTifer   GET_SCIA_ROE_JDAY
+.PURPOSE     return Julian day at start of orbit from ROE records
+.INPUT/OUTPUT
+  call as   jday = GET_SCIA_ROE_JDAY( absOrbit );
+     input:
+	     unsigned short absOrbit : absolute orbit number
+
+.RETURNS     Julian (decimal) day since 2000-01-01 (double)
+             error status passed by global variable ``nadc_stat''
+.COMMENTS    none
+-------------------------*/
 double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
 {
      const char prognm[] = "GET_SCIA_ROE_JDAY";
@@ -345,3 +366,60 @@ double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
      if ( fileID > 0 ) (void) H5Fclose( fileID );
      return jday;
 }
+
+/*
+ * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+#ifdef TEST_PROG
+bool Use_Extern_Alloc = FALSE;
+
+int main( void )
+{
+     const char prognm[] = "get_scia_roe_info";
+
+     const unsigned short orbit_min = 7564;
+     const unsigned short orbit_max = 8564;
+     const unsigned short num_steps = 1000;
+
+     register unsigned int ii;
+
+     int    absOrbit;
+     bool   saaFlag;
+     float  orbitPhase;
+     double jday_min, jday_max;
+     double jday, step;
+
+     jday_min = GET_SCIA_ROE_JDAY( orbit_min );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+			   "during call GET_SCIA_ROE_JDAY" );
+     jday_max = GET_SCIA_ROE_JDAY( orbit_max );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+			   "during call GET_SCIA_ROE_JDAY" );
+
+     (void) printf( "orbit range = [%-hu, %-hu]\n", orbit_min, orbit_max );
+     (void) printf( "Min(jday)=%15.11f, MAX(jday)=%15.11f, duration=%.11f\n",
+		    jday_min, jday_max, jday_max-jday_min );
+
+     jday = jday_min;
+     step = (jday_max - jday_min) / num_steps;
+     for ( ii = 0; ii < num_steps; ii++ ) {
+	  GET_SCIA_ROE_INFO( FALSE, jday, 
+			     &absOrbit, &saaFlag, &orbitPhase );
+	  (void) printf( "%15.11f %5d %2hhu %8.4f", 
+			 jday, absOrbit, (char) saaFlag, orbitPhase );
+	  GET_SCIA_ROE_INFO( TRUE, jday, 
+			     &absOrbit, &saaFlag, &orbitPhase );
+	  (void) printf( " --- %5d %2hhu %8.4f\n", 
+			 absOrbit, (char) saaFlag, orbitPhase );
+	  jday += step;
+     }
+done:
+     NADC_Err_Trace( stderr );
+     if ( IS_ERR_STAT_FATAL )
+          exit( EXIT_FAILURE );
+     else
+          exit( EXIT_SUCCESS );
+}
+#endif /* TEST_PROG */
