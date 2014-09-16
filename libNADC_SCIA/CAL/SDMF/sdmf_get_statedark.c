@@ -429,11 +429,13 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
      if ( channel == 0 ) {
 	  (void) memset( pet, 0, SCIENCE_CHANNELS * sizeof(float) );
 	  (void) memset( num_signal, 0, SCIENCE_PIXELS * sizeof(short) );
+	  (void) memset( num_noise, 0, SCIENCE_PIXELS * sizeof(short) );
 	  (void) memset( darkSignal, 0, SCIENCE_PIXELS * sizeof(float) );
 	  (void) memset( darkNoise, 0, SCIENCE_PIXELS * sizeof(float) );
      } else {
 	  *pet = 0.f;
 	  (void) memset( num_signal, 0, CHANNEL_SIZE * sizeof(short) );
+	  (void) memset( num_noise, 0, CHANNEL_SIZE * sizeof(short) );
 	  (void) memset( darkSignal, 0, CHANNEL_SIZE * sizeof(float) );
 	  (void) memset( darkNoise, 0, CHANNEL_SIZE * sizeof(float) );
      }
