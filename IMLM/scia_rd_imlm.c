@@ -222,7 +222,7 @@ unsigned int Read_IMLM_Record( const char flname[],
 
 
 	  if ( *line == '#' ) continue;
-	  if ( (cpntr = strrchr( line, '#' )) != NULL ) cpntr = '\0';
+	  if ( (cpntr = strrchr( line, '#' )) != NULL ) *cpntr = '\0';
 
 	  numItems = sscanf( line, FORMAT_RECORD, 
 			     rec->lon_corner+1, rec->lat_corner+1,

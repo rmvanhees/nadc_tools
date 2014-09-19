@@ -43,8 +43,8 @@
 #include <nadc_sdmf.h>
 
 /*+++++ Static Variables +++++*/
-static const char  listName[] = "orbitList";
-static const char  indexName[] = "orbitIndex";
+//static const char  listName[] = "orbitList";
+//static const char  indexName[] = "orbitIndex";
 static const char  tableName[] = "metaTable";
 
 static const size_t mtbl_size = sizeof( struct mtbl_simudark_rec );

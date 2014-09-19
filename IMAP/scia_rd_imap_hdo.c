@@ -109,7 +109,7 @@ unsigned int Read_IMAP_Record( const char flname[],
 
 
 	  if ( *line == '#' ) continue;
-	  if ( (cpntr = strrchr( line, '#' )) != NULL ) cpntr = '\0';
+	  if ( (cpntr = strrchr( line, '#' )) != NULL ) *cpntr = '\0';
 
 	  numItems = sscanf( line, FORMAT_RECORD,
 			     &iday, &imon, &iyear, &hour, &rec->jday, 

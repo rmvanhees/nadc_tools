@@ -176,9 +176,9 @@ if (HAS_SUGGEST_ATTRIBUTE)
    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsuggest-attribute=const")
 endif ()
 
-check_c_compiler_flag (-fcatch-undefined-behavior HAS_CATCH_UNDEF_BEHAVIOR)
-if (HAS_CATCH_UNDEF_BEHAVIOR)
-   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fcatch-undefined-behavior")
+check_c_compiler_flag (-fsanitize=undefined HAS_SANITIZE_UNDEF_TRAP)
+if (HAS_SANITIZE_UNDEF_TRAP)
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
 endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
