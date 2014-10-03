@@ -219,7 +219,7 @@ size_t NADC_BIWEIGHT( const size_t dim, const float *arr,
 		      /*@out@*/ /*@null@*/ float *scale )
 {
      register size_t ni;
-     register float  wght;
+     register double dist, uu, wght;
 
      const float med = _MEDIAN( dim, arr );
      const float mad = _MAD( dim, arr, med );
@@ -239,20 +239,21 @@ size_t NADC_BIWEIGHT( const size_t dim, const float *arr,
      /* calculate one-step biweight location estimator */
      ni = 0;
      do {
-	  float dist = arr[ni] - med;
-	  float tmp  = dist / max_dist_loc;
+	  dist = arr[ni] - med;
+	  uu   = dist / max_dist_loc;
 
-	  if ( tmp > 1 ) {
+	  if ( (uu *= uu) > 1 ) {
 	       rejected++;
-	       continue;
-	  }
-	  tmp *= tmp;
-	  wght = (1 - tmp) * (1 - tmp);
+	  } else {
+	       wght = (1 - uu) * (1 - uu);
 	  
-	  sum1 += wght * dist;
-	  sum2 += wght;
+	       sum1 += wght * dist;
+	       sum2 += wght;
+	  }
      } while( ++ni < dim );
-     *median += (float)(sum1 / sum2);
+
+     if ( sum2 > DBL_EPSILON )
+	  *median += (float)(sum1 / sum2);
 
      /* calculate one-step biweight scale estimator */
      if ( scale != NULL ) {
@@ -261,15 +262,14 @@ size_t NADC_BIWEIGHT( const size_t dim, const float *arr,
 
 	  ni = 0;
 	  do {
-	       float dist = arr[ni] - med;
-	       float uu   = dist / max_dist_scale;
+	       dist = arr[ni] - med;
+	       uu   = dist / max_dist_scale;
 
-	       if ( uu > 1 ) continue;
-	       uu *= uu;
+	       if ( (uu *= uu) > 1 ) continue;
+	       wght = 1 - uu;
 
-	       sum3 += (dist * dist) 
-		    * (1. - uu) * (1. - uu) * (1. - uu) * (1. - uu);
-	       sum4 += (1 - uu) * (1 - 5 * uu);
+	       sum3 += dist * dist * wght * wght * wght * wght;
+	       sum4 += wght * (1 - 5 * uu);
 	  } while( ++ni < dim );
 	  *scale = (float)(sqrt((dim * sum3) / (sum4 * sum4)));
      }
