@@ -74,22 +74,6 @@ double Eval_Poly( unsigned int xx, const double coeffs[] )
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function(s) +++++++++++++++*/
-static inline
-void Get_DopplerCorrSRS( const struct srs_scia *srs, 
-			 unsigned int indx_to_chan, 
-			 /*@out@*/ float *wvlen_sun )
-{
-     register unsigned int np = 0;
-
-     register const float *pntr_wvchan = srs->wvlen_sun + indx_to_chan;
-
-     const double DopplerCorr = 1 + srs->dopp_shift / 500.;
-
-     do {
-	  *wvlen_sun++ = (float)(*pntr_wvchan++ * DopplerCorr);
-     } while ( ++np < CHANNEL_SIZE );
-}
-
 void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
 			  float orbit_phase, struct wvlen_rec *wvlen )
 {

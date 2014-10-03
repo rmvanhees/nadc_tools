@@ -65,19 +65,7 @@
         /* NONE */
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
-static inline
-void __Inverse_Chan2( float *rbuff )
-{
-     register unsigned short nr;
-     register float rtemp;
-
-     rbuff += CHANNEL_SIZE;                   /* move to channel 2 data */
-     for ( nr = 0; nr <  CHANNEL_SIZE / 2; nr++ ) {
-          rtemp = rbuff[nr];
-          rbuff[nr] = rbuff[(CHANNEL_SIZE-1)-nr];
-          rbuff[(CHANNEL_SIZE-1)-nr] = rtemp;
-     }
-}
+        /* NONE */
 
 /*+++++++++++++++++++++++++
 .IDENTifer   Get_DopplerCorrSRS
