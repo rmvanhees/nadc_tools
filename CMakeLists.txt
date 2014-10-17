@@ -163,31 +163,36 @@ add_custom_target(uninstall
 ##  Global build parameters
 ##
 ## =============================================================================
-## Compiler flags
-set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wwrite-strings -Wcast-qual -Wc++-compat -Wstrict-prototypes -Wdeclaration-after-statement")
+## Default Compiler flags
+set (CMAKE_C_FLAGS "-std=c99 -W -Wall -Wstrict-prototypes -Wdeclaration-after-statement")
 
 check_c_compiler_flag (-Wdisabled-optimization HAS_DISABLED_OPTIMIZATION)
 if (HAS_DISABLED_OPTIMIZATION)
    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wdisabled-optimization")
 endif ()
 
-check_c_compiler_flag (-Wsuggest-attribute=const HAS_SUGGEST_ATTRIBUTE)
-if (HAS_SUGGEST_ATTRIBUTE)
-   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsuggest-attribute=const")
-endif ()
-
+## Debug Compiler flags
+set (CMAKE_C_FLAGS_DEBUG "-g -pedantic -Wc++-compat -Wcast-align -Wcast-qual -Wwrite-strings -Wno-overlength-strings -Wno-long-long")
 check_c_compiler_flag (-fsanitize=undefined HAS_SANITIZE_UNDEF_TRAP)
 if (HAS_SANITIZE_UNDEF_TRAP)
-   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
+   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=undefined")
 endif ()
 
-if (CMAKE_BUILD_TYPE STREQUAL "")
-   set (CMAKE_C_FLAGS "-Os ${CMAKE_C_FLAGS}")
+check_c_compiler_flag (-Wsuggest-attribute=const HAS_SUGGEST_ATTRIBUTE)
+if (HAS_SUGGEST_ATTRIBUTE)
+   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wsuggest-attribute=const -Wsuggest-attribute=pure")
 endif ()
 
-set (CMAKE_C_FLAGS_DEBUG "-g -pedantic -Wcast-align -Wno-long-long -Wno-overlength-strings")
+## Release Compiler flags
 
-set (CMAKE_C_FLAGS_RELEASE "-march=native -O3")
+## Optimization Compiler flags
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+   set (CMAKE_C_FLAGS_DEBUG "-O0 ${CMAKE_C_FLAGS_DEBUG}")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+   set (CMAKE_C_FLAGS_RELEASE "-O3 -march=native")
+else ()
+   set (CMAKE_C_FLAGS "-O ${CMAKE_C_FLAGS}")
+endif ()
 
 ## Include directories for header files
 include_directories(
