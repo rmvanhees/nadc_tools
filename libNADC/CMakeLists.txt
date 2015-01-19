@@ -43,6 +43,7 @@ set (NADC_COMMON_SRCS
     nadc_info_screen.c
     nadc_init_param.c 
     nadc_interpol.c 
+    nadc_medfit.c
     nadc_pytable_api.c
     nadc_receivedate.c 
     nadc_select.c 

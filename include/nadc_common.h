@@ -518,6 +518,12 @@ extern void NADC_FIT( size_t, const float *, const float *, const float *,
        /*@globals  errno;@*/
        /*@modifies errno, *fit_a, *fit_b, *sig_a, *sig_b, *chisq, *q_fit@*/;
 
+extern void NADC_MEDFIT( size_t, const float *, const float *, 
+		      /*@out@*/ float *fit_a, /*@out@*/ float *fit_b, 
+		      /*@out@*/ float *abdev )
+       /*@globals  errno;@*/
+       /*@modifies errno, *fit_a, *fit_b, *abdev@*/;
+
 extern void NADC_RECEIVEDATE( const char *, /*@out@*/ char *datetime )
        /*@modifies datetime@*/;
 
