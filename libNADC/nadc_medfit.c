@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2009 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2014 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,13 +21,12 @@
 .LANGUAGE    ANSI C
 .PURPOSE     fitting data to a straight line y = a + b * x
 .INPUT/OUTPUT
-  call as   NADC_MEDFIT( dim_arr, x_arr, y_arr, err_arr, 
+  call as   NADC_MEDFIT( dim_arr, x_arr, y_arr,
                          &fit_a, &fit_b, &abdev  );
      input:  
              size_t dim_arr  :  number of data points
              float *x_arr    :  independent variable values (X-axis)
              float *y_arr    :  dependent variable values (Y-axis)
-             float *err_arr  :  measurement errors of the data points Y
     output:  
              float *fit_a    :  parameter a
              float *fit_b    :  parameter b 
