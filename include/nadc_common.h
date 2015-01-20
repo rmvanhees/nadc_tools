@@ -463,6 +463,12 @@ extern int    SELECTi( const size_t, const size_t, const int    * );
 extern float  SELECTr( const size_t, const size_t, const float  * );
 extern double SELECTd( const size_t, const size_t, const double * );
 
+extern size_t NADC_SIGMACLIPPED( const size_t, const float *, 
+				 /*@out@*/ float *mean,
+				 /*@out@*/ float *sdev )
+     /*@globals  nadc_stat, nadc_err_stack, errno;@*/
+     /*@modifies nadc_stat, nadc_err_stack, errno, mean, sdev@*/;
+
 extern size_t nadc_strlcpy( /*@out@*/ char *, 
 			    /*@unique@*/ const char *, size_t );
 extern size_t nadc_strlcat( /*@out@*/ char *, 

@@ -47,6 +47,7 @@ set (NADC_COMMON_SRCS
     nadc_pytable_api.c
     nadc_receivedate.c 
     nadc_select.c 
+    nadc_sigmaclipped.c
     nadc_string.c
     nadc_usrindx.c 
     nadc_usrinp.c

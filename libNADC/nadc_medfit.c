@@ -31,7 +31,7 @@
     output:  
              float *fit_a    :  parameter a
              float *fit_b    :  parameter b 
-             float *sig_a    :  uncertainty in parameter a & b
+             float *abdev    :  uncertainty in parameter a & b
 
 .RETURNS     nothing
 .COMMENTS    adopted from Numerical Recipes in C
