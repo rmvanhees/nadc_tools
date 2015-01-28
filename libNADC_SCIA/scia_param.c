@@ -742,6 +742,12 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 		    param->write_aux0 = PARAM_UNSET;
 	       } else if ( strncmp( argv[narg]+1, "no_pmd0", 7 ) == 0 ) {
 		    param->write_pmd0 = PARAM_UNSET;
+	       } else if ( strncmp( argv[narg]+1, "no_aux", 6 ) == 0 ) {
+		    param->write_aux = PARAM_UNSET;
+	       } else if ( strncmp( argv[narg]+1, "no_det", 6 ) == 0 ) {
+		    param->write_det = PARAM_UNSET;
+	       } else if ( strncmp( argv[narg]+1, "no_pmd", 6 ) == 0 ) {
+		    param->write_pmd = PARAM_UNSET;
 	       } else if ( strncmp( argv[narg]+1, "no_mds", 6 ) == 0 ) {
 		    if ( ! select_mds ) {
 			 select_mds = TRUE;

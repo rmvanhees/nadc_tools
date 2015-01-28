@@ -87,7 +87,9 @@ int main( int argc, char *argv[] )
 {
      const char prognm[] = "scia_nl0";
 
-     unsigned int num_dsd, num_info, num_mds, num;
+     register unsigned int ns;
+     
+     unsigned int num_dsd, num_state, num;
 
      FILE  *fd = NULL;
 #ifdef _WITH_SQL
@@ -97,8 +99,8 @@ int main( int argc, char *argv[] )
      struct mph_envi  mph;
      struct sph0_scia sph;
      struct dsd_envi  *dsd = NULL;
-     struct mds0_info *mds_info = NULL;
-     struct mds0_info *info = NULL;
+     struct mds0_states *states_all = NULL;
+     struct mds0_states *states = NULL;
      struct mds0_aux  *aux;
      struct mds0_det  *det;
      struct mds0_pmd  *pmd;
@@ -216,99 +218,65 @@ int main( int argc, char *argv[] )
  * -------------------------
  * read SCIAMACHY source packets
  *
- * first try to read the MDS info data
+ * first read MDS info data
  */
-     num_info = SCIA_LV0_RD_MDS_INFO( fd, num_dsd, dsd, &info );
-     if ( IS_ERR_STAT_FATAL ) 
+     num_state = SCIA_LV0_RD_MDS_INFO( fd, num_dsd, dsd, &states_all );
+     if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "RD_MDS_INFO" );
      if ( param.write_ascii == PARAM_SET ) {
-	  SCIA_LV0_WR_ASCII_INFO( param, num_info, info );
+	  SCIA_LV0_WR_ASCII_INFO( param, num_state, states_all );
 	  if ( IS_ERR_STAT_FATAL ) 
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "WR_MDS_INFO" );
      }
+     num_state = SCIA_LV0_SELECT_MDS( param, num_state, states_all, &states );
+     (void) fprintf( stderr, "num_state (selected): %u\n", num_state );
+     if ( num_state == 0 ) goto done;
+
 #ifdef _WITH_SQL
      if ( param.write_sql == PARAM_SET ) {
-	  unsigned short numState = 0u;
-
-	  unsigned int sumAux = 0u;
-	  unsigned int sumDet = 0u;
-	  unsigned int sumPMD = 0u;
-
-	  struct mds0_info *infoAux = NULL;
-	  struct mds0_info *infoDet = NULL;
-	  struct mds0_info *infoPMD = NULL;
-
 	  struct mds0_sql sqlState[256];
 
-	  const unsigned int totalAux = 
-	       SCIA_LV0_SELECT_MDS( SCIA_AUX_PACKET, param, num_info, 
-				    info, &infoAux );
-	  const unsigned int totalDet = 
-	       SCIA_LV0_SELECT_MDS( SCIA_DET_PACKET, param, num_info, 
-				    info, &infoDet );
-	  const unsigned int totalPMD = 
-	       SCIA_LV0_SELECT_MDS( SCIA_PMD_PACKET, param, num_info, 
-				    info, &infoPMD );
-
-	  while ( sumAux < totalAux && sumDet < totalDet ) {
-	       /* number of Auxiliary records of current state */
-	       sqlState[numState].nrAux = 
-		    GET_SCIA_LV0_STATE_AUX( fd, infoAux+sumAux, 
-					    totalAux-sumAux, &aux );
+	  for ( ns = 0; ns < num_state && ns < 256; ns++ ) {
+	       sqlState[ns].nrAux = 
+		    GET_SCIA_LV0_STATE_AUX( fd, states+ns, &aux );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
-	       /* number of Detector records of current state */
-	       sqlState[numState].nrDet = 
-		    GET_SCIA_LV0_STATE_DET( BAND_ALL, fd, infoDet+sumDet, 
-					    totalDet-sumDet, &det );
+	       sqlState[ns].nrDet = 
+		    GET_SCIA_LV0_STATE_DET( BAND_ALL, fd, states+ns, &det );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
-               /* number of PMD records of current state */
-	       sqlState[numState].nrPMD = 
-		    GET_SCIA_LV0_STATE_PMD( fd, infoPMD+sumPMD, 
-					    totalPMD-sumPMD, &pmd );
+	       sqlState[ns].nrPMD = 
+		    GET_SCIA_LV0_STATE_PMD( fd, states+ns, &pmd );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
-
-	       sqlState[numState].stateID = infoDet[sumDet].state_id;
 
 	       /* set DateTime and StateID of current state */
-	       (void) memcpy( &sqlState[numState].mjd, &infoDet[sumDet].mjd,
-			      sizeof( struct mjd_envi ) );
+	       (void) memcpy( &sqlState[ns].mjd, &states[ns].mjd,
+			      sizeof(struct mjd_envi) );
+	       sqlState[ns].stateID = states[ns].state_id;
 
 	       /* obtain OBM temperature of current state */
-	       GET_SCIA_LV0_STATE_OBMtemp( TRUE, sqlState[numState].nrAux, 
-					   aux, &sqlState[numState].obmTemp );
+	       GET_SCIA_LV0_STATE_OBMtemp( TRUE, sqlState[ns].nrAux, aux,
+					   &sqlState[ns].obmTemp );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
 	       /* obtain Detectory array temperature of current state */
-	       GET_SCIA_LV0_STATE_DETtemp( sqlState[numState].nrDet, det, 
-					   sqlState[numState].chanTemp );
+	       GET_SCIA_LV0_STATE_DETtemp( sqlState[ns].nrDet, det, 
+					   sqlState[ns].chanTemp );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
 	       /* obtain Detectory array temperature of current state */
-	       GET_SCIA_LV0_STATE_PMDtemp( sqlState[numState].nrPMD, pmd, 
-					   &sqlState[numState].pmdTemp );
+	       GET_SCIA_LV0_STATE_PMDtemp( sqlState[ns].nrPMD, pmd, 
+					   &sqlState[ns].pmdTemp );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
 	       /* release allocated memory */
-	       if ( sqlState[numState].nrAux > 0 ) free( aux );
-	       SCIA_LV0_FREE_MDS_DET( sqlState[numState].nrDet, det );
-	       if ( sqlState[numState].nrPMD > 0 ) free( pmd );
-
-	       sumAux += sqlState[numState].nrAux;
-	       sumDet += sqlState[numState].nrDet;
-	       sumPMD += sqlState[numState].nrPMD;
-	       if ( ++numState >= 256 ) break;      /* should complain here */
+	       if ( sqlState[ns].nrAux > 0 ) free( aux );
+	       SCIA_LV0_FREE_MDS_DET( sqlState[ns].nrDet, det );
+	       if ( sqlState[ns].nrPMD > 0 ) free( pmd );
 	  }
  failed:
-	  if ( totalAux > 0 ) free( infoAux );
-	  if ( totalDet > 0 ) free( infoDet );
-	  if ( totalPMD > 0 ) free( infoPMD );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS0" );
-
 	  SCIA_LV0_MATCH_STATE( conn, param.flag_verbose,
-				&mph, numState, sqlState );
+				&mph, num_state, sqlState );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_STATE" );
 	  goto done;
@@ -317,150 +285,84 @@ int main( int argc, char *argv[] )
 /* 
  * process Auxiliary source packets
  */
-     num_mds = SCIA_LV0_SELECT_MDS( SCIA_AUX_PACKET, param, num_info, info,
-				    &mds_info );
-     (void) fprintf( stdout, "Auxiliary MDS:\t%6u\n", num_mds );
-     if ( param.flag_check == PARAM_SET )
-	  (void) fprintf( stdout, "CRC/Reed-Solomon errors: " );
-     num = 0u;
-     while ( num_mds > num ) {
-	  unsigned int numAux = 
-	       GET_SCIA_LV0_STATE_AUX( fd, mds_info+num, num_mds-num, &aux );
+     if ( param.flag_silent == PARAM_UNSET )
+	  NADC_Info_Proc( stdout, "Auxiliary MDS", num_state );
+
+     for ( ns = 0; ns < num_state; ns++ ) {
+	  if ( param.flag_silent == PARAM_UNSET )
+	       NADC_Info_Update( stdout, 2, ns );
+
+	  (void) fprintf( stderr, "states->num_aux: %u\n", states[ns].num_aux );
+	  num = GET_SCIA_LV0_STATE_AUX( fd, states+ns, &aux );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       free( mds_info );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX" );
 	  }
+	  
 	  if ( param.write_hdf5 == PARAM_SET ) {
-	       SCIA_LV0_WR_H5_AUX( param, mds_info[num].state_index, 
-				   numAux, aux );
+	       SCIA_LV0_WR_H5_AUX( param, ns, num, aux );
 	  } else if ( param.write_ascii == PARAM_SET ) {
- 	       SCIA_LV0_WR_ASCII_AUX( param, mds_info[num].state_index, 
-				      numAux, aux );
-	  } else {
-	       register unsigned int nr, total;
-
-	       (void) fprintf( stdout, "%02d:", mds_info[num].state_id );
-	       for ( total = nr = 0; nr < numAux; nr++ )
-		    total += aux[nr].fep_hdr.crc_errs;
-	       if ( total == 0 )
-		    (void) fprintf( stdout, "-/" );
-	       else
-		    (void) fprintf( stdout, BOLDRED"%-d"RESET"/", total );
-	       for ( total = nr = 0; nr < numAux; nr++ )
-		    total += aux[nr].fep_hdr.rs_errs;
-	       if  ( total == 0 )
-		    (void) fprintf( stdout, "- " );
-	       else
-		    (void) fprintf( stdout, BOLDRED"%-d "RESET, total );
+ 	       SCIA_LV0_WR_ASCII_AUX( param, ns, num, aux );
 	  }
-
 	  free( aux );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       free( mds_info );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "MDS_AUX" );
 	  }
-	  num += numAux;
      }
-     if ( num_mds > 0 ) free( mds_info );
-     if ( param.flag_check == PARAM_SET ) (void) fprintf( stdout, "\n" );
+     if ( param.flag_silent == PARAM_UNSET )
+	  NADC_Info_Finish( stdout, 2, ns );
 /* 
  * process Detector source packets
  */
-     num_mds = SCIA_LV0_SELECT_MDS( SCIA_DET_PACKET, param, num_info, info,
-				    &mds_info );
-     (void) fprintf( stdout, "Detector MDS:\t%6u\n", num_mds );
-     if ( param.flag_check == PARAM_SET )
-	  (void) fprintf( stdout, "CRC/Reed-Solomon errors: " );
-     num = 0u;
-     while ( num_mds > num ) {
-	  unsigned int numDet = 
-	       GET_SCIA_LV0_STATE_DET( param.chan_mask, fd, 
-				       mds_info+num, num_mds-num, &det );
+     if ( param.flag_silent == PARAM_UNSET )
+	  NADC_Info_Proc( stdout, "Detector MDS", num_state );
+     
+     for ( ns = 0; ns < num_state; ns++ ) {
+	  if ( param.flag_silent == PARAM_UNSET )
+	       NADC_Info_Update( stdout, 2, ns );
+
+	  num = GET_SCIA_LV0_STATE_DET( param.chan_mask, fd, 
+					states+ns, &det );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       free( mds_info );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_DET" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
-	       SCIA_LV0_WR_H5_DET( param, mds_info[num].state_index, 
-				   numDet, det );
+	       SCIA_LV0_WR_H5_DET( param, ns, num, det );
 	  } else if ( param.write_ascii == PARAM_SET ) {
-	       SCIA_LV0_WR_ASCII_DET( param, mds_info[num].state_index, 
-				      numDet, det );
-	  } else {
-	       register unsigned int nr, total;
-
-	       (void) fprintf( stdout, "%02d:", mds_info[num].state_id );
-	       for ( total = nr = 0; nr < numDet; nr++ )
-		    total += det[nr].fep_hdr.crc_errs;
-	       if ( total == 0 )
-		    (void) fprintf( stdout, "-/" );
-	       else
-		    (void) fprintf( stdout, BOLDRED"%-d"RESET"/", total );
-	       for ( total = nr = 0; nr < numDet; nr++ )
-		    total += det[nr].fep_hdr.rs_errs;
-	       if  ( total == 0 )
-		    (void) fprintf( stdout, "- " );
-	       else
-		    (void) fprintf( stdout, BOLDRED"%-d "RESET, total );
+	       SCIA_LV0_WR_ASCII_DET( param, ns, num, det );
 	  }
-
-	  SCIA_LV0_FREE_MDS_DET( numDet, det );
+	  SCIA_LV0_FREE_MDS_DET( num, det );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       free( mds_info );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "MDS_DET" );
 	  }
-	  num += numDet;
      }
-     if ( num_mds > 0 ) free( mds_info );
-     if ( param.flag_check == PARAM_SET ) (void) fprintf( stdout, "\n" );
+     if ( param.flag_silent == PARAM_UNSET )
+	  NADC_Info_Finish( stdout, 2, ns );
 /* 
  * process PMD source packets
  */
-     num_mds = SCIA_LV0_SELECT_MDS( SCIA_PMD_PACKET, param, num_info, info,
-				    &mds_info );
-     (void) fprintf( stdout, "PMD MDS:\t%6u\n", num_mds );
-     if ( param.flag_check == PARAM_SET )
-	  (void) fprintf( stdout, "CRC/Reed-Solomon errors: " );
-     num = 0u;
-     while ( num_mds > num ) {
-	  unsigned int numPMD = 
-	       GET_SCIA_LV0_STATE_PMD( fd, mds_info+num, num_mds-num, &pmd );
+     if ( param.flag_silent == PARAM_UNSET )
+	  NADC_Info_Proc( stdout, "PMD MDS", num_state );
+
+     for ( ns = 0; ns < num_state; ns++ ) {
+	  if ( param.flag_silent == PARAM_UNSET )
+	       NADC_Info_Update( stdout, 2, ns );
+
+	  num = GET_SCIA_LV0_STATE_PMD( fd, states+ns, &pmd );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       free( mds_info );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMD" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
-	       SCIA_LV0_WR_H5_PMD( param, mds_info[num].state_index, 
-				   numPMD, pmd );
+	       SCIA_LV0_WR_H5_PMD( param, ns, num, pmd );
 	  } else if ( param.write_ascii == PARAM_SET ) {
-	       SCIA_LV0_WR_ASCII_PMD( param, mds_info[num].state_index, 
-				      numPMD, pmd );
-	  } else {
-	       register unsigned int nr, total;
-
-	       (void) fprintf( stdout, "%02d:", mds_info[num].state_id );
-	       for ( total = nr = 0; nr < numPMD; nr++ )
-		    total += pmd[nr].fep_hdr.crc_errs;
-	       if ( total == 0 )
-		    (void) fprintf( stdout, "-/" );
-	       else
-		    (void) fprintf( stdout, BOLDRED"%-d"RESET"/", total );
-	       for ( total = nr = 0; nr < numPMD; nr++ )
-		    total += pmd[nr].fep_hdr.rs_errs;
-	       if  ( total == 0 )
-		    (void) fprintf( stdout, "- " );
-	       else
-		    (void) fprintf( stdout, BOLDRED"%-d "RESET, total );
+	       SCIA_LV0_WR_ASCII_PMD( param, ns, num, pmd );
 	  }
 	  free( pmd );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       free( mds_info );
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "MDS_PMD" );
 	  }
-	  num += numPMD;
      }
-     if ( num_mds > 0 ) free( mds_info );
-     if ( param.flag_check == PARAM_SET ) (void) fprintf( stdout, "\n" );
+     if ( param.flag_silent == PARAM_UNSET )
+	  NADC_Info_Finish( stdout, 2, ns );
 /*
  * when an error has occurred we jump to here:
  */
@@ -486,7 +388,7 @@ int main( int argc, char *argv[] )
  * free allocated memory
  */
      if ( dsd != NULL ) free( dsd );
-     if ( info != NULL ) free( info );
+     if ( states != NULL ) free( states );
 /*
  * display error messages?
  */

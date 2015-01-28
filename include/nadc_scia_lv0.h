@@ -418,13 +418,54 @@ struct mds0_info
      unsigned char   category;
      unsigned char   state_id;
      unsigned char   quality;
+     union {
+	  struct qinfo_bitfield {
+	       unsigned char fixed_mjd       : 1;
+	       unsigned char fixed_state_id  : 1;
+	       unsigned char fixed_bcps      : 1;
+	       unsigned char dumy4 : 1;
+	       unsigned char dumy5 : 1;
+	       unsigned char dumy6 : 1;
+	       unsigned char dumy7 : 1;
+	       unsigned char dumy8 : 1;
+	  } flag;
+	  unsigned char value;
+     } q;
      unsigned short  crc_errors;
      unsigned short  rs_errors;
      unsigned short  bcps;
-     unsigned short  state_index;
      unsigned short  packet_length;
+     unsigned short  state_index;            // OBSOLETE: please remove
      unsigned int    on_board_time;
      unsigned int    offset;
+};
+
+struct mds0_states
+{
+     struct mjd_envi mjd;
+     unsigned char   category;
+     unsigned char   state_id;
+     union {
+	  struct qstate_bitfield {
+	       unsigned char dumy1 : 1;
+	       unsigned char dumy2 : 1;
+	       unsigned char dumy3 : 1;
+	       unsigned char dumy4 : 1;
+	       unsigned char dumy5 : 1;
+	       unsigned char dumy6 : 1;
+	       unsigned char dumy7 : 1;
+	       unsigned char dumy8 : 1;
+	  } flag;
+	  unsigned char value;
+     } q;
+     unsigned short  num_aux;
+     unsigned short  num_det;
+     unsigned short  num_pmd;
+     unsigned int    on_board_time;
+     unsigned int    offset;
+     struct mds0_info *info_aux;
+     struct mds0_info *info_det;
+     struct mds0_info *info_pmd;
 };
 
 struct mds0_aux
@@ -509,9 +550,9 @@ extern void SCIA_LV0_WR_SPH( FILE *fd, const struct mph_envi,
 
 extern unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int, 
 					  const struct dsd_envi *,
-					  /*@out@*/ struct mds0_info **info )
+       				  /*@out@*/ struct mds0_states **states )
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack, fd, *info@*/;
+       /*@modifies errno, nadc_stat, nadc_err_stack, fd, *states@*/;
 
 extern unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *, 
 					   struct mds0_info *info )
@@ -519,7 +560,7 @@ extern unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *,
        /*@modifies errno, stderr, nadc_stat, nadc_err_stack, fd, info@*/;
 
 extern unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *,
-                                     unsigned int,
+				     unsigned int,
                                      /*@out@*/ struct mds0_aux **aux_out )
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *aux_out@*/;
@@ -527,8 +568,8 @@ extern unsigned int SCIA_LV0_WR_AUX( FILE *fd, const struct mds0_info *,
                                      unsigned int, const struct mds0_aux * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/;
-extern unsigned int GET_SCIA_LV0_STATE_AUX( FILE *, const struct mds0_info *,
-				     unsigned int, struct mds0_aux **aux_out )
+extern unsigned int GET_SCIA_LV0_STATE_AUX( FILE *, const struct mds0_states *,
+					    struct mds0_aux **aux_out )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *aux_out@*/;
 
@@ -543,8 +584,7 @@ extern unsigned int SCIA_LV0_WR_DET( FILE *fd, const struct mds0_info *,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/;
 extern unsigned int GET_SCIA_LV0_STATE_DET( unsigned char, FILE *, 
-					    const struct mds0_info *,
-					    unsigned int, 
+					    const struct mds0_states *,
 					    struct mds0_det **det_out )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, det_out@*/;
@@ -558,8 +598,8 @@ extern unsigned int SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *,
                                      unsigned int, const struct mds0_pmd * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/;
-extern unsigned int GET_SCIA_LV0_STATE_PMD( FILE *, const struct mds0_info *,
-				     unsigned int, struct mds0_pmd **pmd_out )
+extern unsigned int GET_SCIA_LV0_STATE_PMD( FILE *, const struct mds0_states *,
+					    struct mds0_pmd **pmd_out )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, pmd_out@*/;
 
@@ -619,19 +659,19 @@ extern void SCIA_LV0_WR_ASCII_SPH( struct param_record,
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
 extern void SCIA_LV0_WR_ASCII_INFO( struct param_record, unsigned int,
-				    const struct mds0_info * )
+				    const struct mds0_states * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
 extern void SCIA_LV0_FREE_MDS_DET( unsigned int, 
                                    /*@only@*/ struct mds0_det * );
 
-extern unsigned int SCIA_LV0_SELECT_MDS( int, const struct param_record,
+extern unsigned int SCIA_LV0_SELECT_MDS( const struct param_record,
 					 unsigned int, 
-					 const struct mds0_info *,
-			  /*@null@*/ /*@out@*/ struct mds0_info **info )
+					 const struct mds0_states *,
+			  /*@null@*/ /*@out@*/ struct mds0_states **states )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack, *info@*/;
+       /*@modifies errno, nadc_stat, nadc_err_stack, *states@*/;
 
 extern void SCIA_LV0_WR_ASCII_AUX( struct param_record, unsigned int,
 				   unsigned int, const struct mds0_aux * )

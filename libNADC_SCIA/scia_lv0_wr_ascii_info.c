@@ -21,11 +21,11 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Dump collected Info-records of an SCIA level 0 file
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_ASCII_INFO( param, num_info, info );
+  call as   SCIA_LV0_WR_ASCII_INFO( param, num_states, states );
      input: 
-            struct param_record param : struct holding user-defined settings
-	    unsigned int num_info     : number of info-records
-	    struct mds0_info *info    : pointer to structure with info-records
+            struct param_record param  : struct holding user-defined settings
+	    unsigned int num_states    : number of info-records
+	    struct mds0_states *states : pointer to structure with info-records
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
@@ -48,12 +48,12 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV0_WR_ASCII_INFO( struct param_record param, unsigned int num_info,
-			     const struct mds0_info *info )
+void SCIA_LV0_WR_ASCII_INFO( struct param_record param, unsigned int num_states,
+			     const struct mds0_states *states )
 {
      const char prognm[] = "SCIA_LV0_WR_ASCII_INFO";
 
-     register unsigned int ni;
+     register unsigned int ni, ns;
 
      char  date_str[UTC_STRING_LENGTH];
 
@@ -66,28 +66,110 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, unsigned int num_info,
  */
      nadc_write_header( outfl, 0, param.infile, 
 			"Info records of a Level 0 Product" );
-     for ( ni = 0; ni < num_info; ni++ ) {
-	  (void) MJD_2_ASCII( info[ni].mjd.days, info[ni].mjd.secnd, 
-			      info[ni].mjd.musec, date_str );
-	  nadc_write_text( outfl, ni, "ISP (Date Time)", date_str );
-	  nadc_write_double( outfl, ni, "ISP (Julian Day)", 16, 
-			     (double) info[ni].mjd.days + 
-			     ((info[ni].mjd.secnd + info[ni].mjd.musec / 1e6)
-			      / (24. * 60 * 60)) );
-	  nadc_write_uchar( outfl, ni, "Packet ID", info[ni].packet_type );
-	  nadc_write_uchar( outfl, ni, "Category", info[ni].category );
-	  nadc_write_uchar( outfl, ni, "State ID", info[ni].state_id );
-	  nadc_write_uchar( outfl, ni, "Quality", info[ni].quality );
-	  nadc_write_ushort( outfl, ni, "CRC errors", info[ni].crc_errors );
-	  nadc_write_ushort( outfl, ni, "Reed-Solomon errors", 
-	       info[ni].rs_errors );
-	  nadc_write_ushort( outfl, ni, "BCPS", info[ni].bcps );
-	  nadc_write_ushort( outfl, ni, "State counter", info[ni].state_index );
-	  nadc_write_ushort( outfl, ni, "Data packet length", 
-			     info[ni].packet_length );
-	  nadc_write_uint( outfl, ni, "ICU on-board-time", 
-			   info[ni].on_board_time );
-	  nadc_write_uint( outfl, ni, "Offset in file", info[ni].offset );
+
+     for ( ns = 0; ns < num_states; ns++ ) {
+	  (void) MJD_2_ASCII( states[ns].mjd.days, states[ns].mjd.secnd, 
+			      states[ns].mjd.musec, date_str );
+	  nadc_write_text( outfl, ns, "ISP (Date Time)", date_str );
+	  nadc_write_uchar( outfl, ns, "Category", states[ns].category );
+	  nadc_write_uchar( outfl, ns, "State ID", states[ns].state_id );
+	  nadc_write_uchar( outfl, ns, "Quality", states[ns].q.value );
+	  nadc_write_ushort( outfl, ns, "Number AUX_MDS", states[ns].num_aux );
+	  nadc_write_ushort( outfl, ns, "Number DET_MDS", states[ns].num_det );
+	  nadc_write_ushort( outfl, ns, "Number PMD_MDS", states[ns].num_pmd );
+	  nadc_write_uint( outfl, ns, "ICU on-board-time", 
+			   states[ns].on_board_time );
+	  nadc_write_uint( outfl, ns, "Offset in file", states[ns].offset );
+
+	  for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
+	       unsigned int indx = 100 * (ns+1) + ni;
+	       
+	       struct mds0_info *info = states[ns].info_aux;
+	       
+	       (void) MJD_2_ASCII( info[ni].mjd.days, info[ni].mjd.secnd, 
+				   info[ni].mjd.musec, date_str );
+	       nadc_write_text( outfl, indx, "ISP (Date Time)", date_str );
+	       nadc_write_double( outfl, indx, "ISP (Julian Day)", 16, 
+				  (double) info[ni].mjd.days + 
+				  ((info[ni].mjd.secnd + info[ni].mjd.musec
+				    / 1e6) / (24. * 60 * 60)) );
+	       nadc_write_uchar( outfl, indx, "Packet ID",
+				 info[ni].packet_type );
+	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
+	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
+	       nadc_write_uchar( outfl, indx, "Quality", info[ni].quality );
+	       nadc_write_ushort( outfl, indx, "CRC errors",
+				  info[ni].crc_errors );
+	       nadc_write_ushort( outfl, indx, "Reed-Solomon errors", 
+				  info[ni].rs_errors );
+	       nadc_write_ushort( outfl, indx, "BCPS", info[ni].bcps );
+	       nadc_write_ushort( outfl, indx, "Data packet length", 
+				  info[ni].packet_length );
+	       nadc_write_uint( outfl, indx, "ICU on-board-time", 
+				info[ni].on_board_time );
+	       nadc_write_uint( outfl, indx, "Offset in file",
+				info[ni].offset );
+	  }
+
+     	  for ( ni = 0; ni < states[ns].num_det; ni++ ) {
+	       unsigned int indx = 100 * (ns+1) + ni;
+	       
+	       struct mds0_info *info = states[ns].info_det;
+	       
+	       (void) MJD_2_ASCII( info[ni].mjd.days, info[ni].mjd.secnd, 
+				   info[ni].mjd.musec, date_str );
+	       nadc_write_text( outfl, indx, "ISP (Date Time)", date_str );
+	       nadc_write_double( outfl, indx, "ISP (Julian Day)", 16, 
+				  (double) info[ni].mjd.days + 
+				  ((info[ni].mjd.secnd + info[ni].mjd.musec
+				    / 1e6) / (24. * 60 * 60)) );
+	       nadc_write_uchar( outfl, indx, "Packet ID",
+				 info[ni].packet_type );
+	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
+	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
+	       nadc_write_uchar( outfl, indx, "Quality", info[ni].quality );
+	       nadc_write_ushort( outfl, indx, "CRC errors",
+				  info[ni].crc_errors );
+	       nadc_write_ushort( outfl, indx, "Reed-Solomon errors", 
+				  info[ni].rs_errors );
+	       nadc_write_ushort( outfl, indx, "BCPS", info[ni].bcps );
+	       nadc_write_ushort( outfl, indx, "Data packet length", 
+				  info[ni].packet_length );
+	       nadc_write_uint( outfl, indx, "ICU on-board-time", 
+				info[ni].on_board_time );
+	       nadc_write_uint( outfl, indx, "Offset in file",
+				info[ni].offset );
+	  }
+
+     	  for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
+	       unsigned int indx = 100 * (ns+1) + ni;
+	       
+	       struct mds0_info *info = states[ns].info_pmd;
+	       
+	       (void) MJD_2_ASCII( info[ni].mjd.days, info[ni].mjd.secnd, 
+				   info[ni].mjd.musec, date_str );
+	       nadc_write_text( outfl, indx, "ISP (Date Time)", date_str );
+	       nadc_write_double( outfl, indx, "ISP (Julian Day)", 16, 
+				  (double) info[ni].mjd.days + 
+				  ((info[ni].mjd.secnd + info[ni].mjd.musec
+				    / 1e6) / (24. * 60 * 60)) );
+	       nadc_write_uchar( outfl, indx, "Packet ID",
+				 info[ni].packet_type );
+	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
+	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
+	       nadc_write_uchar( outfl, indx, "Quality", info[ni].quality );
+	       nadc_write_ushort( outfl, indx, "CRC errors",
+				  info[ni].crc_errors );
+	       nadc_write_ushort( outfl, indx, "Reed-Solomon errors", 
+				  info[ni].rs_errors );
+	       nadc_write_ushort( outfl, indx, "BCPS", info[ni].bcps );
+	       nadc_write_ushort( outfl, indx, "Data packet length", 
+				  info[ni].packet_length );
+	       nadc_write_uint( outfl, indx, "ICU on-board-time", 
+				info[ni].on_board_time );
+	       nadc_write_uint( outfl, indx, "Offset in file",
+				info[ni].offset );
+	  }
      }
      (void) fclose( outfl );
 }

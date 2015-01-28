@@ -19,17 +19,17 @@
 .AUTHOR      R.M. van Hees
 .KEYWORDS    SCIA level 0 data selection
 .LANGUAGE    ANSI C
-.PURPOSE     obtain indices to info-records of selected MDS records
+.PURPOSE     obtain indices to state-records of selected MDS records
 .INPUT/OUTPUT
-  call as   nr_mds = SCIA_LV0_SELECT_MDS( source, param, nr_info, info, 
-                                          &info_out );
+  call as   nr_mds = SCIA_LV0_SELECT_MDS( source, param, nr_states, states, 
+                                          &states_out );
      input: 
             int source                 : data source (Detector, Auxiliary, PMD)
 	    struct param_record param  : struct holding user-defined settings
-	    unsigned int nr_info       : number of info-records
-	    struct mds0_info *info     : structure for info-records
+	    unsigned int nr_states     : number of state-records
+	    struct mds0_states *states : structure for state-records
     output:  
-	    struct mds0_info **info_out: array with selected info-records
+	    struct mds0_states **states_out : array with selected states-records
 
 .RETURNS     number of selected records (unsigned int)
              error status passed by global variable ``nadc_stat''
@@ -65,61 +65,25 @@
 #include "selected_channel.inc"
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV0_SELECT_MDS_SOURCE
-.PURPOSE     select info-records on data source
-.INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_SOURCE( source, info, 
-                                                  nr_indx, indx_info );
-     input:  
-            int source              : data source (Detector, Auxiliary, PMD)
-	    struct mds0_info *info  : structure for info-records
-	    unsigned int nr_indx    : (at first call) number of info-records
-    output:  
-            unsigned int *indx_info : (at first call) array of size nr_indx
-                                      initialized as [0,1,2,...,nr_indx-1]
-
-.RETURNS     number of selected info-records
-.COMMENTS    static function
--------------------------*/
-static
-unsigned int SCIA_LV0_SELECT_MDS_SOURCE( int source, 
-					 const struct mds0_info *info, 
-					 unsigned int nr_indx, 
-					 unsigned int *indx_info )
-       /*@modifies indx_info@*/
-{
-     register unsigned int ni;
-     register unsigned int nr = 0u;
-
-     for ( ni = 0; ni < nr_indx; ni++ ) {
-	  if ( source == (int) info[indx_info[ni]].packet_type ) 
-	       indx_info[nr++] = indx_info[ni];
-     }
-     return nr;
-}
-
-/*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_SELECT_MDS_UNIQ
-.PURPOSE     reject duplicated info-records
+.PURPOSE     reject duplicated states
 .INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( info, nr_indx, indx_info );
+  call as   nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, nr_indx, indx );
      input:  
-	    struct mds0_info *info  : structure for info-records
-	    unsigned int nr_indx    : (at first call) number of info-records
+	    struct mds0_states *states : structure for mds0_states
+	    unsigned int nr_indx       : (at first call) number of states
     output:  
-            unsigned int *indx_info : (at first call) array of size nr_indx
-                                      initialized as [0,1,2,...,nr_indx-1]
+            unsigned int *indx         : (at first call) array of size nr_indx
+                                         initialized as [0,1,2,...,nr_indx-1]
 
-.RETURNS     number of selected info-records
+.RETURNS     number of selected states
 .COMMENTS    static function
 -------------------------*/
-#define CMP_MJD(a,b) memcmp( &(a), &(b), sizeof(struct mjd_envi))
-
 static
-unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_info *info, 
+unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states, 
 				       unsigned int nr_indx, 
-				       unsigned int *indx_info )
-       /*@modifies indx_info@*/
+				       unsigned int *indx )
+       /*@modifies indx@*/
 {
      const char prognm[] = "SCIA_LV0_SELECT_MDS_UNIQ";
 
@@ -128,79 +92,70 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_info *info,
      register unsigned int ni, nj;
      register unsigned int nr = 0u;
 
-     register const struct mds0_info *info_ptr;
+     register const struct mds0_states *states_ptr;
 
-     /* check if state_index is strictly increasing (duplicates are allowed) */
+     /* check if on_board_time is strictly increasing */
      for ( ni = 1; ni < nr_indx; ni++ ) {
-	  if (info[indx_info[ni-1]].state_index > info[indx_info[ni]].state_index) 
+	  if ( states[indx[ni-1]].on_board_time
+	       > states[indx[ni]].on_board_time ) 
 	       break;
      }
      if ( ni == nr_indx ) return nr_indx;
 
      /* identify duplicated records */
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  if ( indx_info[ni] == UINT_MAX ) continue;
+	  if ( indx[ni] == UINT_MAX ) continue;
 
-	  info_ptr = info + indx_info[ni];
+	  states_ptr = states + indx[ni];
 	  for ( nj = ni+1;  nj < nr_indx; nj++ ) {
-	       if ( indx_info[nj] == UINT_MAX ) continue;
+	       if ( indx[nj] == UINT_MAX ) continue;
 
-	       if ( info_ptr->packet_type == info[indx_info[nj]].packet_type
-/* 		    && CMP_MJD(info_ptr->mjd, info[indx_info[nj]].mjd) == 0 */
-		    && info_ptr->state_index == info[indx_info[nj]].state_index
-		    && info_ptr->bcps == info[indx_info[nj]].bcps )
-		    indx_info[nj] = UINT_MAX;
+	       if ( states_ptr->on_board_time == states[indx[nj]].on_board_time
+		    && states_ptr->num_aux == states[indx[nj]].num_aux
+		    && states_ptr->num_det == states[indx[nj]].num_det
+		    && states_ptr->num_pmd == states[indx[nj]].num_pmd )
+		    indx[nj] = UINT_MAX;
 	  }
      }
      /* remove indices to duplicated records */
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  if ( indx_info[ni] != UINT_MAX ) indx_info[nr++] = indx_info[ni];
+	  if ( indx[ni] != UINT_MAX ) indx[nr++] = indx[ni];
      }
      if ( nr_indx == nr ) return nr_indx;
 
      /* compose message to user */
-     if ( (int) info[indx_info[0]].packet_type == SCIA_AUX_PACKET ) {
-	  (void) snprintf( msg, 64, 
-			   "rejected %-u duplicated Auxiliary packages", 
-			   nr_indx - nr );
-     } else if ( (int) info[indx_info[0]].packet_type == SCIA_DET_PACKET ) {
-	  (void) snprintf( msg, 64, 
-			   "rejected %-u duplicated Detector packages", 
-			   nr_indx - nr );
-     } else {
-	  (void) snprintf( msg, 64, "rejected %-u duplicated PMD packages", 
-			   nr_indx - nr );
-     }
+     (void) snprintf( msg, 64, 
+		      "rejected %-u duplicated states", nr_indx - nr );
      NADC_ERROR( prognm, NADC_ERR_NONE, msg );
      return nr;
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_SELECT_MDS_PERIOD
-.PURPOSE     select info-records on given time window
+.PURPOSE     select states on given time window
 .INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( bgn_date, end_date, info, 
-                                                  nr_indx, indx_info );
+  call as   nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( bgn_date, end_date, states, 
+                                                  nr_indx, indx );
      input:  
-            char *bgn_date          : start of time window
-            char *end_date          : end of time window
-	    struct mds0_info *info  : structure for info-records
-	    unsigned int nr_indx    : (at first call) number of info-records
+            char *bgn_date             : start of time window
+            char *end_date             : end of time window
+	    struct mds0_states *states : structure for state-records
+	    unsigned int nr_indx       : (at first call) number of state-records
     output:  
-            unsigned int *indx_info : (at first call) array of size nr_indx
-                                      initialized as [0,1,2,...,nr_indx-1]
+            unsigned int *indx         : (at first call) array of size nr_indx
+	                                 initialized as [0,1,2,...,nr_indx-1]
 
-.RETURNS     number of selected info-records
+.RETURNS     number of selected state-records
 .COMMENTS    static function
 -------------------------*/
 static
 unsigned int SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date,
 					 const char *end_date,
-					 const struct mds0_info *info, 
+					 const struct mds0_states *states, 
 					 unsigned int nr_indx, 
-					 unsigned int *indx_info )
+					 unsigned int *indx )
        /*@globals  errno;@*/
-       /*@modifies errno, indx_info@*/
+       /*@modifies errno, indx@*/
 {
      register unsigned int ni;
      register unsigned int nr = 0u;
@@ -220,41 +175,41 @@ unsigned int SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date,
      end_jdate = mjd2000 + (secnd + mu_sec / 1000000.) / SecPerDay;
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  register double mjd_date = info[indx_info[ni]].mjd.days 
-	       + (info[indx_info[ni]].mjd.secnd 
-		  + info[indx_info[ni]].mjd.musec / 1000000.) / SecPerDay;
+	  register double mjd_date = states[indx[ni]].mjd.days 
+	       + (states[indx[ni]].mjd.secnd 
+		  + states[indx[ni]].mjd.musec / 1000000.) / SecPerDay;
 
 	  if ( mjd_date >= bgn_jdate && mjd_date <= end_jdate )
-	       indx_info[nr++] = indx_info[ni];
+	       indx[nr++] = indx[ni];
      }
      return nr;
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_SELECT_MDS_STATE
-.PURPOSE     select info-records on state ID
+.PURPOSE     select state-records on state ID
 .INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_STATE( stateID_nr, stateID, info, 
-                                                 nr_indx, indx_info );
+  call as   nr_indx = SCIA_LV0_SELECT_MDS_STATE( stateID_nr, stateID, states, 
+                                                 nr_indx, indx );
      input:  
-            unsigned char stateID_nr: number of selected stateIDs
-	    unsigned char *stateID  : array with stateIDs
-	    struct mds0_info *info  : structure for info-records
-	    unsigned int nr_indx    : (at first call) number of info-records
+            unsigned char stateID_nr   : number of selected stateIDs
+	    unsigned char *stateID     : array with stateIDs
+	    struct mds0_states *states : structure for state-records
+	    unsigned int nr_indx       : (at first call) number of state-records
     output:  
-            unsigned int *indx_info : (at first call) array of size nr_indx
-                                      initialized as [0,1,2,...,nr_indx-1]
+            unsigned int *indx         : (at first call) array of size nr_indx
+                                         initialized as [0,1,2,...,nr_indx-1]
 
-.RETURNS     number of selected info-records
+.RETURNS     number of selected state-records
 .COMMENTS    static function
 -------------------------*/
 static
 unsigned int SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
 					const unsigned char *stateID,
-					const struct mds0_info *info, 
+					const struct mds0_states *states, 
 					unsigned int nr_indx, 
-					unsigned int *indx_info )
-       /*@modifies indx_info@*/
+					unsigned int *indx )
+       /*@modifies indx@*/
 {
      register unsigned int ni;
      register unsigned int nr = 0u;
@@ -264,76 +219,110 @@ unsigned int SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
 
 	  register bool found = FALSE;
 	  do {
-	       if ( stateID[ns] == info[indx_info[ni]].state_id )
+	       if ( stateID[ns] == states[indx[ni]].state_id )
 		    found = TRUE;
 	  } while( ! found && ++ns < (short) stateID_nr );
-	  if ( found ) indx_info[nr++] = indx_info[ni];
+	  if ( found ) indx[nr++] = indx[ni];
 
      }
      return nr;
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned int SCIA_LV0_SELECT_MDS( int source, struct param_record param,
-				  unsigned int nr_info, 
-				  const struct mds0_info *info,
-				  struct mds0_info **info_out )
+unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
+				  unsigned int num_states, 
+				  const struct mds0_states *states,
+				  struct mds0_states **states_out )
 {
      const char prognm[] = "SCIA_LV0_SELECT_MDS";
 
      register unsigned int ni;
      register unsigned int nr_indx = 0;
 
-     unsigned int *indx_info = NULL;
+     unsigned int *indx_states = NULL;
 /*
  * initialize output array
  */
-     *info_out = NULL;
-     if ( nr_info == 0u ) return 0u;
+     *states_out = NULL;
+     if ( num_states == 0u ) return 0u;
 /*
  * first check type of selected MDS
  */
-     if ( source == SCIA_AUX_PACKET && param.write_aux == PARAM_UNSET )
-	  return 0u;
-     if ( source == SCIA_DET_PACKET && param.write_det == PARAM_UNSET )
-	  return 0u;
-     if ( source == SCIA_PMD_PACKET && param.write_pmd == PARAM_UNSET )
+     if ( param.write_aux == PARAM_UNSET
+	  && param.write_det == PARAM_UNSET
+	  && param.write_pmd == PARAM_UNSET )
 	  return 0u;
 /*
  * allocate memory to store indices to selected MDS records
  */
-     indx_info = (unsigned int *) malloc( nr_info * sizeof( unsigned int ));
-     if ( indx_info == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_info" );
-     for ( ni = 0; ni < nr_info; ni++ ) indx_info[ni] = ni;
+     (void) fprintf( stderr, "num_states(1): %u\n", num_states );
+     indx_states = (unsigned int *) malloc( num_states * sizeof(unsigned int) );
+     if ( indx_states == NULL ) 
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_states" );
+     for ( ni = 0; ni < num_states; ni++ ) indx_states[ni] = ni;
 /*
  * apply selection criteria
  */
-     nr_indx = SCIA_LV0_SELECT_MDS_SOURCE( source, info, nr_info, indx_info );
-     nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( info, nr_indx, indx_info );
+     nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, num_states, indx_states );
+     (void) fprintf( stderr, "num_states(2): %u\n", nr_indx );
 
      if ( param.flag_period != PARAM_UNSET ) {
 	  nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( param.bgn_date, param.end_date,
-						info, nr_indx, indx_info );
+						states, nr_indx, indx_states );
      }
      if ( param.stateID_nr != PARAM_UNSET ) {
 	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( param.stateID_nr, param.stateID,
-					       info, nr_indx, indx_info );
+					       states, nr_indx, indx_states );
      }
+     (void) fprintf( stderr, "num_states(3): %u\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
- * copy selected info-records to output array
+ * copy selected state-records to output array
  */
-     *info_out = (struct mds0_info *) 
-	  malloc( (size_t) nr_indx * sizeof( struct mds0_info ));
-     if ( *info_out == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_info" );
+     *states_out = (struct mds0_states *) 
+	  malloc( (size_t) nr_indx * sizeof( struct mds0_states ));
+     if ( *states_out == NULL ) 
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  (void) memcpy( &(*info_out)[ni], &info[indx_info[ni]],
-			 sizeof( struct mds0_info ) );
+	  (void) memcpy( &(*states_out)[ni], &states[indx_states[ni]],
+			 sizeof( struct mds0_states ) );
+	  if ( param.write_aux == PARAM_UNSET ) {
+	       (*states_out)[ni].num_aux = 0;
+	  } else if ( (*states_out)[ni].num_aux > 0 ) {
+	       size_t num_aux = (*states_out)[ni].num_aux;
+	       
+	       (*states_out)[ni].info_aux = (struct mds0_info *)
+		    malloc( num_aux * sizeof(struct mds0_info));
+	       (void) memcpy( &(*states_out)[ni].info_aux,
+			      &states[indx_states[ni]].info_aux,
+			      num_aux * sizeof(struct mds0_info));
+	  }
+	  if ( param.write_det == PARAM_UNSET ) {
+	       (*states_out)[ni].num_det = 0;
+	  } else if ( (*states_out)[ni].num_det > 0 ) {
+	       size_t num_det = (*states_out)[ni].num_det;
+	       
+	       (*states_out)[ni].info_det = (struct mds0_info *)
+		    malloc( num_det * sizeof(struct mds0_info));
+	       (void) memcpy( &(*states_out)[ni].info_det,
+			      &states[indx_states[ni]].info_det,
+			      num_det * sizeof(struct mds0_info));
+	  }
+	  if ( param.write_pmd == PARAM_UNSET ) {
+	       (*states_out)[ni].num_pmd = 0;
+	  } else if ( (*states_out)[ni].num_pmd > 0 ) {
+	       size_t num_pmd = (*states_out)[ni].num_pmd;
+	       
+	       (*states_out)[ni].info_pmd = (struct mds0_info *)
+		    malloc( num_pmd * sizeof(struct mds0_info));
+	       (void) memcpy( &(*states_out)[ni].info_pmd,
+			      &states[indx_states[ni]].info_pmd,
+			      num_pmd * sizeof(struct mds0_info));
+	  }
      }
 done:
-     if ( indx_info != NULL ) free( indx_info );
+     (void) fprintf( stderr, "num_states(4): %u\n", nr_indx );
+     if ( indx_states != NULL ) free( indx_states );
      return nr_indx;
 }

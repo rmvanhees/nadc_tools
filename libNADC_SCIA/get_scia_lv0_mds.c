@@ -56,101 +56,77 @@
 .IDENTifer   GET_SCIA_LV0_STATE_AUX
 .PURPOSE     read all Auxiliary MDS records of one state
 .INPUT/OUTPUT
-  call as   nrec = GET_SCIA_LV0_STATE_AUX( fd, info, numInfo, &aux );
+  call as   nrec = GET_SCIA_LV0_STATE_AUX( fd, states, &aux );
      input:
-            FILE *fd               : file pointer
-            struct mds0_info *info : structure holding info about MDS records
-	    unsigned int numInfo   : number of info records
+            FILE *fd                   : file pointer
+            struct mds0_states *states : structure holding info about MDS 
     output:
-            struct mds0_aux **aux  : auxiliary MDS records
+            struct mds0_aux **aux      : auxiliary MDS records
             
 .RETURNS     number of MDS recods read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int GET_SCIA_LV0_STATE_AUX( FILE *fd, const struct mds0_info *info,
-				     unsigned int numInfo,
+unsigned int GET_SCIA_LV0_STATE_AUX( FILE *fd,
+				     const struct mds0_states *states,
 				     struct mds0_aux **aux_out )
 {
-     register unsigned int naux = 0u;
+     if ( states->num_aux == 0u ) return 0u;
 
-     const unsigned short state_index = (info == NULL ? 0 : info->state_index);
+     (void) SCIA_LV0_RD_AUX( fd, states->info_aux, states->num_aux, aux_out );
 
-     if ( numInfo == 0u || info == NULL ) return 0u;
-
-     while( ++naux < numInfo ) {
-	  if ( info[naux].state_index != state_index ) break;
-     }
-     (void) SCIA_LV0_RD_AUX( fd, info, naux, aux_out );
-
-     return naux;
+     return states->num_aux;
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   GET_SCIA_LV0_STATE_DET
 .PURPOSE     read all Detector MDS records of one state
 .INPUT/OUTPUT
-  call as   nrec = GET_SCIA_LV0_STATE_DET( fd, info, numInfo, &det );
+  call as   nrec = GET_SCIA_LV0_STATE_DET( chan_mask, fd, states, &det );
      input:
-            FILE *fd               : file pointer
-            struct mds0_info *info : structure holding info about MDS records
-	    unsigned int numInfo   : number of info records
+            unsigned char chan_mask    : mask to select bands
+            FILE *fd                   : file pointer
+            struct mds0_states *states : structure holding info about MDS
     output:
-            struct mds0_det **det  : detector MDS records
+            struct mds0_det **det      : detector MDS records
             
 .RETURNS     number of MDS recods read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int GET_SCIA_LV0_STATE_DET( unsigned char chan_mask,
-				     FILE *fd, const struct mds0_info *info,
-				     unsigned int numInfo, 
+unsigned int GET_SCIA_LV0_STATE_DET( unsigned char chan_mask, FILE *fd,
+				     const struct mds0_states *states,
 				     struct mds0_det **det_out )
 {
-     register unsigned int ndet = 0u;
+     if ( states->num_det == 0u ) return 0u;
 
-     const unsigned short state_index = (info == NULL ? 0 : info->state_index);
-
-     if ( numInfo == 0u || info == NULL ) return 0u;
-
-     while( ++ndet < numInfo ) {
-	  if ( info[ndet].state_index != state_index ) break;
-     }
-     (void) SCIA_LV0_RD_DET( fd, info, ndet, chan_mask, det_out );
-
-     return ndet;
+     (void) SCIA_LV0_RD_DET( fd, states->info_det, states->num_det,
+			     chan_mask, det_out );
+     return states->num_det;
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   GET_SCIA_LV0_STATE_PMD
 .PURPOSE     read all PMD MDS records of one state
 .INPUT/OUTPUT
-  call as   nrec = GET_SCIA_LV0_STATE_PMD( fd, info, numInfo, &pmd );
+  call as   nrec = GET_SCIA_LV0_STATE_PMD( fd, states, &pmd );
      input:
-            FILE *fd               : file pointer
-            struct mds0_info *info : structure holding info about MDS records
-	    unsigned int numInfo   : number of info records
+            FILE *fd                   : file pointer
+            struct mds0_states *states : structure holding info about MDS
     output:
-            struct mds0_pmd **pmd  : PMD MDS records
+            struct mds0_pmd **pmd      : PMD MDS records
             
 .RETURNS     number of MDS recods read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int GET_SCIA_LV0_STATE_PMD( FILE *fd, const struct mds0_info *info,
-				     unsigned int numInfo,
+unsigned int GET_SCIA_LV0_STATE_PMD( FILE *fd,
+				     const struct mds0_states *states,
 				     struct mds0_pmd **pmd_out )
 {
-     register unsigned int npmd = 0u;
+     if ( states->num_pmd == 0u ) return 0u;
 
-     const unsigned short state_index = (info == NULL ? 0 : info->state_index);
+     (void) SCIA_LV0_RD_PMD( fd, states->info_pmd, states->num_pmd, pmd_out );
 
-     if ( numInfo == 0u || info == NULL ) return 0u;
-
-     while( ++npmd < numInfo ) {
-	  if ( info[npmd].state_index != state_index ) break;
-     }
-     (void) SCIA_LV0_RD_PMD( fd, info, npmd, pmd_out );
-
-     return npmd;
+     return states->num_pmd;
 }
