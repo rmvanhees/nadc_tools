@@ -81,7 +81,7 @@
 -------------------------*/
 static
 size_t SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states, 
-				       size_t nr_indx, size_t *indx )
+				 size_t nr_indx, size_t *indx )
        /*@modifies indx@*/
 {
      const char prognm[] = "SCIA_LV0_SELECT_MDS_UNIQ";
@@ -300,8 +300,8 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	       
 	       (*states_out)[ni].info_aux = (struct mds0_info *)
 		    malloc( num_aux * sizeof(struct mds0_info));
-	       (void) memcpy( &(*states_out)[ni].info_aux,
-			      &states[indx_states[ni]].info_aux,
+	       (void) memcpy( (*states_out)[ni].info_aux,
+			      states[indx_states[ni]].info_aux,
 			      num_aux * sizeof(struct mds0_info) );
 	  }
 	  if ( param.write_det == PARAM_UNSET ) {
@@ -312,8 +312,8 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	       
 	       (*states_out)[ni].info_det = (struct mds0_info *)
 		    malloc( num_det * sizeof(struct mds0_info));
-	       (void) memcpy( &(*states_out)[ni].info_det,
-			      &states[indx_states[ni]].info_det,
+	       (void) memcpy( (*states_out)[ni].info_det,
+			      states[indx_states[ni]].info_det,
 			      num_det * sizeof(struct mds0_info) );
 	  }
 	  if ( param.write_pmd == PARAM_UNSET ) {
@@ -324,8 +324,8 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	       
 	       (*states_out)[ni].info_pmd = (struct mds0_info *)
 		    malloc( num_pmd * sizeof(struct mds0_info));
-	       (void) memcpy( &(*states_out)[ni].info_pmd,
-			      &states[indx_states[ni]].info_pmd,
+	       (void) memcpy( (*states_out)[ni].info_pmd,
+			      states[indx_states[ni]].info_pmd,
 			      num_pmd * sizeof(struct mds0_info) );
 	  }
      }

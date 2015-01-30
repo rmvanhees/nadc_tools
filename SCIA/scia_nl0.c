@@ -232,6 +232,7 @@ int main( int argc, char *argv[] )
      }
      num_state = SCIA_LV0_SELECT_MDS(param, num_state_all, states_all, &states);
      (void) fprintf( stderr, "num_state (selected): %zd\n", num_state );
+     SCIA_LV0_FREE_MDS_INFO( num_state_all, states_all );
 
      if ( num_state == 0 ) goto done;
 
@@ -297,7 +298,6 @@ int main( int argc, char *argv[] )
 	  if ( param.flag_silent == PARAM_UNSET )
 	       NADC_Info_Update( stdout, 2, ns );
 
-	  (void) fprintf( stderr, "states->num_aux: %u\n", states[ns].num_aux );
 	  num = GET_SCIA_LV0_STATE_AUX( fd, states+ns, &aux );
 	  if ( IS_ERR_STAT_FATAL ) {
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX" );
@@ -361,8 +361,6 @@ int main( int argc, char *argv[] )
 	  if ( IS_ERR_STAT_FATAL ) {
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMD" );
 	  }
-	  (void) fprintf( stderr, "PMD: %zd %u %u\n",
-			  ns, num, states[ns].num_pmd );
 	  if ( param.write_hdf5 == PARAM_SET ) {
 	       SCIA_LV0_WR_H5_PMD( param, ns, num, pmd );
 	  } else if ( param.write_ascii == PARAM_SET ) {
@@ -401,7 +399,6 @@ int main( int argc, char *argv[] )
  */
      if ( dsd != NULL ) free( dsd );
      SCIA_LV0_FREE_MDS_INFO( num_state, states );
-     SCIA_LV0_FREE_MDS_INFO( num_state_all, states_all );
 /*
  * display error messages?
  */

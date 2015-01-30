@@ -1053,7 +1053,6 @@ unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
 	  *aux_out = NULL;
 	  return 0u;
      }
-     (void) fprintf( stderr, "%s: %u\n", prognm, num_info );
 /*
  * allocate memory to store output records
  */
@@ -1254,7 +1253,6 @@ unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 	  pmd -= nr_pmd;
 	  do {
 	       if ( pmd[nr].isp.days == 0 ) {
-		    (void) fprintf( stderr,"--> %u %d\n", nr, pmd[nr].isp.days );
 		    if ( nr > 0 )
 			 (void) memcpy( &pmd[nr].isp, &pmd[nr-1].isp, 
 					sizeof( struct mjd_envi ) );
