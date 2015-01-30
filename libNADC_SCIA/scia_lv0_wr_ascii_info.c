@@ -24,7 +24,7 @@
   call as   SCIA_LV0_WR_ASCII_INFO( param, num_states, states );
      input: 
             struct param_record param  : struct holding user-defined settings
-	    unsigned int num_states    : number of info-records
+	    size_t num_states          : number of info-records
 	    struct mds0_states *states : pointer to structure with info-records
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
@@ -48,12 +48,13 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV0_WR_ASCII_INFO( struct param_record param, unsigned int num_states,
+void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 			     const struct mds0_states *states )
 {
      const char prognm[] = "SCIA_LV0_WR_ASCII_INFO";
 
-     register unsigned int ni, ns;
+     register unsigned int ni;
+     register size_t       ns;
 
      char  date_str[UTC_STRING_LENGTH];
 

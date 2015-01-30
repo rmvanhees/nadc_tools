@@ -458,9 +458,9 @@ struct mds0_states
 	  } flag;
 	  unsigned char value;
      } q;
-     unsigned short  num_aux;
-     unsigned short  num_det;
-     unsigned short  num_pmd;
+     unsigned int  num_aux;
+     unsigned int  num_det;
+     unsigned int  num_pmd;
      unsigned int    on_board_time;
      unsigned int    offset;
      struct mds0_info *info_aux;
@@ -548,11 +548,13 @@ extern void SCIA_LV0_WR_SPH( FILE *fd, const struct mph_envi,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/;
 
-extern unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int, 
-					  const struct dsd_envi *,
-       				  /*@out@*/ struct mds0_states **states )
+extern size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int, 
+				    const struct dsd_envi *,
+				    /*@out@*/ struct mds0_states **states )
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *states@*/;
+
+extern void SCIA_LV0_FREE_MDS_INFO( size_t, /*@only@*/ struct mds0_states * );
 
 extern unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *, 
 					   struct mds0_info *info )
@@ -658,7 +660,7 @@ extern void SCIA_LV0_WR_ASCII_SPH( struct param_record,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
-extern void SCIA_LV0_WR_ASCII_INFO( struct param_record, unsigned int,
+extern void SCIA_LV0_WR_ASCII_INFO( struct param_record, size_t,
 				    const struct mds0_states * )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
@@ -666,9 +668,8 @@ extern void SCIA_LV0_WR_ASCII_INFO( struct param_record, unsigned int,
 extern void SCIA_LV0_FREE_MDS_DET( unsigned int, 
                                    /*@only@*/ struct mds0_det * );
 
-extern unsigned int SCIA_LV0_SELECT_MDS( const struct param_record,
-					 unsigned int, 
-					 const struct mds0_states *,
+extern size_t SCIA_LV0_SELECT_MDS( const struct param_record,
+				   size_t, const struct mds0_states *,
 			  /*@null@*/ /*@out@*/ struct mds0_states **states )
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, *states@*/;

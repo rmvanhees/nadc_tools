@@ -105,16 +105,20 @@ void _SET_QFLAG_STATE( unsigned char qflag, unsigned short state_index,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   _SET_INFO_STATEINDEX
+.IDENTifer   _ASSIGN_INFO_STATES
 .PURPOSE     identify DSR packages of the same state
 .INPUT/OUTPUT
-  call as   _SET_INFO_STATEINDEX( correct_info_rec, num_info, info );
+  call as   num_states = _ASSIGN_INFO_STATES( correct_info_rec, num_info, info,
+			                      &states )
      input:  
-            unsigned int num_info  : number of info records
- in/output:  
-	    struct mds0_info *info : structure holding info about MDS records
+            bool correct_info_rec   : allow correction of corrupted data?
+            unsigned int num_info   : number of info records
+	    struct mds0_info *info  : structure holding info about MDS records
+    output:  
+            struct mds0_states **states : info-recored organized per state
 
-.RETURNS     nothing
+.RETURNS     number of states in product (size_t)
+             error status passed by global variable ``nadc_stat''
 .COMMENTS    static function
 -------------------------*/
 static inline
@@ -123,9 +127,9 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
 {
      register unsigned int ni = 0;
      
-     unsigned short na = 0;
-     unsigned short nd = 0;
-     unsigned short np = 0;
+     unsigned int na = 0;
+     unsigned int nd = 0;
+     unsigned int np = 0;
 
      (void) memcpy( &states->mjd, &info->mjd, sizeof(struct mjd_envi) );
      states->category = info->category;
@@ -133,69 +137,94 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
      states->q.value = 0;
      states->on_board_time = info->on_board_time;
      states->offset = info->offset;
-     if ( states->num_det > 0 ) {
-	  states->info_det = (struct mds0_info *)
-	       malloc( states->num_det * sizeof(struct mds0_info) );
-     }
      if ( states->num_aux > 0 ) {
 	  states->info_aux = (struct mds0_info *)
 	       malloc( states->num_aux * sizeof(struct mds0_info) );
+     }
+     if ( states->num_det > 0 ) {
+	  states->info_det = (struct mds0_info *)
+	       malloc( states->num_det * sizeof(struct mds0_info) );
      }
      if ( states->num_pmd > 0 ) {
 	  states->info_pmd = (struct mds0_info *)
 	       malloc( states->num_pmd * sizeof(struct mds0_info) );
      }
      do {
-	  if ( info[ni].packet_type == SCIA_DET_PACKET ) {
-	       (void) memcpy( states->info_det+nd,
-			      &info[ni], 
+	  switch ( info[ni].packet_type ) {
+	  case SCIA_DET_PACKET: 
+	       (void) memcpy( states->info_det+nd, info+ni, 
 			      sizeof(struct mds0_info) );
 	       nd++;
-	  } else if ( info[ni].packet_type == SCIA_AUX_PACKET ) {
-	       (void) memcpy( states->info_aux+na,
-			      &info[ni], 
+	       break;
+	  case SCIA_AUX_PACKET:
+	       (void) memcpy( states->info_aux+na, info+ni, 
 			      sizeof(struct mds0_info) );
 	       na++;
-	  } else if ( info[ni].packet_type == SCIA_PMD_PACKET ) {
-	       (void) memcpy( states->info_pmd+np,
-			      &info[ni], 
+	       break;
+	  case SCIA_PMD_PACKET:
+	       (void) memcpy( states->info_pmd+np, info+ni, 
 			      sizeof(struct mds0_info) );
 	       np++;
+	       break;
 	  }
      } while ( ++ni < num_info );
+     (void) fprintf( stderr,
+		     "_FILL_STATES: (%u - %u) (%u - %u) (%u - %u)\n",
+		     na, states->num_aux, nd, states->num_det,
+		     np, states->num_pmd );
 }
 
 static
-void _ASSIGN_INFO_STATES( bool correct_info_rec,
-			  unsigned int num_info, struct mds0_info *info,
-			  unsigned int *num_states, struct mds0_states *states )
-     /*@modifies states @*/
+size_t _ASSIGN_INFO_STATES( bool correct_info_rec,
+			    unsigned int num_info, struct mds0_info *info,
+			    /*@out@*/ struct mds0_states **states_out )
+     /*@modifies nadc_stat, nadc_err_stack, *states; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
 {
-//     const char prognm[] = "_ASSIGN_INFO_STATES";
+     const char prognm[] = "_ASSIGN_INFO_STATES";
 
      register unsigned int ni  = 0;
 
      register size_t ns  = 0;
      register size_t num = 0;
 
+     size_t num_state = 0;
      unsigned int on_board_time = info->on_board_time;
      struct mjd_envi mjd;
+     struct mds0_states *states = NULL;
      
      /* handle special cases gracefully */
-     if ( num_info == 0 ) return;
+     if ( num_info == 0u ) goto done;
 
-     /* */
+     /* find number of states in product */
+     for ( ni = 0; ni < num_info; ni++ ) {
+	  if ( info[ni].on_board_time > 0
+	       && on_board_time != info[ni].on_board_time ) {
+	       on_board_time = info[ni].on_board_time;
+	       num++;
+	  }
+     }
+     num++;
+     
+     /* allocate output array */
+     states = (struct mds0_states *) malloc( num * sizeof(struct mds0_states) );
+     if ( (states_out[0] = states) == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
+     num_state = num;
+     
+     /* fill output array */
+     ni = 0u;
+     num = 0;
+     on_board_time = info->on_board_time;
      (void) memcpy(&mjd, &info->mjd, sizeof(struct mjd_envi));
+     states->num_aux = 0;
+     states->num_det = 0;
+     states->num_pmd = 0;
+		    
      do {
 	  if ( on_board_time == info[ni].on_board_time
 	       || (ni+1 < num_info
 		   && on_board_time == info[ni+1].on_board_time) ) {
-	       if ( info[ni].packet_type == SCIA_DET_PACKET )
-		    states[ns].num_det++;
-	       else if ( info[ni].packet_type == SCIA_AUX_PACKET )
-		    states[ns].num_aux++;
-	       else if ( info[ni].packet_type == SCIA_PMD_PACKET )
-		    states[ns].num_pmd++;
 
 	       if ( correct_info_rec
 		    && on_board_time != info[ni].on_board_time ) {
@@ -203,18 +232,39 @@ void _ASSIGN_INFO_STATES( bool correct_info_rec,
 		    (void) memcpy(&info[ni].mjd, &mjd, sizeof(struct mjd_envi));
 	       }
 	  } else {
-	       _FILL_STATES( num, &info[ni-num], &states[ns] );
+	       _FILL_STATES( num, &info[ni-num], states+ns );
 	       ns++;
+	       num = 0;
 	       on_board_time = info[ni].on_board_time;
 	       (void) memcpy(&mjd, &info[ni].mjd, sizeof(struct mjd_envi));
-	       num = 0;
+	       states[ns].num_aux = 0;
+	       states[ns].num_det = 0;
+	       states[ns].num_pmd = 0;
+	  }
+	  switch ( info[ni].packet_type ) {
+	  case ( SCIA_DET_PACKET ):
+	       states[ns].num_det++;
+	       break;
+	  case ( SCIA_AUX_PACKET ):
+	       states[ns].num_aux++;
+	       break;
+	  case ( SCIA_PMD_PACKET ):
+	       states[ns].num_pmd++;
+	       break;
+	  default:
+	       (void) fprintf( stderr, "no valid packet ID: %u\n", ni );
 	  }
 	  num++;
      } while ( ++ni < num_info );
-
-     if ( num > 0 )
+     
+     if ( num > 0 ) {
 	  _FILL_STATES( num, &info[num_info-num], &states[ns] );
-     *num_states = ns;
+	  ns++;
+     }
+     (void) fprintf( stderr, "%u %zd %zd %zd\n", num_info, num, ns, num_state );
+     num_state = ns;
+done:
+     return num_state;
 }
 
 /*+++++++++++++++++++++++++
@@ -851,24 +901,21 @@ void _SET_INFO_QUALITY( unsigned short absOrbit, unsigned int num_info,
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
-				   const struct dsd_envi *dsd, 
-				   struct mds0_states **states_out )
+size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
+			     const struct dsd_envi *dsd, 
+			     struct mds0_states **states_out )
 {
      const char prognm[] = "SCIA_LV0_RD_MDS_INFO";
 
-     register unsigned int ni;
-     
      unsigned short absOrbit;
      unsigned int   indx_dsd;
      unsigned int   num_info;
-     unsigned int   num_states = 0;
 
-     unsigned int   on_board_time;
+     size_t num_states = 0;
 
      struct mph_envi    mph;
-     struct mds0_info   *info;
-     struct mds0_states *states;
+     struct mds0_info   *info = NULL;
+     struct mds0_states *states = NULL;
 
      const char dsd_name[] = "SCIAMACHY_SOURCE_PACKETS";
 
@@ -877,6 +924,9 @@ unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      bool clusdef_db_exist = CLUSDEF_DB_EXISTS();
      bool correct_info_rec =
 	  (env_str != NULL && *env_str == '1') ? FALSE : TRUE;
+
+     /* initialize return values */
+     states_out[0] = NULL;
 
      /* read Main Product Header */
      ENVI_RD_MPH( fd, &mph );
@@ -893,41 +943,22 @@ unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      num_info = dsd[indx_dsd].num_dsr;
      info = (struct mds0_info *) 
 	  malloc( (size_t) num_info * sizeof(struct mds0_info) );
-     if ( info == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds0_info" );
-	  return 0u;
-     }
+     if ( info == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_info" );
 
      /* extract info-records from input file */
      num_info = GET_SCIA_LV0_MDS_INFO( fd, &dsd[indx_dsd], info );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "GET_SCIA_LV0_MDS_INFO" );
      (void) printf( "GET_SCIA_LV0_MDS_INFO: %u\n", num_info );
-     
-     /* find number of states in product */
-     num_states = 0;
-     on_board_time = info->on_board_time;
-     for ( ni = 0; ni < num_info; ni++ ) {
-	  if ( on_board_time != info[ni].on_board_time ) {
-	       if ( info[ni].on_board_time > 0 ) {
-		    on_board_time = info[ni].on_board_time;
-		    num_states++;
-	       }
-	  }
-     }
-     num_states++;
-     
-     states = (struct mds0_states *) 
-	  malloc( (size_t) num_states * sizeof(struct mds0_states) );
-     if ( (states_out[0] = states) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
-	  return 0u;
-     }
 
      /*   */
-     _ASSIGN_INFO_STATES( correct_info_rec, num_info, info,
-			  &num_states, states );
-     (void) printf( "_ASSIGN_INFO_STATES: %u\n", num_states );
+     num_states = _ASSIGN_INFO_STATES( correct_info_rec, num_info, info,
+				       &states );
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "_ASSIGN_INFO_STATES(" );
+     states_out[0] = states;
+     (void) printf( "_ASSIGN_INFO_STATES: %zd\n", num_states );
      
      /* set State counter */
 //     _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
@@ -957,4 +988,35 @@ unsigned int SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 //     }
 done:
      return num_states;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_LV0_FREE_MDS_INFO
+.PURPOSE     free memory allocated by SCIA_LV0_MDS_INFO
+.INPUT/OUTPUT
+  call as   SCIA_LV0_FREE_MDS_INFO( num_states, states );
+     input:  
+            size_t num_states          : number of MDS info records (per state)
+    output:  
+            struct mds0_states *states : MDS info-records
+
+.RETURNS     error status passed by global variable ``nadc_stat''
+.COMMENTS    none
+-------------------------*/
+void SCIA_LV0_FREE_MDS_INFO( size_t num_states, struct mds0_states *states )
+{
+     register size_t ns = 0;
+
+     if ( num_states == 0 ) return;
+
+     do {
+	  if ( states[ns].num_aux > 0 )
+	       free( states[ns].info_aux );
+	  if ( states[ns].num_det > 0 )
+	       free( states[ns].info_det );
+	  if ( states[ns].num_pmd > 0 )
+	       free( states[ns].info_pmd );
+     } while( ++ns < num_states );
+
+     free( states );
 }

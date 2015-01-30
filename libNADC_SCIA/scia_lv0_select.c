@@ -26,12 +26,12 @@
      input: 
             int source                 : data source (Detector, Auxiliary, PMD)
 	    struct param_record param  : struct holding user-defined settings
-	    unsigned int nr_states     : number of state-records
+	    size_t nr_states           : number of state-records
 	    struct mds0_states *states : structure for state-records
     output:  
 	    struct mds0_states **states_out : array with selected states-records
 
-.RETURNS     number of selected records (unsigned int)
+.RETURNS     number of selected records (size_t)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 .ENVIRONment None
@@ -71,26 +71,25 @@
   call as   nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, nr_indx, indx );
      input:  
 	    struct mds0_states *states : structure for mds0_states
-	    unsigned int nr_indx       : (at first call) number of states
+	    size_t nr_indx             : (at first call) number of states
     output:  
-            unsigned int *indx         : (at first call) array of size nr_indx
+            size_t *indx               : (at first call) array of size nr_indx
                                          initialized as [0,1,2,...,nr_indx-1]
 
 .RETURNS     number of selected states
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states, 
-				       unsigned int nr_indx, 
-				       unsigned int *indx )
+size_t SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states, 
+				       size_t nr_indx, size_t *indx )
        /*@modifies indx@*/
 {
      const char prognm[] = "SCIA_LV0_SELECT_MDS_UNIQ";
 
      char msg[64];
 
-     register unsigned int ni, nj;
-     register unsigned int nr = 0u;
+     register size_t ni, nj;
+     register size_t nr = 0u;
 
      register const struct mds0_states *states_ptr;
 
@@ -125,7 +124,7 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states,
 
      /* compose message to user */
      (void) snprintf( msg, 64, 
-		      "rejected %-u duplicated states", nr_indx - nr );
+		      "rejected %-zd duplicated states", nr_indx - nr );
      NADC_ERROR( prognm, NADC_ERR_NONE, msg );
      return nr;
 }
@@ -140,25 +139,23 @@ unsigned int SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states,
             char *bgn_date             : start of time window
             char *end_date             : end of time window
 	    struct mds0_states *states : structure for state-records
-	    unsigned int nr_indx       : (at first call) number of state-records
+	    size_t nr_indx             : (at first call) number of state-records
     output:  
-            unsigned int *indx         : (at first call) array of size nr_indx
+            size_t *indx               : (at first call) array of size nr_indx
 	                                 initialized as [0,1,2,...,nr_indx-1]
 
 .RETURNS     number of selected state-records
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned int SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date,
-					 const char *end_date,
-					 const struct mds0_states *states, 
-					 unsigned int nr_indx, 
-					 unsigned int *indx )
+size_t SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date, const char *end_date,
+				   const struct mds0_states *states, 
+				   size_t nr_indx, size_t *indx )
        /*@globals  errno;@*/
        /*@modifies errno, indx@*/
 {
-     register unsigned int ni;
-     register unsigned int nr = 0u;
+     register size_t ni;
+     register size_t nr = 0u;
 
      int          mjd2000;
      unsigned int secnd, mu_sec;
@@ -195,24 +192,23 @@ unsigned int SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date,
             unsigned char stateID_nr   : number of selected stateIDs
 	    unsigned char *stateID     : array with stateIDs
 	    struct mds0_states *states : structure for state-records
-	    unsigned int nr_indx       : (at first call) number of state-records
+	    size_t nr_indx             : (at first call) number of state-records
     output:  
-            unsigned int *indx         : (at first call) array of size nr_indx
+            size_t *indx               : (at first call) array of size nr_indx
                                          initialized as [0,1,2,...,nr_indx-1]
 
 .RETURNS     number of selected state-records
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned int SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
-					const unsigned char *stateID,
-					const struct mds0_states *states, 
-					unsigned int nr_indx, 
-					unsigned int *indx )
+size_t SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
+				  const unsigned char *stateID,
+				  const struct mds0_states *states, 
+				  size_t nr_indx, size_t *indx )
        /*@modifies indx@*/
 {
-     register unsigned int ni;
-     register unsigned int nr = 0u;
+     register size_t ni;
+     register size_t nr = 0u;
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
 	  register short ns = 0;
@@ -229,22 +225,21 @@ unsigned int SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
-				  unsigned int num_states, 
-				  const struct mds0_states *states,
-				  struct mds0_states **states_out )
+size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
+			    size_t num_states, const struct mds0_states *states,
+			    struct mds0_states **states_out )
 {
      const char prognm[] = "SCIA_LV0_SELECT_MDS";
 
-     register unsigned int ni;
-     register unsigned int nr_indx = 0;
+     register size_t ni;
+     register size_t nr_indx = 0;
 
-     unsigned int *indx_states = NULL;
+     size_t *indx_states = NULL;
 /*
  * initialize output array
  */
      *states_out = NULL;
-     if ( num_states == 0u ) return 0u;
+     if ( num_states == 0 ) return 0;
 /*
  * first check type of selected MDS
  */
@@ -255,8 +250,8 @@ unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
 /*
  * allocate memory to store indices to selected MDS records
  */
-     (void) fprintf( stderr, "num_states(1): %u\n", num_states );
-     indx_states = (unsigned int *) malloc( num_states * sizeof(unsigned int) );
+     (void) fprintf( stderr, "num_states(1): %zd\n", num_states );
+     indx_states = (size_t *) malloc( num_states * sizeof(size_t) );
      if ( indx_states == NULL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_states" );
      for ( ni = 0; ni < num_states; ni++ ) indx_states[ni] = ni;
@@ -264,7 +259,7 @@ unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
  * apply selection criteria
  */
      nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, num_states, indx_states );
-     (void) fprintf( stderr, "num_states(2): %u\n", nr_indx );
+     (void) fprintf( stderr, "num_states(2): %zd\n", nr_indx );
 
      if ( param.flag_period != PARAM_UNSET ) {
 	  nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( param.bgn_date, param.end_date,
@@ -274,21 +269,32 @@ unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( param.stateID_nr, param.stateID,
 					       states, nr_indx, indx_states );
      }
-     (void) fprintf( stderr, "num_states(3): %u\n", nr_indx );
+     (void) fprintf( stderr, "num_states(3): %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * copy selected state-records to output array
  */
      *states_out = (struct mds0_states *) 
-	  malloc( (size_t) nr_indx * sizeof( struct mds0_states ));
+	  malloc( nr_indx * sizeof( struct mds0_states ));
      if ( *states_out == NULL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  (void) memcpy( &(*states_out)[ni], &states[indx_states[ni]],
-			 sizeof( struct mds0_states ) );
+	  (void) memcpy( &(*states_out)[ni].mjd, &states[indx_states[ni]].mjd,
+			 sizeof(struct mjd_envi) );
+	  (*states_out)[ni].category = states[indx_states[ni]].category;
+	  (*states_out)[ni].state_id = states[indx_states[ni]].state_id;
+	  (*states_out)[ni].q.value = states[indx_states[ni]].q.value ;
+	  (*states_out)[ni].num_aux = states[indx_states[ni]].num_aux;
+	  (*states_out)[ni].num_det = states[indx_states[ni]].num_det;
+	  (*states_out)[ni].num_pmd = states[indx_states[ni]].num_pmd;
+	  (*states_out)[ni].on_board_time =
+	       states[indx_states[ni]].on_board_time;
+	  (*states_out)[ni].offset = states[indx_states[ni]].offset;
+
 	  if ( param.write_aux == PARAM_UNSET ) {
 	       (*states_out)[ni].num_aux = 0;
+	       (*states_out)[ni].info_aux = NULL;
 	  } else if ( (*states_out)[ni].num_aux > 0 ) {
 	       size_t num_aux = (*states_out)[ni].num_aux;
 	       
@@ -296,10 +302,11 @@ unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
 		    malloc( num_aux * sizeof(struct mds0_info));
 	       (void) memcpy( &(*states_out)[ni].info_aux,
 			      &states[indx_states[ni]].info_aux,
-			      num_aux * sizeof(struct mds0_info));
+			      num_aux * sizeof(struct mds0_info) );
 	  }
 	  if ( param.write_det == PARAM_UNSET ) {
 	       (*states_out)[ni].num_det = 0;
+	       (*states_out)[ni].info_det = NULL;
 	  } else if ( (*states_out)[ni].num_det > 0 ) {
 	       size_t num_det = (*states_out)[ni].num_det;
 	       
@@ -307,10 +314,11 @@ unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
 		    malloc( num_det * sizeof(struct mds0_info));
 	       (void) memcpy( &(*states_out)[ni].info_det,
 			      &states[indx_states[ni]].info_det,
-			      num_det * sizeof(struct mds0_info));
+			      num_det * sizeof(struct mds0_info) );
 	  }
 	  if ( param.write_pmd == PARAM_UNSET ) {
 	       (*states_out)[ni].num_pmd = 0;
+	       (*states_out)[ni].info_pmd = NULL;
 	  } else if ( (*states_out)[ni].num_pmd > 0 ) {
 	       size_t num_pmd = (*states_out)[ni].num_pmd;
 	       
@@ -318,11 +326,11 @@ unsigned int SCIA_LV0_SELECT_MDS( const struct param_record param,
 		    malloc( num_pmd * sizeof(struct mds0_info));
 	       (void) memcpy( &(*states_out)[ni].info_pmd,
 			      &states[indx_states[ni]].info_pmd,
-			      num_pmd * sizeof(struct mds0_info));
+			      num_pmd * sizeof(struct mds0_info) );
 	  }
      }
 done:
-     (void) fprintf( stderr, "num_states(4): %u\n", nr_indx );
+     (void) fprintf( stderr, "num_states(4): %zd\n", nr_indx );
      if ( indx_states != NULL ) free( indx_states );
      return nr_indx;
 }
