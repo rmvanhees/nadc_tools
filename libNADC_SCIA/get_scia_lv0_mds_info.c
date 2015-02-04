@@ -97,8 +97,7 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
      do {
 	  mds_start = cpntr;
 
-	  info_pntr->quality = 0;
-	  info_pntr->state_index = 0;
+	  info_pntr->q.value = 0;
 
 	  (void) memcpy( &info_pntr->mjd, cpntr, sizeof(struct mjd_envi) );
 	  cpntr += (3 * ENVI_UINT);

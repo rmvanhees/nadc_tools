@@ -242,15 +242,18 @@ int main( int argc, char *argv[] )
 
 	  for ( ns = 0; ns < num_state && ns < 256; ns++ ) {
 	       sqlState[ns].nrAux = 
-		    GET_SCIA_LV0_STATE_AUX( fd, states+ns, &aux );
+		    SCIA_LV0_RD_AUX( fd, states[ns].info_aux,
+				     states[ns].num_aux, &aux );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
 	       sqlState[ns].nrDet = 
-		    GET_SCIA_LV0_STATE_DET( BAND_ALL, fd, states+ns, &det );
+		    SCIA_LV0_RD_DET( fd, states[ns].info_det,
+				     states[ns].num_det, BAND_ALL, &det );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
 	       sqlState[ns].nrPMD = 
-		    GET_SCIA_LV0_STATE_PMD( fd, states+ns, &pmd );
+		    SCIA_LV0_RD_PMD( fd, states[ns].info_pmd,
+				     states[ns].num_pmd, &pmd );
 	       if ( IS_ERR_STAT_FATAL ) goto failed;
 
 	       /* set DateTime and StateID of current state */
@@ -298,7 +301,8 @@ int main( int argc, char *argv[] )
 	  if ( param.flag_silent == PARAM_UNSET )
 	       NADC_Info_Update( stdout, 2, ns );
 
-	  num = GET_SCIA_LV0_STATE_AUX( fd, states+ns, &aux );
+	  num = SCIA_LV0_RD_AUX( fd, states[ns].info_aux, states[ns].num_aux,
+				 &aux );
 	  if ( IS_ERR_STAT_FATAL ) {
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX" );
 	  }
@@ -327,8 +331,8 @@ int main( int argc, char *argv[] )
 	  if ( param.flag_silent == PARAM_UNSET )
 	       NADC_Info_Update( stdout, 2, ns );
 
-	  num = GET_SCIA_LV0_STATE_DET( param.chan_mask, fd, 
-					states+ns, &det );
+	  num = SCIA_LV0_RD_DET( fd, states[ns].info_det, states[ns].num_det,
+				 param.chan_mask, &det );
 	  if ( IS_ERR_STAT_FATAL ) {
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_DET" );
 	  }

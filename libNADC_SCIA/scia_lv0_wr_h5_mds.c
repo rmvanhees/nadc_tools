@@ -68,9 +68,10 @@ unsigned short _GET_LV0_CLUSDEF( unsigned int num_det,
 				 struct clusdef_rec *clusDef )
 {
      register unsigned char ncl, nch;
+     register unsigned char chan_id = 1;
      register unsigned int  nd;
 
-     unsigned short nr_clus;
+     unsigned char nr_clus;
      const struct chan_src *chan_src;
 
      /* initialize return value */
@@ -78,12 +79,12 @@ unsigned short _GET_LV0_CLUSDEF( unsigned int num_det,
 
      (void) memset( clusDef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
 
-     for ( nch = 1; nch <= SCIENCE_CHANNELS; nch++ ) {
+     do {
           register unsigned char clusIDmx = 0;
 
           for ( nd = 0; nd < num_det; nd++ ) {
 	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
-		    if ( det[nd].data_src[nch].hdr.channel.field.id != nch )
+		    if ( det[nd].data_src[nch].hdr.channel.field.id != chan_id )
 			 continue;
 
 		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
@@ -95,15 +96,15 @@ unsigned short _GET_LV0_CLUSDEF( unsigned int num_det,
 			 
 			 if ( chan_src[ncl].cluster_id > clusIDmx )
 			      clusIDmx = chan_src[ncl].cluster_id;
-			 clusDef[indx].chanID = nch;
+			 clusDef[indx].chanID = chan_id;
 			 clusDef[indx].clusID = chan_src[ncl].cluster_id;
 			 clusDef[indx].start  = chan_src[ncl].start;
 			 clusDef[indx].length = chan_src[ncl].length;
 		    }
 	       }
           }
-          numClus += clusIDmx;
-     }
+          numClus += clusIDmx + 1u;
+     } while ( ++chan_id <= SCIENCE_CHANNELS );
      return numClus;
 }
 

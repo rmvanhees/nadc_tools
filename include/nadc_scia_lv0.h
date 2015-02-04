@@ -417,12 +417,11 @@ struct mds0_info
      unsigned char   packet_type;
      unsigned char   category;
      unsigned char   state_id;
-     unsigned char   quality;
      union {
 	  struct qinfo_bitfield {
-	       unsigned char fixed_mjd       : 1;
-	       unsigned char fixed_state_id  : 1;
-	       unsigned char fixed_bcps      : 1;
+	       unsigned char state_id  : 1;
+	       unsigned char packet_id : 1;
+	       unsigned char dumy3 : 1;
 	       unsigned char dumy4 : 1;
 	       unsigned char dumy5 : 1;
 	       unsigned char dumy6 : 1;
@@ -435,7 +434,6 @@ struct mds0_info
      unsigned short  rs_errors;
      unsigned short  bcps;
      unsigned short  packet_length;
-     unsigned short  state_index;            // OBSOLETE: please remove
      unsigned int    on_board_time;
      unsigned int    offset;
 };

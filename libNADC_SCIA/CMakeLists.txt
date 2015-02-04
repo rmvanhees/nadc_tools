@@ -26,7 +26,7 @@ endif (NOT ${BIGENDIAN})
 
 ## define source-files
 set (SCIA_LV0_SRCS
-    get_scia_lv0c_mds.c
+#    get_scia_lv0c_mds.c
     get_scia_lv0_mds.c
     get_scia_lv0_mds_hk.c
     get_scia_lv0_mds_info.c

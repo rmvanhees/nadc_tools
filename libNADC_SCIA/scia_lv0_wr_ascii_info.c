@@ -98,7 +98,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 				 info[ni].packet_type );
 	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
 	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
-	       nadc_write_uchar( outfl, indx, "Quality", info[ni].quality );
+	       nadc_write_uchar( outfl, indx, "Quality", info[ni].q.value );
 	       nadc_write_ushort( outfl, indx, "CRC errors",
 				  info[ni].crc_errors );
 	       nadc_write_ushort( outfl, indx, "Reed-Solomon errors", 
@@ -128,7 +128,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 				 info[ni].packet_type );
 	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
 	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
-	       nadc_write_uchar( outfl, indx, "Quality", info[ni].quality );
+	       nadc_write_uchar( outfl, indx, "Quality", info[ni].q.value );
 	       nadc_write_ushort( outfl, indx, "CRC errors",
 				  info[ni].crc_errors );
 	       nadc_write_ushort( outfl, indx, "Reed-Solomon errors", 
@@ -158,7 +158,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 				 info[ni].packet_type );
 	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
 	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
-	       nadc_write_uchar( outfl, indx, "Quality", info[ni].quality );
+	       nadc_write_uchar( outfl, indx, "Quality", info[ni].q.value );
 	       nadc_write_ushort( outfl, indx, "CRC errors",
 				  info[ni].crc_errors );
 	       nadc_write_ushort( outfl, indx, "Reed-Solomon errors", 

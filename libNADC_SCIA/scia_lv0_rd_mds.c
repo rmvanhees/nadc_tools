@@ -136,12 +136,12 @@ void SET_NO_CLUSTER_CORRECTION( FILE *fd )
 #define FMT_MSG_FAIL     "can not correct corrupted cluster"
 
 static inline
-unsigned char CHECK_CLUSTERDEF( unsigned short ncl, 
+unsigned char _CHECK_CLUSTERDEF( unsigned short ncl, 
 				struct det_src *det_src )
        /*@globals  nadc_stat, nadc_err_stack, numClusDef, clusDef;@*/
        /*@modifies nadc_stat, nadc_err_stack, det_src@*/
 {
-     const char prognm[] = "CHECK_CLUSTERDEF";
+     const char prognm[] = "_CHECK_CLUSTERDEF";
 
      register unsigned short nc;
 
@@ -227,6 +227,8 @@ unsigned char CHECK_CLUSTERDEF( unsigned short ncl,
      }
 
      /* Oeps, can not correct inconsistent header fields */
+     (void) fprintf( stderr, "%s: %hhu %hhu %hu %hu\n",
+		     prognm, chanID, clusID, start, length );
      (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_FAIL );
      NADC_ERROR( prognm, NADC_ERR_NONE, msg );
      return DET_SRC_READ_FAILED;
@@ -633,17 +635,17 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 #endif
 	       cpntr += ENVI_USHRT;
                /* check for corrupted cluster, and try to correct them */
-	       stat = CHECK_CLUSTERDEF( n_cl, data_src );
-	       if ( stat == DET_SRC_READ_FAILED ) {
-		    if ( Band_Is_Selected && numClusters > 0 ) {
-			 while ( n_cl > 0 )
-			      free( data_src->pixel[--n_cl].data );
-			 free( data_src->pixel );
-			 data_src->hdr.channel.field.clusters = 0;
-		    }
-		    NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD,
-				"corrupted cluster block, remainder skipped" );
-	       }
+//	       stat = _CHECK_CLUSTERDEF( n_cl, data_src );
+//	       if ( stat == DET_SRC_READ_FAILED ) {
+//		    if ( Band_Is_Selected && numClusters > 0 ) {
+//			 while ( n_cl > 0 )
+//			      free( data_src->pixel[--n_cl].data );
+//			 free( data_src->pixel );
+//			 data_src->hdr.channel.field.clusters = 0;
+//		    }
+//		    NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD,
+//				"corrupted cluster block, remainder skipped" );
+//	       }
                /* determine size of cluster pixel data block */
 	       if ( data_src->pixel[n_cl].co_adding == UCHAR_ONE )
 		    num_byte = (size_t) 
@@ -949,6 +951,14 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
      det->num_chan = SCIA_LV0_RD_MDS_DET_SRC( cdet, det_length, chan_mask, 
 					      det->num_chan, det->data_src );
      free( cdet );
+     if ( IS_ERR_STAT_WARN ) {
+	  char msg[SHORT_STRING_LENGTH];
+	  (void) snprintf( msg, SHORT_STRING_LENGTH,
+			   "Read failed for on_board_time %-u state_id %hhu",
+			   info->on_board_time, info->state_id );
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, msg );
+	  nadc_stat &= ~(NADC_STAT_WARN);
+     }
      if ( IS_ERR_STAT_FATAL ) {
 	  if ( ! Use_Extern_Alloc ) free( det->data_src );
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_DATA_SRC" );
@@ -1338,7 +1348,7 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 /*
  * read Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &aux->packet_hdr);
+     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &aux->packet_hdr );
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP data field header
