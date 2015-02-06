@@ -421,8 +421,8 @@ struct mds0_info
 	  struct qinfo_bitfield {
 	       unsigned char state_id  : 1;
 	       unsigned char packet_id : 1;
-	       unsigned char dumy3 : 1;
-	       unsigned char dumy4 : 1;
+	       unsigned char duplicate : 1;
+	       unsigned char dsr_size  : 1;
 	       unsigned char dumy5 : 1;
 	       unsigned char dumy6 : 1;
 	       unsigned char dumy7 : 1;
@@ -438,24 +438,29 @@ struct mds0_info
      unsigned int    offset;
 };
 
+
+union qstate_rec {
+     struct qstate_bitfield {
+	  unsigned char too_short   : 1;
+	  unsigned char dsr_missing : 1;
+	  unsigned char crc_flag    : 1;
+	  unsigned char rs_flag     : 1;
+	  unsigned char dumy5 : 1;
+	  unsigned char dumy6 : 1;
+	  unsigned char dumy7 : 1;
+	  unsigned char dumy8 : 1;
+     } flag;
+     unsigned char value;
+};
+
 struct mds0_states
 {
      struct mjd_envi mjd;
      unsigned char   category;
      unsigned char   state_id;
-     union {
-	  struct qstate_bitfield {
-	       unsigned char dumy1 : 1;
-	       unsigned char dumy2 : 1;
-	       unsigned char dumy3 : 1;
-	       unsigned char dumy4 : 1;
-	       unsigned char dumy5 : 1;
-	       unsigned char dumy6 : 1;
-	       unsigned char dumy7 : 1;
-	       unsigned char dumy8 : 1;
-	  } flag;
-	  unsigned char value;
-     } q;
+     union qstate_rec q_aux;
+     union qstate_rec q_det;
+     union qstate_rec q_pmd;
      unsigned int  num_aux;
      unsigned int  num_det;
      unsigned int  num_pmd;

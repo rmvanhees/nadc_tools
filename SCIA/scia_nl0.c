@@ -231,7 +231,6 @@ int main( int argc, char *argv[] )
 	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "WR_MDS_INFO" );
      }
      num_state = SCIA_LV0_SELECT_MDS(param, num_state_all, states_all, &states);
-     (void) fprintf( stderr, "num_state (selected): %zd\n", num_state );
      SCIA_LV0_FREE_MDS_INFO( num_state_all, states_all );
 
      if ( num_state == 0 ) goto done;

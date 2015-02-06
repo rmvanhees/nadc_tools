@@ -250,7 +250,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 /*
  * allocate memory to store indices to selected MDS records
  */
-     (void) fprintf( stderr, "num_states(1): %zd\n", num_states );
      indx_states = (size_t *) malloc( num_states * sizeof(size_t) );
      if ( indx_states == NULL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_states" );
@@ -259,7 +258,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
  * apply selection criteria
  */
      nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, num_states, indx_states );
-     (void) fprintf( stderr, "num_states(2): %zd\n", nr_indx );
 
      if ( param.flag_period != PARAM_UNSET ) {
 	  nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( param.bgn_date, param.end_date,
@@ -269,7 +267,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( param.stateID_nr, param.stateID,
 					       states, nr_indx, indx_states );
      }
-     (void) fprintf( stderr, "num_states(3): %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * copy selected state-records to output array
@@ -284,7 +281,9 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 			 sizeof(struct mjd_envi) );
 	  (*states_out)[ni].category = states[indx_states[ni]].category;
 	  (*states_out)[ni].state_id = states[indx_states[ni]].state_id;
-	  (*states_out)[ni].q.value = states[indx_states[ni]].q.value ;
+	  (*states_out)[ni].q_aux.value = states[indx_states[ni]].q_aux.value ;
+	  (*states_out)[ni].q_det.value = states[indx_states[ni]].q_det.value ;
+	  (*states_out)[ni].q_pmd.value = states[indx_states[ni]].q_pmd.value ;
 	  (*states_out)[ni].num_aux = states[indx_states[ni]].num_aux;
 	  (*states_out)[ni].num_det = states[indx_states[ni]].num_det;
 	  (*states_out)[ni].num_pmd = states[indx_states[ni]].num_pmd;
@@ -330,7 +329,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  }
      }
 done:
-     (void) fprintf( stderr, "num_states(4): %zd\n", nr_indx );
      if ( indx_states != NULL ) free( indx_states );
      return nr_indx;
 }

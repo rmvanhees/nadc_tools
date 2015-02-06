@@ -74,7 +74,12 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 	  nadc_write_text( outfl, ns, "ISP (Date Time)", date_str );
 	  nadc_write_uchar( outfl, ns, "Category", states[ns].category );
 	  nadc_write_uchar( outfl, ns, "State ID", states[ns].state_id );
-	  nadc_write_uchar( outfl, ns, "Quality", states[ns].q.value );
+	  nadc_write_uchar( outfl, ns, "Quality AUX_MDS",
+			    states[ns].q_aux.value );
+	  nadc_write_uchar( outfl, ns, "Quality DET_MDS",
+			    states[ns].q_det.value );
+	  nadc_write_uchar( outfl, ns, "Quality PMD_MDS",
+			    states[ns].q_pmd.value );
 	  nadc_write_ushort( outfl, ns, "Number AUX_MDS", states[ns].num_aux );
 	  nadc_write_ushort( outfl, ns, "Number DET_MDS", states[ns].num_det );
 	  nadc_write_ushort( outfl, ns, "Number PMD_MDS", states[ns].num_pmd );
