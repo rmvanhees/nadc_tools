@@ -353,7 +353,10 @@ unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID,
      unsigned short sz = 65;
 
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) != 0 ) {
+	       metaTable.num_clus = 0;
+	       return 0;
+	  }
      }
      if ( metaTable.indx_Clcon == 255 ) return 0;
 
@@ -412,7 +415,10 @@ unsigned short CLUSDEF_INTG_MIN( unsigned char stateID,
      unsigned short intg_min = USHRT_MAX;
 
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) != 0 ) {
+	       metaTable.num_clus = 0;
+	       return 0;
+	  }
      }
      do {
 	  if ( clusDef[ncl].readouts > 0  && clusDef[ncl].intg < intg_min )
@@ -484,22 +490,42 @@ unsigned short CLUSDEF_NUM_DET( unsigned char stateID,
 .RETURNS     number of clusters (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEDF_CLCON( unsigned char stateID, 
-			       unsigned short absOrbit,
-			       struct clusdef_rec *clusdef )
+unsigned short CLUSDEF_CLCON( unsigned char stateID, 
+			      unsigned short absOrbit,
+			      struct clusdef_rec *clusdef )
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEDF_CLCON";
-     register unsigned short ncl;
+//     const char prognm[] = "CLUSDEF_CLCON";
+     register unsigned short ncl, offs;
+     register unsigned char chan_id = 0;
+     register unsigned char clus_id = 0;
 
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) != 0 ) {
+	       metaTable.num_clus = 0;
+	       return 0;
+	  }
      }
      (void) memset( clusdef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
+
      for ( ncl = 0; ncl < metaTable.num_clus; ncl++ ) {
+	  if ( chan_id < clusDef[ncl].chan_id ) {
+	       chan_id = clusDef[ncl].chan_id;
+	       clus_id = 0;
+	       if ( chan_id == 2 )
+		    offs = chan_id * CHANNEL_SIZE;
+	       else
+		    offs = (chan_id - 1) * CHANNEL_SIZE;
+	  } else {
+	       clus_id++;
+	  }
 	  clusdef[ncl].chanID = clusDef[ncl].chan_id;
-	  clusdef[ncl].clusID = clusDef[ncl].clus_id;
-	  clusdef[ncl].start  = clusDef[ncl].start;
+	  clusdef[ncl].clusID = clus_id;
+	  if ( chan_id == 2 )
+	       clusdef[ncl].start  =
+		    offs - (clusDef[ncl].start + clusDef[ncl].length);
+	  else
+	       clusdef[ncl].start  = offs + clusDef[ncl].start;
 	  clusdef[ncl].length = clusDef[ncl].length;
      }     
      return metaTable.num_clus;

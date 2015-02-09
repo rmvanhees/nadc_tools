@@ -19,7 +19,7 @@
 .AUTHOR      R.M. van Hees
 .KEYWORDS    SCIA level 0 data
 .LANGUAGE    ANSI C
-.PURPOSE     read SCIAMACHY level 0 Measurement Data Sets 
+.PURPOSE     read SCIAMACHY level 0 Measurement Data Sets of one State execution
 .COMMENTS    contains SCIA_LV0_RD_AUX, SCIA_LV0_RD_DET, SCIA_LV0_RD_PMD,
 		      SCIA_LV0_RD_LV1_AUX, SCIA_LV0_FREE_MDS_DET, 
 		      SCIA_LV0_RD_LV1_PMD
@@ -90,22 +90,16 @@ static struct clusdef_rec clusDef[MAX_NUM_STATE];
 #endif /* _SWAP_TO_LITTLE_ENDIAN */
 
 static inline
-void SET_NO_CLUSTER_CORRECTION( FILE *fd )
+void SET_NO_CLUSTER_CORRECTION( void )
 {
      char *env_str = getenv( "NO_CLUSTER_CORRECTION" );
 
-     if (  env_str == NULL ) {
-	  struct mph_envi  mph;
-
-	  ENVI_RD_MPH( fd, &mph );
-	  if ( mph.abs_orbit > 4151 ) 
-	       ClusterCorrectionFlag = TRUE;
-	  else
-	       ClusterCorrectionFlag = FALSE;
-     } else if ( *env_str == '0' )  {
-	  ClusterCorrectionFlag = TRUE;
-     } else {
+     if (  env_str != NULL && *env_str == '1' ) {
 	  ClusterCorrectionFlag = FALSE;
+     } else if ( ! CLUSDEF_DB_EXISTS() ) {
+	  ClusterCorrectionFlag = FALSE;
+     } else {
+	  ClusterCorrectionFlag = TRUE;
      }
 }
 
@@ -129,11 +123,11 @@ void SET_NO_CLUSTER_CORRECTION( FILE *fd )
 #define DET_SRC_MODIFIED_LENGTH ((unsigned char) 0x8U)
 #define DET_SRC_READ_FAILED     ((unsigned char) 0x10U)
 
-#define FMT_MSG_CHANID   "corrected ID of channel from %-hhu to %-hhu"
-#define FMT_MSG_CLUSID   "corrected ID of cluster from %-hhu to %-hhu"
-#define FMT_MSG_START    "corrected start of cluster from %-hu to %-hu"
-#define FMT_MSG_LENGTH   "corrected length of cluster from %-hu to %-hu"
-#define FMT_MSG_FAIL     "can not correct corrupted cluster"
+#define FMT_MSG_CHANID "corrected (%-hhu,%2hhu,%5hu,%4hu) ID of channel to %hhu"
+#define FMT_MSG_CLUSID "corrected (%-hhu,%2hhu,%5hu,%4hu) ID of cluster to %hhu"
+#define FMT_MSG_START  "corrected (%-hhu,%2hhu,%5hu,%4hu) start of cluster to %hu"
+#define FMT_MSG_LENGTH "corrected (%-hhu,%2hhu,%5hu,%4hu) length of cluster to %hu"
+#define FMT_MSG_FAIL   "failed correcting cluster (%-hhu,%2hhu,%5hu,%4hu)"
 
 static inline
 unsigned char _CHECK_CLUSTERDEF( unsigned short ncl, 
@@ -147,14 +141,34 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 
      char msg[SHORT_STRING_LENGTH];
 
-     const unsigned char chanID  = det_src->hdr.channel.field.id;
-     const unsigned char clusID  = (det_src->pixel[ncl].cluster_id &= 0x0F);
-     const unsigned short start  = det_src->pixel[ncl].start;
-     const unsigned short length = det_src->pixel[ncl].length;
+     unsigned char stat = DET_SRC_MODIFIED_NONE;
 
-     /* perform check on request or when a memeory corruption is obvious */
-     if ( ! ClusterCorrectionFlag && length <= CHANNEL_SIZE ) 
-	  return DET_SRC_MODIFIED_NONE;
+     const unsigned char mask_id = (unsigned char) 0xFU;
+     const unsigned short mask_start = (unsigned short) 0x1FFFU;
+     const unsigned short mask_length = (unsigned short) 0x7FFU;
+
+     const unsigned char chanID  = (det_src->hdr.channel.field.id & mask_id);
+     const unsigned char clusID  = (det_src->pixel[ncl].cluster_id & mask_id);
+     const unsigned short start  = (det_src->pixel[ncl].start & mask_start);
+     const unsigned short length = (det_src->pixel[ncl].length & mask_length);
+
+     /* check for precense of an out-of-bound value due to a bitflip */
+     if ( chanID != det_src->hdr.channel.field.id ) {
+	  det_src->hdr.channel.field.id &= mask_id;
+	  stat = DET_SRC_MODIFIED_CHANID;
+     }
+     if ( clusID != det_src->pixel[ncl].cluster_id ) {
+	  det_src->pixel[ncl].cluster_id &= mask_id;
+	  stat &= DET_SRC_MODIFIED_CLUSID;
+     }
+     if ( start  != det_src->pixel[ncl].start ) {
+	  det_src->pixel[ncl].start &= mask_start;
+	  stat &= DET_SRC_MODIFIED_START;
+     }
+     if ( length != det_src->pixel[ncl].length ) {
+	  det_src->pixel[ncl].length &= mask_length;
+	  stat &= DET_SRC_MODIFIED_LENGTH;
+     }
 
      /* check if all fields in header are oke */
      nc = 0;
@@ -164,7 +178,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 	       && clusDef[nc].start == start
 	       && clusDef[nc].length == length ) break;
      } while( ++nc < numClusDef );
-     if ( nc < numClusDef ) return DET_SRC_MODIFIED_NONE;
+     if ( nc < numClusDef ) return stat;
 
      /* check if 3 fields in header are oke, except "clusID" */
      nc = 0;
@@ -176,7 +190,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
      if ( nc < numClusDef ) {
 	  det_src->pixel[ncl].cluster_id = clusDef[nc].clusID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CLUSID, 
-			   clusID, clusDef[nc].clusID );
+			   chanID, clusID, start, length, clusDef[nc].clusID );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_CLUSID;
      }
@@ -191,7 +205,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
      if ( nc < numClusDef ) {
 	  det_src->hdr.channel.field.id = clusDef[nc].chanID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CHANID, 
-			   chanID, clusDef[nc].chanID );
+			   chanID, clusID, start, length, clusDef[nc].chanID );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_CHANID;
      }
@@ -206,7 +220,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
      if ( nc < numClusDef ) {
 	  det_src->pixel[ncl].start = clusDef[nc].start;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_START, 
-			   start, clusDef[nc].start );
+			   chanID, clusID, start, length, clusDef[nc].start );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_START;
      }
@@ -221,15 +235,14 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
      if ( nc < numClusDef ) {
 	  det_src->pixel[ncl].length = clusDef[nc].length;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_LENGTH,
-			   length, clusDef[nc].length );
+			   chanID, clusID, start, length, clusDef[nc].length );
 	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_LENGTH;
      }
 
      /* Oeps, can not correct inconsistent header fields */
-     (void) fprintf( stderr, "%s: %hhu %hhu %hu %hu\n",
-		     prognm, chanID, clusID, start, length );
-     (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_FAIL );
+     (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_FAIL,
+		      chanID, clusID, start, length );
      NADC_ERROR( prognm, NADC_ERR_NONE, msg );
      return DET_SRC_READ_FAILED;
 }
@@ -282,7 +295,6 @@ void SCIA_LV0_RD_MDS_ANNOTATION( const char *cbuff,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_MDS_ANNOTATION( isp, fep_hdr );
 #endif
-     return;
 }
 
 /*+++++++++++++++++++++++++
@@ -316,7 +328,6 @@ void SCIA_LV0_RD_MDS_PACKET_HDR( const char *cbuff,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_MDS_PACKET_HDR( packet_hdr );
 #endif
-     return;
 }
 
 /*+++++++++++++++++++++++++
@@ -358,7 +369,6 @@ void SCIA_LV0_RD_MDS_DATA_HDR(  const char *cbuff,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_MDS_DATA_HDR( data_hdr );
 #endif
-     return;
 }
 
 /*+++++++++++++++++++++++++
@@ -378,7 +388,6 @@ static
 void SCIA_LV0_RD_MDS_PMTC_HDR( const char *cbuff,
                                /*@out@*/ struct pmtc_hdr *pmtc_hdr )
        /*@modifies *pmtc_hdr@*/
-
 {
      register const char *cpntr = cbuff;
 /*
@@ -397,7 +406,6 @@ void SCIA_LV0_RD_MDS_PMTC_HDR( const char *cbuff,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_MDS_PMTC_HDR( pmtc_hdr );
 #endif
-     return;
 }
 
 /*+++++++++++++++++++++++++
@@ -421,7 +429,7 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
 {
      const char prognm[] = "SCIA_LV0_RD_PMTC_FRAME";
      
-     register unsigned short nb;
+     register unsigned short nb = 0;
      register const char *cpntr = cbuff;
 
      unsigned int ubuff;
@@ -434,7 +442,6 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
 /*
  * copy data to output structure
  */
-     nb = 0;
      do {
 	  (void) memcpy( &pmtc_frame->bcp[nb].sync, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
@@ -451,22 +458,17 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
 			 cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
 	  (void) memcpy( &ubuff, cpntr, ENVI_UINT );
-	  pmtc_frame->bcp[nb].azi_encode_cntr = 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       (byte_swap_u32( ubuff ) >> 4) & (~0U >> 12);
-#else
-	       (ubuff >> 4) & (~0U >> 12);
+	  ubuff = byte_swap_u32( ubuff );
 #endif
+	  pmtc_frame->bcp[nb].azi_encode_cntr = (ubuff >> 4) & 0xFFFFF;
 	  cpntr += ENVI_USHRT;
 	  (void) memcpy( &ubuff, cpntr, ENVI_UINT );
-	  pmtc_frame->bcp[nb].ele_encode_cntr = 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	       byte_swap_u32( ubuff ) & (~0U >> 12);
-#else
-	       ubuff & (~0U >> 12);
+	  ubuff = byte_swap_u32( ubuff );
 #endif
+	  pmtc_frame->bcp[nb].ele_encode_cntr = (ubuff >> 4) & 0xFFFFF;
 	  cpntr += ENVI_UINT;
-	       
 	  (void) memcpy( &pmtc_frame->bcp[nb].azi_cntr_error, 
 			 cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
@@ -488,10 +490,6 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
      (void) memcpy( &pmtc_frame->bench_az.two_byte, cpntr, ENVI_USHRT );
      cpntr += ENVI_USHRT;
 
-     if ( (cpntr - cbuff) != AUX_DATA_SRC_LENGTH ) {
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, 
-			     "Auxiliary Source Data" );
-     }
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_MDS_PMTC_FRAME( pmtc_frame );
 #endif
@@ -530,7 +528,6 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 
      register const char *cpntr = cbuff;
 
-     unsigned char  stat = DET_SRC_MODIFIED_NONE;
      unsigned short nr_chan = 0;
 
      bool           Band_Is_Selected;
@@ -551,7 +548,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
           /* check data integrity */
 	  if ( data_src->hdr.sync != CHANNEL_SYNC )
 	       NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD, 
-				"incorrect Channel Sync value(s) found" );
+				"incorrect Channel Sync value found" );
 
 	  (void) memcpy( &data_src->hdr.channel.two_byte, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
@@ -580,8 +577,9 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 		    malloc ( numClusters * sizeof( struct chan_src ) );
 	       if ( data_src->pixel == NULL )
 		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel" );
-	  } else 
+	  } else {
 	       data_src->pixel = dummy_pixel;
+	  }
 /*
  * read data of the clusters
  */
@@ -634,18 +632,23 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 		    byte_swap_u16( data_src->pixel[n_cl].length );
 #endif
 	       cpntr += ENVI_USHRT;
+
                /* check for corrupted cluster, and try to correct them */
-//	       stat = _CHECK_CLUSTERDEF( n_cl, data_src );
-//	       if ( stat == DET_SRC_READ_FAILED ) {
-//		    if ( Band_Is_Selected && numClusters > 0 ) {
-//			 while ( n_cl > 0 )
-//			      free( data_src->pixel[--n_cl].data );
-//			 free( data_src->pixel );
-//			 data_src->hdr.channel.field.clusters = 0;
-//		    }
-//		    NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD,
-//				"corrupted cluster block, remainder skipped" );
-//	       }
+	       if ( ClusterCorrectionFlag && numClusDef != 0 ) {
+		    unsigned char stat = _CHECK_CLUSTERDEF( n_cl, data_src );
+
+		    if ( stat == DET_SRC_READ_FAILED ) {
+			 if ( Band_Is_Selected && numClusters > 0 ) {
+			      while ( n_cl > 0 )
+				   free( data_src->pixel[--n_cl].data );
+			      free( data_src->pixel );
+			      data_src->hdr.channel.field.clusters = 0;
+			 }
+			 NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD,
+				"corrupted cluster block, remainder skipped" );
+		    }
+	       }
+	       
                /* determine size of cluster pixel data block */
 	       if ( data_src->pixel[n_cl].co_adding == UCHAR_ONE )
 		    num_byte = (size_t) 
@@ -709,7 +712,7 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, *pmd_src@*/
 {
-     const char prognm[]  = "SCIA_LV0_RD_PMD_SRC";
+     const char prognm[]  = "SCIA_LV0_RD_MDS_PMD_SRC";
 
      register unsigned short np;
      register const char *cpntr = cbuff;
@@ -720,7 +723,7 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
 /*
  * initialize output structure to zero
  */
-     (void) memset( pmd_src, 0, sizeof( struct pmd_src ));
+     (void) memset( pmd_src, 0, sizeof(struct pmd_src) );
 /*
  * copy data to output structure
  */
@@ -747,9 +750,6 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
 	  cpntr += ENVI_USHRT;
      } while ( ++np < NUM_LV0_PMD_PACKET );
 
-     if ( (cpntr - cbuff) != PMD_DATA_SRC_LENGTH ) {
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "PMD Source Data" );
-     }
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_MDS_PMD_SRC( pmd_src );
 #endif
@@ -928,8 +928,6 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
      det->orbit_vector[7] = byte_swap_32( det->orbit_vector[7] );
      det->num_chan = byte_swap_u16( det->num_chan );
 #endif
-     /* obtain cluster definition (not implemented for absOrbit < 4151) */
-     numClusDef = GET_SCIA_CLUSDEF( info->state_id, clusDef );
 /*
  * read ISP Detector Data Source Packet
  */
@@ -1090,24 +1088,6 @@ unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
 	  info++;
 	  aux++;
      } while ( ++nr_aux < num_info );
-/*
- * set return values
- */
-     if ( ClusterCorrectionFlag ) {
-	  register unsigned int nr = 0;
-
-	  aux -= nr_aux;
-	  do {
-	       if ( aux[nr].isp.days == 0 ) {
-		    if ( nr > 0 )
-			 (void) memcpy( &aux[nr].isp, &aux[nr-1].isp, 
-					sizeof( struct mjd_envi ) );
-		    else
-			 (void) memcpy( &aux[nr].isp, &aux[nr+1].isp, 
-					sizeof( struct mjd_envi ) );
-	       }
-	  } while ( ++nr < nr_aux );
-     }
  done:
      return nr_aux;
 }
@@ -1147,7 +1127,25 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 /*
  * set flag which indicates that Detector MDS records have to be checked
  */
-     SET_NO_CLUSTER_CORRECTION( fd );
+     SET_NO_CLUSTER_CORRECTION();
+
+     /* obtain cluster definition */
+     if ( ClusterCorrectionFlag ) {
+//	  register unsigned short jj;
+	  
+	  struct mph_envi  mph;
+
+          ENVI_RD_MPH( fd, &mph );
+	  numClusDef = CLUSDEF_CLCON( info->state_id, mph.abs_orbit, clusDef );
+//	  (void) fprintf( stderr, " %d %d %d %d\n", (int) mph.abs_orbit,
+//			  (int) info->state_id, (int) ClusterCorrectionFlag,
+//			  (int) numClusDef );
+//	  for ( jj = 0; jj < numClusDef; jj++ ) {
+//	       (void) fprintf( stderr, "%2hhu %2hhu %4hu %4hu\n",
+//			       clusDef[jj].chanID, clusDef[jj].clusID,
+//			       clusDef[jj].start, clusDef[jj].length );
+//	  }
+     }
 /*
  * allocate memory to store output records
  */
@@ -1175,24 +1173,6 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 	  info++;
 	  det++;
      } while ( ++nr_det < num_info );
-/*
- * set return values
- */
-     if ( ClusterCorrectionFlag ) {
-	  register unsigned int nr = 0;
-
-	  det -= nr_det;
-	  do {
-	       if ( det[nr].isp.days == 0 ) {
-		    if ( nr > 0 )
-			 (void) memcpy( &det[nr].isp, &det[nr-1].isp, 
-					sizeof( struct mjd_envi ) );
-		    else
-			 (void) memcpy( &det[nr].isp, &det[nr+1].isp, 
-					sizeof( struct mjd_envi ) );
-	       }
-	  } while ( ++nr < nr_det );
-     }
  done:
      return nr_det;
 }
@@ -1254,24 +1234,6 @@ unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 	  info++;
 	  pmd++;
      } while ( ++nr_pmd < num_info );
-/*
- * set return values
- */
-     if ( ClusterCorrectionFlag ) {
-	  register unsigned int nr = 0;
-
-	  pmd -= nr_pmd;
-	  do {
-	       if ( pmd[nr].isp.days == 0 ) {
-		    if ( nr > 0 )
-			 (void) memcpy( &pmd[nr].isp, &pmd[nr-1].isp, 
-					sizeof( struct mjd_envi ) );
-		    else
-			 (void) memcpy( &pmd[nr].isp, &pmd[nr+1].isp, 
-					sizeof( struct mjd_envi ) );
-	       }
-	  } while ( ++nr < nr_pmd );
-     }
  done:
      return nr_pmd;
 }

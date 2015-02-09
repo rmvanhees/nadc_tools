@@ -455,17 +455,17 @@ union qstate_rec {
 
 struct mds0_states
 {
-     struct mjd_envi mjd;
-     unsigned char   category;
-     unsigned char   state_id;
+     struct mjd_envi  mjd;
      union qstate_rec q_aux;
      union qstate_rec q_det;
      union qstate_rec q_pmd;
-     unsigned int  num_aux;
-     unsigned int  num_det;
-     unsigned int  num_pmd;
-     unsigned int    on_board_time;
-     unsigned int    offset;
+     unsigned char    category;
+     unsigned char    state_id;
+     unsigned int     num_aux;
+     unsigned int     num_det;
+     unsigned int     num_pmd;
+     unsigned int     on_board_time;
+     unsigned int     offset;
      struct mds0_info *info_aux;
      struct mds0_info *info_det;
      struct mds0_info *info_pmd;

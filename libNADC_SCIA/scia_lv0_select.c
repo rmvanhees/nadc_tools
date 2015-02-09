@@ -225,6 +225,15 @@ size_t SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
+//
+// Perform selections on complete states, applied criteria are:
+//    1) MJD selection 
+//    2) state_id selection
+//    3) reject incomplete states
+//    4) CRC selection
+//    5) Reject states with corrupted DSR records
+// 
+//
 size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 			    size_t num_states, const struct mds0_states *states,
 			    struct mds0_states **states_out )

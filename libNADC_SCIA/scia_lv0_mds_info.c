@@ -171,12 +171,15 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	  }
      }
      num++;
-     
+
+     /* handle special cases gracefully */
+     if ( num == 0 ) return 0;
+     num_state = num;
+
      /* allocate output array */
      states = (struct mds0_states *) malloc( num * sizeof(struct mds0_states) );
      if ( (states_out[0] = states) == NULL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
-     num_state = num;
      
      /* fill output array */
      ni = 0u;
@@ -211,7 +214,8 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	       states[ns].num_pmd++;
 	       break;
 	  default:
-	       (void) fprintf( stderr, "no valid packet ID: %u\n", ni );
+	       (void) fprintf( stderr, "no valid packet ID[%u]: %hhu\n",
+			       ni, info[ni].packet_type );
 	  }
 	  num++;
      } while ( ++ni < num_info );
@@ -351,6 +355,7 @@ void _REPAIR_INFO_SORTED( unsigned int num_info, struct mds0_info *info )
      
      double *on_board_time;
 
+     /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
      /* allocate memory */
@@ -393,13 +398,11 @@ void _CHECK_INFO_SORTED( bool correct_info_rec,
      register double jday0, jday1;
 
      bool monotonic = TRUE;
-/*
- * handle special cases gracefully
- */
+
+     /* handle special cases gracefully */
      if ( num_info < 2 ) return;
-/*
- * check if onboard time is increasing monotonically
- */
+
+     /* check if onboard time is increasing monotonically */
      jday0 = info->on_board_time + (double) info->bcps / 1e4;
      do {
 	  jday1 = info[ni].on_board_time + (double) info[ni].bcps / 1e4;
@@ -449,6 +452,10 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
      
      unsigned int on_board_time = info->on_board_time;
 
+     /* handle special cases gracefully */
+     if ( num_info < 2 ) return;
+
+     /* allocate memory for number of records per State ID */
      (void) memset( counted_state_id, 0, MAX_NUM_STATE * sizeof(short) );
      
      do {
@@ -515,10 +522,13 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
      /*@modifies info->q.value, info->packet_type; @*/
 {
      const char prognm[] = "_CHECK_INFO_PACKET_ID";
-     
+
      register unsigned int ni = 0;
 
      char msg[SHORT_STRING_LENGTH];
+
+     /* handle special cases gracefully */
+     if ( num_info < 2 ) return;
 
      do { 
 	  if ( info[ni].packet_type > (unsigned char) 3 ) {
@@ -549,17 +559,24 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 .COMMENTS    static function
 -------------------------*/
 static
-void _CHECK_INFO_UNIQUE( size_t num_state, struct mds0_states *states )
+void _CHECK_INFO_UNIQUE( bool correct_info_rec,
+			 size_t num_state, struct mds0_states *states )
      /*@modifies info->q.value; @*/
 {
      const char prognm[] = "_CHECK_INFO_UNIQUE";
-     
+
+     const size_t sz_mds0_info = sizeof( struct mds0_info );
+          
      register size_t       ns = 0;
      register unsigned int ni;
 
      char msg[SHORT_STRING_LENGTH];
 
+     /* handle special cases gracefully */
+     if ( num_state == 0 ) return;
+
      do {
+	  /* check Auxiliary DSRs */
 	  for ( ni = 1; ni < states[ns].num_aux; ni++ ) {
 	       struct mds0_info *info = states[ns].info_aux;
 	       
@@ -580,6 +597,22 @@ void _CHECK_INFO_UNIQUE( size_t num_state, struct mds0_states *states )
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 	  }
+	  if ( correct_info_rec ) {
+	       register unsigned int num = 0;
+	  
+	       for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
+		    struct mds0_info *info = states[ns].info_aux;
+
+		    if ( info[ni].q.flag.duplicate == 0 ) {
+			 if ( ni > num )
+			      (void) memcpy( info+num, info+ni, sz_mds0_info );
+			 num++;
+		    }
+	       }
+	       states[ns].num_aux = num;
+	  }
+	  
+	  /* check Detector DSRs */
 	  for ( ni = 1; ni < states[ns].num_det; ni++ ) {
 	       struct mds0_info *info = states[ns].info_det;
 	       
@@ -600,6 +633,22 @@ void _CHECK_INFO_UNIQUE( size_t num_state, struct mds0_states *states )
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 	  }
+	  if ( correct_info_rec ) {
+	       register unsigned int num = 0;
+	  
+	       for ( ni = 0; ni < states[ns].num_det; ni++ ) {
+		    struct mds0_info *info = states[ns].info_det;
+
+		    if ( info[ni].q.flag.duplicate == 0 ) {
+			 if ( ni > num )
+			      (void) memcpy( info+num, info+ni, sz_mds0_info );
+			 num++;
+		    }
+	       }
+	       states[ns].num_det = num;
+	  }
+
+	  /* check PMD DSRs */
 	  for ( ni = 1; ni < states[ns].num_pmd; ni++ ) {
 	       struct mds0_info *info = states[ns].info_pmd;
 	       
@@ -620,13 +669,25 @@ void _CHECK_INFO_UNIQUE( size_t num_state, struct mds0_states *states )
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 	  }
+	  if ( correct_info_rec ) {
+	       register unsigned int num = 0;
+	  
+	       for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
+		    struct mds0_info *info = states[ns].info_pmd;
+
+		    if ( info[ni].q.flag.duplicate == 0 ) {
+			 if ( ni > num )
+			      (void) memcpy( info+num, info+ni, sz_mds0_info );
+			 num++;
+		    }
+	       }
+	       states[ns].num_pmd = num;
+	  }
      } while ( ++ns < num_state );
 }
 
 //
 // ToDo
-// * Aparte quality-flag voor AUX, DET en PMD
-// * Bijwerken onderstaande module
 // * Checks voor AUX en PMD toevoegen (completeness, DSR size)
 // * mds0_states uitbreiden met CLcon informatie per state voor gebruik by lezen DET DSR
 //
@@ -673,7 +734,8 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 
      const unsigned short num_dsr = (unsigned short) num_info;
 
-     if ( num_dsr < 2 ) return;
+     /* handle special cases gracefully */
+     if ( num_info < 2 ) return;
 
      /* check if entry in nadc_clusDef database is valid */
      state_id = info_pntr->state_id;
@@ -743,6 +805,9 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
 {
      unsigned int ni = 0;
+
+     /* handle special cases gracefully */
+     if ( num_info == 0 ) return;
 
      do {
 	  (void) printf( "%02hhu %02hhu %8u %5hu %6hu %5hu %5hu\n",
@@ -825,7 +890,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      states_out[0] = states;
      
      /* check for repeated DSR records in product */
-     _CHECK_INFO_UNIQUE( num_state, states );
+     _CHECK_INFO_UNIQUE( correct_info_rec, num_state, states );
 
      /* perform quality check on detector info-records */
      if ( clusdef_db_exist ) {
