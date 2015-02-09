@@ -496,7 +496,7 @@ unsigned short CLUSDEF_CLCON( unsigned char stateID,
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
 //     const char prognm[] = "CLUSDEF_CLCON";
-     register unsigned short ncl, offs;
+     register unsigned short ncl, offs = 0;
      register unsigned char chan_id = 0;
      register unsigned char clus_id = 0;
 

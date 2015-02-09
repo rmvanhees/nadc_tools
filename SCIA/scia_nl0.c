@@ -89,7 +89,8 @@ int main( int argc, char *argv[] )
 
      register size_t ns;
 
-     size_t num_state_all, num_state;
+     size_t num_state_all = 0;
+     size_t num_state = 0;
 
      unsigned int num, num_dsd;
 

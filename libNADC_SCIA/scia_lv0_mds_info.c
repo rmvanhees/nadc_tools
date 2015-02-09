@@ -391,34 +391,14 @@ static
 void _CHECK_INFO_SORTED( bool correct_info_rec,
 			 unsigned int num_info, struct mds0_info *info )
 {
-     const char prognm[] = "_CHECK_INFO_SORTED";
+//     const char prognm[] = "_CHECK_INFO_SORTED";
      
-     register unsigned int ni = 1;
-
-     register double jday0, jday1;
-
-     bool monotonic = TRUE;
-
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
-     /* check if onboard time is increasing monotonically */
-     jday0 = info->on_board_time + (double) info->bcps / 1e4;
-     do {
-	  jday1 = info[ni].on_board_time + (double) info[ni].bcps / 1e4;
-	  
-          if ( jday0 > jday1 ) {
-               monotonic = FALSE;
-	       break;
-	  }
-	  jday0 = jday1;
-     } while ( ++ni < num_info );
-
-     if ( ! monotonic ) {
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "info-records not sorted" );
-	  if ( correct_info_rec )
-	       _REPAIR_INFO_SORTED( num_info, info );
-     }
+     /* sort auxiliary, detector and PMD DSR */
+     if ( correct_info_rec )
+	  _REPAIR_INFO_SORTED( num_info, info );
 }
 
 /*+++++++++++++++++++++++++
@@ -874,8 +854,8 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "GET_SCIA_LV0_MDS_INFO" );
 
      /* sort info-records */
-     _CHECK_INFO_SORTED( correct_info_rec, num_info, info );
      if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
+     _CHECK_INFO_SORTED( correct_info_rec, num_info, info );
      
      /* check State ID */
      _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
