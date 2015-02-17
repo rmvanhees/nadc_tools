@@ -59,54 +59,6 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
-/*
- * determine characteristics of available clusters
- */
-static inline
-unsigned short _GET_LV0_CLUSDEF( unsigned int num_det, 
-                                 const struct mds0_det *det,
-				 struct clusdef_rec *clusDef )
-{
-     register unsigned char ncl, nch;
-     register unsigned char chan_id = 1;
-     register unsigned int  nd;
-
-     unsigned char nr_clus;
-     const struct chan_src *chan_src;
-
-     /* initialize return value */
-     unsigned short numClus = 0;
-
-     (void) memset( clusDef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
-
-     do {
-          register unsigned char clusIDmx = 0;
-
-          for ( nd = 0; nd < num_det; nd++ ) {
-	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
-		    if ( det[nd].data_src[nch].hdr.channel.field.id != chan_id )
-			 continue;
-
-		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
-		    chan_src = det[nd].data_src[nch].pixel;
-		    
-		    for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
-			 unsigned short indx = 
-			      numClus + chan_src[ncl].cluster_id;
-			 
-			 if ( chan_src[ncl].cluster_id > clusIDmx )
-			      clusIDmx = chan_src[ncl].cluster_id;
-			 clusDef[indx].chanID = chan_id;
-			 clusDef[indx].clusID = chan_src[ncl].cluster_id;
-			 clusDef[indx].start  = chan_src[ncl].start;
-			 clusDef[indx].length = chan_src[ncl].length;
-		    }
-	       }
-          }
-          numClus += clusIDmx + 1u;
-     } while ( ++chan_id <= SCIENCE_CHANNELS );
-     return numClus;
-}
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
@@ -548,6 +500,9 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 
      register unsigned short nc;
 
+     int     abs_orbit;
+     unsigned short numClus;
+     
      char    grpName[11];
      hsize_t chunk_sz;
 
@@ -564,9 +519,8 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
      const char tblName[] = "mds0_det";
 
      const unsigned short CLUSTER_SYNC = 0xBBBB;
-     const unsigned short numClus = _GET_LV0_CLUSDEF( nr_det, det, clusDef );
 
-     const int compress = (param.flag_deflate == PARAM_SET) ? 3 : -1;
+     const int compress = (param.flag_deflate == PARAM_SET) ? 3 : 0;
 /*
  * check number of MDS records
  */
@@ -726,6 +680,12 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
      if ( chan_hdr == NULL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "chan_hdr" );
 /*
+ *
+ */
+     (void) H5LTget_attribute_int( param.hdf_file_id, "/", "abs_orbit", 
+				   &abs_orbit );
+     numClus = CLUSDEF_CLCON( det->data_hdr.state_id, abs_orbit, clusDef );
+/*
  * process detector source packets
  */
      for ( nc = 0; nc < numClus; nc++ ) {
@@ -734,6 +694,7 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 	  char            *data;
 	  unsigned short  *ptr_short;
 	  unsigned int    *ptr_int;
+	  struct det_src  *ptr_data_src = NULL;
 	  struct chan_src *ptr_chan_src = NULL;
 
 	  (void) snprintf( grpName, 11, "cluster_%02u", (nc + 1u) );
@@ -746,34 +707,33 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 	  ptr_int = (unsigned int *) data;
 
 	  for ( nd = 0; nd < nr_det; nd++ ) {
-	       register unsigned char  nclus = UCHAR_ZERO;
-	       register unsigned short nchan = 0;
+	       register unsigned char nclus = 0;
+	       register unsigned char nchan = 0;
 	       unsigned char clusters;
 
+	       if ( det[nd].num_chan == 0 ) continue;
+	       ptr_data_src = det[nd].data_src;
 	       do {
-		    unsigned char id =
-			 det[nd].data_src[nchan].hdr.channel.field.id;
-
-		    if ( clusDef[nc].chanID == id ) break;
+		    if ( clusDef[nc].chanID == ptr_data_src->hdr.channel.field.id )
+			 break;
+		    ptr_data_src++;
 	       } while( ++nchan < det[nd].num_chan );
 	       if ( nchan == det[nd].num_chan ) continue;
 
-	       clusters = det[nd].data_src[nchan].hdr.channel.field.clusters;
+	       if ( ptr_data_src->hdr.channel.field.clusters == 0 ) continue;
+	       clusters = ptr_data_src->hdr.channel.field.clusters;
 	       do {
-		    unsigned char cluster_id =
-			 det[nd].data_src[nchan].pixel[nclus].cluster_id;
-
-		    if ( clusDef[nc].clusID == cluster_id ) break;
+		    if ( clusDef[nc].clusID == ptr_data_src->pixel[nclus].cluster_id )
+			 break;
 	       } while( ++nclus < clusters );
 	       if ( nclus == clusters ) continue;
 
-	       if ( det[nd].data_src[nchan].pixel[nclus].sync != CLUSTER_SYNC
-		    || det[nd].data_src[nchan].pixel[nclus].length != clusDef[nc].length )
+	       if ( ptr_data_src->pixel[nclus].sync != CLUSTER_SYNC
+		    || ptr_data_src->pixel[nclus].length != clusDef[nc].length )
 		    continue;
-	       ptr_chan_src = &det[nd].data_src[nchan].pixel[nclus];
+	       ptr_chan_src = ptr_data_src->pixel+nclus;
 
-	       (void) memcpy( &chan_hdr[numHDR], 
-			      &det[nd].data_src[nchan].hdr, 
+	       (void) memcpy( &chan_hdr[numHDR], &ptr_data_src->hdr, 
 			      sizeof( struct chan_hdr ) );
 
 	       if ( ptr_chan_src->co_adding == UCHAR_ONE ) {

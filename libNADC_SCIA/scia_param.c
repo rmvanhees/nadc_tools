@@ -114,7 +114,7 @@ struct nadc_env {
      { "SCIA_MFACTOR_DIR", "=<dirname>", 
        "give path to directory with auxiliary files for m-factor correction",
        1, {SCIA_LEVEL_1, 0, 0} },
-     { "USE_SDMF_VERSION", "=<2.4|3.0|3.1>", 
+     { "USE_SDMF_VERSION", "=<2.4|3.0|3.1|3.2>", 
        "use SDMF version, default 3.0",
        1, {SCIA_LEVEL_1, 0} },
      {"SCIA_TRANS_RANGE", "=min,max",
@@ -250,6 +250,9 @@ struct nadc_opt {
        1, {SCIA_LEVEL_1, 0, 0, 0} },
      { "--clus", "=[1,2,...,64]", "write data of selected clusters",
        1, {SCIA_LEVEL_1, 0, 0, 0} },
+/* MDS quality check */
+     { "-no_qcheck", NULL, "no check on incomplete and/or corrupted states",
+       1, {SCIA_LEVEL_0, 0, 0, 0} },
 /* MDS calibration */
      { "--cal", "[=0,1,...,9]", "apply spectral calibration, impies L1c format",
        1, {SCIA_LEVEL_1, 0, 0, 0} },
@@ -821,6 +824,8 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 		    param->write_sun = PARAM_UNSET;
 	       } else if ( strncmp( argv[narg]+1, "no_patch", 8 ) == 0 ) {
 		    param->patch_scia = SCIA_PATCH_NONE;
+	       } else if ( strncmp( argv[narg]+1, "no_qcheck", 9 ) == 0 ) {
+		    param->qcheck = PARAM_UNSET;		    
 	       }
 	  } else if ( argv[narg][0] == '-' && argv[narg][1] == '-' ) {
 	       /* perform selection on time-window */
@@ -1146,47 +1151,12 @@ void SCIA_SHOW_PARAM( int instrument, const struct param_record param )
 	       nadc_write_text( outfl, ++nr, "StateID", cbuff );
 	  }
 /*
- * spectral bands
+ * DSR quality check
  */
-	  if ( (param.chan_mask & BAND_ALL) != UCHAR_ZERO ) {
-	       (void) strcpy( string, "" );
-	       if ( (param.chan_mask & BAND_ONE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "1" );
-	       }	  
-	       if ( (param.chan_mask & BAND_TWO) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "2" );
-	       }
-	       if ( (param.chan_mask & BAND_THREE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "3" );
-	       }
-	       if ( (param.chan_mask & BAND_FOUR) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "4" );
-	       }
-	       if ( (param.chan_mask & BAND_FIVE) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "5" );
-	       }
-	       if ( (param.chan_mask & BAND_SIX) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "6" );
-	       }
-	       if ( (param.chan_mask & BAND_SEVEN) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "7" );
-	       }
-	       if ( (param.chan_mask & BAND_EIGHT) != UCHAR_ZERO ) {
-		    if ( strlen( string ) > 0 ) (void) strcat( string, "," );
-		    (void) strcat( string, "8" );
-	       }
-	       if ( strlen( string ) == 0 )
-		    nadc_write_text( outfl, ++nr, "Bands", "None" );
-	       else
-		    nadc_write_text( outfl, ++nr, "Bands", string );
-	  }
+	  if ( param.qcheck == PARAM_UNSET )
+	       nadc_write_text( outfl, ++nr, "MdsQualityCheck", "Off" );
+	  else
+	       nadc_write_text( outfl, ++nr, "MdsQualityCheck", "On" );
 	  break;
 /*
  *  ----- Patch SCIAMACHY level 1 processor specific options

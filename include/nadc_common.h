@@ -203,7 +203,7 @@ struct param_record
      unsigned char flag_sunz;
      unsigned char flag_wave;
 
-     unsigned char use_infodb;
+     unsigned char qcheck;
 
      unsigned char write_pds;
      unsigned char write_ascii;
