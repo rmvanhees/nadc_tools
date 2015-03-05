@@ -123,7 +123,7 @@ void NADC_INIT_PARAM( struct param_record *param )
      param->flag_sunz    = PARAM_UNSET;
      param->flag_wave    = PARAM_UNSET;
 
-     param->use_infodb   = PARAM_UNSET;
+     param->qcheck       = PARAM_SET;
 
      param->write_pds    = PARAM_UNSET;
      param->write_ascii  = PARAM_UNSET;

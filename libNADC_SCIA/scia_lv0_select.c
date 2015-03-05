@@ -35,7 +35,8 @@
              error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 .ENVIRONment None
-.VERSION      3.1   09-Dec-2009	add unique filter, RvH
+.VERSION      4.0   ..-Feb-2015	big update using mds0_states, RvH
+              3.1   09-Dec-2009	add unique filter, RvH
               3.0   11-Oct-2005	rewrite to one selection per module, RvH
               2.5   13-Oct-2003	changes to due modification of mds0_info, RvH
               2.4   19-Feb-2002	returns array with selected info-records, RvH
@@ -62,72 +63,7 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
-#include "selected_channel.inc"
-
-/*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV0_SELECT_MDS_UNIQ
-.PURPOSE     reject duplicated states
-.INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, nr_indx, indx );
-     input:  
-	    struct mds0_states *states : structure for mds0_states
-	    size_t nr_indx             : (at first call) number of states
-    output:  
-            size_t *indx               : (at first call) array of size nr_indx
-                                         initialized as [0,1,2,...,nr_indx-1]
-
-.RETURNS     number of selected states
-.COMMENTS    static function
--------------------------*/
-static
-size_t SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states, 
-				 size_t nr_indx, size_t *indx )
-       /*@modifies indx@*/
-{
-     const char prognm[] = "SCIA_LV0_SELECT_MDS_UNIQ";
-
-     char msg[64];
-
-     register size_t ni, nj;
-     register size_t nr = 0u;
-
-     register const struct mds0_states *states_ptr;
-
-     /* check if on_board_time is strictly increasing */
-     for ( ni = 1; ni < nr_indx; ni++ ) {
-	  if ( states[indx[ni-1]].on_board_time
-	       > states[indx[ni]].on_board_time ) 
-	       break;
-     }
-     if ( ni == nr_indx ) return nr_indx;
-
-     /* identify duplicated records */
-     for ( ni = 0; ni < nr_indx; ni++ ) {
-	  if ( indx[ni] == UINT_MAX ) continue;
-
-	  states_ptr = states + indx[ni];
-	  for ( nj = ni+1;  nj < nr_indx; nj++ ) {
-	       if ( indx[nj] == UINT_MAX ) continue;
-
-	       if ( states_ptr->on_board_time == states[indx[nj]].on_board_time
-		    && states_ptr->num_aux == states[indx[nj]].num_aux
-		    && states_ptr->num_det == states[indx[nj]].num_det
-		    && states_ptr->num_pmd == states[indx[nj]].num_pmd )
-		    indx[nj] = UINT_MAX;
-	  }
-     }
-     /* remove indices to duplicated records */
-     for ( ni = 0; ni < nr_indx; ni++ ) {
-	  if ( indx[ni] != UINT_MAX ) indx[nr++] = indx[ni];
-     }
-     if ( nr_indx == nr ) return nr_indx;
-
-     /* compose message to user */
-     (void) snprintf( msg, 64, 
-		      "rejected %-zd duplicated states", nr_indx - nr );
-     NADC_ERROR( prognm, NADC_ERR_NONE, msg );
-     return nr;
-}
+/* #include "selected_channel.inc" */
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_SELECT_MDS_PERIOD
@@ -148,7 +84,7 @@ size_t SCIA_LV0_SELECT_MDS_UNIQ( const struct mds0_states *states,
 .COMMENTS    static function
 -------------------------*/
 static
-size_t SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date, const char *end_date,
+size_t SCIA_LV0_SELECT_MDS_PERIOD( const struct param_record *param,
 				   const struct mds0_states *states, 
 				   size_t nr_indx, size_t *indx )
        /*@globals  errno;@*/
@@ -166,9 +102,9 @@ size_t SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date, const char *end_date,
 /*
  * initialize begin and end julian date of time window
  */
-     ASCII_2_MJD( bgn_date, &mjd2000, &secnd, &mu_sec );
+     ASCII_2_MJD( param->bgn_date, &mjd2000, &secnd, &mu_sec );
      bgn_jdate = mjd2000 + (secnd + mu_sec / 1000000.) / SecPerDay;
-     ASCII_2_MJD( end_date, &mjd2000, &secnd, &mu_sec );
+     ASCII_2_MJD( param->end_date, &mjd2000, &secnd, &mu_sec );
      end_jdate = mjd2000 + (secnd + mu_sec / 1000000.) / SecPerDay;
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
@@ -186,7 +122,7 @@ size_t SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date, const char *end_date,
 .IDENTifer   SCIA_LV0_SELECT_MDS_STATE
 .PURPOSE     select state-records on state ID
 .INPUT/OUTPUT
-  call as   nr_indx = SCIA_LV0_SELECT_MDS_STATE( stateID_nr, stateID, states, 
+  call as   nr_indx = SCIA_LV0_SELECT_MDS_STATE( param, states
                                                  nr_indx, indx );
      input:  
             unsigned char stateID_nr   : number of selected stateIDs
@@ -201,8 +137,7 @@ size_t SCIA_LV0_SELECT_MDS_PERIOD( const char *bgn_date, const char *end_date,
 .COMMENTS    static function
 -------------------------*/
 static
-size_t SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
-				  const unsigned char *stateID,
+size_t SCIA_LV0_SELECT_MDS_STATE( const struct param_record *param,
 				  const struct mds0_states *states, 
 				  size_t nr_indx, size_t *indx )
        /*@modifies indx@*/
@@ -211,15 +146,133 @@ size_t SCIA_LV0_SELECT_MDS_STATE( unsigned char stateID_nr,
      register size_t nr = 0u;
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
-	  register short ns = 0;
+	  register unsigned char ns = 0;
 
 	  register bool found = FALSE;
 	  do {
-	       if ( stateID[ns] == states[indx[ni]].state_id )
+	       if ( param->stateID[ns] == states[indx[ni]].state_id )
 		    found = TRUE;
-	  } while( ! found && ++ns < (short) stateID_nr );
+	  } while( ! found && ++ns < param->stateID_nr );
 	  if ( found ) indx[nr++] = indx[ni];
 
+     }
+     return nr;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_LV0_SELECT_MDS_COMPLETE
+.PURPOSE     reject incomplete state-records
+.INPUT/OUTPUT
+  call as   nr_indx = SCIA_LV0_SELECT_MDS_COMPLETE( states, 
+                                                    nr_indx, indx );
+     input:  
+	    struct mds0_states *states : structure for state-records
+	    size_t nr_indx             : (at first call) number of state-records
+    output:  
+            size_t *indx               : (at first call) array of size nr_indx
+                                         initialized as [0,1,2,...,nr_indx-1]
+
+.RETURNS     number of selected state-records
+.COMMENTS    static function
+-------------------------*/
+static
+size_t SCIA_LV0_SELECT_MDS_COMPLETE( const struct param_record *param,
+				     const struct mds0_states *states, 
+				     size_t nr_indx, size_t *indx )
+       /*@modifies indx@*/
+{
+     register size_t ni;
+     register size_t nr = 0u;
+
+     for ( ni = 0; ni < nr_indx; ni++ ) {
+	  register bool good_aux = TRUE;
+	  register bool good_det = TRUE;
+	  register bool good_pmd = TRUE;
+
+	  // if write_aux then check q_aux
+	  if ( param->write_aux == PARAM_SET ) {
+	       if ( states[indx[ni]].q_aux.flag.too_short == 1
+		    || states[indx[ni]].q_aux.flag.dsr_missing == 1 )
+		    good_aux = FALSE;
+	  }
+	  // if write_det then check q_det
+	  if ( param->write_det == PARAM_SET ) {
+	       if ( states[indx[ni]].q_det.flag.too_short == 1
+		    || states[indx[ni]].q_det.flag.dsr_missing == 1 )
+		    good_det = FALSE;
+	  }
+	  // if write_pmd then check q_pmd
+	  if ( param->write_pmd == PARAM_SET ) {
+	       if ( states[indx[ni]].q_pmd.flag.too_short == 1
+		    || states[indx[ni]].q_pmd.flag.dsr_missing == 1 )
+		    good_pmd = FALSE;
+	  }
+
+	  if ( good_aux && good_det && good_pmd )
+	       indx[nr++] = indx[ni];
+     }
+     return nr;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   SCIA_LV0_SELECT_MDS_CRC
+.PURPOSE     reject state-records with too many CRC errors
+.INPUT/OUTPUT
+  call as   nr_indx = SCIA_LV0_SELECT_MDS_CRC( states, 
+                                                    nr_indx, indx );
+     input:  
+	    struct mds0_states *states : structure for state-records
+	    size_t nr_indx             : (at first call) number of state-records
+    output:  
+            size_t *indx               : (at first call) array of size nr_indx
+                                         initialized as [0,1,2,...,nr_indx-1]
+
+.RETURNS     number of selected state-records
+.COMMENTS    static function
+-------------------------*/
+static
+size_t SCIA_LV0_SELECT_MDS_CRC( const struct param_record *param,
+				const struct mds0_states *states, 
+				size_t nr_indx, size_t *indx )
+       /*@modifies indx@*/
+{
+     register size_t ns;
+     register size_t nr = 0u;
+
+     register unsigned int ni;
+
+     for ( ns = 0; ns < nr_indx; ns++ ) {
+	  register unsigned short crc_flag = 0;
+	  register unsigned short crc_aux = 0;
+	  register unsigned short crc_det = 0;
+	  register unsigned short crc_pmd = 0;
+
+	  // if write_aux then check CRC of state
+	  if ( param->write_aux == PARAM_SET ) {
+	       for ( ni = 0; ni < states[indx[ns]].num_aux; ni++ )
+		    crc_aux += states[indx[ns]].info_aux[ni].crc_errors;
+
+	       if ( 10 * crc_aux > states[indx[ns]].num_aux ) crc_flag += 1;
+	       
+	  }
+	  // if write_aux then check CRC of state
+	  if ( param->write_det == PARAM_SET ) {
+	       for ( ni = 0; ni < states[indx[ns]].num_det; ni++ )
+		    crc_det += states[indx[ns]].info_det[ni].crc_errors;
+
+	       if ( 10 * crc_det > states[indx[ns]].num_det ) crc_flag += 1;
+	       
+	  }
+	  // if write_pmd then check CRC of state
+	  if ( param->write_pmd == PARAM_SET ) {
+	       for ( ni = 0; ni < states[indx[ns]].num_pmd; ni++ )
+		    crc_pmd += states[indx[ns]].info_pmd[ni].crc_errors;
+
+	       if ( 10 * crc_pmd > states[indx[ns]].num_pmd ) crc_flag += 1;
+	       
+	  }
+
+	  if ( crc_flag == 0 ) indx[nr++] = indx[ns];
      }
      return nr;
 }
@@ -241,7 +294,7 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
      const char prognm[] = "SCIA_LV0_SELECT_MDS";
 
      register size_t ni;
-     register size_t nr_indx = 0;
+     register size_t nr_indx = num_states;
 
      size_t *indx_states = NULL;
 /*
@@ -264,18 +317,41 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_states" );
      for ( ni = 0; ni < num_states; ni++ ) indx_states[ni] = ni;
 /*
- * apply selection criteria
+ * apply date-time criterium
  */
-     nr_indx = SCIA_LV0_SELECT_MDS_UNIQ( states, num_states, indx_states );
-
+     (void) fprintf( stderr, "(0) nr_indx: %zd\n", nr_indx );
      if ( param.flag_period != PARAM_UNSET ) {
-	  nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( param.bgn_date, param.end_date,
-						states, nr_indx, indx_states );
+	  nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( &param, states,
+						nr_indx, indx_states );
      }
+     (void) fprintf( stderr, "(1) nr_indx: %zd\n", nr_indx );
+     if ( nr_indx == 0 ) goto done;
+/*
+ * apply State ID criterium
+ */
      if ( param.stateID_nr != PARAM_UNSET ) {
-	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( param.stateID_nr, param.stateID,
-					       states, nr_indx, indx_states );
+	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( &param, states,
+					       nr_indx, indx_states );
      }
+     (void) fprintf( stderr, "(2) nr_indx: %zd\n", nr_indx );
+     if ( nr_indx == 0 ) goto done;
+/*
+ * reject incomplete states
+ */
+     if ( param.qcheck == PARAM_SET ) {
+	  nr_indx = SCIA_LV0_SELECT_MDS_COMPLETE( &param, states,
+						  nr_indx, indx_states );
+     }
+     (void) fprintf( stderr, "(3) nr_indx: %zd\n", nr_indx );
+     if ( nr_indx == 0 ) goto done;
+/*
+ * apply CRC criterium 
+ */
+     if ( param.qcheck == PARAM_SET ) {
+	  nr_indx = SCIA_LV0_SELECT_MDS_CRC( &param, states,
+					     nr_indx, indx_states );
+     }
+     (void) fprintf( stderr, "(4) nr_indx: %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * copy selected state-records to output array

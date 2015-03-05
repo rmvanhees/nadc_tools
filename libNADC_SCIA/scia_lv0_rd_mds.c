@@ -1137,7 +1137,7 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 
           ENVI_RD_MPH( fd, &mph );
 	  numClusDef = CLUSDEF_CLCON( info->state_id, mph.abs_orbit, clusDef );
-//	  (void) fprintf( stderr, " %d %d %d %d\n", (int) mph.abs_orbit,
+//	  (void) fprintf( stderr, " %d %d %d %d\n", mph.abs_orbit,
 //			  (int) info->state_id, (int) ClusterCorrectionFlag,
 //			  (int) numClusDef );
 //	  for ( jj = 0; jj < numClusDef; jj++ ) {

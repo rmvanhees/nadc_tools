@@ -185,6 +185,11 @@ void SCIA_WR_H5_MPH( struct param_record param,
 			    NFIELDS, 1, mph_size, mph_names, mph_offs, 
 			    mph_type, 1, NULL, compress, mph );
 /*
+ * create some attributes for quick access
+ */
+     (void) H5LTset_attribute_int( param.hdf_file_id, "/", "abs_orbit", 
+				   &mph->abs_orbit, 1 );
+/*
  * close interface
  */
      do {
