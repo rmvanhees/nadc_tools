@@ -651,8 +651,7 @@ extern void GET_SCIA_LV0_STATE_PMDtemp( unsigned short,
 extern void GET_SCIA_LV0_DET_PET( struct chan_hdr, 
 				  /*@out@*/ float *, 
 				  /*@out@*/ unsigned short * );
-extern unsigned short GET_SCIA_LV0C_MDS( unsigned int, 
-					 const struct mds0_info *,
+extern unsigned short GET_SCIA_LV0C_MDS( const unsigned int, 
 					 const struct mds0_det *, 
 					 /*@out@*/ struct mds1c_scia **mds )
        /*@globals  nadc_stat, nadc_err_stack;@*/

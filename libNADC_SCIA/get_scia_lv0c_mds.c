@@ -58,43 +58,6 @@
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 static inline
-unsigned short _GET_NUM_CLUSDEF( unsigned int num_det, 
-				 const struct mds0_det *det )
-{
-     register unsigned char ncl, nch;
-     register unsigned char nc = 1;
-     register unsigned int  nd;
-
-     unsigned short nr_clus;
-     const struct chan_src *chan_src;
-
-     /* initialize return value */
-     unsigned short numClus = 0;
-
-     do {
-          register unsigned char clusIDmx = 0;
-
-          for ( nd = 0; nd < num_det; nd++ ) {
-	       for ( nch = 0; nch < det[nd].num_chan; nch++ ) {
-		    if ( det[nd].data_src[nch].hdr.channel.field.id != nc )
-			 continue;
-
-		    nr_clus = det[nd].data_src[nch].hdr.channel.field.clusters;
-		    chan_src = det[nd].data_src[nch].pixel;
-		    
-		    for ( ncl = 0 ; ncl < nr_clus; ncl++ ) {
-			 if ( chan_src[ncl].cluster_id > clusIDmx )
-			      clusIDmx = chan_src[ncl].cluster_id;
-		    }
-	       }
-          }
-          numClus += clusIDmx + 1;
-     } while ( ++nc <= SCIENCE_CHANNELS );
-
-     return numClus;
-}
-
-static inline
 unsigned short _GET_LV0_CLUSDEF( unsigned int num_det, 
                                  const struct mds0_det *det,
 				 struct clusdef_rec *clusDef )
@@ -328,23 +291,17 @@ void _GET_LV0_PIXELVAL( unsigned int num_det,
 
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned short GET_SCIA_LV0C_MDS( unsigned int num_det, 
-				  const struct mds0_info *info,
+unsigned short GET_SCIA_LV0C_MDS( const unsigned int num_det, 
 				  const struct mds0_det *det, 
 				  struct mds1c_scia **mds_out )
 {
      const char prognm[] = "GET_SCIA_LV0C_MDS";
 
      register unsigned short np;
-     register unsigned short numClus = 0;
 
-     register unsigned int   nc, nd, ndd;
+     register unsigned int   nc;
 
-     register struct mds1c_scia *mds_pntr;
-
-     unsigned short num_mds = 0;
-
-     struct mds1c_scia *mds_1c;
+     struct mds1c_scia  *mds_1c;
 
      struct clusdef_rec clusDef[MAX_CLUSTER];
 
@@ -357,104 +314,86 @@ unsigned short GET_SCIA_LV0C_MDS( unsigned int num_det,
 	  86, 86, 86, 86, 86, 86, 86, 86, 111, 86, 
 	  303, 86, 86, 86, 86, 86, 86, 86, 111, 303
      };
+     const double dsec_const  = det->isp.secnd + det->isp.musec / 1e6
+	  + ri[det->data_hdr.state_id - 1] / 256.;
 /*
  * determine the required number of level 1c MDS
  */
-     ndd = 0;
-     do {
-	  nd = ndd;
-	  while ( ++ndd < num_det 
-		  && info[ndd].state_index == info[nd].state_index );
-	  num_mds += _GET_NUM_CLUSDEF( ndd-nd, det+nd );
-     } while ( ndd < num_det );
+     const unsigned short num_mds = _GET_LV0_CLUSDEF( num_det, det, clusDef );
 /*
  * allocate memory to store output records
  */
      *mds_out = NULL;
+     if ( num_mds == 0 ) return 0;
+
      mds_1c = (struct mds1c_scia *) 
-	  malloc( num_mds * sizeof( struct mds1c_scia ) );
-     if ( (mds_pntr = mds_1c) == NULL ) {
+	  malloc( (size_t) num_mds * sizeof( struct mds1c_scia ) );
+     if ( mds_1c == NULL ) {
           NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds1c_scia" );
 	  return 0;
      }
 /*
  * reorganise level 0 Detector MDS into level 1c structure
  */
-     ndd = 0;
+     nc = 0;
      do {
-	  const unsigned char stateID = info[ndd].state_id;
-	  const double dsec_const  = det[ndd].isp.secnd 
-	       + det[ndd].isp.musec / 1e6 + ri[stateID-1] / 256.;
+	  double dsec = dsec_const 
+	       + _GET_LV0_BCPS( num_det, det, clusDef[nc].chanID,
+				clusDef[nc].clusID ) / 16.;
 
-	  nd = ndd;
-	  while ( ++ndd < num_det 
-		  && info[ndd].state_index == info[nd].state_index );
-	  numClus = _GET_LV0_CLUSDEF( ndd-nd, det+nd, clusDef );
+	  mds_1c[nc].mjd.days  = det->isp.days;
+	  mds_1c[nc].mjd.secnd = (unsigned int) dsec;
+	  mds_1c[nc].mjd.musec = 
+	       (unsigned int)(1e6 * (dsec - mds_1c[nc].mjd.secnd));
+	  mds_1c[nc].rad_units_flag = CHAR_ZERO;
+	  mds_1c[nc].quality_flag = CHAR_ZERO;
+	  mds_1c[nc].type_mds = GET_SCIA_MDS_TYPE( det->data_hdr.state_id );
+	  mds_1c[nc].coaddf = _GET_LV0_COADDF( num_det, det, 
+					       clusDef[nc].chanID,
+					       clusDef[nc].clusID );
+	  mds_1c[nc].category = det->data_hdr.category;
+	  mds_1c[nc].state_id = det->data_hdr.state_id;
+	  mds_1c[nc].chan_id = clusDef[nc].chanID;
+	  mds_1c[nc].clus_id = clusDef[nc].clusID;
+	  mds_1c[nc].dur_scan = 0;              /* FIX THIS */
+	  mds_1c[nc].num_obs = _GET_LV0_NUM_OBS( num_det, det, 
+						 clusDef[nc].chanID,
+						 clusDef[nc].clusID );
+	  mds_1c[nc].num_pixels = clusDef[nc].length;
+	  mds_1c[nc].dsr_length = 0u;
+	  mds_1c[nc].orbit_phase = -999.f;
+	  mds_1c[nc].pet = _GET_LV0_PET( num_det, det, 
+					 clusDef[nc].chanID,
+					 clusDef[nc].clusID );
 
-	  /* initialise mds-records of this state */
-	  nc = 0;
-	  do {
-	       double dsec = dsec_const 
-		    + _GET_LV0_BCPS( ndd-nd, det+nd, clusDef[nc].chanID,
-				     clusDef[nc].clusID ) / 16.;
+	  /* allocate memory for pixel ID and values */
+	  mds_1c[nc].pixel_ids = (unsigned short *)
+	       malloc( mds_1c[nc].num_pixels * sizeof(short) );
+	  mds_1c[nc].pixel_val = (float *)
+	       malloc( mds_1c[nc].num_obs * mds_1c[nc].num_pixels 
+		       * sizeof(float) );
+	  if ( mds_1c[nc].pixel_ids == NULL 
+	       || mds_1c[nc].pixel_val == NULL ) {
+	       NADC_ERROR(prognm, NADC_ERR_ALLOC, "pixel_ids/pixel_val");
+	       return 0; /* Oeps, we can't release (mds_1c) memory */
+	  }
+	  /* store pixel IDs */
+	  for ( np = 0; np < clusDef[nc].length; np++ )
+	       mds_1c[nc].pixel_ids[np] = clusDef[nc].start + np;
+	  
+	  /* store pixel values */
+	  _GET_LV0_PIXELVAL( num_det, det, 
+			     clusDef[nc].chanID, clusDef[nc].clusID,
+			     mds_1c[nc].pixel_val );
 
-	       mds_pntr[nc].mjd.days  = det[nd].isp.days;
-	       mds_pntr[nc].mjd.secnd = (unsigned int) dsec;
-	       mds_pntr[nc].mjd.musec = 
-		    (unsigned int)(1e6 * (dsec - mds_pntr[nc].mjd.secnd));
-	       mds_pntr[nc].rad_units_flag = CHAR_ZERO;
-	       mds_pntr[nc].quality_flag = CHAR_ZERO;
-	       mds_pntr[nc].type_mds = GET_SCIA_MDS_TYPE( stateID );
-	       mds_pntr[nc].coaddf = _GET_LV0_COADDF( ndd-nd, det+nd, 
-						      clusDef[nc].chanID,
-						      clusDef[nc].clusID );
-	       mds_pntr[nc].category = det[nd].data_hdr.category;
-	       mds_pntr[nc].state_id = stateID;
-	       mds_pntr[nc].chan_id = clusDef[nc].chanID;
-	       mds_pntr[nc].clus_id = clusDef[nc].clusID;
-	       mds_pntr[nc].dur_scan = 0;              /* FIX THIS */
-	       mds_pntr[nc].num_obs = _GET_LV0_NUM_OBS( ndd-nd, det+nd, 
-							clusDef[nc].chanID,
-							clusDef[nc].clusID );
-	       mds_pntr[nc].num_pixels = clusDef[nc].length;
-	       mds_pntr[nc].dsr_length = 0u;
-	       mds_pntr[nc].orbit_phase = -999.f;
-	       mds_pntr[nc].pet = _GET_LV0_PET( ndd-nd, det+nd, 
-						clusDef[nc].chanID,
-						clusDef[nc].clusID );
-
-	       /* allocate memory for pixel ID and values */
-	       mds_pntr[nc].pixel_ids = (unsigned short *)
-		    malloc( mds_pntr[nc].num_pixels * sizeof(short) );
-	       mds_pntr[nc].pixel_val = (float *)
-		    malloc( mds_pntr[nc].num_obs * mds_pntr[nc].num_pixels 
-			    * sizeof(float) );
-	       if ( mds_pntr[nc].pixel_ids == NULL 
-		    || mds_pntr[nc].pixel_val == NULL ) {
-		    NADC_ERROR(prognm, NADC_ERR_ALLOC, "pixel_ids/pixel_val");
-		    return 0; /* Oeps, we can't release (mds_1c) memory */
-	       }
-	       /* store pixel IDs */
-	       for ( np = 0; np < clusDef[nc].length; np++ )
-		    mds_pntr[nc].pixel_ids[np] = clusDef[nc].start + np;
-
-	       /* store pixel values */
-	       _GET_LV0_PIXELVAL( ndd-nd, det+nd, 
-				 clusDef[nc].chanID, clusDef[nc].clusID,
-				 mds_pntr[nc].pixel_val );
-
-	       /* make sure to initialize these pointers to NULL */
-	       mds_pntr[nc].pixel_wv     = NULL;
-	       mds_pntr[nc].pixel_wv_err = NULL;
-	       mds_pntr[nc].pixel_err    = NULL;
-	       mds_pntr[nc].geoC = NULL;
-	       mds_pntr[nc].geoL = NULL;
-	       mds_pntr[nc].geoN = NULL;
-	  } while( ++nc < numClus );
-
-	  /* set pointer to mds-records of next state */
-	  mds_pntr += numClus;
-     } while ( ndd < num_det );
+	  /* make sure to initialize these pointers to NULL */
+	  mds_1c[nc].pixel_wv     = NULL;
+	  mds_1c[nc].pixel_wv_err = NULL;
+	  mds_1c[nc].pixel_err    = NULL;
+	  mds_1c[nc].geoC = NULL;
+	  mds_1c[nc].geoL = NULL;
+	  mds_1c[nc].geoN = NULL;
+     } while( ++nc < num_mds );
 /*
  * set return values
  */
