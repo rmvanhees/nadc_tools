@@ -319,12 +319,10 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 /*
  * apply date-time criterium
  */
-     (void) fprintf( stderr, "(0) nr_indx: %zd\n", nr_indx );
      if ( param.flag_period != PARAM_UNSET ) {
 	  nr_indx = SCIA_LV0_SELECT_MDS_PERIOD( &param, states,
 						nr_indx, indx_states );
      }
-     (void) fprintf( stderr, "(1) nr_indx: %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * apply State ID criterium
@@ -333,7 +331,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  nr_indx = SCIA_LV0_SELECT_MDS_STATE( &param, states,
 					       nr_indx, indx_states );
      }
-     (void) fprintf( stderr, "(2) nr_indx: %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * reject incomplete states
@@ -342,7 +339,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  nr_indx = SCIA_LV0_SELECT_MDS_COMPLETE( &param, states,
 						  nr_indx, indx_states );
      }
-     (void) fprintf( stderr, "(3) nr_indx: %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * apply CRC criterium 
@@ -351,7 +347,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 	  nr_indx = SCIA_LV0_SELECT_MDS_CRC( &param, states,
 					     nr_indx, indx_states );
      }
-     (void) fprintf( stderr, "(4) nr_indx: %zd\n", nr_indx );
      if ( nr_indx == 0 ) goto done;
 /*
  * copy selected state-records to output array

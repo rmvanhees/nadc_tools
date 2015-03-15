@@ -30,9 +30,10 @@ struct ftbl_rec
 };
 /*@unused@*/ 
 static const size_t ftbl_sizes[DIM_FTBL] = {
-     sizeof( int ), ENVI_FILENAME_SIZE, STR_SZ_DATE, MAX_NUM_STATE
+     sizeof(int), ENVI_FILENAME_SIZE, STR_SZ_DATE, MAX_NUM_STATE
 };
 
+#define DIM_FTBL2   5
 struct ftbl2_rec 
 {
      char            prodName[ENVI_FILENAME_SIZE];
@@ -42,8 +43,8 @@ struct ftbl2_rec
      unsigned short  absOrbit;
 };
 /*@unused@*/ 
-static const size_t ftbl2_sizes[DIM_FTBL] = {
-     ENVI_FILENAME_SIZE, STR_SZ_DATE, MAX_NUM_STATE, sizeof(short)
+static const size_t ftbl2_sizes[DIM_FTBL2] = {
+     ENVI_FILENAME_SIZE, sizeof(char), STR_SZ_DATE, MAX_NUM_STATE, sizeof(short)
 };
 
 /* structure definition of SDMF v2.4 MonitorList */
