@@ -11,6 +11,8 @@ set (LIB_VERS "${LIB_VERS_MAJOR}.${LIB_VERS_MINOR}.${LIB_VERS_RELEASE}")
 ## define pre-compiler flags
 add_definitions (-DDATA_DIR="${NADC_TOOLS_DATADIR}")
 
+set (CMAKE_C_FLAGS "-Wunused-variable")
+
 ## Linker instructions
 set (CMAKE_LINKER_FLAGS "-Wl,-Bsymbolic")
 set (CMAKE_EXE_LINKER_FLAGS "-Wl,-Bsymbolic")

@@ -103,10 +103,11 @@ int IDL_STDCALL _SCIA_LV0_RD_MDS_INFO ( int argc, void *argv[] )
 {
      const char prognm[] = "_SCIA_LV0_RD_MDS_INFO";
 
-     unsigned int num_dsd, num_info;
+     unsigned int num_dsd;
+     size_t       num_states;
      
-     struct dsd_envi  *dsd;
-     struct mds0_info *info;
+     struct dsd_envi    *dsd;
+     struct mds0_states *states;
 
      if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
@@ -114,13 +115,13 @@ int IDL_STDCALL _SCIA_LV0_RD_MDS_INFO ( int argc, void *argv[] )
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
-     info = (struct mds0_info *) argv[2];
+     states = (struct mds0_states *) argv[2];
 
-     num_info = SCIA_LV0_RD_MDS_INFO( fd_nadc, num_dsd, dsd, &info );
+     num_states = SCIA_LV0_RD_MDS_INFO( fd_nadc, num_dsd, dsd, &states );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "GET_SCIA_LV0_MDS_INFO" );
 
-     return (int) num_info;
+     return (int) num_states;
  done:
      return -1;
 }
@@ -131,7 +132,7 @@ int IDL_STDCALL _SCIA_LV0_RD_AUX ( int argc, void *argv[] )
 
      int num_info, nr_aux;
 
-     struct mds0_aux *aux;	
+     struct mds0_aux  *aux;	
      struct mds0_info *info;
 
      if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
@@ -305,7 +306,7 @@ int IDL_STDCALL _SCIA_LV0_RD_PMD ( int argc, void *argv[] )
      int num_info, nr_pmd;
 
      struct mds0_info *info;
-     struct mds0_pmd *pmd;
+     struct mds0_pmd  *pmd;
 
      if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 

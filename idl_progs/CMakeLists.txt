@@ -203,6 +203,7 @@ set (NADC_IDL_DEFS
     StructDefs/mds0_aux__define.pro
     StructDefs/mds0_det__define.pro
     StructDefs/mds0_info__define.pro
+    StructDefs/mds0_states__define.pro
     StructDefs/mds0_pmd__define.pro
     StructDefs/mds1c_pmd__define.pro
     StructDefs/mds1c_polv__define.pro
