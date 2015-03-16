@@ -1,5 +1,5 @@
 ;
-; COPYRIGHT (c) 2002 - 2013 SRON (R.M.van.Hees@sron.nl)
+; COPYRIGHT (c) 2002 - 2015 SRON (R.M.van.Hees@sron.nl)
 ;
 ;   This is free software; you can redistribute it and/or modify it
 ;   under the terms of the GNU General Public License, version 2, as
@@ -28,7 +28,7 @@
 ; CALLING SEQUENCE:
 ;       SCIA_LV0_RD_PMD, info, mds_pmd, period=period,
 ;                        category=category, state_id=state_id, $
-;                        posit=posit, status=status 
+;                        status=status 
 ;
 ; INPUTS:
 ;      info :    structure holding info about MDS records
@@ -41,7 +41,6 @@
 ;                (default or -1: all categories)
 ;  state_id :    read only selected states (scalar or array)
 ;                (default or -1: all states)
-;     posit :    relative index or index-range [low,high] to MDS record(s)
 ;    period :    read only MDS within a time-window (scalar or array)
 ;                  date must be given in decimal julian 2000 day
 ;    status :    returns named variable with error status (0 = ok)
@@ -68,12 +67,14 @@
 ;       Modified:  RvH, 22 March 2010
 ;                    added keywords: state_posit, indx_state, num_state
 ;                    use new function GET_LV0_MDS_STATE
+;       Modified:  RvH, March 2015
+;                Works again for nadc_tools v2.x; removed obsolete keywords
 ;-
 ;---------------------------------------------------------------------------
 PRO SCIA_LV0_RD_PMD, info_all, mds_pmd, category=category, $
-                     state_id=state_id, state_posit=state_posit, $
+                     state_id=state_id, period=period, $
                      indx_state=indx_state, num_state=num_state, $
-                     period=period, posit=posit, status=status
+                     status=status
   compile_opt idl2,logical_predicate,hidden
 
 ; initialize the return values
@@ -84,9 +85,8 @@ PRO SCIA_LV0_RD_PMD, info_all, mds_pmd, category=category, $
   IF N_PARAMS() NE 2 THEN BEGIN
      MESSAGE, ' Usage: scia_lv0_rd_pmd, info, mds_pmd' $
               + ', category=category, state_id=state_id' $
-              + ', state_posit=state_posit, indx_state=indx_state' $
-              + ', num_state=num_state, posit=posit' $
-              + ', period=period, status=status', /INFO
+              + ', period=period, indx_state=indx_state' $
+              + ', num_state=num_state, status=status', /INFO
      status = -1
      RETURN
   ENDIF
@@ -95,8 +95,7 @@ PRO SCIA_LV0_RD_PMD, info_all, mds_pmd, category=category, $
 ; select PMD source packets
   info_pmd = GET_LV0_MDS_STATE( info_all, mds_type='PMD', $
                                 category=category, state_id=state_id, $
-                                state_posit=state_posit, period=period, $
-                                posit=posit, $
+                                period=period, $
                                 indx_state=indx_state, num_state=num_state )
   IF num_state LE 0 THEN BEGIN
      MESSAGE, 'No state-records found for given selection criteria', /INFO
@@ -111,7 +110,7 @@ PRO SCIA_LV0_RD_PMD, info_all, mds_pmd, category=category, $
 
 ; process PMD source packets
   num = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_PMD', $
-                       info_pmd, ULONG(num_pmd), mds_pmd, /CDECL )
+                       info_pmd, ULONG(num_pmd), mds_pmd, /CDECL, /UL_VALUE )
 
 ; check error status
   IF num NE num_pmd THEN status = -1

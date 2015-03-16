@@ -1,5 +1,5 @@
 ;
-; COPYRIGHT (c) 2010 - 2013 SRON (R.M.van.Hees@sron.nl)
+; COPYRIGHT (c) 2010 - 2015 SRON (R.M.van.Hees@sron.nl)
 ;
 ;   This is free software; you can redistribute it and/or modify it
 ;   under the terms of the GNU General Public License, version 2, as
@@ -41,9 +41,6 @@
 ;      period :  read only MDS within a time-window (scalar or array)
 ;                date must be given in decimal julian 2000 day
 ;                (default or -1: all data)
-; state_posit :  relative index/indices to the state record(s), this
-;                is last selection applied, only counting those MDS(s)
-;                which contain data (default or -1: all data)
 ;  indx_state :  named variable which contains the indices to the
 ;                original state records as defined in the level 1b/1c product
 ;   num_state :  named variable which contains the number of selected states
@@ -57,20 +54,21 @@
 ;
 ; MODIFICATION HISTORY:
 ; 	Written by:	Richard van Hees (SRON), March 2010
+;       Modified:  RvH, March 2015
+;                Works again for nadc_tools v2.x; removed obsolete keywords
 ;-
 FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
                             category=category, state_id=state_id, $
-                            state_posit=state_posit, period=period, $
-                            indx_state=indx_state, num_state=num_state, $
-                            channels=channels, posit=posit
+                            period=period, num_state=num_state, $
+                            indx_state=indx_state, channels=channels
   compile_opt idl2,logical_predicate,hidden
 
 ; definition of SCIAMACHY related constants
   NotSet = -1
 
 ; initialize
-  indx_state = NotSet
   num_state = 0
+  indx_state = LINDGEN(N_ELEMENTS(UNIQ(info_all.on_board_time)))
 
 ; check required parameters
   SWITCH N_PARAMS() OF
@@ -94,16 +92,6 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
      state_id = NotSet $
   ELSE IF state_id[0] EQ -1 THEN $
      state_id = NotSet
-     
-  IF N_ELEMENTS( state_posit ) EQ 0 THEN $
-     state_posit = NotSet $
-  ELSE IF state_id[0] EQ -1 THEN $
-     state_posit = NotSet
-
-  IF N_ELEMENTS( posit ) EQ 0 THEN $
-     posit = NotSet $
-  ELSE IF state_posit[0] NE NotSet THEN $
-     posit = NotSet
      
   IF N_ELEMENTS( category ) EQ 0 THEN $
      category = NotSet $
@@ -147,6 +135,7 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
   ENDELSE
   IF num_info LE 0 THEN RETURN, -1
   info_mds = info_all[indx]
+  indx_state = indx_state[indx]
 
 ; select packages on state ID
   IF state_id[0] NE NotSet THEN BEGIN
@@ -166,6 +155,7 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
      ENDFOR
      IF num_info GT 0 THEN BEGIN
         info_mds = info_mds[indx_all[UNIQ(indx_all, SORT(indx_all))]]
+        indx_state = indx_state[indx_all[UNIQ(indx_all, SORT(indx_all))]]
         num_info = N_ELEMENTS( info_mds )
      ENDIF ELSE RETURN, -1
   ENDIF
@@ -188,6 +178,7 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
      ENDFOR
      IF num_info GT 0 THEN BEGIN
         info_mds = info_mds[indx_all[UNIQ(indx_all, SORT(indx_all))]]
+        indx_state = indx_state[indx_all[UNIQ(indx_all, SORT(indx_all))]]
         num_info = N_ELEMENTS( info_mds )
      ENDIF ELSE RETURN, -1
   ENDIF
@@ -198,72 +189,14 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
      mjd_time = info_mds.mjd.days $
                 + (info_mds.mjd.secnd + info_mds.mjd.musec / 1d6) / SecInDay 
      indx = WHERE( mjd_time GE period[0] AND mjd_time LE period[1], num_info )
-     IF num_info GT 0 THEN $
-        info_mds = info_mds[indx] $
-     ELSE $
+     IF num_info GT 0 THEN BEGIN
+        info_mds = info_mds[indx]
+        indx_state = indx_state[indx]
+     ENDIF ELSE $
         RETURN, -1
   ENDIF
 
-; selection on relative index
-  IF posit[0] NE NotSet THEN BEGIN
-     IF N_ELEMENTS( posit ) EQ 1 THEN BEGIN
-        IF posit[0] LT 0 OR posit[0] GE num_info THEN BEGIN
-           MESSAGE, 'Attempt to use subscript POSIT out of range.', /INFO
-           status = 1
-           RETURN, -1
-        ENDIF
-        num_info = 1
-        info_mds = info_mds[posit[0]]
-     ENDIF ELSE BEGIN
-        IF posit[0] LT 0 OR posit[0] GE num_info THEN BEGIN
-           MESSAGE, 'Attempt to use subscript POSIT[0] out of range.', /INFO
-           status = 1
-           RETURN, -1
-        ENDIF
-        IF posit[1] LT 0 OR posit[1] GE num_info THEN BEGIN
-           MESSAGE, 'Attempt to use subscript POSIT[1] out of range.', /INFO
-           status = 1
-           RETURN, -1
-        ENDIF
-        IF posit[0] GT posit[1] THEN BEGIN
-           MESSAGE, 'Subscript range values of the form low:high must be' $
-                    + ' low <= high', /INFO
-           status = 1
-           RETURN, -1
-        ENDIF
-        info_mds = info_mds[posit[0]:posit[1]]
-        num_info = N_ELEMENTS( info_mds )
-     ENDELSE
-  ENDIF
-
-; selection on state index
-  num_state = N_ELEMENTS(UNIQ(info_mds.state_index))
-  indx_state = info_mds[UNIQ(info_mds.state_index)].state_index
-  IF state_posit[0] NE NotSet THEN BEGIN
-     nr_posit = N_ELEMENTS( state_posit )
-
-     num_info = 0
-     FOR nr = 0, nr_posit-1 DO BEGIN
-        IF state_posit[nr] LT num_state THEN BEGIN
-           indx = WHERE( info_mds.state_index EQ indx_state[state_posit[nr]],$
-                         count )
-           IF num_info EQ 0 THEN $
-              indx_all = indx $
-           ELSE $
-              indx_all = [indx_all, indx]
-           num_info += count
-        ENDIF
-     ENDFOR
-     IF num_info GT 0 THEN $
-        info_mds = info_mds[indx_all] $
-     ELSE BEGIN
-        num_state = 0
-        indx_state = -1
-        RETURN, -1
-     ENDELSE
-     num_state = N_ELEMENTS(UNIQ(info_mds.state_index))
-     indx_state = info_mds[UNIQ(info_mds.state_index)].state_index
-  ENDIF
+  num_state = N_ELEMENTS(UNIQ(info_mds.on_board_time))
 
   RETURN, info_mds
 END

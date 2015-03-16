@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -22,7 +22,8 @@
 .PURPOSE     IDL wrapper for reading SCIAMACHY level 0 data
 .COMMENTS    None
 .ENVIRONment None
-.VERSION      1.3   12-Oct-2002	consistently return, in case of error, -1, RvH 
+.VERSION      1.4   16-Mar-2015	fixed for nadc_tools v2.x, RvH
+              1.3   12-Oct-2002	consistently return, in case of error, -1, RvH 
               1.2   02-Jul-2002	added more error checking, RvH
               1.1   19-Feb-2002	made program complied with libSCIA, RvH 
               1.0   04-Dec-2001	Created by R. M. van Hees 
@@ -73,7 +74,7 @@ int IDL_STDCALL _SCIA_LV0_RD_SPH ( int argc, void *argv[] )
      return -1;
 }
 
-int IDL_STDCALL _GET_LV0_MDS_INFO ( int argc, void *argv[] )
+unsigned int IDL_STDCALL _GET_LV0_MDS_INFO ( int argc, void *argv[] )
 {
      const char prognm[] = "_GET_LV0_MDS_INFO";
 
@@ -93,9 +94,9 @@ int IDL_STDCALL _GET_LV0_MDS_INFO ( int argc, void *argv[] )
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "GET_SCIA_LV0_MDS_INFO" );
 
-     return (int) num_info;
+     return num_info;
  done:
-     return -1;
+     return 0;
 }
 
 
@@ -126,31 +127,6 @@ int IDL_STDCALL _SCIA_LV0_RD_MDS_INFO ( int argc, void *argv[] )
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV0_RD_AUX ( int argc, void *argv[] )
-{
-     const char prognm[] = "_SCIA_LV0_RD_AUX";
-
-     int num_info, nr_aux;
-
-     struct mds0_aux  *aux;	
-     struct mds0_info *info;
-
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
-
-     info  = (struct mds0_info *) argv[0];
-     num_info  = *(int *) argv[1];
-     aux   = (struct mds0_aux *) argv[2];
-
-     nr_aux = (int) SCIA_LV0_RD_AUX( fd_nadc, info, num_info, &aux );
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     return nr_aux;
- done:
-     return -1;
-}
-
 static inline
 void _UNPACK_LV0_PIXEL_DATA( const struct chan_src *pixel,
 			     /*@out@*/ unsigned int *data )
@@ -175,7 +151,7 @@ void _UNPACK_LV0_PIXEL_DATA( const struct chan_src *pixel,
      }
 }
 
-int IDL_STDCALL _SCIA_LV0_RD_DET ( int argc, void *argv[] )
+unsigned int IDL_STDCALL _SCIA_LV0_RD_DET ( int argc, void *argv[] )
 {
      const char prognm[] = "_SCIA_LV0_RD_DET";
 
@@ -299,11 +275,36 @@ int IDL_STDCALL _SCIA_LV0_RD_DET ( int argc, void *argv[] )
      return num_det;
 }
 
-int IDL_STDCALL _SCIA_LV0_RD_PMD ( int argc, void *argv[] )
+unsigned int IDL_STDCALL _SCIA_LV0_RD_AUX ( int argc, void *argv[] )
+{
+     const char prognm[] = "_SCIA_LV0_RD_AUX";
+
+     unsigned int num_info, num_aux;
+
+     struct mds0_aux  *aux;	
+     struct mds0_info *info;
+
+     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( fileno( fd_nadc ) == -1 ) 
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+
+     info  = (struct mds0_info *) argv[0];
+     num_info  = *(unsigned int *) argv[1];
+     aux   = (struct mds0_aux *) argv[2];
+
+     num_aux = SCIA_LV0_RD_AUX( fd_nadc, info, num_info, &aux );
+     if ( IS_ERR_STAT_FATAL ) return 0;
+
+     return num_aux;
+ done:
+     return 0;
+}
+
+unsigned int IDL_STDCALL _SCIA_LV0_RD_PMD ( int argc, void *argv[] )
 {
      const char prognm[] = "_SCIA_LV0_RD_PMD";
 
-     int num_info, nr_pmd;
+     unsigned int num_info, num_pmd;
 
      struct mds0_info *info;
      struct mds0_pmd  *pmd;
@@ -313,13 +314,13 @@ int IDL_STDCALL _SCIA_LV0_RD_PMD ( int argc, void *argv[] )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
 
      info  = (struct mds0_info *) argv[0];
-     num_info  = *(int *) argv[1];
+     num_info  = *(unsigned int *) argv[1];
      pmd   = (struct mds0_pmd *) argv[2];
 
-     nr_pmd = (int) SCIA_LV0_RD_PMD( fd_nadc, info, num_info, &pmd );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     num_pmd = SCIA_LV0_RD_PMD( fd_nadc, info, num_info, &pmd );
+     if ( IS_ERR_STAT_FATAL ) return 0;
 
-     return nr_pmd;
+     return num_pmd;
  done:
-     return -1;
+     return 0;
 }

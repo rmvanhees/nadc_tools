@@ -3,14 +3,13 @@
 
 ; open file
 data_dir = '/SCIA/LV0_04/P/'
-flname = 'SCI_NL__0PPLRA20070727_193804_000057182060_00157_28267_6316.N1'
+flname = 'SCI_NL__0PPLRA20070727_125105_000059962060_00153_28263_6248.N1'
 
 SCIA_HL_OPEN, data_dir + flname, dsd, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; collect info about SCIAMACHY source packets
-flname = STRMID(flname, STRPOS( flname, '/', /REVERSE_SEARCH )+1)
-SCIA_LV0_RD_MDS_INFO, flname, dsd, info, status=status
+SCIA_LV0_RD_MDS_INFO, dsd, info, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; read Auxiliary source packets

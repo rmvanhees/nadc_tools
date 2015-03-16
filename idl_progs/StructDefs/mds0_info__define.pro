@@ -12,7 +12,6 @@ struct = { mds0_info, $
            crc_errors    : 0us        ,$
            rs_errors     : 0us        ,$
            bcps          : 0us        ,$
-           state_index   : 0us        ,$
            packet_length : 0us        ,$
            on_board_time : 0ul        ,$
            offset        : 0ul        $

@@ -1,5 +1,5 @@
 ;
-; COPYRIGHT (c) 2002 - 2013 SRON (R.M.van.Hees@sron.nl)
+; COPYRIGHT (c) 2002 - 2015 SRON (R.M.van.Hees@sron.nl)
 ;
 ;   This is free software; you can redistribute it and/or modify it
 ;   under the terms of the GNU General Public License, version 2, as
@@ -27,10 +27,9 @@
 ;
 ; CALLING SEQUENCE:
 ;       SCIA_LV0_RD_DET, info, mds_det, count=count, category=category, $
-;                        state_id=state_id, state_posit=state_posit, $
+;                        state_id=state_id, channels=channels, period=period, $
 ;                        indx_state=indx_state, num_state=num_state, $
-;                        channels=channels, period=period, $
-;                        posit=posit, status=status, 
+;                        status=status, 
 ;
 ; INPUTS:
 ;      info :    structure holding info about MDS records
@@ -44,9 +43,6 @@
 ;                (default or -1: all categories)
 ;  state_id   :  read only selected states (scalar or array)
 ;                (default or -1: all states)
-;  state_posit:  relative index/indices to the state record(s), this
-;                is last selection applied, only counting those MDS(s)
-;                which contain data (default or -1: all data)
 ;  indx_state :  named variable which contains the indices to the
 ;                original state records as defined in the level 1b/1c
 ;                product
@@ -56,7 +52,6 @@
 ;  period     :  read only MDS within a time-window (scalar or array)
 ;                date must be given in decimal julian 2000 day
 ;                (default or -1: all data)
-;  posit      :  relative index or index-range [low,high] to MDS record(s)
 ;  status     :  returns named variable with error status (0 = ok)
 ;
 ; SIDE EFFECTS:
@@ -188,6 +183,8 @@
 ;       Modified:  RvH, 22 March 2010
 ;                    added keywords: state_posit, indx_state, num_state
 ;                    use new function GET_LV0_MDS_STATE
+;       Modified:  RvH, March 2015
+;                Works again for nadc_tools v2.x; removed obsolete keywords
 ;-
 ;---------------------------------------------------------------------------
 FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, chan_mask
@@ -219,9 +216,8 @@ FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, chan_mask
 END
 
 PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
-                     state_id=state_id, state_posit=state_posit, $
+                     state_id=state_id, period=period, channels=channels, $
                      indx_state=indx_state, num_state=num_state, $
-                     channels=channels, period=period, posit=posit, $
                      status=status
   compile_opt idl2,logical_predicate,hidden
 
@@ -234,9 +230,9 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
   IF N_PARAMS() NE 2 THEN BEGIN
      MESSAGE, ' Usage: scia_lv0_rd_det, info, mds_det, count=count' $
               + ', category=category, state_id=state_id' $
-              + ', state_posit=state_posit, indx_state=indx_state' $
-              + ', num_state=num_state, channels=channels, period=period' $
-              + ', posit=posit, status=status', /INFO
+              + ', channels=channels, period=period' $
+              + ', indx_state=indx_state, num_state=num_state' $
+              + ', status=status', /INFO
      status = -1
      RETURN
   ENDIF
@@ -263,8 +259,7 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
 ; select Detector source packets
   info_det = GET_LV0_MDS_STATE( info_all, $
                                 category=category, state_id=state_id, $
-                                state_posit=state_posit, period=period, $
-                                channels=channels, posit=posit, $
+                                period=period, channels=channels, $
                                 indx_state=indx_state, num_state=num_state )
   IF num_state LE 0 THEN BEGIN
      MESSAGE, 'No state-records found for given selection criteria', /INFO
@@ -287,18 +282,18 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
                                    info_det[nd].category,$
                                    mph.abs_orbit, chan_mask )
 
-     state_index = info_det[nd].state_index
+     on_board_time = info_det[nd].on_board_time
      REPEAT BEGIN
         nd += 1L
         IF nd GE num_det THEN break
-     ENDREP UNTIL info_det[nd].state_index NE state_index
+     ENDREP UNTIL info_det[nd].on_board_time NE on_board_time
   ENDFOR
   data = ULONARR( sz_data )
 
 ; read Detector source packets
   count = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_DET', $
                          info_det, ULONG(num_det), chan_mask, $
-                         mds_det, data, /CDECL )
+                         mds_det, data, /CDECL, /UL_VALUE )
 ; check error status
   IF count NE num_det THEN BEGIN
      status = -1

@@ -28,7 +28,7 @@
 ; CALLING SEQUENCE:
 ;       SCIA_LV0_RD_AUX, info, mds_aux, period=period,
 ;                        category=category, state_id=state_id, $
-;                        posit=posit, status=status
+;                        status=status
 ;
 ; INPUTS:
 ;      info :    structure holding info about MDS records
@@ -41,7 +41,6 @@
 ;                (default or -1: all categories)
 ;  state_id :    read only selected states (scalar or array)
 ;                (default or -1: all states)
-;     posit :    relative index or index-range [low,high] to MDS record(s)
 ;    period :    read only MDS within a time-window (scalar or array)
 ;                  date must be given in decimal julian 2000 day
 ;    status :    returns named variable with error status (0 = ok)
@@ -77,9 +76,9 @@
 ;-
 ;---------------------------------------------------------------------------
 PRO SCIA_LV0_RD_AUX, info_all, mds_aux, category=category, $
-                     state_id=state_id, state_posit=state_posit, $
+                     state_id=state_id, period=period, $
                      indx_state=indx_state, num_state=num_state, $
-                     period=period, posit=posit, status=status
+                     status=status
   compile_opt idl2,logical_predicate,hidden
 
 ; initialize the return values
@@ -90,8 +89,7 @@ PRO SCIA_LV0_RD_AUX, info_all, mds_aux, category=category, $
   IF N_PARAMS() NE 2 THEN BEGIN
      MESSAGE, ' Usage: scia_lv0_rd_aux, info, mds_aux' $
               + ', category=category, state_id=state_id' $
-              + ', state_posit=state_posit, indx_state=indx_state' $
-              + ', num_state=num_state, posit=posit' $
+              + ', indx_state=indx_state, num_state=num_state' $
               + ', period=period, status=status', /INFO
      status = -1
      RETURN
@@ -101,8 +99,7 @@ PRO SCIA_LV0_RD_AUX, info_all, mds_aux, category=category, $
 ; select Auxiliary source packets
   info_aux = GET_LV0_MDS_STATE( info_all, mds_type='AUX', $
                                 category=category, state_id=state_id, $
-                                state_posit=state_posit, period=period, $
-                                posit=posit, $
+                                period=period, $
                                 indx_state=indx_state, num_state=num_state )
   IF num_state LE 0 THEN BEGIN
      MESSAGE, 'No state-records found for given selection criteria', /INFO
@@ -117,7 +114,7 @@ PRO SCIA_LV0_RD_AUX, info_all, mds_aux, category=category, $
 
 ; read Auxiliary source packets
   num = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_AUX', $
-                       info_aux, ULONG(num_aux), mds_aux, /CDECL )
+                       info_aux, ULONG(num_aux), mds_aux, /CDECL, /UL_VALUE )
 
 ; check error status
   IF num NE num_aux THEN status = -1

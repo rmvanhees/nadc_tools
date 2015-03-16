@@ -1,5 +1,5 @@
 ;
-; COPYRIGHT (c) 2002 - 2013 SRON (R.M.van.Hees@sron.nl)
+; COPYRIGHT (c) 2002 - 2015 SRON (R.M.van.Hees@sron.nl)
 ;
 ;   This is free software; you can redistribute it and/or modify it
 ;   under the terms of the GNU General Public License, version 2, as
@@ -26,10 +26,9 @@
 ;       SCIAMACHY level 0
 ;
 ; CALLING SEQUENCE:
-;       SCIA_LV0_RD_MDS_INFO, flname, dsd, info, status=status
+;       SCIA_LV0_RD_MDS_INFO, dsd, info, status=status
 ;
 ; INPUTS:
-;       flname :    string with the name of the Sciamachy file
 ;       dsd    :    structure for the DSD records
 ;
 ; OUTPUTS:
@@ -60,18 +59,17 @@
 ;       Modified:  RvH, 16 Januari 2006
 ;                    adopted new function call to C-routine 
 ;                    SCIA_LV0_RD_MDS_INFO, modified keywords accordingly
+;       Modified:  RvH, March 2015
+;                Works again for nadc_tools v2.x; removed obsolete keywords
 ;-
-PRO SCIA_LV0_RD_MDS_INFO, flname, dsd, info, info_fl=info_fl, status=status
+PRO SCIA_LV0_RD_MDS_INFO, dsd, info, status=status
   compile_opt idl2,logical_predicate,hidden
 
   info = -1
-  IF N_PARAMS() NE 3 THEN BEGIN
-     MESSAGE, ' Usage: SCIA_LV0_RD_MDS_INFO, flname, dsd, info' $
+  IF N_PARAMS() NE 2 THEN BEGIN
+     MESSAGE, ' Usage: SCIA_LV0_RD_MDS_INFO, dsd, info' $
               + ', status=status'
   ENDIF
-
-  IF N_ELEMENTS( info_fl ) NE 0 THEN $
-     MESSAGE, 'keyword info_fl is obsolete, please update your code', /INFO
 
 ; collect info about SCIAMACHY source packets
   indx_dsd = WHERE( STRCOMPRESS(STRING(dsd[*].name),/REMOVE) $
@@ -82,12 +80,11 @@ PRO SCIA_LV0_RD_MDS_INFO, flname, dsd, info, info_fl=info_fl, status=status
      RETURN
   ENDIF
 
-  num_dsd = ULONG( N_ELEMENTS( dsd ) )
   num_dsr = dsd[indx_dsd].num_dsr
   info = REPLICATE( {mds0_info}, num_dsr )
 
-  num = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_MDS_INFO', $
-                       num_dsd, dsd, info, /CDECL )
+  num = call_external( lib_name('libnadc_idl'), '_GET_LV0_MDS_INFO', $
+                       dsd, info, /CDECL, /UL_VALUE )
 
 ; check error status
   IF num EQ num_dsr THEN BEGIN
