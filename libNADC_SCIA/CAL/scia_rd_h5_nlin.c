@@ -21,9 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     read table for Epitaxx non-linearity correction
 .INPUT/OUTPUT
-  call as    SCIA_RD_H5_NLIN( nlcorr_db, &nlin );
-      input:
-             char *nlcorr_db           : full-path to nlcorr database (or NULL)
+  call as    SCIA_RD_H5_NLIN( &nlin );
      output: 
              struct scia_nlincorr *nlin :
                     size_t dims[2]     : dimension of matrix (hdf5 definition)
@@ -65,7 +63,7 @@
         /* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_RD_H5_NLIN( const char nlcorr_db[], struct scia_nlincorr *nlin )
+void SCIA_RD_H5_NLIN( struct scia_nlincorr *nlin )
 {
      const char prognm[] = "SCIA_RD_H5_NLIN";
 
@@ -76,20 +74,16 @@ void SCIA_RD_H5_NLIN( const char nlcorr_db[], struct scia_nlincorr *nlin )
 /*
  * open non-linearity correction database (HDF5-file)
  */
-     if ( nlcorr_db != NULL ) {
-	  file_id = H5Fopen( nlcorr_db, H5F_ACC_RDONLY, H5P_DEFAULT );
-          if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, nlcorr_db );
-     } else if ( env_str != NULL ) {
-          file_id = H5Fopen( env_str, H5F_ACC_RDONLY, H5P_DEFAULT );
-          if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, env_str );
-     } else {
+     if ( env_str != NULL ) {
 	  const char nlin_fl[] = DATA_DIR"/NLcorr.h5";
 
           file_id = H5Fopen( nlin_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 ) 
                NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, nlin_fl );
+     } else {
+          file_id = H5Fopen( env_str, H5F_ACC_RDONLY, H5P_DEFAULT );
+          if ( file_id < 0 ) 
+               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, env_str );
      }
 /*
  * read datasets

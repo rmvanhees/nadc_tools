@@ -378,6 +378,9 @@ extern unsigned char GET_SCIA_MDS_TYPE( unsigned char stateID );
 extern void GET_SCIA_ROE_INFO( bool, const double, /*@out@*/ int *, 
 			       /*@out@*/ bool *, /*@out@*/ float * );
 extern double GET_SCIA_ROE_JDAY( unsigned short );
+extern size_t GET_SCIA_ROE_JDAY_ALL( /*@out@*/ double **jday_out )
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack, *jday_out@*/;
 
 extern void SCIA_LV1C_FREE_MDS( int, unsigned int, 
 				/*@only@*/ struct mds1c_scia * );

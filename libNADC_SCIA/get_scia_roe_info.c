@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -315,7 +315,7 @@ double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
      unsigned short *orbit_list = NULL;
      double         *jday_list = NULL;
 /*
- * open output HDF5-file
+ * open ROE-database
  */
      (void) snprintf( string, MAX_STRING_LENGTH, "./%s", name_ROE_db );
      H5E_BEGIN_TRY {
@@ -367,6 +367,65 @@ double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
      return jday;
 }
 
+/*+++++++++++++++++++++++++
+.IDENTifer   GET_SCIA_ROE_JDAY_ALL
+.PURPOSE     return for whole ROE database Julian day at start of orbit
+.INPUT/OUTPUT
+  call as   dim_jday = GET_SCIA_ROE_JDAY_ALL( &jday_arr );
+     input:
+             double **jday_arr  : array of julian days for orbit 1..N
+
+.RETURNS     number of julian days
+             error status passed by global variable ``nadc_stat''
+.COMMENTS    none
+-------------------------*/
+size_t GET_SCIA_ROE_JDAY_ALL( double **jday_out )
+{
+     const char prognm[] = "GET_SCIA_ROE_JDAY_ALL";
+
+     char    string[MAX_STRING_LENGTH];
+
+     hid_t   fileID = -1;
+     hsize_t numRoe;
+     herr_t  stat;
+
+     size_t num_jday = 0;
+     double *jday_arr = NULL;
+/*
+ * open ROE-database
+ */
+     (void) snprintf( string, MAX_STRING_LENGTH, "./%s", name_ROE_db );
+     H5E_BEGIN_TRY {
+          fileID = H5Fopen( string, H5F_ACC_RDONLY, H5P_DEFAULT );
+     } H5E_END_TRY;
+     if ( fileID < 0 ) {
+          (void) snprintf( string, MAX_STRING_LENGTH, "%s/%s", 
+			   DATA_DIR, name_ROE_db );
+          fileID = H5Fopen( string, H5F_ACC_RDONLY, H5P_DEFAULT );
+          if ( fileID < 0 )
+	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, string );
+     }
+/*
+ * obtain size of array julianDay
+ */
+     stat = H5LTget_dataset_info( fileID, "julianDay", &numRoe, NULL, NULL );
+     if ( stat < 0 || numRoe == 0 ) 
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "julianDay" );
+/*
+ * read julian dates
+ */
+     jday_arr = (double *) malloc( (size_t) numRoe * sizeof(double));
+     if ( jday_arr == NULL )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "jday_arr" );
+     if ( H5LTread_dataset_double( fileID, "julianDay", jday_arr ) < 0 )
+	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "julianDay" );
+     num_jday = (size_t) numRoe;
+ done:
+     if ( fileID > 0 ) (void) H5Fclose( fileID );
+     *jday_out = jday_arr;
+
+     return num_jday;
+}
 /*
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */

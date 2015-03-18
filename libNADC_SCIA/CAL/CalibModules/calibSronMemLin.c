@@ -292,7 +292,7 @@ void SCIA_SRON_CAL_NLIN( unsigned short num_mds, struct mds1c_scia *mds_1c )
 /*
  * read lookup table for non-linearity correction of Epitaxx detector data
  */
-     SCIA_RD_H5_NLIN( NULL, &nlcorr );
+     SCIA_RD_H5_NLIN( &nlcorr );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
 /*

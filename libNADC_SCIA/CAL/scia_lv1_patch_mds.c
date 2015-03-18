@@ -737,7 +737,7 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
 
      struct scia_nlincorr nlcorr = {{0,0}, NULL, NULL};
 
-     SCIA_RD_H5_NLIN( NULL, &nlcorr );
+     SCIA_RD_H5_NLIN( &nlcorr );
      if ( IS_ERR_STAT_FATAL ) 
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
 

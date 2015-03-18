@@ -98,16 +98,15 @@ struct RadSens_rec {
  */
 extern void SCIA_RD_H5_MEM( /*@out@*/ struct scia_memcorr *mem )
        /*@globals nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack@*/;
+       /*@modifies nadc_stat, nadc_err_stack, mem@*/;
 extern void SCIA_FREE_H5_MEM( struct scia_memcorr *mem );
-extern void SCIA_RD_H5_NLIN( /*@null@*/ const char *file, 
-			     /*@out@*/ struct scia_nlincorr *nlin )
+extern void SCIA_RD_H5_NLIN( /*@out@*/ struct scia_nlincorr *nlin )
        /*@globals nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack@*/;
+       /*@modifies nadc_stat, nadc_err_stack, nlin@*/;
 extern void SCIA_FREE_H5_NLIN( struct scia_nlincorr *nlin );
 extern void SCIA_RD_H5_STRAY( /*@out@*/ struct scia_straycorr *stray )
        /*@globals nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack@*/;
+       /*@modifies nadc_stat, nadc_err_stack, stray@*/;
 extern void SCIA_FREE_H5_STRAY( struct scia_straycorr *stray );
 
 #if defined _STDIO_H || defined _STDIO_H_ || defined S_SPLINT_S

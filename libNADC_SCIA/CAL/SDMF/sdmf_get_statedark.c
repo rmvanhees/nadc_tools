@@ -494,7 +494,7 @@ bool SDMF_get_StateDark_30( unsigned char stateID, unsigned short channel,
      SCIA_RD_H5_MEM( &memcorr );
      if ( IS_ERR_STAT_FATAL )
           NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_RD_H5_MEM" );
-     SCIA_RD_H5_NLIN( DATA_DIR"/NLcorr.h5", &nlcorr );
+     SCIA_RD_H5_NLIN( &nlcorr );
      if ( IS_ERR_STAT_FATAL )
           NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_RD_H5_NLIN" );
 /*
