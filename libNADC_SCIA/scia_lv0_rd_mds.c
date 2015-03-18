@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -33,7 +33,8 @@
 
 .ENVIRONment none
 .EXTERNALs   ENVI_GET_DSD_INDEX 
-.VERSION      5.4   29-Sep-2011	check on likelihood of "start" corruption, RvH
+.VERSION      5.5   18-Mar-2015	bugfixes and code improvements, RvH
+              5.4   29-Sep-2011	check on likelihood of "start" corruption, RvH
               5.3   22-Nov-2009	more fixes in clusDef correction algorithm, RvH
               5.2   28-Oct-2009	move GET_LV0_MDS_INFO to seperate module, RvH
               5.1   10-Apr-2009	fixed memory corruption bug (numClusters=0), RvH
@@ -684,7 +685,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 			   "Detector[%-hu] MDS size: %zd instead of %zd", 
 			   numClusters, (size_t)(cpntr - cbuff), 
 			   det_length );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, msg );
+	  NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD, msg );
      }
 /*
  * release allocated memory
@@ -954,8 +955,8 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
 			   "Read failed for on_board_time %-u state_id %hhu",
 			   info->on_board_time, info->state_id );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, msg );
 	  nadc_stat &= ~(NADC_STAT_WARN);
+	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, msg );
      }
      if ( IS_ERR_STAT_FATAL ) {
 	  if ( ! Use_Extern_Alloc ) free( det->data_src );
