@@ -815,8 +815,9 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
  * check packet ID
  */
      if ( (int) aux->data_hdr.id.field.packet != SCIA_AUX_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-			     "not an Auxiliary data packet" );
+	  aux->data_hdr.id.field.packet = SCIA_AUX_PACKET;
+//	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+//			     "not an Auxiliary data packet" );
 /*
  * read PMTC settings
  */
@@ -896,8 +897,9 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
  * check packet ID
  */
      if ( (int) det->data_hdr.id.field.packet != SCIA_DET_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-			     "not a detector data packet" );
+	  det->data_hdr.id.field.packet = SCIA_DET_PACKET;
+//	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+//			     "not a detector data packet" );
 /*
  * read Broadcast counter (MDI)
  */
@@ -1021,8 +1023,9 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
  * check packet ID
  */
      if ( (int) pmd->data_hdr.id.field.packet != SCIA_PMD_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-			     "not a PMD data packet" );
+	  pmd->data_hdr.id.field.packet = SCIA_PMD_PACKET;
+//	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+//			     "not a PMD data packet" );
 /*
  * read ISP PMD data source packet
  */

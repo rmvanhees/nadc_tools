@@ -790,10 +790,10 @@ void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
      if ( num_info == 0 ) return;
 
      do {
-	  (void) printf( "%02hhu %02hhu %8u %5hu %6hu %5hu %5hu\n",
+	  (void) printf( "%02hhu %02hhu %8u %5hu %6hu %3hhu %5hu %5hu\n",
 			 info[ni].packet_type, info[ni].state_id,
 			 info[ni].on_board_time, info[ni].bcps,
-			 info[ni].packet_length, 
+			 info[ni].packet_length, info[ni].q.value,
 			 info[ni].crc_errors, info[ni].rs_errors );
      } while ( ++ni < num_info );
 }
