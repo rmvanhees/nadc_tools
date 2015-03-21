@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -420,13 +420,11 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
 			   unsigned int num_info, struct mds0_info *info )
      /*@modifies info->q.value, info->state_id; @*/
 {
-     const char prognm[] = "_CHECK_INFO_STATE_ID";
+     //const char prognm[] = "_CHECK_INFO_STATE_ID";
 
      register size_t ns;
 
      register unsigned int ni = 0;
-
-     char msg[SHORT_STRING_LENGTH];
 
      unsigned short counted_state_id[MAX_NUM_STATE];
      
@@ -462,11 +460,6 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
 		    do {
 			 if ( info[nj].on_board_time == on_board_time
 			      && info[nj].state_id != state_id ) {
-			      (void) snprintf( msg, SHORT_STRING_LENGTH,
-				       "Invalid State ID [%-u/%02hhu] - %hhu", 
-				       nj, state_id, info[nj].state_id );
-			      NADC_ERROR( prognm, NADC_ERR_NONE, msg );
-
 			      if ( correct_info_rec ) {
 				   info[nj].state_id = state_id;
 				   info[nj].q.flag.state_id = 1;
@@ -501,22 +494,15 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 			   unsigned int num_info, struct mds0_info *info )
      /*@modifies info->q.value, info->packet_type; @*/
 {
-     const char prognm[] = "_CHECK_INFO_PACKET_ID";
+     //const char prognm[] = "_CHECK_INFO_PACKET_ID";
 
      register unsigned int ni = 0;
-
-     char msg[SHORT_STRING_LENGTH];
 
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
      do { 
 	  if ( info[ni].packet_type > (unsigned char) 3 ) {
-	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-				"Invalid Packet ID [%-u/%02hhu] - %hhu", 
-				ni, info[ni].state_id, info[ni].packet_type );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
-
 	       if ( correct_info_rec ) {
 		    info[ni].packet_type &= (unsigned char) 3;
 		    info[ni].q.flag.packet_id = 1;
@@ -529,7 +515,7 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 .IDENTifer   _CHECK_INFO_UNIQUE
 .PURPOSE     check if info-records are unique
 .INPUT/OUTPUT
-  call as   _CHECK_INFO_UNIQUE( num_state, states );
+  call as   _CHECK_INFO_UNIQUE( correct_info_rec, num_state, states );
      input:  
             unsigned int num_state      :  number of info-records
  in/output:  
@@ -541,127 +527,106 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 static
 void _CHECK_INFO_UNIQUE( bool correct_info_rec,
 			 size_t num_state, struct mds0_states *states )
-     /*@modifies info->q.value; @*/
+     /*@modifies states->q.value, states->info->q.value; @*/
 {
-     const char prognm[] = "_CHECK_INFO_UNIQUE";
+     // const char prognm[] = "_CHECK_INFO_UNIQUE";
 
      const size_t sz_mds0_info = sizeof( struct mds0_info );
-          
+
      register size_t       ns = 0;
      register unsigned int ni;
 
-     char msg[SHORT_STRING_LENGTH];
+     struct mds0_info *info;
 
      /* handle special cases gracefully */
      if ( num_state == 0 ) return;
 
      do {
 	  /* check Auxiliary DSRs */
+	  info = states[ns].info_aux;
 	  for ( ni = 1; ni < states[ns].num_aux; ni++ ) {
-	       struct mds0_info *info = states[ns].info_aux;
-	       
 	       if ( info[ni].bcps == info[ni-1].bcps ) {
 		    if ( info[ni-1].crc_errors > info[ni].crc_errors
 			 || info[ni-1].rs_errors > info[ni].rs_errors
 			 || info[ni-1].q.value > info[ni].q.value ) {
 			 info[ni-1].q.flag.duplicate = 1;
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-					  "Duplicated MDS record [%-u/%02hhu]", 
-					  ni-1, info[ni-1].state_id );
 		    } else {
 			 info[ni].q.flag.duplicate = 1;
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-					  "Duplicated MDS record [%-u/%02hhu]", 
-					  ni, info[ni].state_id );
 		    }
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 	  }
 	  if ( correct_info_rec ) {
 	       register unsigned int num = 0;
-	  
-	       for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
-		    struct mds0_info *info = states[ns].info_aux;
 
+	       for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
 		    if ( info[ni].q.flag.duplicate == 0 ) {
 			 if ( ni > num )
 			      (void) memcpy( info+num, info+ni, sz_mds0_info );
 			 num++;
 		    }
 	       }
-	       states[ns].num_aux = num;
+	       if ( states[ns].num_aux != num ) {
+		    states[ns].q_aux.flag.duplicates = 1;
+		    states[ns].num_aux = num;
+	       }
 	  }
 	  
 	  /* check Detector DSRs */
+	  info = states[ns].info_det;
 	  for ( ni = 1; ni < states[ns].num_det; ni++ ) {
-	       struct mds0_info *info = states[ns].info_det;
-	       
 	       if ( info[ni].bcps == info[ni-1].bcps ) {
 		    if ( info[ni-1].crc_errors > info[ni].crc_errors
 			 || info[ni-1].rs_errors > info[ni].rs_errors
 			 || info[ni-1].q.value > info[ni].q.value ) {
 			 info[ni-1].q.flag.duplicate = 1;
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-					  "Duplicated MDS record [%-u/%02hhu]", 
-					  ni-1, info[ni-1].state_id );
 		    } else {
 			 info[ni].q.flag.duplicate = 1;
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-					  "Duplicated MDS record [%-u/%02hhu]", 
-					  ni, info[ni].state_id );
 		    }
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 	  }
 	  if ( correct_info_rec ) {
 	       register unsigned int num = 0;
 	  
 	       for ( ni = 0; ni < states[ns].num_det; ni++ ) {
-		    struct mds0_info *info = states[ns].info_det;
-
-		    if ( info[ni].q.flag.duplicate == 0 ) {
-			 if ( ni > num )
-			      (void) memcpy( info+num, info+ni, sz_mds0_info );
-			 num++;
-		    }
+	  	    if ( info[ni].q.flag.duplicate == 0 ) {
+	  		 if ( ni > num )
+	  		      (void) memcpy( info+num, info+ni, sz_mds0_info );
+	  		 num++;
+	  	    }
 	       }
-	       states[ns].num_det = num;
+	       if ( states[ns].num_det != num ) {
+	  	    states[ns].q_det.flag.duplicates = 1;
+	  	    states[ns].num_det = num;
+	       }
 	  }
 
 	  /* check PMD DSRs */
+	  info = states[ns].info_pmd;
 	  for ( ni = 1; ni < states[ns].num_pmd; ni++ ) {
-	       struct mds0_info *info = states[ns].info_pmd;
-	       
 	       if ( info[ni].bcps == info[ni-1].bcps ) {
 		    if ( info[ni-1].crc_errors > info[ni].crc_errors
 			 || info[ni-1].rs_errors > info[ni].rs_errors
 			 || info[ni-1].q.value > info[ni].q.value ) {
 			 info[ni-1].q.flag.duplicate = 1;
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-					  "Duplicated MDS record [%-u/%02hhu]", 
-					  ni-1, info[ni-1].state_id );
 		    } else {
 			 info[ni].q.flag.duplicate = 1;
-			 (void) snprintf( msg, SHORT_STRING_LENGTH,
-					  "Duplicated MDS record [%-u/%02hhu]", 
-					  ni, info[ni].state_id );
 		    }
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 	  }
 	  if ( correct_info_rec ) {
 	       register unsigned int num = 0;
 	  
 	       for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
-		    struct mds0_info *info = states[ns].info_pmd;
-
 		    if ( info[ni].q.flag.duplicate == 0 ) {
 			 if ( ni > num )
 			      (void) memcpy( info+num, info+ni, sz_mds0_info );
 			 num++;
 		    }
 	       }
-	       states[ns].num_pmd = num;
+	       if ( states[ns].num_pmd != num ) {
+		    states[ns].q_pmd.flag.duplicates = 1;
+		    states[ns].num_pmd = num;
+	       }
 	  }
      } while ( ++ns < num_state );
 }
@@ -693,13 +658,11 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      /*@modifies nadc_stat, nadc_err_stack, info->quality; @*/
      /*@globals  nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "_SET_DET_DSR_QUALITY";
+     // const char prognm[] = "_SET_DET_DSR_QUALITY";
 
      register unsigned short nr;
 
      register struct mds0_info *info_pntr = info;
-
-     char msg[SHORT_STRING_LENGTH];
 
      bool limb_flag = FALSE;
 
@@ -757,10 +720,6 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 	  /* perform check on size of data-package */
 	  size_ref = CLUSDEF_DSR_SIZE( state_id, absOrbit, bcps_effective );
 	  if ( size_ref > 0 && info_pntr->packet_length != size_ref ) {
-	       (void) snprintf( msg, SHORT_STRING_LENGTH,
-				"wrong DSR size [%-u/%02hhu] size %hu != %hu",
-			     nr, state_id, info_pntr->packet_length, size_ref );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       info_pntr->q.flag.dsr_size = 1;
 	  }
      }
@@ -768,20 +727,13 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      /* check state */
      bcps = info[num_dsr-1].bcps;
      if ( bcps != duration ) {
-	  (void) snprintf( msg, SHORT_STRING_LENGTH,
-			   "too short state [%02hhu] duration: %hu != %hu", 
-			   state_id, bcps, duration );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  q_det->flag.too_short = 1;
      } else if ( num_dsr != num_dsr_ref ) {
-	  (void) snprintf( msg, SHORT_STRING_LENGTH,
-			   "incomplete state [%02hhu] num DSR: %hu != %hu", 
-			   state_id, num_dsr, num_dsr_ref );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  q_det->flag.dsr_missing = 1;
      } 
 }
 
+static
 void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
 {
      unsigned int ni = 0;
@@ -796,6 +748,178 @@ void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
 			 info[ni].packet_length, info[ni].q.value,
 			 info[ni].crc_errors, info[ni].rs_errors );
      } while ( ++ni < num_info );
+}
+
+static
+void _MDS_INFO_WARNINGS( unsigned short absOrbit,
+			 size_t num_state, struct mds0_states *states )
+{
+     const char prognm[] = "_MDS_INFO_WARNINGS";
+
+     register size_t       ns = 0;
+     register unsigned int ni;
+
+     struct mds0_info *info = states[ns].info_det;
+
+     char msg[MAX_STRING_LENGTH];
+
+     const char msg_state[]
+	  = "fixed %s DSR [%zd,%u] (on_board_time=%u) - state_id to %hhu";
+     const char msg_packet[]
+	  = "fixed %s DSR [%zd,%u] (state_id=%02hhu) - packet_id to %hhu";
+     const char msg_duplicate[]
+	  = "duplicate %s DSR [%zd,%u] (state_id=%02hhu)";
+     const char msg_dsr_sz[]
+	  = "invalid %s DSR [%zd,%u] (state_id=%02hhu) - size = %u bytes";
+     const char msg_duration[]
+	  = "state [%zd,%02hhu] (on_board_time=%u) - too short duration (%hu != %hu) in %s DSRs";
+     const char msg_missing[]
+	  = "state [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != !%u) of %s DSRs";
+     const char msg_unique[]
+	  = "state [%zd,%02hhu] (on_board_time=%u) - removed duplicated %s DSRs";
+
+     /* handle special cases gracefully */
+     if ( num_state == 0 ) return;
+
+     do {
+	  /* check Auxiliary DSRs */
+	  info = states[ns].info_aux;
+	  for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
+	       // fixed value state_id
+	       if ( info[ni].q.flag.state_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_state, "auxiliary", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].on_board_time );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value packet_id
+	       if ( info[ni].q.flag.packet_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_packet, "auxiliary", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_type );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // identified duplicated DSR
+	       if ( info[ni].q.flag.duplicate == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_duplicate, "auxiliary", ns, ni, 
+				     info[ni].state_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+	  }
+	  if ( states[ns].q_aux.flag.duplicates == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_unique, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				"auxiliary" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+
+	  /* check Detector DSRs */
+	  info = states[ns].info_det;
+	  for ( ni = 0; ni < states[ns].num_det; ni++ ) {
+	       // fixed value state_id
+	       if ( info[ni].q.flag.state_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_state, "detector", ns, ni, 
+				     info[ni].on_board_time,
+				     info[ni].state_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value packet_id
+	       if ( info[ni].q.flag.packet_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_packet, "detector", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_type );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // identified duplicated DSR
+	       if ( info[ni].q.flag.duplicate == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_duplicate, "detector", ns, ni, 
+				     info[ni].state_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // invalid DSR size
+	       if ( info[ni].q.flag.dsr_size == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_dsr_sz, "detector", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_length );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+	  }
+	  if ( states[ns].q_det.flag.too_short == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_duration, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				states[ns].info_det[states[ns].num_det-1].bcps,
+				CLUSDEF_DURATION( states[ns].state_id, absOrbit ),
+				"detector" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+	  if ( states[ns].q_det.flag.dsr_missing == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_missing, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				states[ns].num_det,
+				CLUSDEF_NUM_DET(states[ns].state_id, absOrbit),
+				"detector" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+	  if ( states[ns].q_det.flag.duplicates == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_unique, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				"detector" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+	  
+	  /* check PMD DSRs */
+	  info = states[ns].info_pmd;
+	  for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
+	       // fixed value state_id
+	       if ( info[ni].q.flag.state_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_state, "PMD", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].on_board_time );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value packet_id
+	       if ( info[ni].q.flag.packet_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_packet, "PMD", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_type );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // identified duplicated DSR
+	       if ( info[ni].q.flag.duplicate == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_duplicate, "PMD", ns, ni, 
+				     info[ni].state_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+	  }
+	  if ( states[ns].q_pmd.flag.duplicates == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_unique, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				"PMD" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+     } while ( ++ns < num_state );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -817,11 +941,11 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 
      const char dsd_name[] = "SCIAMACHY_SOURCE_PACKETS";
 
-     char *env_str1 = getenv( "NO_INFO_CORRECTION" );
-     char *env_str2 = getenv( "SHOW_INFO_RECORDS" );
-
+     const char *env_str1 = getenv( "NO_INFO_CORRECTION" );
      bool correct_info_rec =
 	  (env_str1 != NULL && *env_str1 == '1') ? FALSE : TRUE;
+
+     const char *env_str2 = getenv( "SHOW_INFO_RECORDS" );
      bool show_info_rec =
 	  (env_str2 != NULL && *env_str2 == '1') ? TRUE : FALSE;
 
@@ -855,7 +979,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 
      /* sort info-records */
      if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
-     _CHECK_INFO_SORTED( correct_info_rec, num_info, info );
+     _CHECK_INFO_SORTED( TRUE, num_info, info );
      
      /* check State ID */
      _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
@@ -884,6 +1008,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 				     "_SET_DET_DSR_QUALITY" );
 	  } while ( ++ns < num_state );
      }
+     _MDS_INFO_WARNINGS( absOrbit, num_state, states );
 done:
      return num_state;
 }

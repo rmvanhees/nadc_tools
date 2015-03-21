@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2003 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2003 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -441,11 +441,11 @@ struct mds0_info
 
 union qstate_rec {
      struct qstate_bitfield {
+	  unsigned char duplicates  : 1;
 	  unsigned char too_short   : 1;
 	  unsigned char dsr_missing : 1;
 	  unsigned char crc_flag    : 1;
 	  unsigned char rs_flag     : 1;
-	  unsigned char dumy5 : 1;
 	  unsigned char dumy6 : 1;
 	  unsigned char dumy7 : 1;
 	  unsigned char dumy8 : 1;

@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -35,7 +35,7 @@
              error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 .ENVIRONment None
-.VERSION      4.0   ..-Feb-2015	big update using mds0_states, RvH
+.VERSION      4.0   20-Mar-2015	big update using mds0_states, RvH
               3.1   09-Dec-2009	add unique filter, RvH
               3.0   11-Oct-2005	rewrite to one selection per module, RvH
               2.5   13-Oct-2003	changes to due modification of mds0_info, RvH
@@ -219,7 +219,7 @@ size_t SCIA_LV0_SELECT_MDS_COMPLETE( const struct param_record *param,
 .PURPOSE     reject state-records with too many CRC errors
 .INPUT/OUTPUT
   call as   nr_indx = SCIA_LV0_SELECT_MDS_CRC( states, 
-                                                    nr_indx, indx );
+                                               nr_indx, indx );
      input:  
 	    struct mds0_states *states : structure for state-records
 	    size_t nr_indx             : (at first call) number of state-records
