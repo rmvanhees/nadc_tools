@@ -31,7 +31,7 @@ else ()
 endif ()
 
 if (NETCDF_FOUND)
-   add_executable(adaguc_fresco adaguc_fresco.c  ${FRESCO_SRCS})
+   add_executable(adaguc_fresco adaguc_fresco.c ${FRESCO_SRCS})
 
    target_link_libraries(adaguc_fresco ${FRESCO_LIBS})
 endif ()

@@ -69,7 +69,7 @@ set (NADC_SRCS
 add_library (${NADC_LIB_TARGET} ${LIB_TYPE} ${NADC_SRCS})
 
 ## Linker instructions
-target_link_libraries(${NADC_LIB_TARGET} ${HDF5_C_LIBRARIES})
+target_link_libraries(${NADC_LIB_TARGET} ${HDF5_C_LIBRARIES} m)
 
 IF (${LIB_TYPE} MATCHES "SHARED")
    SET_TARGET_PROPERTIES (${NADC_LIB_TARGET} PROPERTIES SOVERSION ${LIB_VERS})

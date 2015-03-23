@@ -8,6 +8,10 @@ string (REGEX REPLACE ".*#define[ \t]+version_release[ \t]+([0-9]*).*$"
        "\\1" GOME_VERS_RELEASE ${_version_contents})
 set (LIB_VERS "${GOME_VERS_MAJOR}.${GOME_VERS_MINOR}.${GOME_VERS_RELEASE}")
 
+if (${LIB_TYPE} MATCHES "SHARED")
+   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif (${LIB_TYPE} MATCHES "SHARED")
+
 ## define pre-compiler flags
 if (PGSQL_FOUND)
    add_definitions (-D_WITH_SQL)
@@ -67,12 +71,15 @@ set (NADC_GOME_SRCS
     ${GOME_HDF5_SRCS}
 )
 
+add_library (${NADC_GOME_LIB_TARGET} ${LIB_TYPE} ${NADC_GOME_SRCS})
+
+#-----------------------------------------------------------------------------
+# Set-up for NADC_GOME_LIB
+#-----------------------------------------------------------------------------
 ## Compiler instructions
 if (APPLE)
    set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
 endif (APPLE)
-
-add_library (${NADC_GOME_LIB_TARGET} ${LIB_TYPE} ${NADC_GOME_SRCS})
 
 ## Linker instructions
 target_link_libraries (${NADC_GOME_LIB_TARGET} ${NADC_LIB_TARGET})

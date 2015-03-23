@@ -21,15 +21,15 @@
 .LANGUAGE    ANSI C
 .PURPOSE     obtain inventarisation of Sciamachy LV0 product
 .INPUT/OUTPUT
-  call as   nr_info = SCIA_LV0_RD_MDS_INFO( fd, num_dsd, dsd, info );
+  call as   num_state = SCIA_LV0_RD_MDS_INFO( fd, num_dsd, dsd, states );
      input:
-             FILE *fd                  : (open) stream pointer to scia-file
-             unsigned int num_dsd      : number of DSD records
-	     struct dsd_envi *dsd      : structure for the DSD records
+             FILE *fd                    : (open) stream pointer to scia-file
+             unsigned int num_dsd        : number of DSD records
+	     struct dsd_envi *dsd        : structure for the DSD records
     output:
-             struct mds0_info **info   : structure for "info" records
+             struct mds0_states **states : info on states in product
 
-.RETURNS     number of info records found (unsigned int)
+.RETURNS     number of states records found (size_t)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 .ENVIRONment None
@@ -69,6 +69,46 @@
 	/* NONE */
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
+/*++++++++++ function to display info-record information ++++++++++*/
+static
+void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
+{
+     unsigned int ni = 0;
+
+     /* handle special cases gracefully */
+     if ( num_info == 0 ) return;
+
+     do {
+	  (void) fprintf( stdout,
+			  "%9u %02hhu %02hhu %10u %4hu %5hu %5hu %3hhu %4hu %4hu\n",
+			  info->offset, info->packet_id, info->state_id,
+			  info->on_board_time, info->bcps,
+			  info->isp_length, info->packet_length,
+			  info->q.value,
+			  info->crc_errors, info->rs_errors );
+     } while ( info++, ++ni < num_info );
+}
+
+/*++++++++++ function to display states-record information ++++++++++*/
+static
+void _SHOW_STATE_RECORDS( size_t num_state, const struct mds0_states *states )
+{
+     size_t ns = 0;
+
+     /* handle special cases gracefully */
+     if ( num_state == 0 ) return;
+
+     do {
+	  (void) fprintf( stdout,
+			  "%9u %02hhu %10u %5u %03hhu %5u %03hhu %5u %03hhu\n",
+			  states->offset, states->state_id, 
+			  states->on_board_time,
+			  states->num_aux, states->q_aux.value,
+			  states->num_det, states->q_det.value,
+			  states->num_pmd, states->q_pmd.value );
+     } while ( states++, ++ns < num_state );
+}
+
 /*+++++++++++++++++++++++++
 .IDENTifer   _ASSIGN_INFO_STATES
 .PURPOSE     identify DSR packages of the same state
@@ -80,7 +120,7 @@
             unsigned int num_info   : number of info records
 	    struct mds0_info *info  : structure holding info about MDS records
     output:  
-            struct mds0_states **states : info-recored organized per state
+            struct mds0_states **states : info-records organized per state
 
 .RETURNS     number of states in product (size_t)
              error status passed by global variable ``nadc_stat''
@@ -243,7 +283,7 @@ done:
 #define PIX_SWAP(a,b) { double temp=(a);(a)=(b);(b)=temp; }
 #define INFO_SWAP(a,b) { struct mds0_info c; memcpy(&c, &(a), type_size); memcpy(&(a), &(b), type_size); memcpy(&(b), &c, type_size); }
 
-static
+static inline
 void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
 {
     register int  ii, ir, jj, kk, ll;
@@ -299,7 +339,7 @@ void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
             for (;;) {
                 do ii++; while (ref_arr[ii-1] < ref_tmp);
                 do jj--; while (ref_arr[jj-1] > ref_tmp);
-                if (jj < ii) break;
+                if (jj <= ii) break;
                 PIX_SWAP(ref_arr[ii-1], ref_arr[jj-1]);
 		INFO_SWAP(info[ii-1], info[jj-1])
             }
@@ -523,9 +563,9 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 .INPUT/OUTPUT
   call as   _CHECK_INFO_UNIQUE( correct_info_rec, num_state, states );
      input:  
-            unsigned int num_state      :  number of info-records
+            unsigned int num_state     :  number of info-records
  in/output:  
-	    struct mds0_states *states  :  state-info records
+	    struct mds0_states *states :  info-records organized per state
 
 .RETURNS     nothing
 .COMMENTS    static function
@@ -739,25 +779,20 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      } 
 }
 
-static
-void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
-{
-     unsigned int ni = 0;
+/*+++++++++++++++++++++++++
+.IDENTifer   _MDS_INFO_WARNINGS
+.PURPOSE     add warning to message error stack
+.INPUT/OUTPUT
+  call as   _MDS_INFO_WARNINGS( absOrbit, num_state, states );
+     input:  
+            unsigned short absOrbit : orbit number
+            size_t        num_state : number of info records
+ in/output:  
+	    struct mds0_states *states : info-records organized per state
 
-     /* handle special cases gracefully */
-     if ( num_info == 0 ) return;
-
-     do {
-	  (void) fprintf( stdout,
-			  "%9u %02hhu %02hhu %10u %4hu %5hu %5hu %3hhu %4hu %4hu\n",
-			  info->offset, info->packet_id, info->state_id,
-			  info->on_board_time, info->bcps,
-			  info->isp_length, info->packet_length,
-			  info->q.value,
-			  info->crc_errors, info->rs_errors );
-     } while ( info++, ++ni < num_info );
-}
-
+.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    static function
+-------------------------*/
 static
 void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 			 size_t num_state, struct mds0_states *states )
@@ -996,11 +1031,11 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      /* sort info-records */
      _CHECK_INFO_SORTED( TRUE, num_info, info );
      
-     /* check Packet type */
-     _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
-
      /* check State ID */
      _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
+
+     /* check Packet type */
+     _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
 
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );
@@ -1010,6 +1045,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      
      /* check for repeated DSR records in product */
      _CHECK_INFO_UNIQUE( correct_info_rec, num_state, states );
+     if ( show_info_rec ) _SHOW_STATE_RECORDS( num_state, states );
 
      /* perform quality check on detector info-records */
      if ( clusdef_db_exist ) {
@@ -1023,8 +1059,10 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 				     "_SET_DET_DSR_QUALITY" );
 	  } while ( ++ns < num_state );
      }
+     if ( show_info_rec ) _SHOW_STATE_RECORDS( num_state, states );
      _MDS_INFO_WARNINGS( absOrbit, num_state, states );
 done:
+     if ( info != NULL ) free( info );
      return num_state;
 }
 
@@ -1036,7 +1074,7 @@ done:
      input:  
             size_t num_states          : number of MDS info records (per state)
     output:  
-            struct mds0_states *states : MDS info-records
+            struct mds0_states *states : info-recored organized per state
 
 .RETURNS     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
