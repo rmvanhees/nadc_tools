@@ -414,9 +414,7 @@ struct sph0_scia
 struct mds0_info
 {
      struct mjd_envi mjd;
-     unsigned char   packet_type;
-     unsigned char   category;
-     unsigned char   state_id;
+     unsigned int    offset;
      union {
 	  struct qinfo_bitfield {
 	       unsigned char state_id  : 1;
@@ -430,12 +428,15 @@ struct mds0_info
 	  } flag;
 	  unsigned char value;
      } q;
+     unsigned char   packet_id;
+     unsigned char   category;
+     unsigned char   state_id;
      unsigned short  crc_errors;
      unsigned short  rs_errors;
      unsigned short  bcps;
+     unsigned short  isp_length;
      unsigned short  packet_length;
      unsigned int    on_board_time;
-     unsigned int    offset;
 };
 
 

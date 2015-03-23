@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -100,7 +100,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 				  ((info[ni].mjd.secnd + info[ni].mjd.musec
 				    / 1e6) / (24. * 60 * 60)) );
 	       nadc_write_uchar( outfl, indx, "Packet ID",
-				 info[ni].packet_type );
+				 info[ni].packet_id );
 	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
 	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
 	       nadc_write_uchar( outfl, indx, "Quality", info[ni].q.value );
@@ -130,7 +130,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 				  ((info[ni].mjd.secnd + info[ni].mjd.musec
 				    / 1e6) / (24. * 60 * 60)) );
 	       nadc_write_uchar( outfl, indx, "Packet ID",
-				 info[ni].packet_type );
+				 info[ni].packet_id );
 	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
 	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
 	       nadc_write_uchar( outfl, indx, "Quality", info[ni].q.value );
@@ -160,7 +160,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 				  ((info[ni].mjd.secnd + info[ni].mjd.musec
 				    / 1e6) / (24. * 60 * 60)) );
 	       nadc_write_uchar( outfl, indx, "Packet ID",
-				 info[ni].packet_type );
+				 info[ni].packet_id );
 	       nadc_write_uchar( outfl, indx, "Category", info[ni].category );
 	       nadc_write_uchar( outfl, indx, "State ID", info[ni].state_id );
 	       nadc_write_uchar( outfl, indx, "Quality", info[ni].q.value );

@@ -95,13 +95,16 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
      /* examine whole source data section */
      cpntr = mds_char;
      do {
+	  /* store byte offset w.r.t. begin of file */
 	  mds_start = cpntr;
-
+	  info_pntr->offset = (unsigned int) 
+	       (dsd->offset + (mds_start - mds_char));
 	  info_pntr->q.value = 0;
 
 	  (void) memcpy( &info_pntr->mjd, cpntr, sizeof(struct mjd_envi) );
 	  cpntr += (3 * ENVI_UINT);
 	  cpntr += (3 * ENVI_UINT);  /* skip FEP mjd */
+	  (void) memcpy( &info_pntr->isp_length, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;       /* skip DSR size */
 	  (void) memcpy( &info_pntr->crc_errors, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
@@ -120,42 +123,42 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 	  (void) memcpy( &info_pntr->on_board_time, cpntr, ENVI_UINT );
 	  cpntr += ENVI_UINT;
 	  cpntr += ENVI_USHRT;       /* skip Redundancy definition vector */
-	  (void) memcpy( &info_pntr->packet_type, cpntr, ENVI_UCHAR );
-	  info_pntr->packet_type = info_pntr->packet_type >> 4;
+	  (void) memcpy( &info_pntr->packet_id, cpntr, ENVI_UCHAR );
+	  info_pntr->packet_id = info_pntr->packet_id >> 4;
 	  cpntr += ENVI_UCHAR;
 	  cpntr += ENVI_UCHAR;       /* skip overfow flag */
 
 	  /* read BCPS, different for AUX, DET and PMD */
 	  info_pntr->bcps = 0;
-	  if ( info_pntr->packet_type == SCIA_AUX_PACKET ) {
+	  if ( info_pntr->packet_id == SCIA_AUX_PACKET ) {
 	       size_t offs = LV0_PMTC_HDR_LENGTH + ENVI_USHRT;
 	       (void) memcpy( &info_pntr->bcps, cpntr+offs, sizeof(short) );
-          } else if ( info_pntr->packet_type == SCIA_DET_PACKET ) {
+          } else if ( info_pntr->packet_id == SCIA_DET_PACKET ) {
 	       size_t offs = DET_DATA_HDR_LENGTH - LV0_DATA_HDR_LENGTH 
 		    + 2 * ENVI_USHRT;
 	       (void) memcpy( &info_pntr->bcps, cpntr+offs, sizeof(short) );
-	  } else if ( info_pntr->packet_type == SCIA_PMD_PACKET ) {
+	  } else if ( info_pntr->packet_id == SCIA_PMD_PACKET ) {
 	       size_t offs = 2 * (PMD_NUMBER + 1) * ENVI_USHRT;
 	       (void) memcpy( &info_pntr->bcps, cpntr+offs, sizeof(short) );
           }
-	  /* store byte offset w.r.t. begin of file */
-	  info_pntr->offset = (unsigned int) 
-	       (dsd->offset + (mds_start - mds_char));
+	  if ( info_pntr->isp_length != info_pntr->packet_length )
+	       break;
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  info_pntr->mjd.days      = byte_swap_32( info_pntr->mjd.days );
+	  info_pntr->mjd.days      = byte_swap_32(  info_pntr->mjd.days );
 	  info_pntr->mjd.secnd     = byte_swap_u32( info_pntr->mjd.secnd );
 	  info_pntr->mjd.musec     = byte_swap_u32( info_pntr->mjd.musec );
 	  info_pntr->crc_errors    = byte_swap_u16( info_pntr->crc_errors );
 	  info_pntr->rs_errors     = byte_swap_u16( info_pntr->rs_errors );
 	  info_pntr->on_board_time = byte_swap_u32( info_pntr->on_board_time );
 	  info_pntr->bcps          = byte_swap_u16( info_pntr->bcps );
+	  info_pntr->isp_length    = byte_swap_u16( info_pntr->isp_length );
 	  info_pntr->packet_length = byte_swap_u16( info_pntr->packet_length );
 #endif
 	  /* move to the next MDS */
 	  cpntr += info_pntr->packet_length - 11;
 	  if ( (cpntr - mds_char) > dsd->size ) break;
-     } while ( ++info_pntr, ++num_info < dsd->num_dsr );
+     } while ( info_pntr++, ++num_info < dsd->num_dsr );
 done:
      if ( mds_char != NULL ) free( mds_char );
      return num_info;

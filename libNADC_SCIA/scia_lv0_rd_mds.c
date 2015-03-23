@@ -812,12 +812,13 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
      SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &aux->data_hdr );
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
- * check packet ID
+ * check packet ID & state ID
  */
-     if ( (int) aux->data_hdr.id.field.packet != SCIA_AUX_PACKET )
+     if ( info->q.flag.packet_id == 1 )
 	  aux->data_hdr.id.field.packet = SCIA_AUX_PACKET;
-//	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-//			     "not an Auxiliary data packet" );
+
+     if ( info->q.flag.state_id == 1 )
+	  aux->data_hdr.state_id = info->state_id;
 /*
  * read PMTC settings
  */
@@ -886,7 +887,7 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 /*
  * read Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &det->packet_hdr);
+     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &det->packet_hdr );
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP Data Field Header
@@ -894,12 +895,13 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
      SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &det->data_hdr );
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
- * check packet ID
+ * check packet ID & state ID
  */
-     if ( (int) det->data_hdr.id.field.packet != SCIA_DET_PACKET )
+     if ( info->q.flag.packet_id == 1 )
 	  det->data_hdr.id.field.packet = SCIA_DET_PACKET;
-//	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-//			     "not a detector data packet" );
+
+     if ( info->q.flag.state_id == 1 )
+	  det->data_hdr.state_id = info->state_id;
 /*
  * read Broadcast counter (MDI)
  */
@@ -1020,12 +1022,13 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
      SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &pmd->data_hdr );
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
- * check packet ID
+ * check packet ID & state ID
  */
-     if ( (int) pmd->data_hdr.id.field.packet != SCIA_PMD_PACKET )
+     if ( info->q.flag.packet_id == 1 )
 	  pmd->data_hdr.id.field.packet = SCIA_PMD_PACKET;
-//	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
-//			     "not a PMD data packet" );
+
+     if ( info->q.flag.state_id == 1 )
+	  pmd->data_hdr.state_id = info->state_id;
 /*
  * read ISP PMD data source packet
  */

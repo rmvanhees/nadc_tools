@@ -117,7 +117,7 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
 	       malloc( states->num_pmd * sizeof(struct mds0_info) );
      }
      do {
-	  switch ( info[ni].packet_type ) {
+	  switch ( (int) info[ni].packet_id ) {
 	  case SCIA_DET_PACKET: 
 	       (void) memcpy( states->info_det+nd, info+ni, 
 			      sizeof(struct mds0_info) );
@@ -135,10 +135,6 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
 	       break;
 	  }
      } while ( ++ni < num_info );
-//     (void) fprintf( stderr,
-//		     "_FILL_STATES[%-hhu]: (%u - %u) (%u - %u) (%u - %u)\n",
-//		     info->state_id, na, states->num_aux, nd, states->num_det,
-//		     np, states->num_pmd );
 }
 
 static
@@ -189,7 +185,7 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
      states->num_aux = 0;
      states->num_det = 0;
      states->num_pmd = 0;
-		    
+
      do {
 	  if ( on_board_time != info[ni].on_board_time ) {
 	       if ( num > 3 ) {
@@ -203,7 +199,7 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	       states[ns].num_det = 0;
 	       states[ns].num_pmd = 0;
 	  }
-	  switch ( info[ni].packet_type ) {
+	  switch ( (int) info[ni].packet_id ) {
 	  case ( SCIA_DET_PACKET ):
 	       states[ns].num_det++;
 	       break;
@@ -214,8 +210,8 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	       states[ns].num_pmd++;
 	       break;
 	  default:
-	       (void) fprintf( stderr, "no valid packet ID[%u]: %hhu\n",
-			       ni, info[ni].packet_type );
+	       (void) fprintf( stdout, "no valid packet ID[%u]: %hhu\n",
+			       ni, info[ni].packet_id );
 	  }
 	  num++;
      } while ( ++ni < num_info );
@@ -437,9 +433,9 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
      (void) memset( counted_state_id, 0, MAX_NUM_STATE * sizeof(short) );
      
      do {
-	  if ( on_board_time == info[ni].on_board_time ) {
-	       if ( info[ni].state_id < MAX_NUM_STATE )
-		    counted_state_id[info[ni].state_id-1]++;
+	  if ( on_board_time == info->on_board_time ) {
+	       if ( info->state_id < MAX_NUM_STATE )
+		    counted_state_id[info->state_id-1]++;
 	  } else {
 	       unsigned short id_found = 0;
 	       unsigned short num = 0;
@@ -469,15 +465,15 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
 	       }
 	       (void) memset( counted_state_id, 0,
 			      MAX_NUM_STATE * sizeof(short) );
-	       on_board_time = info[ni].on_board_time;
-	       counted_state_id[info[ni].state_id-1] = 1;
+	       on_board_time = info->on_board_time;
+	       counted_state_id[info->state_id-1] = 1;
 	  }
-     } while ( ++ni < num_info );
+     } while ( info++, ++ni < num_info );
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   _CHECK_INFO_PACKET_ID
-.PURPOSE     consistency check of value of packet_type in info-records
+.PURPOSE     consistency check of value of packet_id in info-records
 .INPUT/OUTPUT
   call as   _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
      input:  
@@ -492,7 +488,7 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
 static
 void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 			   unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->q.value, info->packet_type; @*/
+     /*@modifies info->q.value, info->packet_id; @*/
 {
      //const char prognm[] = "_CHECK_INFO_PACKET_ID";
 
@@ -502,13 +498,13 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
      if ( num_info < 2 ) return;
 
      do { 
-	  if ( info[ni].packet_type > (unsigned char) 3 ) {
+	  if ( info->packet_id > (unsigned char) 3 ) {
 	       if ( correct_info_rec ) {
-		    info[ni].packet_type &= (unsigned char) 3;
-		    info[ni].q.flag.packet_id = 1;
+		    info->packet_id &= (unsigned char) 3;
+		    info->q.flag.packet_id = 1;
 	       }
 	  }
-     } while ( ++ni < num_info );
+     } while ( info++, ++ni < num_info );
 }
 
 /*+++++++++++++++++++++++++
@@ -742,12 +738,14 @@ void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
      if ( num_info == 0 ) return;
 
      do {
-	  (void) printf( "%02hhu %02hhu %8u %5hu %6hu %3hhu %5hu %5hu\n",
-			 info[ni].packet_type, info[ni].state_id,
-			 info[ni].on_board_time, info[ni].bcps,
-			 info[ni].packet_length, info[ni].q.value,
-			 info[ni].crc_errors, info[ni].rs_errors );
-     } while ( ++ni < num_info );
+	  (void) fprintf( stderr,
+			  "%9u %02hhu %02hhu %10u %4hu %5hu %5hu %3hhu %4hu %4hu\n",
+			  info->offset, info->packet_id, info->state_id,
+			  info->on_board_time, info->bcps,
+			  info->isp_length, info->packet_length,
+			  info->q.value,
+			  info->crc_errors, info->rs_errors );
+     } while ( info++, ++ni < num_info );
 }
 
 static
@@ -774,7 +772,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
      const char msg_duration[]
 	  = "state [%zd,%02hhu] (on_board_time=%u) - too short duration (%hu != %hu) in %s DSRs";
      const char msg_missing[]
-	  = "state [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != !%u) of %s DSRs";
+	  = "state [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != %u) of %s DSRs";
      const char msg_unique[]
 	  = "state [%zd,%02hhu] (on_board_time=%u) - removed duplicated %s DSRs";
 
@@ -789,8 +787,8 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	       if ( info[ni].q.flag.state_id == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_state, "auxiliary", ns, ni, 
-				     info[ni].state_id, 
-				     info[ni].on_board_time );
+				     info[ni].on_board_time,
+				     info[ni].state_id );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -799,7 +797,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_packet, "auxiliary", ns, ni, 
 				     info[ni].state_id, 
-				     info[ni].packet_type );
+				     info[ni].packet_id );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -836,7 +834,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_packet, "detector", ns, ni, 
 				     info[ni].state_id, 
-				     info[ni].packet_type );
+				     info[ni].packet_id );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -890,8 +888,8 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	       if ( info[ni].q.flag.state_id == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_state, "PMD", ns, ni, 
-				     info[ni].state_id, 
-				     info[ni].on_board_time );
+				     info[ni].on_board_time,
+				     info[ni].state_id );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -900,7 +898,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_packet, "PMD", ns, ni, 
 				     info[ni].state_id, 
-				     info[ni].packet_type );
+				     info[ni].packet_id );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -976,9 +974,16 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      num_info = GET_SCIA_LV0_MDS_INFO( fd, &dsd[indx_dsd], info );
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "GET_SCIA_LV0_MDS_INFO" );
+     if ( num_info != dsd[indx_dsd].num_dsr ) {
+	  char msg[SHORT_STRING_LENGTH];
+	  (void) snprintf( msg, SHORT_STRING_LENGTH,
+			   "read error at DSR %u/%u",
+			   num_info+1, dsd[indx_dsd].num_dsr );
+	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+     }
+     if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
 
      /* sort info-records */
-     if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
      _CHECK_INFO_SORTED( TRUE, num_info, info );
      
      /* check State ID */
