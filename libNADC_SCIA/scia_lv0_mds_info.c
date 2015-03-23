@@ -497,12 +497,22 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
+     if ( ! correct_info_rec ) return;
+     
      do { 
 	  if ( info->packet_id > (unsigned char) 3 ) {
-	       if ( correct_info_rec ) {
-		    info->packet_id &= (unsigned char) 3;
-		    info->q.flag.packet_id = 1;
+	       info->packet_id &= (unsigned char) 3;
+	       info->q.flag.packet_id = 1;
+	  }
+	  if ( info->packet_id == (unsigned char) 0 ) {
+	       if ( info->packet_length == 1659 ) {
+		    info->packet_id = SCIA_AUX_PACKET;
+	       } else if ( info->packet_length == 6813 ) {
+		    info->packet_id = SCIA_PMD_PACKET;
+	       } else if ( info->packet_length > 0 ) {
+		    info->packet_id = SCIA_DET_PACKET;
 	       }
+	       info->q.flag.packet_id = 1;
 	  }
      } while ( info++, ++ni < num_info );
 }
@@ -738,7 +748,7 @@ void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
      if ( num_info == 0 ) return;
 
      do {
-	  (void) fprintf( stderr,
+	  (void) fprintf( stdout,
 			  "%9u %02hhu %02hhu %10u %4hu %5hu %5hu %3hhu %4hu %4hu\n",
 			  info->offset, info->packet_id, info->state_id,
 			  info->on_board_time, info->bcps,
@@ -762,19 +772,19 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
      char msg[MAX_STRING_LENGTH];
 
      const char msg_state[]
-	  = "fixed %s DSR [%zd,%u] (on_board_time=%u) - state_id to %hhu";
+	  = "\n#\tfixed %s DSR [%zd,%u] (on_board_time=%u) - state_id to %hhu";
      const char msg_packet[]
-	  = "fixed %s DSR [%zd,%u] (state_id=%02hhu) - packet_id to %hhu";
+	  = "\n#\tfixed %s DSR [%zd,%u] (state_id=%02hhu) - packet_id to %hhu";
      const char msg_duplicate[]
-	  = "duplicate %s DSR [%zd,%u] (state_id=%02hhu)";
+	  = "\n#\tduplicate %s DSR [%zd,%u] (state_id=%02hhu)";
      const char msg_dsr_sz[]
-	  = "invalid %s DSR [%zd,%u] (state_id=%02hhu) - size = %u bytes";
+	  = "\n#\tinvalid %s DSR [%zd,%u] (state_id=%02hhu) - size = %u bytes";
      const char msg_duration[]
-	  = "state [%zd,%02hhu] (on_board_time=%u) - too short duration (%hu != %hu) in %s DSRs";
+	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - too short duration (%hu != %hu) in %s DSRs";
      const char msg_missing[]
-	  = "state [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != %u) of %s DSRs";
+	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != %u) of %s DSRs";
      const char msg_unique[]
-	  = "state [%zd,%02hhu] (on_board_time=%u) - removed duplicated %s DSRs";
+	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - removed duplicated %s DSRs";
 
      /* handle special cases gracefully */
      if ( num_state == 0 ) return;
@@ -986,11 +996,11 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      /* sort info-records */
      _CHECK_INFO_SORTED( TRUE, num_info, info );
      
-     /* check State ID */
-     _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
-
      /* check Packet type */
      _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
+
+     /* check State ID */
+     _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
 
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );
