@@ -33,7 +33,8 @@
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 .ENVIRONment None
-.VERSION      3.0   19-Dec-2013	new implementation, complete rewrite, RvH
+.VERSION      4.0   23-Mar-2015	partly re-wite, many improvements, RvH
+              3.0   19-Dec-2013	new implementation, complete rewrite, RvH
               2.5.1 20-Apr-2006	minor bug-fix to compile without HDF5, RvH
 	      2.5   16-Jan-2005	update documentation, RvH
               2.4   10-Jan-2005	store/read info-records in database, RvH
