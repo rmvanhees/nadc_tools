@@ -405,18 +405,13 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 	  while ( ++nj < num_info && info[nj].packet_id != packet_id );
 
 	  /* no next info record in file */
-	  if ( (nj+1) == num_info ) break;
+	  if ( nj == num_info ) break;
 	  if ( info[nj].on_board_time != on_board_time ) {
 	       while ( ++ni < num_info && info[ni].packet_id != packet_id );
 	       continue;
 	  }
 	  next = info+nj;
 
-	  (void) fprintf( stderr, "%u %u %hu %u %hu %u %hu\n", ni,
-			  prev->on_board_time, prev->bcps, 
-			  info[ni].on_board_time, info[ni].bcps, 
-			  next->on_board_time, next->bcps ); 
-	  
 	  if ( next->bcps > prev->bcps && next->bcps < info[ni].bcps ) {
 	       unsigned short ii = 15;
 	       unsigned short ii_max = 32 - __builtin_clz(next->bcps);
@@ -455,8 +450,78 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 .COMMENTS    static function
 -------------------------*/
 #define PIX_STACK_SIZE 50
+#define UINT_SWAP(a,b) { unsigned int temp=(a);(a)=(b);(b)=temp; }
 #define PIX_SWAP(a,b) { double temp=(a);(a)=(b);(b)=temp; }
 #define INFO_SWAP(a,b) { struct mds0_info c; memcpy(&c, &(a), type_size); memcpy(&(a), &(b), type_size); memcpy(&(b), &c, type_size); }
+
+static inline
+void _UINT_QSORT( unsigned int dim, unsigned int *uint_arr )
+{
+    register int  ii, ir, jj, kk, ll;
+    
+    int     *i_stack;
+    int     j_stack;
+
+    unsigned int uint_tmp;
+
+    ir = dim ;
+    ll = 1 ;
+    j_stack = 0 ;
+    i_stack = (int *) malloc( PIX_STACK_SIZE * sizeof(int) ) ;
+    for (;;) {
+        if ( ir-ll < 7 ) {
+            for ( jj = ll+1; jj <= ir; jj++ ) {
+                uint_tmp = uint_arr[jj-1];
+                for ( ii = jj-1 ; ii >= 1 ; ii-- ) {
+                    if (uint_arr[ii-1] <= uint_tmp) break;
+                    uint_arr[ii] = uint_arr[ii-1];
+                }
+                uint_arr[ii] = uint_tmp;
+            }
+            if (j_stack == 0) break;
+            ir = i_stack[j_stack-- -1];
+            ll  = i_stack[j_stack-- -1];
+        } else {
+            kk = (ll+ir) >> 1;
+            UINT_SWAP(uint_arr[kk-1], uint_arr[ll])
+            if (uint_arr[ll] > uint_arr[ir-1]) {
+                UINT_SWAP(uint_arr[ll], uint_arr[ir-1])
+            }
+            if (uint_arr[ll-1] > uint_arr[ir-1]) {
+                UINT_SWAP(uint_arr[ll-1], uint_arr[ir-1])
+            }
+            if (uint_arr[ll] > uint_arr[ll-1]) {
+                UINT_SWAP(uint_arr[ll], uint_arr[ll-1])
+            }
+            ii = ll+1;
+            jj = ir;
+            uint_tmp = uint_arr[ll-1];
+            for (;;) {
+                do ii++; while (uint_arr[ii-1] < uint_tmp);
+                do jj--; while (uint_arr[jj-1] > uint_tmp);
+                if (jj <= ii) break;
+                UINT_SWAP(uint_arr[ii-1], uint_arr[jj-1]);
+            }
+            uint_arr[ll-1] = uint_arr[jj-1];
+            uint_arr[jj-1] = uint_tmp;
+            j_stack += 2;
+            if (j_stack > PIX_STACK_SIZE) {
+                printf("stack too small in pixel_qsort: aborting");
+                exit(-2001) ;
+            }
+            if (ir-ii+1 >= jj-ll) {
+                i_stack[j_stack-1] = ir;
+                i_stack[j_stack-2] = ii;
+                ir = jj-1;
+            } else {
+                i_stack[j_stack-1] = jj-1;
+                i_stack[j_stack-2] = ll;
+                ll = ii;
+            }
+        }
+    }
+    free(i_stack);
+}
 
 static inline
 void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
@@ -633,57 +698,71 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
 {
      //const char prognm[] = "_CHECK_INFO_STATE_ID";
 
-     register size_t ns;
-
-     register unsigned int ni = 0;
+     register unsigned int ni, nt;
 
      unsigned short counted_state_id[MAX_NUM_STATE];
      
-     unsigned int on_board_time = info->on_board_time;
+     unsigned int num_time, ref_time;
+     unsigned int *time_arr;
 
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
-     /* allocate memory for number of records per State ID */
-     (void) memset( counted_state_id, 0, MAX_NUM_STATE * sizeof(short) );
-     
-     do {
-	  if ( on_board_time == info->on_board_time ) {
-	       if ( info->state_id < MAX_NUM_STATE )
-		    counted_state_id[info->state_id-1]++;
-	  } else {
-	       unsigned short id_found = 0;
-	       unsigned short num = 0;
-	       unsigned char state_id = 0;
+     /* obtain unique values of on_board_time */
+     time_arr = (unsigned int *) malloc( num_info * sizeof(int) );
+     for ( ni = 0; ni < num_info; ni++ )
+	  time_arr[ni] = info[ni].on_board_time;
+     _UINT_QSORT( num_info, time_arr );
+
+     num_time = 1;
+     ref_time = time_arr[0];
+     for ( ni = 1; ni < num_info; ni++ ) {
+	  if ( time_arr[ni] != ref_time ) {
+	       ref_time = time_arr[ni];
+	       time_arr[num_time] = ref_time;
+	       num_time++;
+	  }
+     }
+
+     /* loop over all unique on_board_time values */
+     for ( nt = 0; nt < num_time; nt++ ) {
+	  register unsigned short ns = 0;
+
+	  unsigned short id_found = 0;
+	  unsigned short num = 0;
+	  unsigned char state_id = 0;
+
+	  /* set number of records per State ID to zero */
+	  (void) memset( counted_state_id, 0, MAX_NUM_STATE * sizeof(short) );
+
+	  for ( ni = 0; ni < num_info; ni++ ) {
+	       if ( info[ni].on_board_time == time_arr[nt] ) {
+		    if ( info[ni].state_id < MAX_NUM_STATE )
+			 counted_state_id[info[ni].state_id - 1]++;
+	       }
+	  }
 	       
-	       for ( ns = 0; ns < MAX_NUM_STATE; ns++ ) {
-		    if ( counted_state_id[ns] > 0 ) {
-			 id_found++;
-			 if ( counted_state_id[ns] > num ) {
-			      num = counted_state_id[ns];
-			      state_id = (unsigned char) (ns + 1);
-			 }
+	  do {
+	       if ( counted_state_id[ns] > 0 ) {
+		    id_found++;
+		    if ( counted_state_id[ns] > num ) {
+			 num = counted_state_id[ns];
+			 state_id = (unsigned char) (ns + 1);
 		    }
 	       }
-	       if ( id_found > 1 ) {
-		    register unsigned int nj = 0;
+	  } while ( ++ns < MAX_NUM_STATE );
 
-		    do {
-			 if ( info[nj].on_board_time == on_board_time
-			      && info[nj].state_id != state_id ) {
-			      if ( correct_info_rec ) {
-				   info[nj].state_id = state_id;
-				   info[nj].q.flag.state_id = 1;
-			      }
-			 }
-		    } while ( ++nj < num_info );
+	  if ( id_found > 1 ) {
+	       for ( ni = 0; ni < num_info; ni++ ) {
+		    if ( info[ni].on_board_time == time_arr[nt]
+			 && info[ni].state_id != state_id ) {
+			 info[ni].q.flag.state_id = 1;
+			 if ( correct_info_rec ) info[ni].state_id = state_id;
+		    }
 	       }
-	       (void) memset( counted_state_id, 0,
-			      MAX_NUM_STATE * sizeof(short) );
-	       on_board_time = info->on_board_time;
-	       counted_state_id[info->state_id-1] = 1;
 	  }
-     } while ( info++, ++ni < num_info );
+     }
+     free( time_arr );
 }
 
 /*+++++++++++++++++++++++++
