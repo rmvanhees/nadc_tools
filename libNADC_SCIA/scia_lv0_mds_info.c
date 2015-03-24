@@ -1304,12 +1304,12 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      _CHECK_INFO_BCPS( correct_info_rec, SCIA_DET_PACKET, num_info, info );
      _CHECK_INFO_BCPS( correct_info_rec, SCIA_PMD_PACKET, num_info, info );
 
-     /* sort info-records */
-     _CHECK_INFO_SORTED( TRUE, num_info, info );
-     
      /* check State ID */
      _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
 
+     /* sort info-records */
+     _CHECK_INFO_SORTED( TRUE, num_info, info );
+     
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );
      if ( IS_ERR_STAT_FATAL )
