@@ -423,10 +423,6 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 		    ii--;
 	       }
 	       if ( prev->bcps < bcps && bcps < next->bcps ) {
-		    (void) fprintf( stderr,
-				    "__builtin_clz(0) : %u %hu %hu %hu %hu\n",
-				    info[ni].on_board_time,
-				    ii_max, prev->bcps, bcps, next->bcps );
 		    info[ni].q.flag.bcps = 1;
 		    if ( correct_info_rec ) info[ni].bcps = bcps;
 	       }
@@ -451,8 +447,6 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 -------------------------*/
 #define PIX_STACK_SIZE 50
 #define UINT_SWAP(a,b) { unsigned int temp=(a);(a)=(b);(b)=temp; }
-#define PIX_SWAP(a,b) { double temp=(a);(a)=(b);(b)=temp; }
-#define INFO_SWAP(a,b) { struct mds0_info c; memcpy(&c, &(a), type_size); memcpy(&(a), &(b), type_size); memcpy(&(b), &c, type_size); }
 
 static inline
 void _UINT_QSORT( unsigned int dim, unsigned int *uint_arr )
@@ -522,6 +516,10 @@ void _UINT_QSORT( unsigned int dim, unsigned int *uint_arr )
     }
     free(i_stack);
 }
+#undef UINT_SWAP
+
+#define PIX_SWAP(a,b) { double temp=(a);(a)=(b);(b)=temp; }
+#define INFO_SWAP(a,b) { struct mds0_info c; memcpy(&c, &(a), type_size); memcpy(&(a), &(b), type_size); memcpy(&(b), &c, type_size); }
 
 static inline
 void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
@@ -605,9 +603,9 @@ void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
     }
     free(i_stack);
 }
-#undef PIX_STACK_SIZE
 #undef PIX_SWAP
 #undef INFO_SWAP
+#undef PIX_STACK_SIZE
 
 /*+++++++++++++++++++++++++
 .IDENTifer   _REPAIR_INFO_SORTED
@@ -1014,10 +1012,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 
      char msg[MAX_STRING_LENGTH];
 
-     const char msg_state[]
-	  = "\n#\tfixed %s DSR [%zd,%u] (on_board_time=%u) - state_id to %hhu";
      const char msg_packet[]
 	  = "\n#\tfixed %s DSR [%zd,%u] (state_id=%02hhu) - packet_id to %hhu";
+     const char msg_state[]
+	  = "\n#\tfixed %s DSR [%zd,%u] (on_board_time=%u) - state_id to %hhu";
+     const char msg_time[]
+	  = "\n#\tfixed %s DSR [%zd,%u] (state_id=%02hhu) - on_board_time to %u";
+     const char msg_bcps[]
+	  = "\n#\tfixed %s DSR [%zd,%u] (state_id=%02hhu) - bcps to %hu";
      const char msg_duplicate[]
 	  = "\n#\tduplicate %s DSR [%zd,%u] (state_id=%02hhu)";
      const char msg_dsr_sz[]
@@ -1036,7 +1038,16 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	  /* check Auxiliary DSRs */
 	  info = states[ns].info_aux;
 	  for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
-	       // fixed value state_id
+	       // fixed value(s) of packet_id
+	       if ( info[ni].q.flag.packet_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_packet, "auxiliary", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value(s) of state_id
 	       if ( info[ni].q.flag.state_id == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_state, "auxiliary", ns, ni, 
@@ -1045,12 +1056,21 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
-	       // fixed value packet_id
-	       if ( info[ni].q.flag.packet_id == 1 ) {
+	       // fixed value(s) of_board_time
+	       if ( info[ni].q.flag.on_board_time == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
-				     msg_packet, "auxiliary", ns, ni, 
+				     msg_time, "auxiliary", ns, ni, 
 				     info[ni].state_id, 
-				     info[ni].packet_id );
+				     info[ni].on_board_time );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value(s) of bcps
+	       if ( info[ni].q.flag.bcps == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_bcps, "auxiliary", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].bcps );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -1073,7 +1093,16 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	  /* check Detector DSRs */
 	  info = states[ns].info_det;
 	  for ( ni = 0; ni < states[ns].num_det; ni++ ) {
-	       // fixed value state_id
+	       // fixed value(s) of packet_id
+	       if ( info[ni].q.flag.packet_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_packet, "detector", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value(s) of state_id
 	       if ( info[ni].q.flag.state_id == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_state, "detector", ns, ni, 
@@ -1082,12 +1111,21 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
-	       // fixed value packet_id
-	       if ( info[ni].q.flag.packet_id == 1 ) {
+	       // fixed value(s) of_board_time
+	       if ( info[ni].q.flag.on_board_time == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
-				     msg_packet, "detector", ns, ni, 
+				     msg_time, "detector", ns, ni, 
 				     info[ni].state_id, 
-				     info[ni].packet_id );
+				     info[ni].on_board_time );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value(s) of bcps
+	       if ( info[ni].q.flag.bcps == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_bcps, "detector", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].bcps );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
@@ -1113,7 +1151,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				msg_duration, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				states[ns].info_det[states[ns].num_det-1].bcps,
-				CLUSDEF_DURATION( states[ns].state_id, absOrbit ),
+				CLUSDEF_DURATION(states[ns].state_id, absOrbit),
 				"detector" );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  }
@@ -1137,7 +1175,16 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	  /* check PMD DSRs */
 	  info = states[ns].info_pmd;
 	  for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
-	       // fixed value state_id
+	       // fixed value(s) of packet_id
+	       if ( info[ni].q.flag.packet_id == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_packet, "PMD", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].packet_id );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value(s) of state_id
 	       if ( info[ni].q.flag.state_id == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_state, "PMD", ns, ni, 
@@ -1146,12 +1193,21 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
-	       // fixed value packet_id
-	       if ( info[ni].q.flag.packet_id == 1 ) {
+	       // fixed value(s) of_board_time
+	       if ( info[ni].q.flag.on_board_time == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
-				     msg_packet, "PMD", ns, ni, 
+				     msg_time, "PMD", ns, ni, 
 				     info[ni].state_id, 
-				     info[ni].packet_id );
+				     info[ni].on_board_time );
+		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       }
+
+	       // fixed value(s) of bcps
+	       if ( info[ni].q.flag.bcps == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_bcps, "PMD", ns, ni, 
+				     info[ni].state_id, 
+				     info[ni].bcps );
 		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	       }
 
