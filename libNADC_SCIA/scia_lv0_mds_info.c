@@ -333,20 +333,23 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 {
      //const char prognm[] = "_CHECK_INFO_ON_BOARD_TIME";
 
-     register unsigned int ni = 0;
+     register unsigned int ni = 1;
 
      unsigned int   on_board_time = info->on_board_time;
      
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
-     
+
+     info++;
      do {
 	  if ( on_board_time != info->on_board_time ) {
 	       if ( (ni+1) == num_info ) break;
 
 	       if ( info->on_board_time == info[1].on_board_time ) 
 		    on_board_time = info->on_board_time;
-	       else if ( on_board_time == info[1].on_board_time ) {
+	       else if ( info[-1].state_id == info[1].state_id
+			 && info->state_id == info[1].state_id
+			 && on_board_time == info[1].on_board_time ) {
 		    info->q.flag.on_board_time = 1;
 		    if ( correct_info_rec )
 			 info->on_board_time = on_board_time;
