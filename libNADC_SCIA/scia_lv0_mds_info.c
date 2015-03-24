@@ -266,6 +266,181 @@ done:
 }
 
 /*+++++++++++++++++++++++++
+.IDENTifer   _CHECK_INFO_PACKET_ID
+.PURPOSE     consistency check of value of packet_id in info-records
+.INPUT/OUTPUT
+  call as   _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
+     input:  
+            bool correct_info_rec    :  allow correction of corrupted data?
+            unsigned int num_info    :  number of info-records
+ in/output:  
+	    struct mds0_info *info   :  info records
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+static
+void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
+			   unsigned int num_info, struct mds0_info *info )
+     /*@modifies info->q.value, info->packet_id; @*/
+{
+     //const char prognm[] = "_CHECK_INFO_PACKET_ID";
+
+     register unsigned int ni = 0;
+
+     /* handle special cases gracefully */
+     if ( num_info < 2 ) return;
+
+     if ( ! correct_info_rec ) return;
+     
+     do { 
+	  if ( info->packet_id > (unsigned char) 3 ) {
+	       info->packet_id &= (unsigned char) 3;
+	       info->q.flag.packet_id = 1;
+	  }
+	  if ( info->packet_id == (unsigned char) 0 ) {
+	       if ( info->packet_length == 1659 ) {
+		    info->packet_id = SCIA_AUX_PACKET;
+	       } else if ( info->packet_length == 6813 ) {
+		    info->packet_id = SCIA_PMD_PACKET;
+	       } else if ( info->packet_length > 0 ) {
+		    info->packet_id = SCIA_DET_PACKET;
+	       }
+	       info->q.flag.packet_id = 1;
+	  }
+     } while ( info++, ++ni < num_info );
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   _CHECK_INFO_ON_BOARD_TIME
+.PURPOSE     consistency check of value of on_board_time in info-records
+.INPUT/OUTPUT
+  call as   _CHECK_INFO_ON_BOARD_TIME( correct_info_rec, num_info, info );
+     input:  
+            bool correct_info_rec    :  allow correction of corrupted data?
+            unsigned int num_info    :  number of info-records
+ in/output:  
+	    struct mds0_info *info   :  info records
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+static
+void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
+				unsigned int num_info, struct mds0_info *info )
+     /*@modifies info->q.value, info->on_board_time; @*/
+{
+     //const char prognm[] = "_CHECK_INFO_ON_BOARD_TIME";
+
+     register unsigned int ni = 0;
+
+     unsigned int   on_board_time = info->on_board_time;
+     
+     /* handle special cases gracefully */
+     if ( num_info < 2 ) return;
+     
+     do {
+	  if ( on_board_time != info->on_board_time ) {
+	       if ( (ni+1) == num_info ) break;
+
+	       if ( info->on_board_time == info[1].on_board_time ) 
+		    on_board_time = info->on_board_time;
+	       else if ( on_board_time == info[1].on_board_time ) {
+		    info->q.flag.on_board_time = 1;
+		    if ( correct_info_rec )
+			 info->on_board_time = on_board_time;
+	       }
+	  }
+     } while ( info++, ++ni < num_info );
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   _CHECK_INFO_BCPS
+.PURPOSE     consistency check of value of BCPS in info-records
+.INPUT/OUTPUT
+  call as   _CHECK_INFO_BCPS( correct_info_rec, num_info, info );
+     input:  
+            bool correct_info_rec    :  allow correction of corrupted data?
+            unsigned int num_info    :  number of info-records
+ in/output:  
+	    struct mds0_info *info   :  info records
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+static
+void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
+		       unsigned int num_info, struct mds0_info *info )
+     /*@modifies info->q.value, info->bcps; @*/
+{
+     //const char prognm[] = "_CHECK_INFO_BCPS";
+
+     register unsigned int ni = 0;
+
+     register unsigned int nj, on_board_time;
+
+     struct mds0_info *prev, *next;
+     
+     /* handle special cases gracefully */
+     if ( num_info < 2 ) return;
+
+     /* find first detector DSR */
+     while ( ni < num_info && info[ni].packet_id != packet_id ) ni++;
+     while ( ++ni < num_info && info[ni].packet_id != packet_id );
+
+     do {
+	  on_board_time = info[ni].on_board_time;
+
+	  /* find previous info-record in state */
+	  nj = ni-1;
+	  while ( nj > 0 && info[nj].packet_id != packet_id ) nj--;
+	  if ( info[nj].on_board_time != on_board_time ) {
+	       while ( ++ni < num_info && info[ni].packet_id != packet_id );
+	       continue;
+	  }
+	  prev = info+nj;
+
+	  /* find next info-record in state */
+	  nj = ni;
+	  while ( ++nj < num_info && info[nj].packet_id != packet_id );
+
+	  /* no next info record in file */
+	  if ( (nj+1) == num_info ) break;
+	  if ( info[nj].on_board_time != on_board_time ) {
+	       while ( ++ni < num_info && info[ni].packet_id != packet_id );
+	       continue;
+	  }
+	  next = info+nj;
+
+	  (void) fprintf( stderr, "%u %u %hu %u %hu %u %hu\n", ni,
+			  prev->on_board_time, prev->bcps, 
+			  info[ni].on_board_time, info[ni].bcps, 
+			  next->on_board_time, next->bcps ); 
+	  
+	  if ( next->bcps > prev->bcps && next->bcps < info[ni].bcps ) {
+	       unsigned short ii = 15;
+	       unsigned short ii_max = 32 - __builtin_clz(next->bcps);
+	       unsigned short bcps = info[ni].bcps;
+
+	       while ( ii > ii_max && bcps > next->bcps ) {
+		    if ( (((unsigned short) 1) << ii) < bcps )
+			 bcps -= ((unsigned short) 1) << ii;
+		    ii--;
+	       }
+	       if ( prev->bcps < bcps && bcps < next->bcps ) {
+		    (void) fprintf( stderr,
+				    "__builtin_clz(0) : %u %hu %hu %hu %hu\n",
+				    info[ni].on_board_time,
+				    ii_max, prev->bcps, bcps, next->bcps );
+		    info[ni].q.flag.bcps = 1;
+		    if ( correct_info_rec ) info[ni].bcps = bcps;
+	       }
+	  }
+	  ni = nj;
+     } while ( ni < num_info );
+}
+
+/*+++++++++++++++++++++++++
 .IDENTifer   _INFO_QSORT
 .PURPOSE     sort an array into assending order using the Heapsort algorithm
 .INPUT/OUTPUT
@@ -507,52 +682,6 @@ void _CHECK_INFO_STATE_ID( bool correct_info_rec,
 			      MAX_NUM_STATE * sizeof(short) );
 	       on_board_time = info->on_board_time;
 	       counted_state_id[info->state_id-1] = 1;
-	  }
-     } while ( info++, ++ni < num_info );
-}
-
-/*+++++++++++++++++++++++++
-.IDENTifer   _CHECK_INFO_PACKET_ID
-.PURPOSE     consistency check of value of packet_id in info-records
-.INPUT/OUTPUT
-  call as   _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
-     input:  
-            bool correct_info_rec    :  allow correction of corrupted data?
-            unsigned int num_info    :  number of info-records
- in/output:  
-	    struct mds0_info *info   :  info records
-
-.RETURNS     nothing
-.COMMENTS    static function
--------------------------*/
-static
-void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
-			   unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->q.value, info->packet_id; @*/
-{
-     //const char prognm[] = "_CHECK_INFO_PACKET_ID";
-
-     register unsigned int ni = 0;
-
-     /* handle special cases gracefully */
-     if ( num_info < 2 ) return;
-
-     if ( ! correct_info_rec ) return;
-     
-     do { 
-	  if ( info->packet_id > (unsigned char) 3 ) {
-	       info->packet_id &= (unsigned char) 3;
-	       info->q.flag.packet_id = 1;
-	  }
-	  if ( info->packet_id == (unsigned char) 0 ) {
-	       if ( info->packet_length == 1659 ) {
-		    info->packet_id = SCIA_AUX_PACKET;
-	       } else if ( info->packet_length == 6813 ) {
-		    info->packet_id = SCIA_PMD_PACKET;
-	       } else if ( info->packet_length > 0 ) {
-		    info->packet_id = SCIA_DET_PACKET;
-	       }
-	       info->q.flag.packet_id = 1;
 	  }
      } while ( info++, ++ni < num_info );
 }
@@ -1028,14 +1157,22 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      }
      if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
 
+     /* check Packet type */
+     _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
+
+     /* check on_board_time */
+     _CHECK_INFO_ON_BOARD_TIME( correct_info_rec, num_info, info );
+
+     /* check BCPS */
+     _CHECK_INFO_BCPS( correct_info_rec, SCIA_AUX_PACKET, num_info, info );
+     _CHECK_INFO_BCPS( correct_info_rec, SCIA_DET_PACKET, num_info, info );
+     _CHECK_INFO_BCPS( correct_info_rec, SCIA_PMD_PACKET, num_info, info );
+
      /* sort info-records */
      _CHECK_INFO_SORTED( TRUE, num_info, info );
      
      /* check State ID */
      _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
-
-     /* check Packet type */
-     _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
 
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );

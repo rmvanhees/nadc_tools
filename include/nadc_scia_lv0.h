@@ -417,14 +417,14 @@ struct mds0_info
      unsigned int    offset;
      union {
 	  struct qinfo_bitfield {
-	       unsigned char state_id  : 1;
 	       unsigned char packet_id : 1;
+	       unsigned char state_id  : 1;
+	       unsigned char on_board_time : 1;
+	       unsigned char bcps      : 1;
 	       unsigned char duplicate : 1;
 	       unsigned char dsr_size  : 1;
-	       unsigned char dumy5 : 1;
-	       unsigned char dumy6 : 1;
-	       unsigned char dumy7 : 1;
-	       unsigned char dumy8 : 1;
+	       unsigned char dumy7     : 1;
+	       unsigned char dumy8     : 1;
 	  } flag;
 	  unsigned char value;
      } q;
