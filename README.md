@@ -98,7 +98,7 @@ If the configuration completed succesfully, in order to build all available comp
 Configuration options typically used are:
 
  * `-DCMAKE_BUILD_TYPE=<string>` -- build type: `Debug` or `Release` (default: None)
- * `-D BUILD_SHARED_LIBS=<bool>` -- enable building shared libraries? (default: Yes)
+ * `-DBUILD_SHARED_LIBS=<bool>` -- enable building shared libraries? (default: Yes)
  * `-DCMAKE_INSTALL_PREFIX=<path>` -- user defined installation prefix (default: home-dir)
  * `-DNADC_TOOLS_DATADIR=<path>` -- path to various Sciamachy calibration parameters
 
