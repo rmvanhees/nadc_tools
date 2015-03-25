@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Nadc tools by rmvanhees</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Nadc tools</h1>
+        <p>GOME and Sciamachy data extractors originally developed for the Netherlands Sciamachy Data Center </p>
+        <p class="view"><a href="https://github.com/rmvanhees/nadc_tools">View the Project on GitHub <small>rmvanhees/nadc_tools</small></a></p>
+        <ul>
+          <li><a href="https://github.com/rmvanhees/nadc_tools/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/rmvanhees/nadc_tools/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/rmvanhees/nadc_tools">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="nadc_tools" class="anchor" href="#nadc_tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>nadc_tools</h1>
+
+<p>The software package "nadc_tools" contains a number of tools to access the official GOME and Sciamachy level 0, 1b and 2 data products as distributed by DLR and ESRIN and tools to access GOME and Sciamachy level 2 products developed by SRON and KNMI. </p>
+
+<h3>
+<a id="purpose-and-limitations" class="anchor" href="#purpose-and-limitations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Purpose and Limitations</h3>
+
+<p>The probably most important part of "nadc_tools" are the C-libraries, which contain functions to read Sciamachy data products into memory, dump the data as ASCII output or write the data in PDS or HDF5 format. The software is written in ANSI-C (and even assembler), and coded in such a way that you (an experienced (C-) programmer) can easily understand the code. The data extractors, included in this software package, should give a good example of how to use the libraries.</p>
+
+<p>The software distributed in this package contains libraries, written in ANSI-C (mostly POSIX compliant except for some ISO C99 extensions) and an IDL wrapper library (using <em>CALL_EXTERNAL</em>) with IDL functions to read GOME and Sciamachy data.
+The IDL interface requires sharable object libraries. Building shared libraries is easy on the supported platforms, however, do not forget to set the environment variable <em>LD_LIBRARY_PATH</em>.</p>
+
+<p>This software package is written and maintained by Richard van Hees (SRON), and distributed under the GNU General Public License (version 2).</p>
+
+<h3>
+<a id="acknowledgement" class="anchor" href="#acknowledgement" aria-hidden="true"><span class="octicon octicon-link"></span></a>Acknowledgement</h3>
+
+<p>In case (part of) this dataset is used for a publication and essential to the work and the results, an offer of co-authorship to Richard van Hees (SRON) and /or Ralph Snel (SRON) is highly appreciated. Please do not hesitate to contact us in an early stage for necessary support.</p>
+
+<h3>
+<a id="disclaimer" class="anchor" href="#disclaimer" aria-hidden="true"><span class="octicon octicon-link"></span></a>DISCLAIMER</h3>
+
+<p>We at SRON have developed nadc_tools as part of our commitment towards the verification and further improvement of the calibration of Sciamachy data. This software is developed for in-house usage, and generously shared with you WITHOUT ANY WARRANTY. We will try to help you with any problems, but only on a ``best effort'' basis. In order to continuously improve this facility, feedback from users is highly appreciated. </p>
+
+<p>Note that this software package is also not supported in any way by ESA or DLR, although the nadc_tools extractors and libraries mimic some of the functionality of the gdp and EnviView toolbox.</p>
+
+<p>The software package is in no way intended to replace the official data processor and should not be treated as such. Especially it is not meant to (and cannot) produce official data products. These have to be derived with ESA approved tools such as EnviView that can be downloaded for free from ESA.</p>
+
+<p>It is your own responsibility to verify the results you produce with this package against official data products. If you find discrepancies, please inform SRON (not ESA or DLR) at once. Any information you give will help us to improve our software. We will relay to ESA all information to improve the official data processor.</p>
+
+<h2>
+<a id="checking-out-a-working-copy" class="anchor" href="#checking-out-a-working-copy" aria-hidden="true"><span class="octicon octicon-link"></span></a>Checking out a working copy</h2>
+
+<p>As of 2013-03-20 the source code is hosted as a public repository on Github.</p>
+
+<p>In order to retrieve a working copy or clone into a local bare Git repository:</p>
+
+<pre><code>git clone https://github.com/rmvanhees/nadc_tools.git [&lt;local&gt;]
+</code></pre>
+
+<p>It is adviced though that in order to push back changes, your are working off a fork from the original repository and then issue a pull request once you think your code is ready to be merged back into the main repositorys' master branch.</p>
+
+<h2>
+<a id="organization-of-files-and-directories" class="anchor" href="#organization-of-files-and-directories" aria-hidden="true"><span class="octicon octicon-link"></span></a>Organization of files and directories</h2>
+
+<p>After checking out a working copy, you will be left with the following directory structure:</p>
+
+<pre><code>nadc_tools
+|-- FRESCO
+|-- GOME
+|-- IMAP
+|-- IMLM
+|-- MERIS
+|-- PATCH
+|-- SCIA
+|-- TOGOMI
+|-- TOSOMI
+|-- cmake
+|   `-- modules
+|-- idl_progs
+|   `-- StructDefs
+|-- include
+|-- libNADC
+|-- libNADC_GOME
+|-- libNADC_IDL
+`-- libNADC_SCIA
+    |-- CAL
+    |   `-- CalibModules
+    `-- SDMF
+</code></pre>
+
+<h2>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h2>
+
+<h3>
+<a id="development-tools" class="anchor" href="#development-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development tools</h3>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Version</th>
+<th>Relevance</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git</td>
+<td>&gt; 1.7</td>
+<td>mandatory</td>
+<td>Distributed revision control system</td>
+</tr>
+<tr>
+<td>CMake</td>
+<td>&gt; 2.8.0</td>
+<td>mandatory</td>
+<td>Cross-platform build system generator</td>
+</tr>
+</tbody>
+</table>
+
+<h3>
+<a id="documentation-generation-tools" class="anchor" href="#documentation-generation-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation generation tools</h3>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Version</th>
+<th>Relevance</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+<h3>
+<a id="external-libraries" class="anchor" href="#external-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>External libraries</h3>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Version</th>
+<th>Relevance</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HDF5</td>
+<td>1.8.x</td>
+<td>mandatory</td>
+<td>Hierarchical Data Format, version 5 (<a href="http://www.hdfgroup.org">www.hdfgroup.org</a>)</td>
+</tr>
+<tr>
+<td>netCDF-4</td>
+<td>4.2.x</td>
+<td>optional</td>
+<td>Network Common Data Form, version 4 (<a href="http://www.unidata.ucar.edu">www.unidata.ucar.edu</a>)</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>9.x</td>
+<td>optional</td>
+<td><a href="http://www.postgresql.org">www.postgresql.org</a></td>
+</tr>
+</tbody>
+</table>
+
+<h2>
+<a id="configuration-and-build" class="anchor" href="#configuration-and-build" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration and build</h2>
+
+<p>The software uses the CMake (<a href="http://www.cmake.org">www.cmake.org</a>) cross-platform makefile generator in order to configure for building library, tools and test programs.</p>
+
+<p>It is advised to perform an out-of-source build, in order to prevent polluting the source directories:</p>
+
+<pre><code>mkdir build
+cd build
+cmake [OPTIONS] ..
+</code></pre>
+
+<p>If the configuration completed succesfully, in order to build all available components simply type (the optional <code>-j</code> option is for parallel builds):</p>
+
+<pre><code>make [-j&lt;n&gt;]
+</code></pre>
+
+<p>Configuration options typically used are:</p>
+
+<ul>
+<li>
+<code>-DCMAKE_BUILD_TYPE=&lt;string&gt;</code> -- build type: <code>Debug</code> or <code>Release</code> (default: None)</li>
+<li>
+<code>-DBUILD_SHARED_LIBS=&lt;bool&gt;</code> -- enable building shared libraries? (default: Yes)</li>
+<li>
+<code>-DCMAKE_INSTALL_PREFIX=&lt;path&gt;</code> -- user defined installation prefix (default: home-dir)</li>
+<li>
+<code>-DNADC_TOOLS_DATADIR=&lt;path&gt;</code> -- path to various Sciamachy calibration parameters</li>
+</ul>
+
+<p>Non-standard Environment variable used by cmake:</p>
+
+<ul>
+<li>
+<code>NADC_EXTERN</code> -- directory which contains the include/ and lib/ subdirectories of required packages</li>
+<li>
+<code>HDF5_DIR</code> -- directory which contains the include/ and lib/ subdirectories of the HDF5 installation</li>
+<li>
+<code>IDL_DIR</code> -- directory which contains the include/ and lib/ subdirectories of the IDL installation</li>
+</ul>
+
+<p>In a similar manner you can trigger the installation of the various components (library, header files, executables) via</p>
+
+<pre><code>make install
+</code></pre>
+
+<p>In order to build an individual target/component, pick one of the items on the list return with</p>
+
+<pre><code>make help
+</code></pre>
+
+<p><em>Note</em>: When configuring your build, you can choose between a debug and a release build. The debug build contains the necessary symbols in the files for running a debugger, and has been compiled with coverage flags.</p>
+
+<p>The release build is built using the <code>-march-native -O3</code> optimization flag, and none of the debugging flags. This does make some tools considerably faster, so once you're satisfied that everything has built correctly, you should use the tools from a release build for your analysis.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Once the build has completed you can install the software: to do this run</p>
+
+<pre><code>make install
+</code></pre>
+
+<p>such that header files, libraries, program executables and documentation will be placed into the appropriate locations:</p>
+
+<pre><code>&lt;prefix&gt;                      ...  Installation prefix, CMAKE_INSTALL_PREFIX
+ |-- bin                      ...  Program executables of the tools
+ |-- include                  ...  Header files
+ |-- lib                      ...  (Shared) libraries
+ `-- share
+     `-- idl_nadc             ...  IDL programs
+         |-- Examples
+         `-- StructDefs
+</code></pre>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/rmvanhees">rmvanhees</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
