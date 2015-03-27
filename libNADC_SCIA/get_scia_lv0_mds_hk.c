@@ -289,7 +289,7 @@ double GET_SCIA_LV0_MDS_TIME( int source, const void *mds_lv0 )
      } else if ( source == SCIA_DET_PACKET ) {
 	  const struct mds0_det *det = (const struct mds0_det *) mds_lv0;
 
-	  dsec = det->isp.secnd + det->isp.musec / 1e6
+	  dsec = det->isp.secnd + det->isp.musec / 1000000.
 	       + ri[det->data_hdr.state_id-1] / 256.
 	       + det->data_src[0].hdr.bcps / 16.;
 	  jday = det->isp.days + dsec / sec2day;

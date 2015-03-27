@@ -67,7 +67,8 @@
 	/* NONE */
 
 /*+++++ Static Variables +++++*/
-	/* NONE */
+static bool clusdef_db_exists;
+static unsigned short absOrbit;
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 /*++++++++++ function to display info-record information ++++++++++*/
@@ -111,6 +112,116 @@ void _SHOW_STATE_RECORDS( size_t num_state, const struct mds0_states *states )
 }
 
 /*+++++++++++++++++++++++++
+.IDENTifer   _INFO_QSORT
+.PURPOSE     sort an array into assending order using the Quicksort algorithm
+.INPUT/OUTPUT
+  call as   _INFO_QSORT( dim, ref_arr, info );
+     input:
+            unsigned int dim        :   dimension of the array to be sorted
+ in/output:
+            double       *ref_arr   :   array to be sorted
+            struct mds0_info *info  :   array of records to be sorted as jday
+
+.RETURNS     nothing
+.COMMENTS    static function
+-------------------------*/
+#define PIX_STACK_SIZE 50
+#define PIX_SWAP(a,b) { double temp=(a);(a)=(b);(b)=temp; }
+#define INFO_SWAP(a,b) { struct mds0_info c; memcpy(&c, &(a), type_size); memcpy(&(a), &(b), type_size); memcpy(&(b), &c, type_size); }
+
+static inline
+void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
+{
+    const char prognm[] = "_INFO_QSORT";
+
+    register int  ii, ir, jj, kk, ll;
+
+    int     *i_stack;
+    int     j_stack;
+    double  ref_tmp;
+
+    struct mds0_info info_tmp;
+
+    const size_t type_size = sizeof(struct mds0_info);
+
+    ir = dim;
+    ll = 1;
+    j_stack = 0;
+    i_stack = (int *) malloc( PIX_STACK_SIZE * sizeof(int) );
+    if ( i_stack == NULL )
+	 NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "i_stack" );
+    for (;;) {
+        if ( ir-ll < 7 ) {
+            for ( jj = ll+1; jj <= ir; jj++ ) {
+                ref_tmp = ref_arr[jj-1];
+		(void) memcpy( &info_tmp, &info[jj-1], type_size );
+                for ( ii = jj-1; ii >= 1; ii-- ) {
+                    if ( ref_arr[ii-1] <= ref_tmp ) break;
+                    ref_arr[ii] = ref_arr[ii-1];
+		    (void) memcpy( &info[ii], &info[ii-1], type_size );
+                }
+                ref_arr[ii] = ref_tmp;
+		(void) memcpy( &info[ii], &info_tmp, type_size );
+            }
+            if ( j_stack == 0 ) break;
+            ir = i_stack[j_stack-- -1];
+            ll = i_stack[j_stack-- -1];
+        } else {
+            kk = (ll+ir) >> 1;
+            PIX_SWAP(ref_arr[kk-1], ref_arr[ll])
+	    INFO_SWAP(info[kk-1], info[ll])
+            if ( ref_arr[ll] > ref_arr[ir-1] ) {
+                PIX_SWAP(ref_arr[ll], ref_arr[ir-1])
+		INFO_SWAP(info[ll], info[ir-1])
+            }
+            if ( ref_arr[ll-1] > ref_arr[ir-1] ) {
+                PIX_SWAP(ref_arr[ll-1], ref_arr[ir-1])
+		INFO_SWAP(info[ll-1], info[ir-1])
+            }
+            if ( ref_arr[ll] > ref_arr[ll-1] ) {
+                PIX_SWAP(ref_arr[ll], ref_arr[ll-1])
+		INFO_SWAP(info[ll], info[ll-1])
+            }
+            ii = ll+1;
+            jj = ir;
+            ref_tmp = ref_arr[ll-1];
+	    (void) memcpy( &info_tmp, &info[ll-1], type_size );
+            for (;;) {
+                do ii++; while (ref_arr[ii-1] < ref_tmp);
+                do jj--; while (ref_arr[jj-1] > ref_tmp);
+                if (jj <= ii) break;
+
+                PIX_SWAP(ref_arr[ii-1], ref_arr[jj-1])
+		INFO_SWAP(info[ii-1], info[jj-1])
+            }
+            ref_arr[ll-1] = ref_arr[jj-1];
+            ref_arr[jj-1] = ref_tmp;
+	    (void) memcpy( &info[ll-1], &info[jj-1], type_size );
+	    (void) memcpy( &info[jj-1], &info_tmp, type_size );
+            j_stack += 2;
+            if ( j_stack > PIX_STACK_SIZE )
+		 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL,
+				  "stack too small in pixel_qsort: aborting" );
+
+            if ( (ir - ii + 1) >= (jj - ll) ) {
+                i_stack[j_stack-1] = ir;
+                i_stack[j_stack-2] = ii;
+                ir = jj-1;
+            } else {
+                i_stack[j_stack-1] = jj-1;
+                i_stack[j_stack-2] = ll;
+                ll = ii;
+            }
+        }
+    }
+done:
+    free( i_stack );
+}
+#undef INFO_SWAP
+#undef PIX_SWAP
+#undef PIX_STACK_SIZE
+
+/*+++++++++++++++++++++++++
 .IDENTifer   _ASSIGN_INFO_STATES
 .PURPOSE     identify DSR packages of the same state
 .INPUT/OUTPUT
@@ -140,11 +251,8 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
      (void) memcpy( &states->mjd, &info->mjd, sizeof(struct mjd_envi) );
      states->category = info->category;
      states->state_id = info->state_id;
-     states->q_aux.value = 0;
-     states->q_det.value = 0;
-     states->q_pmd.value = 0;
      states->on_board_time = info->on_board_time;
-     states->offset = info->offset;
+     states->offset   = info->offset;
      if ( states->num_aux > 0 ) {
 	  states->info_aux = (struct mds0_info *)
 	       malloc( states->num_aux * sizeof(struct mds0_info) );
@@ -192,8 +300,11 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
      register size_t num = 0;
 
      size_t num_state = 0;
+     unsigned int offs_aux = 0;
+     unsigned int offs_det = 0;
+     unsigned int offs_pmd = 0;
      unsigned int on_board_time = info->on_board_time;
-     struct mjd_envi mjd;
+
      struct mds0_states *states = NULL;
      
      /* handle special cases gracefully */
@@ -222,43 +333,45 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
      ni = 0u;
      num = 0;
      on_board_time = info->on_board_time;
-     (void) memcpy(&mjd, &info->mjd, sizeof(struct mjd_envi));
-     states->num_aux = 0;
-     states->num_det = 0;
-     states->num_pmd = 0;
+     (void) memset( states, 0, sizeof(struct mds0_states) );
 
      do {
-	  if ( on_board_time != info[ni].on_board_time ) {
+	  if ( on_board_time != info->on_board_time ) {
 	       if ( num > 3 ) {
-		    _FILL_STATES( num, &info[ni-num], states+ns );
+		    _FILL_STATES( num, info-num, states+ns );
 		    ns++;
 	       }
 	       num = 0;
-	       on_board_time = info[ni].on_board_time;
-	       (void) memcpy(&mjd, &info[ni].mjd, sizeof(struct mjd_envi));
-	       states[ns].num_aux = 0;
-	       states[ns].num_det = 0;
-	       states[ns].num_pmd = 0;
+	       on_board_time = info->on_board_time;
+	       (void) memset( states+ns, 0, sizeof(struct mds0_states) );
 	  }
-	  switch ( (int) info[ni].packet_id ) {
+	  switch ( (int) info->packet_id ) {
 	  case ( SCIA_DET_PACKET ):
 	       states[ns].num_det++;
+	       if ( offs_det > info->offset )
+		    states[ns].q_det.flag.sorted = 1;
+	       offs_det = info->offset;
 	       break;
 	  case ( SCIA_AUX_PACKET ):
 	       states[ns].num_aux++;
+	       if ( offs_aux > info->offset )
+		    states[ns].q_aux.flag.sorted = 1;
+	       offs_aux = info->offset;
 	       break;
 	  case ( SCIA_PMD_PACKET ):
 	       states[ns].num_pmd++;
+	       if ( offs_pmd > info->offset )
+		    states[ns].q_pmd.flag.sorted = 1;
+	       offs_pmd = info->offset;
 	       break;
 	  default:
 	       (void) fprintf( stdout, "no valid packet ID[%u]: %hhu\n",
-			       ni, info[ni].packet_id );
+			       ni, info->packet_id );
 	  }
-	  num++;
-     } while ( ++ni < num_info );
+     } while ( info++, num++, ++ni < num_info );
      
      if ( num > 0 ) {
-	  _FILL_STATES( num, &info[num_info-num], &states[ns] );
+	  _FILL_STATES( num, info-num, &states[ns] );
 	  ns++;
      }
      num_state = ns;
@@ -267,10 +380,10 @@ done:
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   _CHECK_INFO_PACKET_ID
-.PURPOSE     consistency check of value of packet_id in info-records
+.IDENTifer   _QCHECK_INFO_PARAMS
+.PURPOSE     quick  check of packet_id, state_id values
 .INPUT/OUTPUT
-  call as   _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
+  call as   _QCHECK_INFO_PARAMS( correct_info_rec, num_info, info );
      input:  
             bool correct_info_rec    :  allow correction of corrupted data?
             unsigned int num_info    :  number of info-records
@@ -281,33 +394,50 @@ done:
 .COMMENTS    static function
 -------------------------*/
 static
-void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
-			   unsigned int num_info, struct mds0_info *info )
+void _QCHECK_INFO_PARAMS( bool correct_info_rec,
+			  unsigned int num_info, struct mds0_info *info )
      /*@modifies info->q.value, info->packet_id; @*/
 {
-     //const char prognm[] = "_CHECK_INFO_PACKET_ID";
+     //const char prognm[] = "_QCHECK_INFO_PARAMS";
 
      register unsigned int ni = 0;
+
+     unsigned char state_id;
 
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
-     if ( ! correct_info_rec ) return;
-     
-     do { 
+     do {
 	  if ( info->packet_id > (unsigned char) 3 ) {
-	       info->packet_id &= (unsigned char) 3;
 	       info->q.flag.packet_id = 1;
+	       if ( correct_info_rec ) 
+		    info->packet_id &= (unsigned char) 3;
 	  }
 	  if ( info->packet_id == (unsigned char) 0 ) {
-	       if ( info->packet_length == 1659 ) {
-		    info->packet_id = SCIA_AUX_PACKET;
-	       } else if ( info->packet_length == 6813 ) {
-		    info->packet_id = SCIA_PMD_PACKET;
-	       } else if ( info->packet_length > 0 ) {
-		    info->packet_id = SCIA_DET_PACKET;
-	       }
 	       info->q.flag.packet_id = 1;
+	       if ( correct_info_rec ) {
+		    if ( info->packet_length == 1659 ) {
+			 info->packet_id = SCIA_AUX_PACKET;
+		    } else if ( info->packet_length == 6813 ) {
+			 info->packet_id = SCIA_PMD_PACKET;
+		    } else {
+			 info->packet_id = SCIA_DET_PACKET;
+		    }
+	       }
+	  }
+
+	  if ( (state_id = info->state_id) > MAX_NUM_STATE ) {
+	       unsigned short ii = 7;
+
+	       while ( ii >= 1 && state_id > MAX_NUM_STATE ) {
+	  	    if ( (unsigned char) (1 << ii) < state_id )
+	  		 state_id -= (unsigned char) (1 << ii);
+	  	    ii--;
+	       }
+	       if ( state_id <= MAX_NUM_STATE ) {
+	  	    info->q.flag.state_id = 1;
+	  	    if ( correct_info_rec ) info->state_id = state_id;
+	       }
 	  }
      } while ( info++, ++ni < num_info );
 }
@@ -329,33 +459,116 @@ void _CHECK_INFO_PACKET_ID( bool correct_info_rec,
 static
 void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 				unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->q.value, info->on_board_time; @*/
+     /*@modifies info->q.value, info->state_id, info->on_board_time; @*/
 {
      //const char prognm[] = "_CHECK_INFO_ON_BOARD_TIME";
 
-     register unsigned int ni = 1;
+     register int nb;
+     
+     register unsigned int ii, ni, nk;
 
-     unsigned int   on_board_time = info->on_board_time;
+     unsigned int num_key;
+
+     struct key_rec {
+	  unsigned char  state_id;
+	  unsigned short num;
+	  unsigned short num_det;
+	  unsigned int   on_board_time;
+	  unsigned int   range[2];
+     } *key;
      
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
-     info++;
-     do {
-	  if ( on_board_time != info->on_board_time ) {
-	       if ( (ni+1) == num_info ) break;
-
-	       if ( info->on_board_time == info[1].on_board_time ) 
-		    on_board_time = info->on_board_time;
-	       else if ( info[-1].state_id == info[1].state_id
-			 && info->state_id == info[1].state_id
-			 && on_board_time == info[1].on_board_time ) {
-		    info->q.flag.on_board_time = 1;
-		    if ( correct_info_rec )
-			 info->on_board_time = on_board_time;
+     key = (struct key_rec *) malloc( num_info * sizeof(struct key_rec) );
+     
+     num_key = 0;
+     for ( ni = 0; ni < num_info; ni++ ) {
+	  bool fnd_key = FALSE;
+	  
+	  for ( nk = 0; nk < num_key; nk++ ) {
+	       if ( info[ni].state_id == key[nk].state_id
+		    && info[ni].on_board_time == key[nk].on_board_time ) {
+		    key[nk].num++;
+		    key[nk].range[1] = ni;
+		    fnd_key = TRUE;
+		    break;
 	       }
 	  }
-     } while ( info++, ++ni < num_info );
+	  if ( ! fnd_key ) {
+	       key[num_key].state_id = info[ni].state_id;
+	       key[num_key].on_board_time = info[ni].on_board_time;
+	       key[num_key].num = 1;
+	       key[num_key].num_det =
+		    CLUSDEF_NUM_DET( info[ni].state_id, absOrbit );
+	       key[num_key].range[0] = key[num_key].range[1] = ni;
+	       num_key++;
+	  }
+     }
+
+     for ( nk = 0; nk < num_key; nk++ ) {
+	  /* skip small sub-sets */
+	  if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) continue;
+	  
+	  for ( ni = 0; ni < num_key; ni++ ) {
+	       /* skip large or empty sub-sets */
+	       if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 ) continue;
+	       
+	       if ( key[ni].on_board_time == key[nk].on_board_time ) {
+		    for ( ii = key[ni].range[0]; ii <= key[ni].range[1]; ii++ ) {
+			 if ( info[ii].state_id == key[ni].state_id
+			      && info[ii].on_board_time == key[ni].on_board_time ) {
+			      info[ii].q.flag.state_id = 1;
+			      if ( correct_info_rec )
+			      info[ii].state_id = key[nk].state_id;
+			 }
+		    }
+		    if ( key[ni].range[0] < key[nk].range[0] )
+			 key[nk].range[0] = key[ni].range[0];
+		    if ( key[ni].range[1] > key[nk].range[1] )
+			 key[nk].range[1] = key[ni].range[1];
+		    key[nk].num += key[ni].num;
+		    key[ni].num = 0;
+	       }
+	  }
+     }
+
+     for ( nb = 1; nb <= 3; nb++ ) {
+	  for ( nk = 0; nk < num_key; nk++ ) {
+	       /* skip small sub-sets */
+	       if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) continue;
+	       
+	       for ( ni = 0; ni < num_key; ni++ ) {
+		    unsigned int diff =
+			 key[ni].on_board_time > key[nk].on_board_time ?
+			 key[ni].on_board_time - key[nk].on_board_time :
+			 key[nk].on_board_time - key[ni].on_board_time;
+
+		    /* skip large or empty sub-sets */
+		    if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 ) continue;
+
+		    if ( key[ni].state_id == key[nk].state_id
+			 && __builtin_popcount(diff) == nb ) {
+			 for ( ii = key[ni].range[0]; ii <= key[ni].range[1]; ii++ ) {
+			      if ( info[ii].on_board_time == key[ni].on_board_time ) {
+				   info[ii].q.flag.on_board_time = 1;
+				   if ( correct_info_rec )
+					info[ii].on_board_time = key[nk].on_board_time;
+			      }
+			 }
+			 if ( key[ni].range[0] < key[nk].range[0] )
+			      key[nk].range[0] = key[ni].range[0];
+			 if ( key[ni].range[1] > key[nk].range[1] )
+			      key[nk].range[1] = key[ni].range[1];
+			 key[nk].num += key[ni].num;
+			 key[ni].num = 0;
+		    }
+	       }
+	  }
+     }
+
+     /* release allocated memory */
+     free( key );
 }
 
 /*+++++++++++++++++++++++++
@@ -436,182 +649,6 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer   _INFO_QSORT
-.PURPOSE     sort an array into assending order using the Heapsort algorithm
-.INPUT/OUTPUT
-  call as   HPSORT( dim, jday, info );
-     input:
-            unsigned int dim        :   dimension of the array to be sorted
- in/output:
-            double       *ref_arr   :   array to be sorted
-            struct mds0_info *info  :   array of records to be sorted as jday
-
-.RETURNS     nothing
-.COMMENTS    static function
--------------------------*/
-#define PIX_STACK_SIZE 50
-#define UINT_SWAP(a,b) { unsigned int temp=(a);(a)=(b);(b)=temp; }
-
-static inline
-void _UINT_QSORT( unsigned int dim, unsigned int *uint_arr )
-{
-    register int  ii, ir, jj, kk, ll;
-    
-    int     *i_stack;
-    int     j_stack;
-
-    unsigned int uint_tmp;
-
-    ir = dim ;
-    ll = 1 ;
-    j_stack = 0 ;
-    i_stack = (int *) malloc( PIX_STACK_SIZE * sizeof(int) ) ;
-    for (;;) {
-        if ( ir-ll < 7 ) {
-            for ( jj = ll+1; jj <= ir; jj++ ) {
-                uint_tmp = uint_arr[jj-1];
-                for ( ii = jj-1 ; ii >= 1 ; ii-- ) {
-                    if (uint_arr[ii-1] <= uint_tmp) break;
-                    uint_arr[ii] = uint_arr[ii-1];
-                }
-                uint_arr[ii] = uint_tmp;
-            }
-            if (j_stack == 0) break;
-            ir = i_stack[j_stack-- -1];
-            ll  = i_stack[j_stack-- -1];
-        } else {
-            kk = (ll+ir) >> 1;
-            UINT_SWAP(uint_arr[kk-1], uint_arr[ll])
-            if (uint_arr[ll] > uint_arr[ir-1]) {
-                UINT_SWAP(uint_arr[ll], uint_arr[ir-1])
-            }
-            if (uint_arr[ll-1] > uint_arr[ir-1]) {
-                UINT_SWAP(uint_arr[ll-1], uint_arr[ir-1])
-            }
-            if (uint_arr[ll] > uint_arr[ll-1]) {
-                UINT_SWAP(uint_arr[ll], uint_arr[ll-1])
-            }
-            ii = ll+1;
-            jj = ir;
-            uint_tmp = uint_arr[ll-1];
-            for (;;) {
-                do ii++; while (uint_arr[ii-1] < uint_tmp);
-                do jj--; while (uint_arr[jj-1] > uint_tmp);
-                if (jj <= ii) break;
-                UINT_SWAP(uint_arr[ii-1], uint_arr[jj-1]);
-            }
-            uint_arr[ll-1] = uint_arr[jj-1];
-            uint_arr[jj-1] = uint_tmp;
-            j_stack += 2;
-            if (j_stack > PIX_STACK_SIZE) {
-                printf("stack too small in pixel_qsort: aborting");
-                exit(-2001) ;
-            }
-            if (ir-ii+1 >= jj-ll) {
-                i_stack[j_stack-1] = ir;
-                i_stack[j_stack-2] = ii;
-                ir = jj-1;
-            } else {
-                i_stack[j_stack-1] = jj-1;
-                i_stack[j_stack-2] = ll;
-                ll = ii;
-            }
-        }
-    }
-    free(i_stack);
-}
-#undef UINT_SWAP
-
-#define PIX_SWAP(a,b) { double temp=(a);(a)=(b);(b)=temp; }
-#define INFO_SWAP(a,b) { struct mds0_info c; memcpy(&c, &(a), type_size); memcpy(&(a), &(b), type_size); memcpy(&(b), &c, type_size); }
-
-static inline
-void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
-{
-    register int  ii, ir, jj, kk, ll;
-    
-    int     *i_stack;
-    int     j_stack;
-    double  ref_tmp;
-    
-    struct mds0_info info_tmp;
-
-    const size_t type_size = sizeof(struct mds0_info);
-
-    ir = dim ;
-    ll = 1 ;
-    j_stack = 0 ;
-    i_stack = (int *) malloc( PIX_STACK_SIZE * sizeof(int) ) ;
-    for (;;) {
-        if ( ir-ll < 7 ) {
-            for ( jj = ll+1; jj <= ir; jj++ ) {
-                ref_tmp = ref_arr[jj-1];
-		(void) memcpy( &info_tmp, &info[jj-1], type_size );
-                for ( ii = jj-1 ; ii >= 1 ; ii-- ) {
-                    if (ref_arr[ii-1] <= ref_tmp) break;
-                    ref_arr[ii] = ref_arr[ii-1];
-		    (void) memcpy( &info[ii], &info[ii-1], type_size );
-                }
-                ref_arr[ii] = ref_tmp;
-		(void) memcpy( &info[ii], &info_tmp, type_size );
-            }
-            if (j_stack == 0) break;
-            ir = i_stack[j_stack-- -1];
-            ll  = i_stack[j_stack-- -1];
-        } else {
-            kk = (ll+ir) >> 1;
-            PIX_SWAP(ref_arr[kk-1], ref_arr[ll])
-	    INFO_SWAP(info[kk-1], info[ll])
-            if (ref_arr[ll] > ref_arr[ir-1]) {
-                PIX_SWAP(ref_arr[ll], ref_arr[ir-1])
-		INFO_SWAP(info[ll], info[ir-1])
-            }
-            if (ref_arr[ll-1] > ref_arr[ir-1]) {
-                PIX_SWAP(ref_arr[ll-1], ref_arr[ir-1])
-		INFO_SWAP(info[ll-1], info[ir-1])
-            }
-            if (ref_arr[ll] > ref_arr[ll-1]) {
-                PIX_SWAP(ref_arr[ll], ref_arr[ll-1])
-		INFO_SWAP(info[ll], info[ll-1])
-            }
-            ii = ll+1;
-            jj = ir;
-            ref_tmp = ref_arr[ll-1];
-	    (void) memcpy( &info_tmp, &info[ll-1], type_size );
-            for (;;) {
-                do ii++; while (ref_arr[ii-1] < ref_tmp);
-                do jj--; while (ref_arr[jj-1] > ref_tmp);
-                if (jj <= ii) break;
-                PIX_SWAP(ref_arr[ii-1], ref_arr[jj-1]);
-		INFO_SWAP(info[ii-1], info[jj-1])
-            }
-            ref_arr[ll-1] = ref_arr[jj-1];
-            ref_arr[jj-1] = ref_tmp;
-	    (void) memcpy( &info[ll-1], &info[jj-1], type_size );
-	    (void) memcpy( &info[jj-1], &info_tmp, type_size );
-            j_stack += 2;
-            if (j_stack > PIX_STACK_SIZE) {
-                printf("stack too small in pixel_qsort: aborting");
-                exit(-2001) ;
-            }
-            if (ir-ii+1 >= jj-ll) {
-                i_stack[j_stack-1] = ir;
-                i_stack[j_stack-2] = ii;
-                ir = jj-1;
-            } else {
-                i_stack[j_stack-1] = jj-1;
-                i_stack[j_stack-2] = ll;
-                ll = ii;
-            }
-        }
-    }
-    free(i_stack);
-}
-#undef PIX_SWAP
-#undef INFO_SWAP
-#undef PIX_STACK_SIZE
-
-/*+++++++++++++++++++++++++
 .IDENTifer   _REPAIR_INFO_SORTED
 .PURPOSE     sort DSRs with ICU onboard time monotonically increasing
 .INPUT/OUTPUT
@@ -624,7 +661,7 @@ void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    static function
 -------------------------*/
-static
+static inline
 void _REPAIR_INFO_SORTED( unsigned int num_info, struct mds0_info *info )
 {
      const char prognm[] = "_REPAIR_INFO_SORTED";
@@ -632,9 +669,6 @@ void _REPAIR_INFO_SORTED( unsigned int num_info, struct mds0_info *info )
      register unsigned int ni = 0;
      
      double *on_board_time;
-
-     /* handle special cases gracefully */
-     if ( num_info < 2 ) return;
 
      /* allocate memory */
      on_board_time = (double *) malloc( num_info * sizeof(double) );
@@ -644,7 +678,7 @@ void _REPAIR_INFO_SORTED( unsigned int num_info, struct mds0_info *info )
      /* initialize array on_board_time */
      do { 
           on_board_time[ni] = info[ni].on_board_time
-	       + (double) info[ni].bcps / 1e4;
+	       + (double) info[ni].bcps / 16.;
      } while ( ++ni < num_info );
 
      _INFO_QSORT( num_info, on_board_time, info );
@@ -677,94 +711,6 @@ void _CHECK_INFO_SORTED( bool correct_info_rec,
      /* sort auxiliary, detector and PMD DSR */
      if ( correct_info_rec )
 	  _REPAIR_INFO_SORTED( num_info, info );
-}
-
-/*+++++++++++++++++++++++++
-.IDENTifer   _CHECK_INFO_STATE_ID
-.PURPOSE     consistency check of value of state_id in info-records
-.INPUT/OUTPUT
-  call as   _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
-     input:  
-            bool correct_info_rec    :  allow correction of corrupted data?
-            unsigned int num_info    :  number of info-records
- in/output:  
-	    struct mds0_info *info   :  info records
-
-.RETURNS     nothing
-.COMMENTS    static function
--------------------------*/
-static
-void _CHECK_INFO_STATE_ID( bool correct_info_rec,
-			   unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->q.value, info->state_id; @*/
-{
-     //const char prognm[] = "_CHECK_INFO_STATE_ID";
-
-     register unsigned int ni, nt;
-
-     unsigned short counted_state_id[MAX_NUM_STATE];
-     
-     unsigned int num_time, ref_time;
-     unsigned int *time_arr;
-
-     /* handle special cases gracefully */
-     if ( num_info < 2 ) return;
-
-     /* obtain unique values of on_board_time */
-     time_arr = (unsigned int *) malloc( num_info * sizeof(int) );
-     for ( ni = 0; ni < num_info; ni++ )
-	  time_arr[ni] = info[ni].on_board_time;
-     _UINT_QSORT( num_info, time_arr );
-
-     num_time = 1;
-     ref_time = time_arr[0];
-     for ( ni = 1; ni < num_info; ni++ ) {
-	  if ( time_arr[ni] != ref_time ) {
-	       ref_time = time_arr[ni];
-	       time_arr[num_time] = ref_time;
-	       num_time++;
-	  }
-     }
-
-     /* loop over all unique on_board_time values */
-     for ( nt = 0; nt < num_time; nt++ ) {
-	  register unsigned short ns = 0;
-
-	  unsigned short id_found = 0;
-	  unsigned short num = 0;
-	  unsigned char state_id = 0;
-
-	  /* set number of records per State ID to zero */
-	  (void) memset( counted_state_id, 0, MAX_NUM_STATE * sizeof(short) );
-
-	  for ( ni = 0; ni < num_info; ni++ ) {
-	       if ( info[ni].on_board_time == time_arr[nt] ) {
-		    if ( info[ni].state_id < MAX_NUM_STATE )
-			 counted_state_id[info[ni].state_id - 1]++;
-	       }
-	  }
-	       
-	  do {
-	       if ( counted_state_id[ns] > 0 ) {
-		    id_found++;
-		    if ( counted_state_id[ns] > num ) {
-			 num = counted_state_id[ns];
-			 state_id = (unsigned char) (ns + 1);
-		    }
-	       }
-	  } while ( ++ns < MAX_NUM_STATE );
-
-	  if ( id_found > 1 ) {
-	       for ( ni = 0; ni < num_info; ni++ ) {
-		    if ( info[ni].on_board_time == time_arr[nt]
-			 && info[ni].state_id != state_id ) {
-			 info[ni].q.flag.state_id = 1;
-			 if ( correct_info_rec ) info[ni].state_id = state_id;
-		    }
-	       }
-	  }
-     }
-     free( time_arr );
 }
 
 /*+++++++++++++++++++++++++
@@ -900,7 +846,7 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
   call as   _SET_DET_DSR_QUALITY( absOrbit, q_det, num_info, info );
      input:  
             unsigned short absOrbit : orbit number
-	    union qstate_re   d_det : DET quality
+	    union qstate_rec  d_det : DET quality
             unsigned int   num_info : number of info records
  in/output:  
 	    struct mds0_info *info  : structure holding info about MDS records
@@ -925,7 +871,6 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      unsigned char  state_id = 0;
 
      unsigned short limb_scan = 0;
-     unsigned short bcps = 0;
      unsigned short duration = 0;
      unsigned short bcps_effective = 0;
      unsigned short size_ref;
@@ -981,8 +926,7 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      }
 
      /* check state */
-     bcps = info[num_dsr-1].bcps;
-     if ( bcps != duration ) {
+     if ( info[num_dsr-1].bcps != duration ) {
 	  q_det->flag.too_short = 1;
      } else if ( num_dsr != num_dsr_ref ) {
 	  q_det->flag.dsr_missing = 1;
@@ -1034,6 +978,8 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != %u) of %s DSRs";
      const char msg_unique[]
 	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - removed duplicated %s DSRs";
+     const char msg_sorted[]
+	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - non-chronological %s DSRs";
 
      /* handle special cases gracefully */
      if ( num_state == 0 ) return;
@@ -1089,6 +1035,13 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	  if ( states[ns].q_aux.flag.duplicates == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
 				msg_unique, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				"auxiliary" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+	  if ( states[ns].q_aux.flag.sorted == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_sorted, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"auxiliary" );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
@@ -1175,7 +1128,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				"detector" );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  }
-	  
+	  if ( states[ns].q_det.flag.sorted == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_sorted, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				"detector" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
+
 	  /* check PMD DSRs */
 	  info = states[ns].info_pmd;
 	  for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
@@ -1230,6 +1190,13 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				"PMD" );
 	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
 	  }
+	  if ( states[ns].q_pmd.flag.sorted == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_sorted, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				"PMD" );
+	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  }
      } while ( ++ns < num_state );
 }
 
@@ -1240,7 +1207,6 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 {
      const char prognm[] = "SCIA_LV0_RD_MDS_INFO";
 
-     unsigned short absOrbit;
      unsigned int   indx_dsd;
      unsigned int   num_info;
 
@@ -1260,14 +1226,15 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      bool show_info_rec =
 	  (env_str2 != NULL && *env_str2 == '1') ? TRUE : FALSE;
 
-     bool clusdef_db_exist = CLUSDEF_DB_EXISTS();
-
      /* initialize return values */
      states_out[0] = NULL;
 
      /* read Main Product Header */
      ENVI_RD_MPH( fd, &mph );
+
+     /* set static variables */
      absOrbit = (unsigned short) mph.abs_orbit;
+     clusdef_db_exists = CLUSDEF_DB_EXISTS();
 
      /* get index to data set descriptor */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
@@ -1296,8 +1263,40 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      }
      if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
 
-     /* check Packet type */
-     _CHECK_INFO_PACKET_ID( correct_info_rec, num_info, info );
+     /*
+      * - There is no need to check the size of DSRs, because the read should
+      *   fail in GET_SCIA_LV0_MDS_INFO when the packet_length or isp_length 
+      *   is corrupted
+      * - Complicating factor is that DSR's are not always sorted correctly
+      *
+      * - ToDo: 
+      *     * majority of products are fine: implement quick-check to 
+      *       skip unnecessary tests
+      *     * assumed is that values are corrupted by to bit-flipping, however,
+      *       this is not checked in all cases
+      *
+      * 1a) Check and fix 'Pack ID' (quick):
+      *    - value of the Packet ID can be checked against the packet_length
+      *    - only packet_id = 0 or packet_id > 3 are assumed to be corrupted
+      * 1b) Check and fix 'State ID' (quick):
+      *    - only state_id = 0 or state_id > 70 are assumed to be corrupted
+      *      state_id > 70: subtrackt 128
+      * 1c) Check and fix 'bcps' (requires clusdef_db_exist):
+      *    - check/fix if bcps is out-of-range for given (state_id, orbit)
+      * 2) Check and fix combination 'On Board Time' and 'State ID':
+      *    - each on_board_time value should match only one state_id
+      *      and each state_id can be matched with several on_board_time values
+      *    - each combination on state_id and on_board_time should occur many 
+      *      times in a product
+      *    - unique on_board_time values may indicate data corruption, can be 
+      *      fixed when 3 successive packages (around corrupted on_board_time) 
+      *      have same state_id and/or incremental bcps values, alternatively 
+      *      one could check if state_id (ofcorrupted on_board_time) occures 
+      *      more often and one of these is missing one occurence
+      *    - 
+      */
+     /* quick check on Packet ID, State ID and BCPS */
+     _QCHECK_INFO_PARAMS( correct_info_rec, num_info, info );
 
      /* check on_board_time */
      _CHECK_INFO_ON_BOARD_TIME( correct_info_rec, num_info, info );
@@ -1306,9 +1305,6 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      _CHECK_INFO_BCPS( correct_info_rec, SCIA_AUX_PACKET, num_info, info );
      _CHECK_INFO_BCPS( correct_info_rec, SCIA_DET_PACKET, num_info, info );
      _CHECK_INFO_BCPS( correct_info_rec, SCIA_PMD_PACKET, num_info, info );
-
-     /* check State ID */
-     _CHECK_INFO_STATE_ID( correct_info_rec, num_info, info );
 
      /* sort info-records */
      _CHECK_INFO_SORTED( TRUE, num_info, info );
@@ -1321,10 +1317,9 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      
      /* check for repeated DSR records in product */
      _CHECK_INFO_UNIQUE( correct_info_rec, num_state, states );
-     if ( show_info_rec ) _SHOW_STATE_RECORDS( num_state, states );
 
      /* perform quality check on detector info-records */
-     if ( clusdef_db_exist ) {
+     if ( clusdef_db_exists ) {
 	  register size_t ns = 0;
 
 	  do {

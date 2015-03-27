@@ -812,13 +812,16 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
      SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &aux->data_hdr );
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
- * check packet ID & state ID
+ * check packet ID, state ID & on-board time
  */
      if ( info->q.flag.packet_id == 1 )
 	  aux->data_hdr.id.field.packet = SCIA_AUX_PACKET;
 
      if ( info->q.flag.state_id == 1 )
 	  aux->data_hdr.state_id = info->state_id;
+
+     if ( info->q.flag.on_board_time == 1 )
+	  aux->data_hdr.on_board_time = info->on_board_time;
 /*
  * read PMTC settings
  */
@@ -895,13 +898,16 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
      SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &det->data_hdr );
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
- * check packet ID & state ID
+ * check packet ID, state ID & on-board time
  */
      if ( info->q.flag.packet_id == 1 )
 	  det->data_hdr.id.field.packet = SCIA_DET_PACKET;
 
      if ( info->q.flag.state_id == 1 )
 	  det->data_hdr.state_id = info->state_id;
+
+     if ( info->q.flag.on_board_time == 1 )
+	  det->data_hdr.on_board_time = info->on_board_time;
 /*
  * read Broadcast counter (MDI)
  */
@@ -1022,13 +1028,16 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
      SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &pmd->data_hdr );
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
- * check packet ID & state ID
+ * check packet ID, state ID, on-board time
  */
      if ( info->q.flag.packet_id == 1 )
 	  pmd->data_hdr.id.field.packet = SCIA_PMD_PACKET;
 
      if ( info->q.flag.state_id == 1 )
 	  pmd->data_hdr.state_id = info->state_id;
+
+     if ( info->q.flag.on_board_time == 1 )
+	  pmd->data_hdr.on_board_time = info->on_board_time;
 /*
  * read ISP PMD data source packet
  */

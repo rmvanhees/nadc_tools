@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2009 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2009 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -34,11 +34,12 @@
 .COMMENTS    None
 .ENVIRONment None
 .EXTERNALs   ENVI_GET_DSD_INDEX 
-.VERSION     3.1     18-NOV-2013   added corrupted DSR detection, RvH
-             3.0     28-OCT-2013   re-write, no cluster-info, RvH
-             2.0     13-NOV-2012   added cluster checking, RvH
-             1.1     16-FEB-2010   added stricter validity checking, RvH
-             1.0     28-OCT-2009   initial release by R. M. van Hees
+.VERSION     4.0     23-Mar-2015   new info-record implementation, RvH
+             3.1     18-Nov-2013   added corrupted DSR detection, RvH
+             3.0     28-Oct-2013   re-write, no cluster-info, RvH
+             2.0     13-Nov-2012   added cluster checking, RvH
+             1.1     16-Feb-2010   added stricter validity checking, RvH
+             1.0     28-Oct-2009   initial release by R. M. van Hees
                                    rewrite of GET_LV0_MDS_INFO
 ------------------------------------------------------------*/
 /*

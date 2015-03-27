@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -30,7 +30,8 @@
 .RETURNS     non-negative on success, negative on failure
 .COMMENTS    None
 .ENVIRONment None
-.VERSION      2.6   08-Oct-2013	[-check] show CRC and Reed-Solomon errors, RvH
+.VERSION      3.0   21-Mar-2015	new implementation for info-records, RvH
+              2.6   08-Oct-2013	[-check] show CRC and Reed-Solomon errors, RvH
               2.5   19-Jun-2009	remove non-archived file from database, RvH
               2.4   20-Jun-2008	removed HDF4 support, RvH
               2.3   16-Jan-2006	adopted new function call to 
@@ -299,7 +300,7 @@ int main( int argc, char *argv[] )
 	  if ( states[ns].num_aux == 0 ) continue;
 	  
 	  if ( param.flag_silent == PARAM_UNSET )
-	       NADC_Info_Update( stdout, 2, ns );
+	       NADC_Info_Update( stdout, 3, ns );
 
 	  num = SCIA_LV0_RD_AUX( fd, states[ns].info_aux, states[ns].num_aux,
 				 &aux );
@@ -318,7 +319,7 @@ int main( int argc, char *argv[] )
 	  }
      }
      if ( param.flag_silent == PARAM_UNSET )
-	  NADC_Info_Finish( stdout, 2, ns );
+	  NADC_Info_Finish( stdout, 3, ns );
 /* 
  * process Detector source packets
  */
@@ -329,7 +330,7 @@ int main( int argc, char *argv[] )
 	  if ( states[ns].num_det == 0 ) continue;
 
 	  if ( param.flag_silent == PARAM_UNSET )
-	       NADC_Info_Update( stdout, 2, ns );
+	       NADC_Info_Update( stdout, 3, ns );
 
 	  num = SCIA_LV0_RD_DET( fd, states[ns].info_det, states[ns].num_det,
 				 param.chan_mask, &det );
@@ -347,7 +348,7 @@ int main( int argc, char *argv[] )
 	  }
      }
      if ( param.flag_silent == PARAM_UNSET )
-	  NADC_Info_Finish( stdout, 2, ns );
+	  NADC_Info_Finish( stdout, 3, ns );
 /* 
  * process PMD source packets
  */
@@ -358,7 +359,7 @@ int main( int argc, char *argv[] )
 	  if ( states[ns].num_pmd == 0 ) continue;
 
 	  if ( param.flag_silent == PARAM_UNSET )
-	       NADC_Info_Update( stdout, 2, ns );
+	       NADC_Info_Update( stdout, 3, ns );
 
 	  num = SCIA_LV0_RD_PMD( fd, states[ns].info_pmd, states[ns].num_pmd,
 				 &pmd );
@@ -376,7 +377,7 @@ int main( int argc, char *argv[] )
 	  }
      }
      if ( param.flag_silent == PARAM_UNSET )
-	  NADC_Info_Finish( stdout, 2, ns );
+	  NADC_Info_Finish( stdout, 3, ns );
 /*
  * when an error has occurred we jump to here:
  */
