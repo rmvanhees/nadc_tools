@@ -66,8 +66,6 @@ void Sun2Intel_FSR( struct fsr2_gome *fsr )
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void GOME_LV2_RD_FSR( FILE *infl, struct fsr2_gome *fsr )
 {
-     const char prognm[] = "GOME_LV2_RD_FSR";
-
      register char *fsr_pntr;
 
      char  *fsr_char;
@@ -77,13 +75,13 @@ void GOME_LV2_RD_FSR( FILE *infl, struct fsr2_gome *fsr )
  * allocate memory to temporary store data for output structure
  */
      if ( (fsr_char = (char *) malloc( LVL2_FSR_LENGTH )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "fsr_char" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "fsr_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( infl, FSR_BYTE_OFFS, SEEK_SET );
      if ( fread( fsr_char, LVL2_FSR_LENGTH, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 
      (void) memcpy( &fsr->nr_sph, fsr_char, GOME_SHORT );
      fsr_pntr = fsr_char + GOME_SHORT;
@@ -97,7 +95,7 @@ void GOME_LV2_RD_FSR( FILE *infl, struct fsr2_gome *fsr )
  * check size of FSR read
  */
      if ( fsr_pntr - fsr_char != LVL2_FSR_LENGTH )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "FSR size" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "FSR size" );
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      Sun2Intel_FSR( fsr );

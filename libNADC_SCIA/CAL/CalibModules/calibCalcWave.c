@@ -77,8 +77,6 @@ double Eval_Poly( unsigned int xx, const double coeffs[] )
 void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
 			  float orbit_phase, struct wvlen_rec *wvlen )
 {
-     const char prognm[] = "InitAtbdWave";
-
      register unsigned int  n_ch, nd, np;
 
      unsigned int num_scp;
@@ -98,7 +96,7 @@ void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
      (void) SCIA_LV1_RD_SRS( fileParam->fp, fileParam->num_dsd, 
 			     fileParam->dsd, &srs );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SRS" );
      for ( n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++ ) {
           unsigned short offs = n_ch * CHANNEL_SIZE;
 
@@ -113,11 +111,11 @@ void SCIA_ATBD_INIT_WAVE( const struct file_rec *fileParam,
      (void) SCIA_LV1_RD_BASE( fileParam->fp, fileParam->num_dsd, 
 			      fileParam->dsd, &base );
      if ( IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "BASE" );
+          NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "BASE" );
      num_scp = SCIA_LV1_RD_SCP( fileParam->fp, fileParam->num_dsd, 
 				fileParam->dsd, &scp );
      if ( IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SCP" );
+          NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SCP" );
      Use_Extern_Alloc = Save_Extern_Alloc;
 /*
  * copy base values to wavelength array
@@ -151,8 +149,6 @@ void SCIA_ATBD_CAL_WAVE( const struct wvlen_rec wvlen,
 			 const struct state1_scia *state,
 			 struct mds1c_scia *mds_1c )
 {
-     /* const char prognm[] = "SCIA_ATBD_CAL_WAVE"; */
-
      register unsigned short num = 0u;
 
      do {

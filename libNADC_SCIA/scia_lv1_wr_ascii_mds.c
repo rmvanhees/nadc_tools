@@ -69,8 +69,6 @@ static
 void SCIA_LV1_WR_ASCII_GEON( FILE *outfl, unsigned short nr_geo,
 			     const struct geoN_scia *geoN )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_GEON";
-
      register unsigned int ni, nx, ny;
 
      unsigned char *cbuff;
@@ -80,7 +78,7 @@ void SCIA_LV1_WR_ASCII_GEON( FILE *outfl, unsigned short nr_geo,
      count[0] = nr_geo;
      cbuff = (unsigned char *) malloc( (size_t) count[0] );
      if ( cbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
 	  cbuff[nx] = geoN[nx].pixel_type;
      nadc_write_arr_uchar( outfl, INDX_GEON, "Pixel Type (backscan=0)", 
@@ -92,7 +90,7 @@ void SCIA_LV1_WR_ASCII_GEON( FILE *outfl, unsigned short nr_geo,
      free( cbuff );
      rbuff = (float *) malloc( (size_t) count[0] * sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
 	  rbuff[nx] = geoN[nx].pos_esm;
      nadc_write_arr_float( outfl, INDX_GEON, "Position ESM", 
@@ -101,7 +99,7 @@ void SCIA_LV1_WR_ASCII_GEON( FILE *outfl, unsigned short nr_geo,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( ni = ny = 0; ny < count[1]; ny++ ) {
 	  for ( nx = 0; nx < count[0]; nx++ ) 
 	       rbuff[ni++] = geoN[nx].sun_zen_ang[ny];
@@ -138,7 +136,7 @@ void SCIA_LV1_WR_ASCII_GEON( FILE *outfl, unsigned short nr_geo,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nx = 0; nx < count[0]; nx++ ) {
 	  rbuff[nx] = geoN[nx].sub_sat_point.lat / 1e6;
 	  rbuff[count[0] + nx] = 
@@ -183,8 +181,6 @@ static
 void SCIA_LV1_WR_ASCII_GEOL( FILE *outfl, unsigned short nr_geo,
 			     const struct geoL_scia *geoL )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_GEOL";
-
      register unsigned int ni, nx, ny;
 
      unsigned int count[2];
@@ -193,7 +189,7 @@ void SCIA_LV1_WR_ASCII_GEOL( FILE *outfl, unsigned short nr_geo,
      count[0] = nr_geo;
      rbuff = (float *) malloc( (size_t) count[0] * sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
 	  rbuff[nx] = geoL[nx].pos_esm;
      nadc_write_arr_float( outfl, INDX_GEOL, "Position ESM", 
@@ -206,7 +202,7 @@ void SCIA_LV1_WR_ASCII_GEOL( FILE *outfl, unsigned short nr_geo,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( ni = ny = 0; ny < count[1]; ny++ ) {
 	  for ( nx = 0; nx < count[0]; nx++ ) 
 	       rbuff[ni++] = geoL[nx].sun_zen_ang[ny];
@@ -253,7 +249,7 @@ void SCIA_LV1_WR_ASCII_GEOL( FILE *outfl, unsigned short nr_geo,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nx = 0; nx < count[0]; nx++ ) {
 	  rbuff[nx] = geoL[nx].sub_sat_point.lat / 1e6;
 	  rbuff[count[0] + nx] = 
@@ -289,8 +285,6 @@ static
 void SCIA_LV1_WR_ASCII_GEOC( FILE *outfl, unsigned short nr_geo,
 			     const struct geoC_scia *geoC )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_GEOC";
-
      register unsigned int nx;
 
      unsigned int count[2];
@@ -299,7 +293,7 @@ void SCIA_LV1_WR_ASCII_GEOC( FILE *outfl, unsigned short nr_geo,
      count[0] = nr_geo;
      rbuff = (float *) malloc( (size_t) count[0] * sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
 	  rbuff[nx] = geoC[nx].pos_esm;
      nadc_write_arr_float( outfl, INDX_GEOC, "Position ESM", 
@@ -316,7 +310,7 @@ void SCIA_LV1_WR_ASCII_GEOC( FILE *outfl, unsigned short nr_geo,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nx = 0; nx < count[0]; nx++ ) {
 	  rbuff[nx] = geoC[nx].sub_sat_point.lat / 1e6;
 	  rbuff[count[0] + nx] = 
@@ -331,8 +325,6 @@ static
 void SCIA_LV1_WR_ASCII_POLV( FILE *outfl, unsigned short nr_pol,
 			     const struct polV_scia *polV )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_POLV";
-
      register unsigned int ni;
 
      unsigned int count[2];
@@ -341,7 +333,7 @@ void SCIA_LV1_WR_ASCII_POLV( FILE *outfl, unsigned short nr_pol,
      count[0] = nr_pol;
      rbuff = (float *) malloc( (size_t) count[0] * sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( ni = 0; ni < count[0]; ni++ ) rbuff[ni] = polV[ni].gdf.p_bar;
      nadc_write_arr_float( outfl, INDX_POLV, "GDF Pbar", 
 			    1, count, 4, rbuff );
@@ -357,7 +349,7 @@ void SCIA_LV1_WR_ASCII_POLV( FILE *outfl, unsigned short nr_pol,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      ni = 0;
      do {
 	  (void) memcpy( rbuff, polV[ni].Q, count[0] * sizeof(float) );
@@ -394,7 +386,7 @@ void SCIA_LV1_WR_ASCII_POLV( FILE *outfl, unsigned short nr_pol,
      rbuff = (float *) realloc( rbuff, (size_t) (count[0] * count[1])
 				* sizeof(float));
      if ( rbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      ni = 0;
      do {
 	  (void) memcpy( rbuff, polV[ni].rep_wv, count[0] * sizeof(float) );
@@ -424,8 +416,6 @@ void SCIA_LV1_WR_ASCII_MDS( const struct param_record param,
 			    unsigned int num_mds, 
 			    const struct mds1_scia *mds )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_MDS";
-
      register unsigned short nc, nj;
      register unsigned int   ni, nm;
      register unsigned int   nr;
@@ -450,10 +440,10 @@ void SCIA_LV1_WR_ASCII_MDS( const struct param_record param,
      else if ( source == SCIA_OCCULT )
 	  (void) snprintf( ext_str, 10, "occult_%02u", mds->state_index );
      else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile);
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile);
 /*
  * write ASCII dump of MDS record
  */
@@ -527,7 +517,7 @@ void SCIA_LV1_WR_ASCII_MDS( const struct param_record param,
 		    ibuff = (int *) malloc( (size_t) (count[0] * count[1])
 					    * sizeof( int ) );
 		    if ( ibuff == NULL ) 
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ibuff" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ibuff" );
 		    for ( ni=0, nj=0; nj < mds->clus[nc].n_sig; nj++ ) {
 			 ibuff[ni++] = (int) mds->clus[nc].sig[nj].corr;
 			 ibuff[ni++] = (int) mds->clus[nc].sig[nj].sign;
@@ -541,7 +531,7 @@ void SCIA_LV1_WR_ASCII_MDS( const struct param_record param,
 		    ibuff = (int *) malloc( (size_t) (count[0] * count[1])
 					    * sizeof( int ) );
 		    if ( ibuff == NULL ) 
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ibuff" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ibuff" );
 		    for ( ni=0, nj=0; nj < mds->clus[nc].n_sigc; nj++ ) {
 			 ibuff[ni++] = (int) 
 			      mds->clus[nc].sigc[nj].det.field.corr;
@@ -577,8 +567,6 @@ void SCIA_LV1C_WR_ASCII_MDS( const struct param_record param,
 			     unsigned int num_mds, 
 			     const struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV1C_WR_ASCII_MDS";
-
      register unsigned int   nm;
      register unsigned int   nr;
 
@@ -601,10 +589,10 @@ void SCIA_LV1C_WR_ASCII_MDS( const struct param_record param,
      else if ( source == SCIA_OCCULT )
 	  (void) snprintf( ext_str, 10, "occult_%02u", mds_1c->state_index );
      else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile);
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile);
 /*
  * write ASCII dump of MDS record
  */
@@ -697,8 +685,6 @@ void SCIA_LV1C_WR_ASCII_MDS( const struct param_record param,
 void SCIA_LV1C_WR_ASCII_MDS_PMD( const struct param_record param,
 				 const struct mds1c_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV1C_WR_ASCII_MDS_PMD";
-
      register unsigned int   nr;
 
      char  ext_str[14], date_str[UTC_STRING_LENGTH];
@@ -724,10 +710,10 @@ void SCIA_LV1C_WR_ASCII_MDS_PMD( const struct param_record param,
      else if ( source == SCIA_OCCULT )
 	  (void) snprintf( ext_str, 14, "occult_pmd_%02u", pmd->state_index );
      else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile);
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile);
 /*
  * write ASCII dump of MDS record
  */
@@ -795,8 +781,6 @@ void SCIA_LV1C_WR_ASCII_MDS_PMD( const struct param_record param,
 void SCIA_LV1C_WR_ASCII_MDS_POLV( const struct param_record param,
 				  const struct mds1c_polV *polV )
 {
-     const char prognm[] = "SCIA_LV1C_WR_ASCII_MDS_POLV";
-
      register unsigned int   nr;
 
      char  ext_str[14], date_str[UTC_STRING_LENGTH];
@@ -822,11 +806,11 @@ void SCIA_LV1C_WR_ASCII_MDS_POLV( const struct param_record param,
      else if ( source == SCIA_MONITOR )
 	  return;
      else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_KEY, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
 
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile);
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile);
 /*
  * write ASCII dump of MDS record
  */

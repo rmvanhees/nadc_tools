@@ -65,12 +65,10 @@ void SCIA_OL2_WR_ASCII_SQADS( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_OL2_WR_ASCII_SQADS";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "sqads" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SQADS record
  */
@@ -111,12 +109,10 @@ void SCIA_OL2_WR_ASCII_NGEO( struct param_record param, unsigned int num_dsr,
      double rbuff[2 * NUM_CORNERS];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_OL2_WR_ASCII_NGEO";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "ngeo" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of NGEO record
  */
@@ -186,12 +182,10 @@ void SCIA_OL2_WR_ASCII_LGEO( struct param_record param, unsigned int num_dsr,
      double rbuff[2 * 3];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_OL2_WR_ASCII_LGEO";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "lgeo" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of LGEO record
  */

@@ -51,8 +51,6 @@
 void MERIS_WR_ASCII_TIE( struct param_record param, unsigned int num_dsr,
 			 const struct tie_meris *tie )
 {
-     const char prognm[] = "MERIS_WR_ASCII_TIE";
-
      register unsigned short ii;
      register unsigned int   nd = 0;
 
@@ -64,7 +62,7 @@ void MERIS_WR_ASCII_TIE( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "tie" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of TIE record
  */

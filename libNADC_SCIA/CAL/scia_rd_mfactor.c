@@ -317,14 +317,12 @@ static char SPH_SCI_AX_descriptor[SCI_AX_MAX][28] =
 static void scia_err( enum err_flag err_flag, const char *source_file, 
 		      int line, const char* message, const char* arg )
 {
-     const char packnm[] = "scia_err";
-
      const char *error_type[] = { "ERROR: ", "WARNING: ", " " };
 
      (void) fprintf( stderr, "%s:%d: %s%s %s\n", source_file, line, 
 		     error_type[err_flag], message, arg );
     
-     NADC_RETURN_ERROR( packnm, NADC_ERR_FATAL, "Error in external code" );
+     NADC_RETURN_ERROR( NADC_ERR_FATAL, "Error in external code" );
 }
 
 /* Reading the main product header MPH */
@@ -734,8 +732,6 @@ static
 void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start, 
 			  /*@out@*/ float *mfactor )
 {
-     const char prognm[] = "Scia_rd_aux_mfactor";
-
      char default_dir[] = "m-factor_07.01";
 
      DSD_SCI_MF1_AX dsd;
@@ -762,7 +758,7 @@ void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start,
 	  dsd = SCI_MF1_AX__M_FACTOR_DN;
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown mftype" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown mftype" );
 	  break;
      }
 
@@ -787,21 +783,21 @@ void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     "can not open m-factor directory: %s", 
 				     mf_dir_name );
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, msg );
+		    NADC_RETURN_ERROR( NADC_ERR_FATAL, msg );
 	       }
 	  }
      }
      /* Here we have a standard directory or an environment value */
      file_aux( mf_file_name, dir_name, SCI_MF1_AX, sensing_start );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 			     "failed to select appropriate m-factor file" );
 
      if ( open_SCIA_mfactor( mf_file_name, &info ) != OK )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, mf_file_name );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, mf_file_name );
      read_M_Factor( wl, mfactor, dsd, &info ) ;
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, mf_file_name );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, mf_file_name );
      close_SCIA_mfactor( &info );
 }
 
@@ -826,8 +822,6 @@ static
 void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 			 /*@out@*/ float *mfactor )
 {
-     const char prognm[] = "SCIA_RD_H5_MFACTOR";
-
      char  mf_file[MAX_STRING_LENGTH];
      char  mf_software_version[MAX_STRING_LENGTH];
 
@@ -851,7 +845,7 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 			   "%s/m-factor.h5", DATA_DIR );
 	  file_id = H5Fopen( mf_file, H5F_ACC_RDONLY, H5P_DEFAULT );
 	  if ( file_id < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, mf_file );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, mf_file );
      }
 /*
  * read software version
@@ -864,7 +858,7 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 				  dims, NULL, NULL );
      val_time = (char *) malloc( (size_t) dims[0] * sizeof(char));
      if ( val_time == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "val_time" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_time" );
      (void) H5LTread_dataset_char( file_id, "VALIDITY_TIME", val_time );
      n_days = (int) dims[0] / 32;
 /*
@@ -874,7 +868,7 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 				  dims, NULL, NULL );
      mf_array = (float *) malloc( (size_t)(dims[0] * dims[1]) * sizeof(float));
      if ( mf_array == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mf_array" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mf_array" );
      (void) H5LTread_dataset_float( file_id, mf_type_str[mftype], mf_array );
 /* 
  * (simple) search for correct data
@@ -888,7 +882,7 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 	  }
      }
      if ( day == -1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "No valid m-factor found" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "No valid m-factor found" );
 /* 
  * copy m-factor  
  */
@@ -905,8 +899,6 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 void SCIA_RD_MFACTOR( enum mf_type mftype, const char *sensing_start,
 		      unsigned int calibFlag, float *mfactor )
 {
-     const char prognm[] = "SCIA_RD_MFACTOR";
-
      char sensing_start_ymd[SHORT_STRING_LENGTH];
 
      int mjd2000;
@@ -921,16 +913,16 @@ void SCIA_RD_MFACTOR( enum mf_type mftype, const char *sensing_start,
      if ( (calibFlag & DO_MFAC_H5_RAD) == UINT_ZERO ) {
 	  Scia_rd_aux_mfactor( mftype, sensing_start_ymd, mfactor );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm,NADC_ERR_FATAL,"Scia_rd_aux_mfactor");
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "Scia_rd_aux_mfactor" );
      } else {                                /* read m-factor from HDF5 file */
 	  char msg[SHORT_STRING_LENGTH];
 
 	  Scia_rd_H5_mfactor( mftype, sensing_start_ymd, mfactor );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, "Scia_rd_H5_mfactor");
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "Scia_rd_H5_mfactor");
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
 			   "read m-factors from HDF5 file - %s",
 			  sensing_start_ymd );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_ERROR( NADC_ERR_NONE, msg );
      }
 }

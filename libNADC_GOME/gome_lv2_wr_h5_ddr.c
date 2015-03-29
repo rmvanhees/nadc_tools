@@ -63,8 +63,6 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
      hid_t    grp_id;
      hbool_t  compress;
      hsize_t  nrpix, dims[2];
-
-     const char prognm[] = "GOME_LV2_WR_H5_DDR";
 /*
  * check number of DDR records
  */
@@ -81,7 +79,7 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
  */
      grp_id = H5Gcreate( param.hdf_file_id, "/DDR", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/DDR" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/DDR" );
 /*
  * +++++ create datasets in the /DDR group
  */
@@ -90,7 +88,7 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
  * Ground Pixel Number and SubSet Counter
  */
      ibuff = (int *) malloc( dims[0] * sizeof(int));
-     if ( ibuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ibuff" );
+     if ( ibuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ibuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
 	  ibuff[ny] = ddr[ny].glr.pixel_nr;
      NADC_WR_HDF5_Dataset( compress, grp_id, "Ground Pixel Number", 
@@ -104,7 +102,7 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
  * UTC date and time
  */
      ubuff = (unsigned int *) malloc( dims[0] * sizeof( unsigned int));
-     if ( ubuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ubuff" );
+     if ( ubuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ubuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
 	  ubuff[ny] = ddr[ny].glr.utc_date;
      NADC_WR_HDF5_Dataset( compress, grp_id, "UTC date", 
@@ -120,7 +118,7 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
      dims[0] = nr_ddr; dims[1] = 3;
      nrpix = dims[0] * dims[1];
      rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nr = ny = 0; ny < dims[0]; ny++ )
 	  for ( nx = 0; nx < dims[1]; nx++ )
 	       rbuff[nr++] = ddr[ny].glr.sat_zenith[nx];
@@ -172,7 +170,7 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
  * Satellite Geodetic Height
  */
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
           rbuff[ny] = ddr[ny].glr.sat_geo_height;
      NADC_WR_HDF5_Dataset( compress, grp_id, "Satellite Geodetic Height", 
@@ -205,7 +203,7 @@ void GOME_LV2_WR_H5_DDR( struct param_record param, short nr_ddr,
      dims[0] = nr_ddr; dims[1] = NUM_COORDS; 
      nrpix = dims[0] * dims[1];
      rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nr = ny = 0; ny < (hsize_t) nr_ddr; ny++)
 	  for ( nx = 0; nx < NUM_COORDS; nx++ )
 	       rbuff[nr++] = ddr[ny].glr.lat[nx];

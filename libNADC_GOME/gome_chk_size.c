@@ -65,8 +65,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void GOME_LV1_CHK_SIZE( const struct fsr1_gome fsr, const char *gomefl )
 {
-     const char prognm[] = "GOME_LV1_CHK_SIZE";
-
      register short nb;
 
      struct stat filestat;
@@ -83,13 +81,11 @@ void GOME_LV1_CHK_SIZE( const struct fsr1_gome fsr, const char *gomefl )
 
      (void) stat( gomefl, &filestat );
      if ( prod_sz != (size_t) filestat.st_size )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, "file corrupt" );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, "file corrupt" );
 }
 
 void GOME_LV2_CHK_SIZE( const struct fsr2_gome fsr, const char *gomefl )
 {
-     const char prognm[] = "GOME_LV2_CHK_SIZE";
-
      struct stat filestat;
 
      size_t prod_sz = LVL1_PIR_LENGTH + LVL2_FSR_LENGTH;
@@ -99,5 +95,5 @@ void GOME_LV2_CHK_SIZE( const struct fsr2_gome fsr, const char *gomefl )
 
      (void) stat( gomefl, &filestat );
      if ( prod_sz != (size_t) filestat.st_size )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, "file corrupt" );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, "file corrupt" );
 }

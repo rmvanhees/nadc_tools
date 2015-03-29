@@ -106,8 +106,6 @@ unsigned int NADC_WR_PDS_HDR( unsigned int num_items,
 			      const NADC_pds_hdr_t *pds_items, FILE *fd )
        /*@modifies fd@*/
 {
-/*      const char prognm[] = "NADC_WR_PDS_HDR"; */
-
      register unsigned int ni;
 
      unsigned int nbyte = 0u;
@@ -144,8 +142,6 @@ unsigned int NADC_RD_PDS_HDR( FILE *fd, unsigned int num_items,
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
        /*@modifies pds_items->values@*/
 {
-     const char prognm[] = "NADC_RD_PDS_HDR";
-     
      register unsigned int ni;
 
      unsigned int nbyte = 0u;
@@ -162,7 +158,7 @@ unsigned int NADC_RD_PDS_HDR( FILE *fd, unsigned int num_items,
 	  } else if ( pds_items[ni].type == PDS_Optional ) {
 	       nbyte += ENVI_RD_PDS_INFO( fd, keyword, keyvalue );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE, err_rd_pds );
 	       if ( strcmp( keyword, pds_items[ni].key ) == 0 ) {
 		    if ( strncmp( "INIT_VERSION", keyword, 12 ) == 0 ) {
 			 pds_items[ni].type = PDS_Plain;
@@ -180,16 +176,16 @@ unsigned int NADC_RD_PDS_HDR( FILE *fd, unsigned int num_items,
 		    while ( ++ni < num_items
 			    && strcmp( keyword, pds_items[ni].key ) != 0 );
 		    if ( ni == num_items )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_KEY, keyword );
 	       }
 	       (void) nadc_strlcpy( pds_items[ni].value, 
 			   	    keyvalue, PDS_KEYVAL_LENGTH );
 	  } else {
 	       nbyte += ENVI_RD_PDS_INFO( fd, keyword, keyvalue );
 	       if ( IS_ERR_STAT_FATAL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, err_rd_pds );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE, err_rd_pds );
 	       if ( strcmp( keyword, pds_items[ni].key ) != 0 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_KEY, keyword );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_KEY, keyword );
 	       (void) nadc_strlcpy( pds_items[ni].value, 
 			            keyvalue, PDS_KEYVAL_LENGTH );
 	  }

@@ -129,8 +129,6 @@ void SCIA_ATBD_CAL_STRAY( float strayError,
 			  const struct mds1_scia *mds_1b,
 			  struct mds1c_scia *mds_1c )
 {
-     /* const char prognm[] = "SCIA_ATBD_CAL_STRAY"; */
-
      register unsigned short num = 0u;     /* counter for number of clusters */
      register unsigned short nd;           /* counter for number of DSR's */
      register unsigned int   nc;           /* counter for number of readouts */

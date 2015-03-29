@@ -57,8 +57,6 @@
 void SCIA_LV1_WR_H5_VLCP( struct param_record param, unsigned int nr_vlcp,
 			  const struct vlcp_scia *vlcp )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_VLCP";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -93,7 +91,7 @@ void SCIA_LV1_WR_H5_VLCP( struct param_record param, unsigned int nr_vlcp,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write VLCP data sets
  */
@@ -117,7 +115,7 @@ void SCIA_LV1_WR_H5_VLCP( struct param_record param, unsigned int nr_vlcp,
                             NFIELDS, nr_vlcp, vlcp_size, vlcp_names,
                             vlcp_offs, vlcp_type, 1,
                             NULL, compress, vlcp );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "vlcp" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "vlcp" );
 /*
  * close interface
  */

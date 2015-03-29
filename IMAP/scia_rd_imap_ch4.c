@@ -119,8 +119,6 @@ unsigned int SELECT_IMAP_RECORDS( unsigned int numRec, struct imap_rec *rec )
 void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
 		       struct imap_rec **imap_out )
 {
-     const char prognm[] = "SCIA_RD_IMAP_CH4";
-
      register unsigned int ni, nr;
 
      char   *cpntr, ctemp[SHORT_STRING_LENGTH];
@@ -173,7 +171,7 @@ void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( flname, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_RETURN_ERROR(prognm, NADC_ERR_HDF_FILE, flname );
+     if ( fid < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_FILE, flname );
 
      (void) H5LTget_dataset_info( fid, "/Data/Geolocation/time", 
 				  dims, NULL, NULL );
@@ -184,16 +182,16 @@ void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
  */
      rec = (struct imap_rec *) 
 	  malloc( hdr->numRec * sizeof( struct imap_rec ));
-     if ( rec == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+     if ( rec == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rec" );
 
      if ( (dbuff = (double *) malloc( hdr->numRec * sizeof(double) )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      (void) H5LTread_dataset_double( fid, "/Data/Geolocation/time", dbuff );
      for ( ni = 0; ni < hdr->numRec; ni++ ) rec[ni].jday = dbuff[ni];
      free( dbuff );
 
      if ( (rbuff = (float *) malloc( hdr->numRec * sizeof(float) )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      (void) H5LTread_dataset_float( fid, "/Data/Geolocation/Longitude", rbuff );
      for ( ni = 0; ni < hdr->numRec; ni++ )
 	  rec[ni].lon_center = LON_IN_RANGE( rbuff[ni] );
@@ -273,7 +271,7 @@ void SCIA_RD_IMAP_CH4( bool qflag, const char *flname, struct imap_hdr *hdr,
  */
      rbuff = (float *) realloc( rbuff, 
 				NUM_CORNERS * hdr->numRec * sizeof(float) );
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      (void) H5LTread_dataset_float( fid, "/Data/Geolocation/CornerLongitudes", 
 				    rbuff );
      for ( ni = nr = 0; ni < hdr->numRec; ni++ ) {

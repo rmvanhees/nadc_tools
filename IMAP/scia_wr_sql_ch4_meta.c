@@ -71,8 +71,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_WR_SQL_CH4_META( PGconn *conn, const struct imap_hdr *hdr )
 {
-     const char prognm[] = "SCIA_WR_SQL_CH4_META";
-
      PGresult *res;
 
      char  *pntr, sql_query[SQL_STR_SIZE];
@@ -86,10 +84,10 @@ void SCIA_WR_SQL_CH4_META( PGconn *conn, const struct imap_hdr *hdr )
 		      META_TBL_NAME, hdr->product );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL_TWICE, hdr->product );
+          NADC_GOTO_ERROR( NADC_ERR_SQL_TWICE, hdr->product );
      }
      PQclear( res );
 /* 
@@ -98,7 +96,7 @@ void SCIA_WR_SQL_CH4_META( PGconn *conn, const struct imap_hdr *hdr )
      res = PQexec( conn,
                    "SELECT nextval(\'meta_imap_ch4_pk_meta_seq\')" );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      pntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );
      PQclear( res );
@@ -114,13 +112,13 @@ void SCIA_WR_SQL_CH4_META( PGconn *conn, const struct imap_hdr *hdr )
 			 hdr->numRec );
 /*      (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 /*
  * do the actual insert
  */
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
 }

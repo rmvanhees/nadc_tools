@@ -150,8 +150,6 @@ void Read_TOSOMI_Header( const char *flname, struct tosomi_hdr *hdr )
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, hdr@*/
 {
-     const char prognm[] = "Read_TOSOMI_Header";
-
      char  *cpntr, line[MAX_LINE_LENGTH];
 
      gzFile fp;
@@ -160,14 +158,14 @@ void Read_TOSOMI_Header( const char *flname, struct tosomi_hdr *hdr )
  * open/read TOSOMI product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, flname );
      gzDirect = (gzdirect(fp) == 1) ? TRUE : FALSE;
 
      do {
 	  if ( gzeof ( fp ) == 1 ) break;
 	  if ( gzgets( fp, line, MAX_LINE_LENGTH ) == Z_NULL ) {
 	       if ( gzDirect ) break;
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, flname );
 	  }
 	  hdr->file_size += strlen( line );
 
@@ -211,12 +209,12 @@ void Read_TOSOMI_Header( const char *flname, struct tosomi_hdr *hdr )
 			 strtoul(cpntr+1, (char **) NULL, 10);
 	       }
 	       if ( hdr->numState == MAX_NUM_TOSOMI_STATES ) {
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				  "increase value for max_num_tosomi_states" );
 	       }
 	       hdr->numState++;
 	  } else {
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, line );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, line );
 	  }
      } while( TRUE );
      hdr->numProd = 1;            /* read a complete products without errors */
@@ -224,9 +222,9 @@ void Read_TOSOMI_Header( const char *flname, struct tosomi_hdr *hdr )
      gzclose( fp );
 
      if ( hdr->numRec == 0u )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_WARN, "empty product" );
+	  NADC_RETURN_ERROR( NADC_ERR_WARN, "empty product" );
      if ( hdr->numState == 0u )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "outdated header" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "outdated header" );
 }
 
 /*+++++++++++++++++++++++++
@@ -248,8 +246,6 @@ unsigned int Read_TOSOMI_Records( const char *flname,
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, rec@*/
 {
-     const char prognm[] = "Read_TOSOMI_Records";
-
      char   tmp_date[9], tmp_time[11], line[MAX_LINE_LENGTH];
      int    numItems, sza, vza, *lon;
 
@@ -260,7 +256,7 @@ unsigned int Read_TOSOMI_Records( const char *flname,
  * open/read TOSOMI product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_ERROR( NADC_ERR_FILE, flname );
 	  return 0;
      }
 /*
@@ -290,7 +286,7 @@ unsigned int Read_TOSOMI_Records( const char *flname,
 	  if ( numItems != NUM_COLUMNS ) {
 	       char msg[80];
 	       (void) snprintf( msg, 80, "incomplete record[%-u]\n", numRec );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, msg );
 	  }
 	  rec->jday = DateTime2SciaJDAY( tmp_date, tmp_time );
 	  rec->meta.sza = sza / 100.f;
@@ -317,8 +313,6 @@ done:
 unsigned int NADC_RD_TOSOMI( const char *flname, struct tosomi_hdr *hdr,
 			     struct tosomi_rec **tosomi_out )
 {
-     const char prognm[] = "NADC_RD_TOSOMI";
-
      register unsigned short num;
 
      char  *cpntr, ctemp[SHORT_STRING_LENGTH];
@@ -353,21 +347,21 @@ unsigned int NADC_RD_TOSOMI( const char *flname, struct tosomi_hdr *hdr,
  */
      Read_TOSOMI_Header( flname, hdr );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "corrupted header" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "corrupted header" );
      if ( hdr->numRec == 0u ) goto done;
 /*
  * allocate enough space to store all records
  */
      tosomi = (struct tosomi_rec *) 
 	  malloc( hdr->numRec * sizeof( struct tosomi_rec ));
-     if ( tosomi == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "tosomi" );
+     if ( tosomi == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "tosomi" );
 /*
  * read data records
  */
      if ( Read_TOSOMI_Records( flname, tosomi ) != hdr->numRec ) {
 	  free ( tosomi );
 	  tosomi_out[0] = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, 
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, 
 			   "failed to read all records" );
      }
      Fill_TOSOMI_Rec_Meta( hdr, tosomi );

@@ -94,8 +94,6 @@ unsigned int SCIA_LV2_RD_DOAS( FILE *fd, const char doas_name[],
 			       const struct dsd_envi *dsd, 
 			       struct doas_scia **doas_out )
 {
-     const char prognm[] = "SCIA_LV2_RD_DOAS";
-
      char         *doas_pntr, *doas_char = NULL;
      size_t       dsd_size, nr_byte;
      unsigned int indx_dsd;
@@ -109,26 +107,26 @@ unsigned int SCIA_LV2_RD_DOAS( FILE *fd, const char doas_name[],
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, doas_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, doas_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, doas_name );
      if ( dsd[indx_dsd].size == 0u ) return 0u;
      if ( ! Use_Extern_Alloc ) {
 	  doas_out[0] = (struct doas_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct doas_scia));
      }
      if ( (doas = doas_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "doas" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "doas" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsd_size = (size_t) dsd[indx_dsd].size;
      if ( (doas_char = (char *) malloc( dsd_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "doas_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "doas_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( doas_char, dsd_size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to DOAS structure
  */
@@ -173,7 +171,7 @@ unsigned int SCIA_LV2_RD_DOAS( FILE *fd, const char doas_name[],
 	  nr_byte = (size_t) n_cross * sizeof( float );
 	  doas->corrpar = (float *) malloc( nr_byte );
 	  if ( doas->corrpar == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "corrpar" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "corrpar" );
 	  (void) memcpy( doas->corrpar, doas_pntr, nr_byte ); 
 	  doas_pntr += nr_byte;
 	  (void) memcpy( &doas->escflag, doas_pntr, ENVI_USHRT );
@@ -200,7 +198,7 @@ unsigned int SCIA_LV2_RD_DOAS( FILE *fd, const char doas_name[],
  * check if we read the whole DSR
  */
      if ( (unsigned int) (doas_pntr - doas_char) != dsd[indx_dsd].size )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, doas_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, doas_name );
      doas_pntr = NULL;
 /*
  * set return values

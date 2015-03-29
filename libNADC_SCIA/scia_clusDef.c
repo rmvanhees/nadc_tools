@@ -100,8 +100,6 @@ herr_t _SCIA_H5_RD_CLUSDEF( hid_t locID, unsigned short metaIndex )
        /*@globals  clusDef;@*/
        /*@modifies clusDef@*/
 {
-     const char prognm[] = "_SCIA_H5_RD_CLUSDEF";
-
      const char tableName[] = "clusDef";
 
      hid_t  dataID = -1;
@@ -115,31 +113,31 @@ herr_t _SCIA_H5_RD_CLUSDEF( hid_t locID, unsigned short metaIndex )
      const hsize_t count[] = {1, MAX_CLUSTER};
 
      if ( (dataID = H5Dopen( locID, tableName, H5P_DEFAULT )) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, tableName );
 
     /* Get the data type ID */
      if ( (typeID = H5Dget_type( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DTYPE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, tableName );
 
      /* Use the equivalent native datatypes */
      mem_typeID = H5Tget_native_type( typeID, H5T_DIR_ASCEND );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
 
      /* Create a memory dataspace handle */
      if ( (mem_spaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
 
      /* Select hyperslap */
      stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, 
 				 start, NULL, count, NULL );
-     if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, tableName );
+     if ( stat < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, tableName );
 
      stat = H5Dread( dataID, mem_typeID, mem_spaceID, spaceID,
 		     H5P_DEFAULT, clusDef );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, tableName );
 
      (void) H5Sclose( mem_spaceID );
      (void) H5Sclose( spaceID );
@@ -174,8 +172,6 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
        /*@modifies metaTable, stateID_prev, absOrbit_prev@*/
 {
-     const char prognm[] = "_SET_SCIA_CLUSDEF";
-
      const size_t mtbl_size = sizeof( struct scia_mtbl_rec );
      const size_t mtbl_offs[NFIELDS_MTBL] = {
 	  HOFFSET(struct scia_mtbl_rec, orbit),
@@ -211,23 +207,23 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
      if ( ! CLUSDEF_DB_EXISTS() ) {
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, 
 			   "can not open file: %s", clusDef_file );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_NONE, msg );
      }
      fid = H5Fopen( clusDef_file, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, clusDef_file );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, clusDef_file );
 
      /* open group with data of requested state */
      (void) snprintf( grpName, 9, "State_%02hhu", stateID );
      H5E_BEGIN_TRY {
           gid = H5Gopen( fid, grpName, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( gid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grpName );
 
      /* read metaTable record */
      stat = H5TBread_records( gid, "metaTable", absOrbit, 1,
 			      mtbl_size, mtbl_offs, mtbl_sizes, 
 			      &metaTable );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "metaTable" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "metaTable" );
 
      /* read Clcon record */
      if ( metaTable.duration == 0 ) {
@@ -237,7 +233,7 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
 	       res = 2;
 	  } else {
 	       if ( _SCIA_H5_RD_CLUSDEF( gid, metaTable.indx_Clcon ) < 0 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "clusDef" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "clusDef" );
 	  }
      }
 
@@ -262,8 +258,6 @@ done:
 -------------------------*/
 bool CLUSDEF_DB_EXISTS( void )
 {
-//     const char prognm[] = "CLUSDEF_DB_EXISTS";
-
      if ( *clusDef_file != '\0' ) return TRUE;
 
      (void) snprintf( clusDef_file, MAX_STRING_LENGTH, "./%s", 
@@ -292,8 +286,6 @@ bool CLUSDEF_DB_EXISTS( void )
 bool CLUSDEF_MTBL_VALID( unsigned char stateID, unsigned short absOrbit )
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
-     const char prognm[] = "CLUSDEF_MTBL_VALID";
-
      static bool res = TRUE;
 
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
@@ -305,19 +297,19 @@ bool CLUSDEF_MTBL_VALID( unsigned char stateID, unsigned short absOrbit )
 	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
 				"no valid Clcon for orbit/state: %05hu/%02hhu", 
 				absOrbit, stateID );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	       res = TRUE;
 	  } else if ( stat == 1 ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
 				"empty entry for orbit/state: %05hu/%02hhu", 
 				absOrbit, stateID );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	       res = FALSE;
 	  } else if ( stat < 0 ) {
 	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
 				"failed to read from %s: %05hu/%02hhu", 
 				name_clusDef_db, absOrbit, stateID );
-	       NADC_ERROR( prognm, NADC_ERR_FATAL, msg );
+	       NADC_ERROR( NADC_ERR_FATAL, msg );
 	       res = FALSE;
 	  } else {                 /* successful read */
 	       res = TRUE;
@@ -346,8 +338,6 @@ unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID,
 				 unsigned short bcps_in_scan )
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEF_DSR_SIZE";
-
      register unsigned char nch = 1;
 
      unsigned short sz = 65;
@@ -408,8 +398,6 @@ unsigned short CLUSDEF_INTG_MIN( unsigned char stateID,
 				 unsigned short absOrbit )
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEF_INTG_MIN";
-
      register unsigned short ncl = 0;
 
      unsigned short intg_min = USHRT_MAX;
@@ -444,8 +432,6 @@ unsigned short CLUSDEF_DURATION( unsigned char stateID,
 				 unsigned short absOrbit )
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEF_DURATION";
-
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
 	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
      }
@@ -468,8 +454,6 @@ unsigned short CLUSDEF_NUM_DET( unsigned char stateID,
 				unsigned short absOrbit )
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEF_NUM_DET";
-
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
 	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
      }
@@ -495,7 +479,6 @@ unsigned short CLUSDEF_CLCON( unsigned char stateID,
 			      struct clusdef_rec *clusdef )
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
-//     const char prognm[] = "CLUSDEF_CLCON";
      register unsigned short ncl, offs = 0;
      register unsigned char chan_id = 0;
      register unsigned char clus_id = 0;

@@ -68,8 +68,6 @@ unsigned int SCIA_RD_H5_LADS( struct param_record param,
 			      struct lads_scia *lads )
      /*@globals lads_size, lads_offs@*/
 {
-     const char prognm[] = "SCIA_RD_H5_LADS";
-
      hid_t   ads_id;
      hsize_t nfields, num_lads;
 
@@ -82,7 +80,7 @@ unsigned int SCIA_RD_H5_LADS( struct param_record param,
  * create/open group /ADS/LADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * read info_h5 records
  */
@@ -101,8 +99,6 @@ void SCIA_WR_H5_LADS( struct param_record param, unsigned int nr_lads,
 		      const struct lads_scia *lads )
      /*@globals lads_size, lads_offs@*/
 {
-     const char prognm[] = "SCIA_WR_H5_LADS";
-
      hid_t   ads_id;
      hsize_t adim;
      hid_t   lads_type[NFIELDS];
@@ -120,7 +116,7 @@ void SCIA_WR_H5_LADS( struct param_record param, unsigned int nr_lads,
  * create/open group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * define user-defined data types of the Table-fields
  */

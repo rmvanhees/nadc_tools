@@ -58,14 +58,11 @@ unsigned int ENVI_GET_DSD_INDEX( unsigned int num_dsd,
 {
      register unsigned int nd = 0;
 
-     const char prognm[] = "ENVI_GET_DSD_INDEX";
-
      do {
 	  if ( strcmp( dsd[nd].name, descriptor ) == 0 ) break;
      } while ( ++nd < num_dsd );
 
-     if ( nd == num_dsd )
-	  NADC_GOTO_ERROR( prognm, NADC_PDS_DSD_ABSENT, descriptor );
+     if ( nd == num_dsd ) NADC_GOTO_ERROR( NADC_PDS_DSD_ABSENT, descriptor );
  done:
      return nd;
 }

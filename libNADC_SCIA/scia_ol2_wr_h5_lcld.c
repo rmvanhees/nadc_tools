@@ -83,8 +83,6 @@ static const size_t lcld_offs[NFIELDS] = {
 void SCIA_OL2_WR_H5_LCLD( struct param_record param, 
 			  unsigned int nr_lcld, const struct lcld_scia *lcld )
 {
-     const char prognm[] = "SCIA_OL2_WR_H5_LCLD";
-
      register unsigned int nr;
 
      int     compress;
@@ -123,11 +121,11 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
  * create group /MDS/<lcld_name>
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      lcld_id = H5Gcreate( grp_id, dsd_name,
 			  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( lcld_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, dsd_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, dsd_name );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -172,7 +170,7 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
  * 
  */
      vdata = (hvl_t *) malloc( nr_lcld * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      total = 0;
      do {
@@ -181,7 +179,7 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lcld[nr].tangent_hghts,
                               vdata[nr].len * sizeof(float) );
@@ -194,7 +192,7 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
  * 
  */
      vdata = (hvl_t *) malloc( nr_lcld * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      total = 0;
      do {
@@ -203,7 +201,7 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lcld[nr].cir,
                               vdata[nr].len * sizeof(float) );
@@ -216,7 +214,7 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
  * 
  */
      vdata = (hvl_t *) malloc( nr_lcld * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      total = 0;
      do {
@@ -225,7 +223,7 @@ void SCIA_OL2_WR_H5_LCLD( struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lcld[nr].limb_para,
                               vdata[nr].len * sizeof(float) );

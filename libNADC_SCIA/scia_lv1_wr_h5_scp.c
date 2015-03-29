@@ -65,8 +65,6 @@ static const size_t scp_offs[NFIELDS] = {
 void SCIA_LV1_WR_H5_SCP( struct param_record param, unsigned int nr_scp,
 			 const struct scp_scia *scp )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_SCP";
-
      hid_t   gads_id;
      hsize_t adim;
      hid_t   scp_type[NFIELDS];
@@ -84,7 +82,7 @@ void SCIA_LV1_WR_H5_SCP( struct param_record param, unsigned int nr_scp,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * define user-defined data types of the Table-fields
  */

@@ -24,42 +24,40 @@ int ADAGUC_DEF_VAR( int ncid, nc_type xtype, int dimids,
 		    const char *long_name, const char *standard,
 		    const char *ancillary )
 {
-     const char prognm[] = "ADAGUC_DEF_VAR";
-
      int retval;
      int var_id;
 
      retval = nc_def_var( ncid, name, xtype, 1, &dimids, &var_id );
      if ( retval != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "long_name",
                                strlen(long_name), long_name );
      if ( retval != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "standard_name",
                                strlen(long_name), long_name );
      if ( retval != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "coordinates", 7, "lon lat" );
      if ( retval != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      if ( unit != NULL ) {
           retval = nc_put_att_text( ncid, var_id, "units",
                                     strlen(unit), unit );
           if ( retval != NC_NOERR )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+               NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
      if ( standard != NULL ) {
 	  retval = nc_put_att_text( ncid, var_id, "standard_name",
                                     strlen(standard), standard );
           if ( retval != NC_NOERR )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+               NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
      if ( ancillary != NULL ) {
 	  retval = nc_put_att_text( ncid, var_id, "ancillary_variables",
                                     strlen(ancillary), ancillary );
           if ( retval != NC_NOERR )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+               NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
      return var_id;
  done:

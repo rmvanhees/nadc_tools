@@ -61,8 +61,6 @@
 void SCIA_OL2_WR_ASCII_CLD( struct param_record param, unsigned int num_dsr, 
 			    const struct cld_sci_ol *cld )
 {
-     const char prognm[] = "SCIA_OL2_WR_ASCII_CLD";
-
      register unsigned int nd, nr;
 
      char  date_str[UTC_STRING_LENGTH];
@@ -72,7 +70,7 @@ void SCIA_OL2_WR_ASCII_CLD( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "cld" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of CLOUD_AEROSOL record
  */
@@ -140,8 +138,6 @@ void SCIA_OL2_WR_ASCII_NFIT( const char *mds_name,
 			     unsigned int num_dsr, 
 			     const struct nfit_scia *nfit )
 {
-     const char prognm[] = "SCIA_OL2_WR_ASCII_NFIT";
-
      register unsigned int nd, nr;
 
      char  date_str[UTC_STRING_LENGTH];
@@ -152,7 +148,7 @@ void SCIA_OL2_WR_ASCII_NFIT( const char *mds_name,
 
      outfl = CRE_ASCII_File( param.outfile, mds_name );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
      nadc_write_header( outfl, 0, param.infile, mds_name );
 /*
  * write ASCII dump of NFIT record
@@ -227,8 +223,6 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 			     unsigned int num_dsr, 
 			     const struct lfit_scia *lfit )
 {
-     const char prognm[] = "SCIA_OL2_WR_ASCII_LFIT";
-
      register unsigned int nd, nr, ns, nss;
 
      char  date_str[UTC_STRING_LENGTH];
@@ -242,7 +236,7 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 
      outfl = CRE_ASCII_File( param.outfile, mds_name );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
      nadc_write_header( outfl, 0, param.infile, mds_name );
 /*
  * write ASCII dump of LFIT record
@@ -282,7 +276,7 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 	       * (unsigned int) lfit[nd].num_rlevel;
 	  rbuff = (float *) malloc( ndim * sizeof( float ));
 	  if ( rbuff == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  for ( ns = 0; ns < ndim; ns++ )
 	       rbuff[ns] = lfit[nd].mainrec[ns].tangvmr;
 	  nadc_write_arr_float( outfl, ++nr, "mainrec.tangvmr", 
@@ -305,7 +299,7 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 	       * (unsigned int) lfit[nd].num_rlevel;
 	  rbuff = (float *) malloc( ndim * sizeof( float ));
 	  if ( rbuff == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  for ( ns = 0; ns < ndim; ns++ )
 	       rbuff[ns] = lfit[nd].scaledrec[ns].tangvmr;
 	  nadc_write_arr_float( outfl, ++nr, "scaledrec.tangvmr", 
@@ -327,11 +321,11 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 	  ndim = (unsigned int) lfit[nd].num_rlevel;
 	  cbuff = (signed char *) malloc( (size_t) ndim );
 	  if ( cbuff == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
 	  rbuff = (float *) malloc( ndim * sizeof( float ));
 	  if ( rbuff == NULL ) {
 	       free( cbuff );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  }
 	  for ( ns = 0; ns < ndim; ns++ )
 	       rbuff[ns] = lfit[nd].mgrid[ns].tangh;
@@ -365,7 +359,7 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 	       ndim = (unsigned int) lfit[nd].stvec_size;
 	       rbuff = (float *) malloc( ndim * sizeof( float ));
 	       if ( rbuff == NULL ) 
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+		    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	       for ( ns = 0; ns < ndim; ns++ )
 		    rbuff[ns] = lfit[nd].statevec[ns].value;
 	       nadc_write_arr_float( outfl, nr, "statevec.value",
@@ -380,7 +374,7 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 	       dims[0] = 4;
 	       cbuff = (signed char *) malloc( (size_t) dims[0] * dims[1] );
 	       if ( cbuff == NULL ) 
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+		    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
 	       for ( nss = ns = 0; ns < ndim; ns ++ ) {
 		    (void) memcpy( &cbuff[nss], lfit[nd].statevec[ns].type, 4 );
 		    nss += 4;
@@ -430,8 +424,6 @@ void SCIA_OL2_WR_ASCII_LFIT( const char *mds_name,
 void SCIA_OL2_WR_ASCII_LCLD( struct param_record param, unsigned int num_dsr, 
 			     const struct lcld_scia *lcld )
 {
-     const char prognm[] = "SCIA_OL2_WR_ASCII_LCLD";
-
      register unsigned int nd, nr;
 
      char  date_str[UTC_STRING_LENGTH];
@@ -441,7 +433,7 @@ void SCIA_OL2_WR_ASCII_LCLD( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "lcld" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of LIM_CLOUDS record
  */

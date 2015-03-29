@@ -56,14 +56,12 @@ void GOME_WR_H5_PIR( struct param_record param, const struct pir_gome *pir )
 {
      hid_t   grp_id;
      hsize_t adim;
-
-     const char prognm[] = "GOME_WR_H5_PIR";
 /*
  * create group PIR
  */
      grp_id = H5Gcreate( param.hdf_file_id, "/PIR", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/PIR" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/PIR" );
 /*
  * +++++ create/write attributes in the /PIR group
  */

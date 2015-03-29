@@ -64,12 +64,10 @@ void SCIA_LV2_WR_ASCII_SQADS( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_SQADS";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "sqads" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SQADS record
  */
@@ -109,12 +107,10 @@ void SCIA_LV2_WR_ASCII_STATE( struct param_record param, unsigned int num_dsr,
 
      char date_str[UTC_STRING_LENGTH];
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_STATE";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "state" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of STATE record
  */
@@ -166,12 +162,10 @@ void SCIA_LV2_WR_ASCII_GEO( struct param_record param, unsigned int num_dsr,
      double rbuff[2 * 4];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_GEO";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "geo" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of GEO record
  */

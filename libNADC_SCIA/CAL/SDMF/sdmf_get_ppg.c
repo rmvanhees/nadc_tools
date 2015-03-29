@@ -67,8 +67,6 @@
 bool SDMF_get_PPG_24( unsigned short absOrbit, unsigned short channel, 
 		      float *pixelGain )
 {
-     const char prognm[] = "SDMF_get_PPG_24";
-
      register unsigned np = 0;
 
      char ppg_fl[MAX_STRING_LENGTH];
@@ -102,9 +100,9 @@ bool SDMF_get_PPG_24( unsigned short absOrbit, unsigned short channel,
  * read Pixel-to-Pixel Gain values
  */
      if ( (db_fp = fopen( ppg_fl, "r" )) == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, ppg_fl );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, ppg_fl );
      if ( fread( &mrec, disk_sz_ppg_rec, 1, db_fp ) != 1 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "mrec" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "mrec" );
      (void) fclose( db_fp );
 
      if ( channel == 0 ) {
@@ -139,8 +137,6 @@ bool SDMF_get_PPG_24( unsigned short absOrbit, unsigned short channel,
 bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
 		      float *pixelGain )
 {
-     const char prognm[] = "SDMF_get_PPG_30";
-
      const char msg_found[] =
           "\n\tapplied SDMF Pixel-to-Pixel Gain (v3.0) of Orbit %-d";
      const char msg_notfound[] =
@@ -180,7 +176,7 @@ bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, sdmf_db );
 /*
  * find PPG values, requirements:
  *  - orbit number within a range MAX_DiffOrbitNumber
@@ -190,7 +186,7 @@ bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
 	  numIndx = 1;
 	  (void) SDMF_get_metaIndex( fid, orbit + delta, &numIndx, &metaIndx );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_metaIndex" );
 	  if ( numIndx > 0 ) {
 	       found = TRUE;
 	  } else {
@@ -198,7 +194,7 @@ bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
 	       if ( abs( delta ) > MAX_DiffOrbitNumber )  {
 		    (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
 				     msg_notfound, orbit );
-		    NADC_GOTO_ERROR( prognm, NADC_SDMF_ABSENT, str_msg );
+		    NADC_GOTO_ERROR( NADC_SDMF_ABSENT, str_msg );
 	       }
 	  }
      } while ( ! found );
@@ -211,7 +207,7 @@ bool SDMF_get_PPG_30( unsigned short absOrbit, unsigned short channel,
                                pixelGain );
      }
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg_found, orbit + delta );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     NADC_ERROR( NADC_ERR_NONE, str_msg );
 /*
  * close SDMF pixel-to-pixel gain database
  */
@@ -231,8 +227,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_get_ppg";
-
      register unsigned short np = 0;
 
      unsigned short orbit;
@@ -252,11 +246,11 @@ int main( int argc, char *argv[] )
 
      fnd_24 = SDMF_get_PPG_24( orbit, channel, ppg_24 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_PPG_24" );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_PPG_24" );
      if ( ! fnd_24 ) (void) fprintf( stderr, "# no solution for SDMF v2.4\n" );
      fnd_30 = SDMF_get_PPG_30( orbit, channel, ppg_30 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_PPG_30" );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_PPG_30" );
      if ( ! fnd_30 ) (void) fprintf( stderr, "# no solution for SDMF v3.0\n" );
 
      if ( ! (fnd_24 || fnd_30) ) goto done;

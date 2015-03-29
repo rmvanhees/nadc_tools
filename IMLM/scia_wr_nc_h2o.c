@@ -86,8 +86,6 @@
 -------------------------*/
 void SCIA_WR_NC_H2O_META( int ncid, const struct imlm_hdr *hdr )
 {
-     const char prognm[] = "SCIA_WR_NC_H2O_META";
-
      register unsigned short ni;
 
      char cbuff[SHORT_STRING_LENGTH];
@@ -102,14 +100,14 @@ void SCIA_WR_NC_H2O_META( int ncid, const struct imlm_hdr *hdr )
 				    strlen(meta_root_list[ni].attr_value)+1,
 				    meta_root_list[ni].attr_value );
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
 /*
  * Product meta-data
  */
      retval = nc_def_var( ncid, "product", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = 0; ni < numProdKeys; ni++ ) {
 	  if ( strcmp(meta_prod_list[ni].attr_name, "input_products")  == 0 )
 	       meta_prod_list[ni].attr_value = hdr->l1b_product;
@@ -127,68 +125,68 @@ void SCIA_WR_NC_H2O_META( int ncid, const struct imlm_hdr *hdr )
 				    strlen(meta_prod_list[ni].attr_value)+1,
 				    meta_prod_list[ni].attr_value );
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
 /*
  * Custom meta-data
  */
      retval = nc_def_var( ncid, "custom", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_ushort( ncid, var_id, "number_input_products", 
 				 NC_INT, 1, &hdr->numProd );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_uint( ncid, var_id, "abs_orbit", 
 			       NC_UINT, hdr->numProd, hdr->orbit );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "pixelmask_version", 
 			       strlen(hdr->pixelmask_version)+1, 
 			       hdr->pixelmask_version );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "cloudmask_version", 
 			       strlen(hdr->cloudmask_version)+1, 
 			       hdr->cloudmask_version );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_uchar( ncid, var_id, "Sciamachy_channel", 
 				NC_INT, 1, &hdr->scia_channel );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) snprintf( cbuff, SHORT_STRING_LENGTH, "%hu - %-hu", 
 		      hdr->window_pixel[0], hdr->window_pixel[1] );
      retval = nc_put_att_text( ncid, var_id, "window_pixels", 
 			       strlen(cbuff)+1, cbuff );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) snprintf( cbuff, SHORT_STRING_LENGTH, "%-.2f - %-.2f", 
 		      hdr->window_wave[0], hdr->window_wave[1] );
      retval = nc_put_att_text( ncid, var_id, "window_wave", 
 			       strlen(cbuff)+1, cbuff );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 /*
  * Projection meta-data
  */
      retval = nc_def_var( ncid, "projection", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = 0; ni < numGeoKeys; ni++ ) {
 	  retval = nc_put_att_text( ncid, var_id,
 				    geo_prod_list[ni].attr_name,
 				    strlen(geo_prod_list[ni].attr_value)+1,
 				    geo_prod_list[ni].attr_value );
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
 /*
  * ISO meta-data
  */
      retval = nc_def_var( ncid, "iso_dataset", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = 0; ni < numIsoKeys; ni++ ) {
 	  if ( strcmp(iso_prod_list[ni].attr_name, "max-x")  == 0 || 
 	       strcmp(iso_prod_list[ni].attr_name, "min-x")  == 0 ||
@@ -206,7 +204,7 @@ void SCIA_WR_NC_H2O_META( int ncid, const struct imlm_hdr *hdr )
 					 iso_prod_list[ni].attr_value );
 	  }
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      }
 }
 
@@ -226,8 +224,6 @@ void SCIA_WR_NC_H2O_META( int ncid, const struct imlm_hdr *hdr )
 void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 			  const struct imlm_rec *rec )
 {
-     const char prognm[] = "SCIA_WR_NC_H2O_REC";
-
      register unsigned int ni, nr;
 
      int    retval;
@@ -245,11 +241,11 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
  * write dimension scale "time"
  */
      dbuff = (double *) malloc( numRec * sizeof(double) );
-     if ( dbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "dbuff" );
+     if ( dbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "dbuff" );
 
      retval = nc_def_dim( ncid, "time", (size_t) numRec, &time_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_def_var( ncid, "time", NC_DOUBLE, 1, &time_id, &var_id );
      retval = nc_put_att_text( ncid, var_id, "long_name", 4, "time" );
      retval = nc_put_att_text( ncid, var_id, "units", 34, 
@@ -260,16 +256,16 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 
      retval = nc_def_dim( ncid, "nv", NUM_CORNERS, &nv_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 /*
  * write longitude and latitude of measurements
  */
      rbuff = (float *) malloc( numRec * sizeof(float) );
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 
      retval = nc_def_var( ncid, "lon", NC_FLOAT, 1, &time_id, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "long_name", 9, "longitude" );
      retval = nc_put_att_text( ncid, var_id, "standard_name", 9, "longitude" );
      retval = nc_put_att_text( ncid, var_id, "units", 12, "degrees_east" );
@@ -279,7 +275,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 
      retval = nc_def_var( ncid, "lat", NC_FLOAT, 1, &time_id, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_text( ncid, var_id, "long_name", 8, "latitude" );
      retval = nc_put_att_text( ncid, var_id, "standard_name", 8, "latitude" );
      retval = nc_put_att_text( ncid, var_id, "units", 13, "degrees_north" );
@@ -323,7 +319,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 			     "atmosphere_number_content_of_water_in_air",
 			     "H2O_error" );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "H2O" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "H2O" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].H2O;
      retval = nc_put_var_float( ncid, var_id, rbuff );
      var_id = ADAGUC_DEF_VAR( ncid, NC_FLOAT, time_id, "H2O_error", "molecules/cm2",
@@ -331,7 +327,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 		    "atmosphere_number_content_of_water_in_air standard_error",
 			     NULL );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "H2O_error" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "H2O_error" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].H2O_err;
      retval = nc_put_var_float( ncid, var_id, rbuff );
 
@@ -341,7 +337,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 			     "atmosphere_number_content_of_methane_in_air",
 			     "CH4_error" );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "CH4" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "CH4" );
      retval = nc_put_att_text( ncid, var_id, "comment",
 			       strlen(CH4_COMMENT), CH4_COMMENT );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].CH4;
@@ -352,7 +348,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
 		  "atmosphere_number_content_of_methane_in_air standard_error",
 			     NULL );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "CH4_error" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "CH4_error" );
      retval = nc_put_att_text( ncid, var_id, "comment",
 			       strlen(CH4_ERR_COMMENT), CH4_ERR_COMMENT );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].CH4_err;
@@ -362,7 +358,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
      var_id = ADAGUC_DEF_VAR( ncid, NC_FLOAT, time_id, "albedo", NULL,
 			     "albedo", "surface_albedo", NULL );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "albedo" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "albedo" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].albedo;
      retval = nc_put_var_float( ncid, var_id, rbuff );
 
@@ -370,7 +366,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
      var_id = ADAGUC_DEF_VAR( ncid, NC_FLOAT, time_id, "cloudFraction", NULL,
 			     "cloud fraction", "cloud_area_fraction", NULL );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudFraction" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudFraction" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cl_fr;
      retval = nc_put_var_float( ncid, var_id, rbuff );
 
@@ -378,7 +374,7 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
      var_id = ADAGUC_DEF_VAR( ncid, NC_FLOAT, time_id, "meanElevation", "m",
 			     "mean elevation", "surface_altitude", NULL );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "meanElevation" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "meanElevation" );
      retval = nc_put_att_text( ncid, var_id, "comment",
 			       strlen(ELEV_COMMENT), ELEV_COMMENT );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].mean_elev;
@@ -387,20 +383,20 @@ void SCIA_WR_NC_H2O_REC( int ncid, unsigned int numRec,
  * write longitude and latitude bounding boxes
  */
      rbuff = (float *) realloc( rbuff, NUM_CORNERS * numRec * sizeof(float) );
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 
      dimids[0] = time_id;
      dimids[1] = nv_id;
      retval = nc_def_var( ncid, "lon_bnds", NC_FLOAT, 2, dimids, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = nr = 0; nr < numRec; nr++, ni += NUM_CORNERS )
 	  (void) memcpy( rbuff+ni, rec[nr].lon_corner, nr_byte );
      retval = nc_put_var_float( ncid, var_id, rbuff );
 
      retval = nc_def_var( ncid, "lat_bnds", NC_FLOAT, 2, dimids, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = nr = 0; nr < numRec; nr++, ni += NUM_CORNERS )
 	  (void) memcpy( rbuff+ni, rec[nr].lat_corner, nr_byte );
      retval = nc_put_var_float( ncid, var_id, rbuff );

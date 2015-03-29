@@ -65,8 +65,6 @@ static const size_t sfp_offs[NFIELDS] = {
 void SCIA_LV1_WR_H5_SFP( struct param_record param, unsigned int nr_sfp,
 			 const struct sfp_scia *sfp )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_SFP";
-
      hid_t   gads_id;
      hbool_t compress;
 
@@ -102,7 +100,7 @@ void SCIA_LV1_WR_H5_SFP( struct param_record param, unsigned int nr_sfp,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * create table
  */

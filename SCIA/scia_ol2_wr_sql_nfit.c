@@ -202,8 +202,6 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
 			   const struct ngeo_scia *ngeo, unsigned int num_nfit, 
 			   const struct nfit_scia *nfit )
 {
-     const char prognm[] = "SCIA_OL2_WR_SQL_NFIT";
-
      register unsigned int nf, ng;
      register unsigned int affectedRows = 0u;
 
@@ -241,10 +239,10 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
 		      META_TBL_NAME, sciafl );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, sciafl );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, sciafl );
      }
      cpntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( cpntr, (char **) NULL, 10 );     
@@ -254,7 +252,7 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * insert all Nadir Fit records
@@ -269,18 +267,18 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
 			   CHECK_TABLE_FOR_JDAY, tbl_name, jday );
           res = PQexec( conn, sql_query );
           if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
           }
 	  while ( memcmp( &nfit[nf].mjd, &ngeo[ng].mjd, SIZE_MJD ) != 0 
 		  && ng < num_ngeo ) ng++;
 	  if ( ng == num_ngeo ) {
-	       NADC_ERROR( prognm, NADC_ERR_FATAL, "no matching geolocation" );
+	       NADC_ERROR( NADC_ERR_FATAL, "no matching geolocation" );
 	       goto done;
 	  }
 
@@ -297,7 +295,7 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
 	       res = PQexec( conn,
 			     "SELECT nextval(\'tile_no2_ol_pk_tile_seq\')" );
 	       if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
+		    NADC_GOTO_ERROR( NADC_ERR_SQL, 
 				     PQresultErrorMessage(res) );
 	       cpntr = PQgetvalue( res, 0, 0 );
 	       tile_id = strtoll( cpntr, (char **) NULL, 10 );
@@ -306,23 +304,23 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
 					   tile_id, jday, ngeo+nf, nfit+nf );
           }
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE ) {
-               NADC_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+               NADC_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
 /* do actual insert */
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -336,10 +334,10 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE, "[%s] affectedRows=%-u", 
 		      nfit_name, affectedRows );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
 }

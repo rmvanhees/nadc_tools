@@ -115,8 +115,6 @@ herr_t NADC_CRE_H5_EArray( hid_t locID, const char *dset_name,
 			   unsigned int compress, void *fill_data,
 			   hid_t typeID, const void *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray";
-
      hid_t   dataID  = -1;
      hid_t   spaceID = -1;
      hid_t   plistID = -1;
@@ -129,8 +127,7 @@ herr_t NADC_CRE_H5_EArray( hid_t locID, const char *dset_name,
 
 	  hsize_t *maxdims = (hsize_t *) malloc( rank * sizeof(hsize_t) );
 	  if ( maxdims == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "maxdims" );
-
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "maxdims" );
 	  do {
 	       if ( ni == extdim )
 		    maxdims[ni] = H5S_UNLIMITED;
@@ -141,42 +138,42 @@ herr_t NADC_CRE_H5_EArray( hid_t locID, const char *dset_name,
 	  spaceID = H5Screate_simple( rank, dims, maxdims );
 	  free( maxdims );
 	  if ( spaceID < 0 ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
 	  /* Modify dataset creation properties, i.e. enable chunking  */
 	  plistID = H5Pcreate( H5P_DATASET_CREATE );
 	  if ( H5Pset_chunk( plistID, rank, dims_chunk ) < 0 ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "set chunking" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "set chunking" );
 
           /* set the fill value using a struct as the data type */
 	  if ( fill_data != NULL 
 	       && H5Pset_fill_value( plistID, typeID, fill_data ) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "set FillValue" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "set FillValue" );
 
           /* dataset creation property list is modified to use */
 	  if ( compress > 0 
 	       && (H5Pset_shuffle( plistID ) < 0
 		   || H5Pset_deflate( plistID, compress ) < 0) )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "set compression" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "set compression" );
 
           /* create the (chunked) dataset */
 	  dataID = H5Dcreate( locID, dset_name, typeID, spaceID, 
 			      H5P_DEFAULT, plistID, H5P_DEFAULT );
 	  if ( dataID < 0 ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, dset_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name );
 
           /* end access to the property list */
 	  if ( H5Pclose( plistID ) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "failed to close" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "failed to close" );
      } else {
 	  if ( (spaceID = H5Screate_simple( rank, dims, NULL )) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
           /* create the dataset (not chunked) */
 	  dataID = H5Dcreate( locID, dset_name, typeID, spaceID, 
 			      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( dataID < 0 ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, dset_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name );
      }
 /*
  * write the data
@@ -184,7 +181,7 @@ herr_t NADC_CRE_H5_EArray( hid_t locID, const char *dset_name,
      if ( buffer != NULL ) {
 	  stat = H5Dwrite( dataID, typeID, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
 			   buffer );
-	  if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, dset_name );
+	  if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_WR, dset_name );
      }
      (void) H5Sclose( spaceID );
      (void) H5Dclose( dataID );
@@ -217,8 +214,6 @@ void NADC_CRE_H5_EArray_uint8( hid_t locID, const char *arrName,
 			       const hsize_t xdim, int compression,
 			       const unsigned char *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray_uint8";
-
      const int     extdim  = 0;
      const int     rank    = (xdim == 1) ? 1 : 2;
      const hsize_t dims[2] = { 1, xdim };
@@ -230,7 +225,7 @@ void NADC_CRE_H5_EArray_uint8( hid_t locID, const char *arrName,
      stat = NADC_CRE_H5_EArray( locID, arrName, rank, dims, dims_chunk,
                                 extdim, (unsigned int) compression, NULL, 
                                 H5T_NATIVE_UCHAR, buffer );
-     if ( stat < 0 ) NADC_ERROR( prognm, NADC_ERR_HDF_CRE, arrName );
+     if ( stat < 0 ) NADC_ERROR( NADC_ERR_HDF_CRE, arrName );
 }
 
 /*+++++++++++++++++++++++++
@@ -253,8 +248,6 @@ void NADC_CRE_H5_EArray_uint16( hid_t locID, const char *arrName,
 				const hsize_t xdim, int compression,
 				const unsigned short *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray_uint16";
-
      const int     extdim  = 0;
      const int     rank    = (xdim == 1) ? 1 : 2;
      const hsize_t dims[2] = { 1, xdim };
@@ -266,7 +259,7 @@ void NADC_CRE_H5_EArray_uint16( hid_t locID, const char *arrName,
      stat = NADC_CRE_H5_EArray( locID, arrName, rank, dims, dims_chunk,
                                 extdim, (unsigned int) compression, NULL,
                                 H5T_NATIVE_USHORT, buffer );
-     if ( stat < 0 ) NADC_ERROR( prognm, NADC_ERR_HDF_CRE, arrName );
+     if ( stat < 0 ) NADC_ERROR( NADC_ERR_HDF_CRE, arrName );
 }
 
 /*+++++++++++++++++++++++++
@@ -289,8 +282,6 @@ void NADC_CRE_H5_EArray_int32( hid_t locID, const char *arrName,
 			       const hsize_t xdim, int compression,
 			       const int *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray_int32";
-
      const int     extdim  = 0;
      const int     rank    = (xdim == 1) ? 1 : 2;
      const hsize_t dims[2] = { 1, xdim };
@@ -302,7 +293,7 @@ void NADC_CRE_H5_EArray_int32( hid_t locID, const char *arrName,
      stat = NADC_CRE_H5_EArray( locID, arrName, rank, dims, dims_chunk,
                                 extdim, (unsigned int) compression, NULL,
                                 H5T_NATIVE_INT, buffer );
-     if ( stat < 0 ) NADC_ERROR( prognm, NADC_ERR_HDF_CRE, arrName );
+     if ( stat < 0 ) NADC_ERROR( NADC_ERR_HDF_CRE, arrName );
 }
 
 /*+++++++++++++++++++++++++
@@ -325,8 +316,6 @@ void NADC_CRE_H5_EArray_uint32( hid_t locID, const char *arrName,
 			       const hsize_t xdim, int compression,
 			       const unsigned int *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray_uint32";
-
      const int     extdim  = 0;
      const int     rank    = (xdim == 1) ? 1 : 2;
      const hsize_t dims[2] = { 1, xdim };
@@ -338,7 +327,7 @@ void NADC_CRE_H5_EArray_uint32( hid_t locID, const char *arrName,
      stat = NADC_CRE_H5_EArray( locID, arrName, rank, dims, dims_chunk,
                                 extdim, (unsigned int) compression, NULL,
                                 H5T_NATIVE_UINT, buffer );
-     if ( stat < 0 ) NADC_ERROR( prognm, NADC_ERR_HDF_CRE, arrName );
+     if ( stat < 0 ) NADC_ERROR( NADC_ERR_HDF_CRE, arrName );
 }
 
 /*+++++++++++++++++++++++++
@@ -361,8 +350,6 @@ void NADC_CRE_H5_EArray_float( hid_t locID, const char *arrName,
 			       const hsize_t xdim, int compression,
 			       const float *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray_float";
-
      const int     extdim  = 0;
      const int     rank    = (xdim == 1) ? 1 : 2;
      const hsize_t dims[2] = { 1, xdim };
@@ -374,7 +361,7 @@ void NADC_CRE_H5_EArray_float( hid_t locID, const char *arrName,
      stat = NADC_CRE_H5_EArray( locID, arrName, rank, dims, dims_chunk,
                                 extdim, (unsigned int) compression, NULL,
                                 H5T_NATIVE_FLOAT, buffer );
-     if ( stat < 0 ) NADC_ERROR( prognm, NADC_ERR_HDF_CRE, arrName );
+     if ( stat < 0 ) NADC_ERROR( NADC_ERR_HDF_CRE, arrName );
 }
 
 /*+++++++++++++++++++++++++
@@ -398,8 +385,6 @@ void NADC_CRE_H5_EArray_struct( hid_t locID, const char *arrName,
 				const hsize_t xdim, int compression,
 				hid_t typeID, const void *buffer )
 {
-     const char prognm[] = "NADC_CRE_H5_EArray_struct";
-
      const int     extdim  = 0;
      const int     rank    = (xdim == 1) ? 1 : 2;
      const hsize_t dims[2] = { 1, xdim };
@@ -411,7 +396,7 @@ void NADC_CRE_H5_EArray_struct( hid_t locID, const char *arrName,
      stat = NADC_CRE_H5_EArray( locID, arrName, rank, dims, dims_chunk,
                                 extdim, (unsigned int) compression, NULL,
                                 typeID, buffer );
-     if ( stat < 0 ) NADC_ERROR( prognm, NADC_ERR_HDF_CRE, arrName );
+     if ( stat < 0 ) NADC_ERROR( NADC_ERR_HDF_CRE, arrName );
 }
 
 /*+++++++++++++++++++++++++
@@ -432,8 +417,6 @@ void NADC_CRE_H5_EArray_struct( hid_t locID, const char *arrName,
 void NADC_CAT_H5_EArray( hid_t locID, const char *dset_name, 
 			 int extdim, size_t count, const void *buffer )
 {
-     const char prognm[] = "NADC_CAT_H5_EArray";
-
      int      rank;
 
      hid_t    dataID;
@@ -450,22 +433,22 @@ void NADC_CAT_H5_EArray( hid_t locID, const char *dset_name,
 
 /* open the dataset */
      if ( (dataID = H5Dopen( locID, dset_name, H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name );
 
 /* get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
 /* get rank */
      if ( (rank = H5Sget_simple_extent_ndims( spaceID )) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "get rank" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "get rank" );
 
 /* get dimensions */
      dims = (hsize_t *) malloc( rank * sizeof(hsize_t) );
      dims_ext = (hsize_t *) malloc( rank * sizeof(hsize_t) );
      offset = (hsize_t *) calloc( rank, sizeof(hsize_t) );
      if ( H5Sget_simple_extent_dims( spaceID, dims, NULL ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
      offset[extdim] = dims[extdim];
      (void) memcpy( dims_ext, dims, rank * sizeof(hsize_t) );
      dims_ext[extdim] = count;
@@ -473,20 +456,20 @@ void NADC_CAT_H5_EArray( hid_t locID, const char *dset_name,
 
 /* terminate access to dataspace */
      if ( H5Sclose( spaceID ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, "failed to close" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, "failed to close" );
 
 /* extend the dataset */
      if ( H5Dset_extent( dataID, dims ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "failed to extend" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "failed to extend" );
 
 /* select a hyperslab */
      if ( (spaceID = H5Dget_space( dataID )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, "dset_name" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, "dset_name" );
      stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, offset, NULL,
 				 dims_ext, NULL );
      free( dims );
      free( offset );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
 /* define memory space */
      mem_spaceID = H5Screate_simple( rank, dims_ext, NULL );
@@ -494,12 +477,12 @@ void NADC_CAT_H5_EArray( hid_t locID, const char *dset_name,
 
 /* get an identifier for datatype. */
      if ( (typeID = H5Dget_type( dataID )) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DTYPE, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, dset_name );
 
 /* write the data to hyperslab */
      stat = H5Dwrite( dataID, typeID, mem_spaceID, spaceID, H5P_DEFAULT, 
 		      buffer );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, dset_name );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_WR, dset_name );
 
 /* terminate access to datatype */
      (void) H5Tclose( typeID );
@@ -540,8 +523,6 @@ void NADC_CAT_H5_EArray( hid_t locID, const char *dset_name,
 void NADC_WR_H5_EArray( hid_t locID, const char *dset_name, 
 			size_t Ystart, size_t Ycount, const void *buffer )
 {
-     const char prognm[] = "NADC_WR_H5_EArray";
-
      int      rank;
 
      herr_t   stat;
@@ -557,17 +538,17 @@ void NADC_WR_H5_EArray( hid_t locID, const char *dset_name,
 
 /* open the dataset */
      if ( (dataID = H5Dopen( locID, dset_name, H5P_DEFAULT )) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name );
 
 /* get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
 /* get rank */
      if ( (rank = H5Sget_simple_extent_ndims( spaceID )) <= 0 ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_PLIST, "get rank" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_PLIST, "get rank" );
      } else if ( rank > 2 ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "rank limited to 2" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "rank limited to 2" );
      }
      (void) H5Sget_simple_extent_dims( spaceID, dims, NULL );
 
@@ -575,7 +556,7 @@ void NADC_WR_H5_EArray( hid_t locID, const char *dset_name,
      count[0] = Ycount;
      count[1] = dims[1];
      if ( (mem_spaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
 /* define a hyperslab in the dataset */
      (void) H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, 
@@ -583,12 +564,12 @@ void NADC_WR_H5_EArray( hid_t locID, const char *dset_name,
 
 /* get an identifier for the datatype. */
      if ( (typeID = H5Dget_type( dataID )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DTYPE, dset_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, dset_name );
 
 /* write data to hyperslap */
      stat = H5Dwrite( dataID, typeID, mem_spaceID, spaceID, H5P_DEFAULT, 
 		      buffer );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, dset_name );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_WR, dset_name );
  done:
 /* terminate access to the datatype */
      if ( typeID > 0 ) (void) H5Tclose( typeID );
@@ -623,8 +604,6 @@ void NADC_RD_H5_EArray_uint8( hid_t locID, const char *dset_name,
 			      hsize_t xdim, int indexNum, 
 			      const int *metaIndex, unsigned char *buffer )
 {
-     const char prognm[] = "NADC_RD_H5_EArray_uint8";
-
      register int nr;
 
      hid_t  dataID, spaceID = -1, memSpaceID = -1;
@@ -644,26 +623,26 @@ void NADC_RD_H5_EArray_uint8( hid_t locID, const char *dset_name,
           dataID = H5Dopen( locID, dset_name, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, dset_name );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], 0};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, start, stride,
                                       count, blocks );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, dset_name);
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name);
 
           stat = H5Dread( dataID, H5T_NATIVE_UCHAR, memSpaceID, spaceID,
                           H5P_DEFAULT, &buffer[nr * xdim] );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, dset_name );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );
@@ -675,8 +654,6 @@ void NADC_RD_H5_EArray_uint16( hid_t locID, const char *dset_name,
 			       hsize_t xdim, int indexNum, 
 			       const int *metaIndex, unsigned short *buffer )
 {
-     const char prognm[] = "NADC_RD_H5_EArray_uint16";
-
      register int nr;
 
      hid_t  dataID, spaceID = -1, memSpaceID = -1;
@@ -696,26 +673,26 @@ void NADC_RD_H5_EArray_uint16( hid_t locID, const char *dset_name,
           dataID = H5Dopen( locID, dset_name, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, dset_name );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], 0};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, start, stride,
                                       count, blocks );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, dset_name);
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name);
 
           stat = H5Dread( dataID, H5T_NATIVE_USHORT, memSpaceID, spaceID,
                           H5P_DEFAULT, &buffer[nr * xdim] );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, dset_name );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );
@@ -727,8 +704,6 @@ void NADC_RD_H5_EArray_int32( hid_t locID, const char *dset_name,
 			      hsize_t xdim, int indexNum, 
 			      const int *metaIndex, int *buffer )
 {
-     const char prognm[] = "NADC_RD_H5_EArray_int32";
-
      register int nr;
 
      hid_t  dataID, spaceID = -1, memSpaceID = -1;
@@ -748,26 +723,26 @@ void NADC_RD_H5_EArray_int32( hid_t locID, const char *dset_name,
           dataID = H5Dopen( locID, dset_name, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, dset_name );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], 0};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, start, stride,
                                       count, blocks );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, dset_name);
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name);
 
           stat = H5Dread( dataID, H5T_NATIVE_INT, memSpaceID, spaceID,
                           H5P_DEFAULT, &buffer[nr * xdim] );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, dset_name );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );
@@ -779,8 +754,6 @@ void NADC_RD_H5_EArray_uint32( hid_t locID, const char *dset_name,
 			      hsize_t xdim, int indexNum, 
 			      const int *metaIndex, unsigned int *buffer )
 {
-     const char prognm[] = "NADC_RD_H5_EArray_uint32";
-
      register int nr;
 
      hid_t  dataID, spaceID = -1, memSpaceID = -1;
@@ -800,26 +773,26 @@ void NADC_RD_H5_EArray_uint32( hid_t locID, const char *dset_name,
           dataID = H5Dopen( locID, dset_name, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, dset_name );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], 0};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, start, stride,
                                       count, blocks );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, dset_name);
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name);
 
           stat = H5Dread( dataID, H5T_NATIVE_UINT, memSpaceID, spaceID,
                           H5P_DEFAULT, &buffer[nr * xdim] );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, dset_name );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );
@@ -831,8 +804,6 @@ void NADC_RD_H5_EArray_float( hid_t locID, const char *dset_name,
 			      hsize_t xdim, int indexNum, 
 			      const int *metaIndex, float *buffer )
 {
-     const char prognm[] = "NADC_RD_H5_EArray_float";
-
      register int nr;
 
      hid_t  dataID, spaceID = -1, memSpaceID = -1;
@@ -852,26 +823,26 @@ void NADC_RD_H5_EArray_float( hid_t locID, const char *dset_name,
           dataID = H5Dopen( locID, dset_name, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, dset_name );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, dset_name );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, dset_name );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], 0};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, start, stride,
                                       count, blocks );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, dset_name);
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name);
 
           stat = H5Dread( dataID, H5T_NATIVE_FLOAT, memSpaceID, spaceID,
                           H5P_DEFAULT, &buffer[nr * xdim] );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, dset_name );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, dset_name );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );

@@ -95,8 +95,6 @@ unsigned int SCIA_LV1_RD_DARK( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi * dsd,
 			       struct dark_scia **dark_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_DARK";
-
      char         *dark_pntr, *dark_char = NULL;
      size_t       dsr_size, nr_byte;
      unsigned int indx_dsd;
@@ -112,7 +110,7 @@ unsigned int SCIA_LV1_RD_DARK( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
 	  NADC_ERR_RESTORE();
           dark_out[0] = NULL;
@@ -127,12 +125,12 @@ unsigned int SCIA_LV1_RD_DARK( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct dark_scia));
      }
      if ( (dark = dark_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dark" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dark" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (dark_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dark_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dark_char" );
 /*
  * rewind/read input data file
  */
@@ -142,7 +140,7 @@ unsigned int SCIA_LV1_RD_DARK( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( dark_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to DARK structure
  */
@@ -179,7 +177,7 @@ unsigned int SCIA_LV1_RD_DARK( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(dark_pntr - dark_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -214,8 +212,6 @@ unsigned int SCIA_LV1_RD_DARK( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_DARK( FILE *fd, unsigned int num_dark,
 		       const struct dark_scia *dark_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_DARK";
-
      size_t nr_byte;
 
      struct dark_scia dark;
@@ -243,45 +239,45 @@ void SCIA_LV1_WR_DARK( FILE *fd, unsigned int num_dark,
  * write DARK structures to file
  */
 	  if ( fwrite( &dark.mjd.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 	  if ( fwrite( &dark.mjd.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &dark.mjd.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &dark.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( dark.dark_spec, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( dark.sdev_dark_spec, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) (2 * PMD_NUMBER) * ENVI_FLOAT;
 	  if ( fwrite( dark.pmd_off, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( dark.pmd_off_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( dark.sol_stray, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( dark.sol_stray_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) PMD_NUMBER * ENVI_FLOAT;
 	  if ( fwrite( dark.pmd_stray, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( dark.pmd_stray_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  dark_in++;

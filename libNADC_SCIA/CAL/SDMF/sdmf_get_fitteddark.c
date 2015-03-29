@@ -83,8 +83,6 @@ bool SDMF_get_FittedDark_24( unsigned short channel, unsigned short absOrbit,
 			     float *analogOffsError, float *darkCurrentError, 
 			     float *chiSquareFit )
 {
-     const char prognm[] = "SDMF_get_FittedDark_24";
-
      char   dark_fl[MAX_STRING_LENGTH];
 
      FILE   *dark_fp;
@@ -131,53 +129,53 @@ bool SDMF_get_FittedDark_24( unsigned short channel, unsigned short absOrbit,
  * read dark parameters
  */
      if ( (dark_fp = fopen( dark_fl, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, dark_fl );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, dark_fl );
      (void) fseek( dark_fp, offset_Quality, SEEK_SET );
      if ( fread( &quality, ENVI_INT, 1, dark_fp ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "quality" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "quality" );
      if ( channel == 0 ) {
 	  if ( fread( analogOffs, sz_ds_byte, 1, dark_fp ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "analogOffs" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "analogOffs" );
 	  if ( fread( darkCurrent, sz_ds_byte, 1, dark_fp ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "darkCurrent" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "darkCurrent" );
 	  if ( analogOffsError != NULL ) {
 	       if ( fread( analogOffsError, sz_ds_byte, 1, dark_fp ) != 1 )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_RD,"analogOffsError");
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "analogOffsError" );
 	  } else
 	       (void) fseek( dark_fp, sz_ds_byte, SEEK_CUR );
 
 	  if ( darkCurrentError != NULL ) {
 	       if ( fread( darkCurrentError, sz_ds_byte, 1, dark_fp ) != 1 )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_RD,"darkCurrentError");
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "darkCurrentError" );
 	  } else
 	       (void) fseek( dark_fp, sz_ds_byte, SEEK_CUR );
 	  if ( chiSquareFit != NULL ) {
 	       if ( fread( chiSquareFit, sz_ds_byte, 1, dark_fp ) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "chiSquareFit" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "chiSquareFit" );
 	  }
      } else {
 	  if ( fread( rbuff, sz_ds_byte, 1, dark_fp ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "analogOffs" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "analogOffs" );
 	  (void) memcpy( analogOffs, rbuff+offs, sz_chan_byte );
 	  if ( fread( rbuff, sz_ds_byte, 1, dark_fp ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "darkCurrent" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "darkCurrent" );
 	  (void) memcpy( darkCurrent, rbuff+offs, sz_chan_byte );
 	  if ( analogOffsError != NULL ) {
 	       if ( fread( rbuff, sz_ds_byte, 1, dark_fp ) != 1 )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_RD,"analogOffsError");
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "analogOffsError" );
 	       (void) memcpy( analogOffsError, rbuff+offs, sz_chan_byte );
 	  } else
 	       (void) fseek( dark_fp, sz_ds_byte, SEEK_CUR );
 
 	  if ( darkCurrentError != NULL ) {
 	       if ( fread( rbuff, sz_ds_byte, 1, dark_fp ) != 1 )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_RD,"darkCurrentError");
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "darkCurrentError" );
 	       (void) memcpy( darkCurrentError, rbuff+offs, sz_chan_byte );
 	  } else
 	       (void) fseek( dark_fp, sz_ds_byte, SEEK_CUR );
 	  if ( chiSquareFit != NULL ) {
 	       if ( fread( rbuff, sz_ds_byte, 1, dark_fp ) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "chiSquareFit" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "chiSquareFit" );
 	       (void) memcpy( chiSquareFit, rbuff+offs, sz_chan_byte );
 	  }
      }
@@ -192,8 +190,6 @@ done:
 static
 int getMetaIndx( hid_t fid, int orbit, /*@out@*/ int *fnd_orbit )
 {
-     const char prognm[] = "getMetaIndx";
-
      const int   MAX_DiffOrbitNumber = 21;
      const short MIN_QualityNumber   = 40;
      const short GOOD_QualityNumber  = 70;
@@ -212,7 +208,7 @@ int getMetaIndx( hid_t fid, int orbit, /*@out@*/ int *fnd_orbit )
 
           (void) SDMF_get_metaIndex( fid, orbit + delta, &numIndx, &metaIndx );
           if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex");
+               NADC_GOTO_ERROR(NADC_ERR_FATAL, "SDMF_get_metaIndex");
           if ( metaIndx > 0 ) {
                SDMF_rd_darkTable( fid, &numIndx, &metaIndx, &mtbl );
                if ( ! mtbl->saaFlag && mtbl->quality >= fnd_quality ) {
@@ -256,8 +252,6 @@ bool SDMF_get_FittedDark_30( unsigned short channel, unsigned short absOrbit,
 			     float *analogOffsError, float *darkCurrentError,
 			     float *chiSquareFit )
 {
-     const char prognm[] = "SDMF_get_FittedDark_30";
-
      hid_t  fid = -1;
 
      int    fnd_orbit;
@@ -301,7 +295,7 @@ bool SDMF_get_FittedDark_30( unsigned short channel, unsigned short absOrbit,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, sdmf_db );
 /*
  * get index to metaTable records or this state
  */
@@ -310,7 +304,7 @@ bool SDMF_get_FittedDark_30( unsigned short channel, unsigned short absOrbit,
      (void) snprintf( str_msg, MAX_STRING_LENGTH, 
 		      "\n\tapplied SDMF Dark data (v3.0) of orbit: %-d", 
 		      fnd_orbit );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     NADC_ERROR( NADC_ERR_NONE, str_msg );
 /*
  * read dark parameters of all channels
  */
@@ -387,8 +381,6 @@ bool SDMF_get_FittedDark( unsigned short absOrbit, unsigned short channel,
 			  float *meanNoise, float *chiSquareFit, 
 			  float *probabilityFit )
 {
-     const char prognm[] = "SDMF_get_FittedDark";
-
      register int delta = 0;
 
      bool found = FALSE;
@@ -461,12 +453,12 @@ bool SDMF_get_FittedDark( unsigned short absOrbit, unsigned short channel,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, sdmf_db );
 
      H5E_BEGIN_TRY {
 	  gid = H5Gopen( fid, "/DarkFit", H5P_DEFAULT );
 	  } H5E_END_TRY;
-     if ( gid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/DarkFit" );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/DarkFit" );
 /*
  * search for good quality fitted dark
  */
@@ -482,7 +474,7 @@ bool SDMF_get_FittedDark( unsigned short absOrbit, unsigned short channel,
 				   mtbl_size, mtbl_offs, mtbl_dark2_sizes, 
 				   mtbl );
 	  if ( stat < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_rd_metaTable" );
+               NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_rd_metaTable" );
 	  delta = (delta > 0) ? (-delta) : (1 - delta);
      } while ( mtbl->stateCount < 3 );
      if ( mtbl->stateCount < 3 ) goto done;
@@ -491,7 +483,7 @@ bool SDMF_get_FittedDark( unsigned short absOrbit, unsigned short channel,
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
 		      "\n\tapplied SDMF Dark data (v3.1) of orbit: %-hu [%-hu]",
 		      mtbl->absOrbit, mtbl->stateCount );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     NADC_ERROR( NADC_ERR_NONE, str_msg );
 /*
  * read dark parameters from SDMF database
  */
@@ -575,8 +567,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_get_fitteddark";
-
      register unsigned short np = 0;
 
      unsigned short orbit;
@@ -609,17 +599,17 @@ int main( int argc, char *argv[] )
      fnd_24 = SDMF_get_FittedDark_24( channel, orbit, ao_24, lc_24, ao_err_24,
 				      lc_err_24, chisq_24 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_FittedDark_24");
+          NADC_GOTO_ERROR(NADC_ERR_FATAL, "SDMF_get_FittedDark_24");
      if ( ! fnd_24 ) (void) fprintf( stderr, "# no solution for SDMF v2.4\n" );
      fnd_30 = SDMF_get_FittedDark_30( channel, orbit, ao_30, lc_30, ao_err_30,
 				      lc_err_30, chisq_30 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_FittedDark_30");
+          NADC_GOTO_ERROR(NADC_ERR_FATAL, "SDMF_get_FittedDark_30");
      if ( ! fnd_30 ) (void) fprintf( stderr, "# no solution for SDMF v3.0\n" );
      fnd_31 = SDMF_get_FittedDark( channel, orbit, ao_31, lc_31, ao_err_31,
 				   lc_err_31, noise_31, chisq_31, prob_31 ); 
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_FittedDark_31");
+          NADC_GOTO_ERROR(NADC_ERR_FATAL, "SDMF_get_FittedDark_31");
      if ( ! fnd_31 ) (void) fprintf( stderr, "# no solution for SDMF v3.1\n" );
 /*
  * 

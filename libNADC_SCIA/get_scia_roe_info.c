@@ -105,8 +105,6 @@ static
 size_t _GET_ROE_INDEX( hid_t fileID, double jday, 
 		       /*@out@*/ double *jday_mn, /*@out@*/ double *jday_mx )
 {
-     const char prognm[] = "_GET_ROE_INDEX";
-
      register size_t indx = 0;
 
      size_t  numRoe;
@@ -121,20 +119,20 @@ size_t _GET_ROE_INDEX( hid_t fileID, double jday,
  */
      stat = H5LTget_dataset_info( fileID, "julianDay", &adim, NULL, NULL );
      if ( stat < 0 || (numRoe = (size_t) adim) == 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "julianDay" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "julianDay" );
 /*
  * read julian dates
  */
      if ( (jday_list = (double *) malloc( numRoe * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "jday_list" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "jday_list" );
      if ( H5LTread_dataset_double ( fileID, "julianDay", jday_list ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "julianDay" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "julianDay" );
 /*
  * search for match
  */
      while( indx < (numRoe-1) && jday >= jday_list[indx+1] ) indx++;
      if ( indx == (numRoe-1) || jday < jday_list[indx] ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_WARN, "no solution found" );
+	  NADC_GOTO_ERROR( NADC_ERR_WARN, "no solution found" );
      *jday_mn = jday_list[indx];
      *jday_mx = jday_list[indx+1];
 
@@ -162,8 +160,6 @@ size_t _GET_ROE_INDEX( hid_t fileID, double jday,
 static
 int _GET_ROE_ENTRY( double jday, /*@out@*/ struct roe_rec *roe )
 {
-     const char prognm[] = "_GET_ROE_ENTRY";
-
      char    string[MAX_STRING_LENGTH];
 
      hid_t   fileID = -1;
@@ -206,7 +202,7 @@ int _GET_ROE_ENTRY( double jday, /*@out@*/ struct roe_rec *roe )
 			   DATA_DIR, name_ROE_db );
           fileID = H5Fopen( string, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( fileID < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, string );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, string );
      }
 /*
  * get index to list with ROE entries
@@ -218,7 +214,7 @@ int _GET_ROE_ENTRY( double jday, /*@out@*/ struct roe_rec *roe )
  */
      stat = H5TBread_records( fileID, "roe_entry", (hsize_t) indxEntry, 1,
 			      roeSize, roeOffs, roeSizes, roe );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "roe_entry" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "roe_entry" );
      (void) H5Fclose( fileID );
      return roe->orbit;
 done:
@@ -299,8 +295,6 @@ void GET_SCIA_ROE_INFO( bool eclipseMode, const double jday,
 -------------------------*/
 double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
 {
-     const char prognm[] = "GET_SCIA_ROE_JDAY";
-
      register size_t nr;
 
      char    string[MAX_STRING_LENGTH];
@@ -326,31 +320,31 @@ double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
 			   DATA_DIR, name_ROE_db );
           fileID = H5Fopen( string, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( fileID < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, string );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, string );
      }
 /*
  * read info_h5 records
  */
      stat = H5LTget_dataset_info( fileID, "julianDay", &adim, NULL, NULL );
      if ( stat < 0 || (numRoe = (size_t) adim) == 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "julianDay" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "julianDay" );
 /*
  * read julian dates
  */
      if ( (jday_list = (double *) malloc( numRoe * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "jday_list" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "jday_list" );
      if ( H5LTread_dataset_double( fileID, "julianDay", jday_list ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "julianDay" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "julianDay" );
 /*
  * read orbit numbers
  */
      orbit_list = (unsigned short *) malloc( numRoe * sizeof(short) );
      if ( orbit_list == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbit_list" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbit_list" );
      stat = H5LTread_dataset( fileID, "orbitList", H5T_NATIVE_USHORT, 
 			      orbit_list );
      if ( stat < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "orbitList" );
 /*
  * search for match
  */
@@ -358,7 +352,7 @@ double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
      while( nr < (numRoe-1) && absOrbit >= orbit_list[nr+1] ) nr++;
 
      if ( nr == (numRoe-1) || absOrbit < orbit_list[nr] ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_WARN, "no solution found" );
+	  NADC_GOTO_ERROR( NADC_ERR_WARN, "no solution found" );
      jday = jday_list[nr];
  done:
      if ( orbit_list != NULL ) free( orbit_list );
@@ -381,8 +375,6 @@ double GET_SCIA_ROE_JDAY( unsigned short absOrbit )
 -------------------------*/
 size_t GET_SCIA_ROE_JDAY_ALL( double **jday_out )
 {
-     const char prognm[] = "GET_SCIA_ROE_JDAY_ALL";
-
      char    string[MAX_STRING_LENGTH];
 
      hid_t   fileID = -1;
@@ -403,22 +395,22 @@ size_t GET_SCIA_ROE_JDAY_ALL( double **jday_out )
 			   DATA_DIR, name_ROE_db );
           fileID = H5Fopen( string, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( fileID < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, string );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, string );
      }
 /*
  * obtain size of array julianDay
  */
      stat = H5LTget_dataset_info( fileID, "julianDay", &numRoe, NULL, NULL );
      if ( stat < 0 || numRoe == 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "julianDay" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "julianDay" );
 /*
  * read julian dates
  */
      jday_arr = (double *) malloc( (size_t) numRoe * sizeof(double));
      if ( jday_arr == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "jday_arr" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "jday_arr" );
      if ( H5LTread_dataset_double( fileID, "julianDay", jday_arr ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "julianDay" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "julianDay" );
      num_jday = (size_t) numRoe;
  done:
      if ( fileID > 0 ) (void) H5Fclose( fileID );
@@ -434,8 +426,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( void )
 {
-     const char prognm[] = "get_scia_roe_info";
-
      const unsigned short orbit_min = 7564;
      const unsigned short orbit_max = 8564;
      const unsigned short num_steps = 1000;
@@ -450,12 +440,10 @@ int main( void )
 
      jday_min = GET_SCIA_ROE_JDAY( orbit_min );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
-			   "during call GET_SCIA_ROE_JDAY" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "during call GET_SCIA_ROE_JDAY" );
      jday_max = GET_SCIA_ROE_JDAY( orbit_max );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
-			   "during call GET_SCIA_ROE_JDAY" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "during call GET_SCIA_ROE_JDAY" );
 
      (void) printf( "orbit range = [%-hu, %-hu]\n", orbit_min, orbit_max );
      (void) printf( "Min(jday)=%15.11f, MAX(jday)=%15.11f, duration=%.11f\n",

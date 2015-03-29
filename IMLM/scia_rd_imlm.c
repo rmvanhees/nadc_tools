@@ -108,8 +108,6 @@ void Read_IMLM_Header( const char flname[], /*@out@*/ struct imlm_hdr *hdr )
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, hdr@*/
 {
-     const char prognm[] = "Read_IMLM_Header";
-
      char   line[MAX_LINE_LENGTH];
      char   sciaDate[12], sciaTime[16];
 
@@ -120,7 +118,7 @@ void Read_IMLM_Header( const char flname[], /*@out@*/ struct imlm_hdr *hdr )
  * open the IMLM product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, flname );
 
      do {
           if ( gzeof ( fp ) == 1 ) break;
@@ -199,8 +197,6 @@ unsigned int Read_IMLM_Record( const char flname[],
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, rec@*/
 {
-     const char prognm[] = "Read_IMLM_Record";
-
      char   line[MAX_LINE_LENGTH];
      int    numItems;
 
@@ -212,7 +208,7 @@ unsigned int Read_IMLM_Record( const char flname[],
  * open the IMLM product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, flname );
 
      do {
 	  char *cpntr;
@@ -243,7 +239,7 @@ unsigned int Read_IMLM_Record( const char flname[],
 	  if ( numItems != NUM_COLUMNS ) {
 	       char msg[80];
 	       (void) snprintf( msg, 80, "incomplete record[%-u]\n", numRec );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, msg );
 	  }
 	  rec->lon_center = LON_IN_RANGE(rec->lon_center);
 	  for ( nr = 0; nr < NUM_CORNERS; nr++ ) {
@@ -267,8 +263,6 @@ unsigned int Read_IMLM_Record( const char flname[],
 void SCIA_RD_IMLM( const char *flname, struct imlm_hdr *hdr,
 		   struct imlm_rec **imlm_out )
 {
-     const char prognm[] = "SCIA_RD_IMLM";
-
      char   *cpntr, ctemp[SHORT_STRING_LENGTH];
 
      unsigned int numRec = 0u;
@@ -298,14 +292,14 @@ void SCIA_RD_IMLM( const char *flname, struct imlm_hdr *hdr,
  */
      Read_IMLM_Header( flname, hdr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "Read_IMLM_Header" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "Read_IMLM_Header" );
      if ( hdr->numRec == 0u ) return;
 /*
  * allocate enough space to store all records
  */
      rec = (struct imlm_rec *) 
 	  malloc( hdr->numRec * sizeof( struct imlm_rec ));
-     if ( rec == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+     if ( rec == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rec" );
 /*
  * read records from the IMLM product
  */
@@ -316,7 +310,7 @@ void SCIA_RD_IMLM( const char *flname, struct imlm_hdr *hdr,
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
 			   "failed to read all records %u out of %u\n", 
 			   numRec, hdr->numRec );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, msg );
      }
      imlm_out[0] = rec;
 }

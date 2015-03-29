@@ -55,8 +55,6 @@
 void SCIA_LV1_WR_H5_PPG( struct param_record param, 
 			 const struct ppg_scia *ppg )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_PPG";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -79,7 +77,7 @@ void SCIA_LV1_WR_H5_PPG( struct param_record param,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write PPG data sets
  */
@@ -94,7 +92,7 @@ void SCIA_LV1_WR_H5_PPG( struct param_record param,
                             5, 1, ppg_size, ppg_names,
                             ppg_offs, ppg_type, 1,
                             NULL, compress, ppg );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "ppg" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "ppg" );
 /*
  * close interface
  */

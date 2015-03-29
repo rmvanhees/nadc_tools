@@ -72,8 +72,6 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 			  const struct mph_envi *mph,
 			  unsigned int num_dsd, const struct dsd_envi *dsd )
 {
-     const char prognm[] = "SCIA_LV1_WR_SQL_AUX";
-
      register unsigned short ni, nd;
 
      char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
@@ -114,7 +112,7 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 			   dsd[nd].flname );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	       NADC_ERROR(prognm,NADC_ERR_SQL,PQresultErrorMessage(res));
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       return;
 	  }
@@ -124,7 +122,7 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 	       res = PQexec( conn, 
 			     "SELECT nextval(\'auxiliary_pk_id_seq\')" );
 	       if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-		    NADC_ERROR(prognm,NADC_ERR_SQL,PQresultErrorMessage(res));
+		    NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 		    PQclear( res );
 		    return;
 	       }
@@ -139,10 +137,10 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 				   strcpy(cbuff,sql_query), dsd[nd].flname );
 	       if ( be_verbose )
 		    (void) printf( "%s(): %s [%-d]\n", 
-				   prognm, sql_query, numChar );
+				   __FUNCTION__, sql_query, numChar );
 	       res = PQexec( conn, sql_query );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-		    NADC_ERROR(prognm,NADC_ERR_SQL,PQresultErrorMessage(res));
+		    NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 		    PQclear( res );
 		    return;
 	       }
@@ -161,10 +159,10 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s WHERE name=\'%s\'",
 			      strcpy(cbuff,sql_query), mph->product );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR(prognm,NADC_ERR_SQL,PQresultErrorMessage(res));
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       return;
 	  }

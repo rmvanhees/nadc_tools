@@ -81,8 +81,6 @@ static const size_t nfit_offs[NFIELDS] = {
 void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param, 
 			  unsigned int nr_nfit, const struct nfit_scia *nfit )
 {
-     const char prognm[] = "SCIA_OL2_WR_H5_NFIT";
-
      register unsigned int nr;
 
      hid_t   grp_id;
@@ -114,11 +112,11 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
  * create group /MDS/<nfit_name>
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      nfit_id = H5Gcreate( grp_id, nfit_name,
 			  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( nfit_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, nfit_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, nfit_name );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -160,7 +158,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
  * Vertical column densities
  */
      vdata = (hvl_t *) malloc( nr_nfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) nfit[nr].numvcd;
@@ -168,7 +166,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, nfit[nr].vcd,
                               vdata[nr].len * sizeof(float) );
@@ -178,7 +176,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
 
      vdata = (hvl_t *) malloc( nr_nfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) nfit[nr].numvcd;
@@ -186,7 +184,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, nfit[nr].errvcd,
                               vdata[nr].len * sizeof(float) );
@@ -198,7 +196,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
  * linear fitted parameters
  */
      vdata = (hvl_t *) malloc( nr_nfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) nfit[nr].num_fitp;
@@ -206,7 +204,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, nfit[nr].linpars,
                               vdata[nr].len * sizeof(float) );
@@ -216,7 +214,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
 
      vdata = (hvl_t *) malloc( nr_nfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) nfit[nr].num_fitp;
@@ -224,7 +222,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, nfit[nr].errlinpars,
                               vdata[nr].len * sizeof(float) );
@@ -236,7 +234,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
  * non-linear fitted parameters
  */
      vdata = (hvl_t *) malloc( nr_nfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) nfit[nr].num_nfitp;
@@ -244,7 +242,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, nfit[nr].nlinpars,
                               vdata[nr].len * sizeof(float) );
@@ -254,7 +252,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
 
      vdata = (hvl_t *) malloc( nr_nfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) nfit[nr].num_nfitp;
@@ -262,7 +260,7 @@ void SCIA_OL2_WR_H5_NFIT( const char nfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, nfit[nr].errnlinpars,
                               vdata[nr].len * sizeof(float) );

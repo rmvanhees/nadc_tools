@@ -91,8 +91,6 @@ unsigned short GET_SCIA_CLUSDEF( unsigned char stateID,
        /*@globals clusDefOne, clusDefThree;@*/
        /*@modifies clusDef@*/
 {
-     const char prognm[] = "GET_CLUSTERDEF";
-
      unsigned short numClus = 0;
 
      const int ClusDefIndx[MAX_NUM_STATE+1] = {
@@ -106,7 +104,7 @@ unsigned short GET_SCIA_CLUSDEF( unsigned char stateID,
      };
 
      if ( stateID < UCHAR_ONE || stateID >= (unsigned char) MAX_NUM_STATE ) {
-          NADC_ERROR( prognm, NADC_ERR_FATAL, "state ID out-of-range" );
+          NADC_ERROR( NADC_ERR_FATAL, "state ID out-of-range" );
 	  return 0;
      }
 

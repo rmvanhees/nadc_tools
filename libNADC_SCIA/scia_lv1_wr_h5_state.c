@@ -87,8 +87,6 @@ static const size_t state_offs[NFIELDS] = {
 void SCIA_LV1_WR_H5_STATE( struct param_record param, unsigned int nr_state,
 			   const struct state1_scia *state )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_STATE";
-
      hid_t   ads_id;
      hid_t   type_id;
      hbool_t compress;
@@ -154,7 +152,7 @@ void SCIA_LV1_WR_H5_STATE( struct param_record param, unsigned int nr_state,
  * open group /ADS/STATE
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -170,7 +168,7 @@ void SCIA_LV1_WR_H5_STATE( struct param_record param, unsigned int nr_state,
      stat = H5TBmake_table( "state", ads_id, "STATES", NFIELDS, 
 			    nr_state, state_size, state_names, state_offs, 
 			    state_type, nr_state, NULL, compress, state );
-     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_WR, "state" );
+     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_WR, "state" );
 /*
  * close interface
  */

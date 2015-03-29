@@ -74,8 +74,6 @@ void NADC_TOGOMI_WR_SQL_TILE( PGconn *conn, int meta_id,
 				   unsigned int num_rec, 
 				   const struct togomi_rec *rec )
 {
-     const char prognm[] = "NADC_TOGOMI_WR_SQL_TILE";
-
      register unsigned int nr;
      register unsigned int insertedRows = 0u;
      register unsigned int failedRows = num_rec;
@@ -92,7 +90,7 @@ void NADC_TOGOMI_WR_SQL_TILE( PGconn *conn, int meta_id,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * loop over all Togomi records
@@ -109,7 +107,7 @@ void NADC_TOGOMI_WR_SQL_TILE( PGconn *conn, int meta_id,
 /*   	  (void) fprintf( stderr, "%s\n", sql_query ); */
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, 
 				PQresultErrorMessage(res) );
 	  }
 	  if ( (nrow = PQntuples( res )) < 1 ) continue;
@@ -129,14 +127,14 @@ void NADC_TOGOMI_WR_SQL_TILE( PGconn *conn, int meta_id,
 
 /*   	  (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -150,14 +148,14 @@ void NADC_TOGOMI_WR_SQL_TILE( PGconn *conn, int meta_id,
 			      meta_id, rec[nr].jday );
 /*  	  (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       failedRows++;
 	       goto done;
@@ -172,13 +170,13 @@ void NADC_TOGOMI_WR_SQL_TILE( PGconn *conn, int meta_id,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE, "insertedRows=%-u", insertedRows );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
      if ( failedRows > 0 ) {
 	  (void) snprintf( cbuff, SQL_STR_SIZE, "failedRows=%-u", failedRows );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+	  NADC_ERROR( NADC_ERR_NONE, cbuff );
      }
 }

@@ -82,8 +82,6 @@ void SDMF30_rd_histTable( hid_t locID, int indexNum, const int *metaIndex,
 			  const int *pixelRange, 
 			  struct sdmf_hist1_rec *sdmf_hist )
 {
-     const char prognm[] = "SDMF30_rd_histTable";
-
      register int nr;
 
      const hsize_t pixelStart = (pixelRange == NULL) ?  0 : pixelRange[0];
@@ -107,30 +105,30 @@ void SDMF30_rd_histTable( hid_t locID, int indexNum, const int *metaIndex,
           dataID = H5Dopen( locID, tableName, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
 
      /* Get the data type ID */
      if ( (typeID = H5Dget_type( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DTYPE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, tableName );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], pixelStart};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, 
 				      start, NULL, count, NULL );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, tableName);
+          if ( stat < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, tableName);
 
           stat = H5Dread( dataID, typeID, memSpaceID, spaceID,
                           H5P_DEFAULT, sdmf_hist+(nr * pixelCount) );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, tableName );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );
@@ -166,8 +164,6 @@ void SDMF31_rd_histTable( hid_t locID, int indexNum, const int *metaIndex,
 			  const int *pixelRange, 
 			  struct sdmf_hist2_rec *sdmf_hist )
 {
-     const char prognm[] = "SDMF31_rd_histTable";
-
      register int nr;
 
      const hsize_t pixelStart = (pixelRange == NULL) ?  0 : pixelRange[0];
@@ -191,30 +187,30 @@ void SDMF31_rd_histTable( hid_t locID, int indexNum, const int *metaIndex,
           dataID = H5Dopen( locID, tableName, H5P_DEFAULT );
      } H5E_END_TRY;
      if ( dataID < 0 )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
 
      /* Get the data type ID */
      if ( (typeID = H5Dget_type( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DTYPE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, tableName );
 
      /* Get the dataspace handle */
      if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
 
      /* Create a memory dataspace handle */
      if ( (memSpaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
 
      for ( nr = 0; nr < indexNum; nr++ ) {
           hsize_t start[] = {metaIndex[nr], pixelStart};
 
           stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, 
 				      start, NULL, count, NULL );
-          if ( stat < 0 ) NADC_GOTO_ERROR(prognm, NADC_ERR_HDF_DATA, tableName);
+          if ( stat < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, tableName);
 
           stat = H5Dread( dataID, typeID, memSpaceID, spaceID,
                           H5P_DEFAULT, sdmf_hist+(nr * pixelCount) );
-          if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+          if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, tableName );
      }
 done:
      if ( memSpaceID >= 0 ) (void) H5Sclose( memSpaceID );

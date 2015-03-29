@@ -96,8 +96,6 @@ int SELECT_BAND( short nband, struct param_record param,
 
      short channel = fcd->bcr[nband].array_nr - 1;
 
-     const char prognm[] = "SELECT_BAND";
-
      switch ( nband ) {
      case BAND_1a:
 	  if ( (param.chan_mask & BAND_ONE_A) == UCHAR_ZERO ) return FALSE;
@@ -126,7 +124,7 @@ int SELECT_BAND( short nband, struct param_record param,
 	  if ( param.write_stray == PARAM_UNSET ) return FALSE;
 	  break;
      default:
-	  NADC_ERROR( prognm, NADC_ERR_FATAL, "unknown detector band" );
+	  NADC_ERROR( NADC_ERR_FATAL, "unknown detector band" );
 	  return FALSE;
      }
 /*
@@ -168,8 +166,6 @@ int SELECT_BAND( short nband, struct param_record param,
 -------------------------*/
 short SELECT_PCD( struct param_record param, const struct pcd_gome *pcd )
 {
-     const char prognm[] = "SELECT_PCD";
-
      register short corner;
 
      double  bgn_jdate, end_jdate, utc_jdate;
@@ -240,7 +236,7 @@ short SELECT_PCD( struct param_record param, const struct pcd_gome *pcd )
 		    return (short) 0;
 	       break;
 	  default:
-	       NADC_ERROR( prognm, NADC_ERR_FATAL, "Invalid subsetcounter" );
+	       NADC_ERROR( NADC_ERR_FATAL, "Invalid subsetcounter" );
 	       return (short) 0;
 	  }
      }
@@ -334,7 +330,6 @@ short SELECT_DDR( struct param_record param, const struct glr2_gome *glr )
      unsigned int bgn_date, end_date;
      unsigned int bgn_time, end_time;
 
-     const char prognm[] = "SELECT_DDR";
      const double Msec2DecimalDay = 1000 * 24. * 60. * 60.;
 /*
  * reject GOME pixels with ground pixel numer less than one
@@ -402,7 +397,7 @@ short SELECT_DDR( struct param_record param, const struct glr2_gome *glr )
 		    return (short) 0;
 	       break;
 	  default:
-	       NADC_ERROR( prognm, NADC_ERR_FATAL, "Invalid subsetcounter" );
+	       NADC_ERROR( NADC_ERR_FATAL, "Invalid subsetcounter" );
 	       return (short) 0;
 	  }
      }

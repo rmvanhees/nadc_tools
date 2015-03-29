@@ -115,8 +115,6 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
 			   const struct mph_envi *mph, unsigned short numState, 
 			   const struct mds0_sql *state )
 {
-     const char prognm[] = "SCIA_LV0_MATCH_STATE";
-
      register unsigned short ni, nr;
 
      char date_str1[UTC_STRING_LENGTH], date_str2[UTC_STRING_LENGTH];
@@ -148,18 +146,18 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
      numChar = snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_STATEINFO,
 			 date_str1, date_str2 );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+          NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      if ( (numRows = PQntuples( res )) == 0 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_WARN, NO_DMOP_FOUND );
+          NADC_GOTO_ERROR( NADC_ERR_WARN, NO_DMOP_FOUND );
      stateRow = (struct stateinfo_rec *) 
           malloc( numRows * sizeof(struct stateinfo_rec) );
      if ( stateRow == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stateRow" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "stateRow" );
 
      i_indx  = PQfnumber( res, "pk_stateinfo" );
      i_state = PQfnumber( res, "stateID" );
@@ -219,15 +217,15 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
 			 "SELECT pk_meta FROM meta__0P WHERE name=\'%s\'",
 			 mph->product );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+          NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, mph->product );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, mph->product );
      }
      pntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );
@@ -238,7 +236,7 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
      sql_long_sz = (size_t) (42 + (numRows+1) * (7+1) + 4);
      if ( (sql_long_query = (char *) malloc( sql_long_sz )) == NULL ) {
 	  free( stateRow );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sql_long_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sql_long_query" );
      }
 /*
  * insert all matches in table "stateinfo_meta__0P"
@@ -261,27 +259,27 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
 	  }
 	  if ( numChar >= sql_long_sz ) {
 	       free( sql_long_query ); free( stateRow );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_long_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_long_query" );
 	  }
 	  numMatch++;
 	  delayedBy += (stateRow[nr].dtMatch *= SecPerDay);
      }
      if ( numChar >= (sql_long_sz-3) ) {
 	  free( sql_long_query ); free( stateRow );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_long_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_long_query" );
      }
      (void) strcat( sql_long_query, "}\')" );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", prognm, sql_long_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_long_query, numChar );
      res = PQexec( conn, sql_long_query );
      free( sql_long_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 
      if ( numMatch == 0 ) {
 	  free( stateRow );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_WARN, NO_MATCHES_FOUND );
+	  NADC_RETURN_ERROR( NADC_ERR_WARN, NO_MATCHES_FOUND );
      }
      delayedBy /= numMatch;
 /*
@@ -313,21 +311,21 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
      numChar = snprintf( sql_query, SQL_STR_SIZE, "%s WHERE pk_meta=%d",
 			 strcpy(cbuff,sql_query), meta_id );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE,
 		      "noEntryDMOP=%-u (States:%-u DMOP:%-u), delayedBy=%-.3f",
 		      numState - numMatch, numState, numRows, delayedBy );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
 /*
  * Start a transaction block
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      PQclear( res );
 /*
@@ -388,23 +386,23 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
 			      "%s WHERE pk_stateinfo=%u",
 			      strcpy(cbuff,sql_query), stateRow[nr].indxDMOP );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-zd]\n", prognm, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE ) {
-	       NADC_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	       PQclear( res );
                res = PQexec( conn, "ROLLBACK" );
                if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-                    NADC_ERROR( prognm, NADC_ERR_SQL,
+                    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
           res = PQexec( conn, sql_query );
           if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
                PQclear( res );
                res = PQexec( conn, "ROLLBACK" );
                if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-                    NADC_ERROR( prognm, NADC_ERR_SQL,
+                    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -415,7 +413,7 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      if ( stateRow != NULL ) free( stateRow );

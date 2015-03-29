@@ -67,8 +67,6 @@ void SCIA_SRON_CAL_NOISE( const struct file_rec *fileParam,
 			  const struct state1_scia *state, 
 			  struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_SRON_CAL_NOISE";
-
      register unsigned short num = 0u;
 
      unsigned char stateID_05, stateID_10;
@@ -106,7 +104,7 @@ void SCIA_SRON_CAL_NOISE( const struct file_rec *fileParam,
 					 &pet, darkSignal, darkNoise_10 );
      }
      if ( ! found_05 || ! found_10 )
-	  NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, "no Dark parameters found");
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "no Dark parameters found" );
 /*
  * estimate measurement noise
  */

@@ -98,15 +98,13 @@ void readDarkDataADS( unsigned int calib_flag, FILE *fp,
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fp, DarkData@*/
 {
-     const char prognm[] = "readDarkDataADS";
-
      struct clcp_scia  clcp;
 /*
  * read CLCP
  */
      (void) SCIA_LV1_RD_CLCP( fp, num_dsd, dsd, &clcp );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "CLCP" );
+          NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "CLCP" );
 /*
  * store data in dark-record
  */
@@ -152,8 +150,6 @@ void addOrbitDarkADS( int source, unsigned int calib_flag,
      /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fp, DarkData@*/
 {
-     const char prognm[] = "addOrbitDarkADS";
-
      register unsigned int  nd;
 
      unsigned int num_dsr;
@@ -169,21 +165,21 @@ void addOrbitDarkADS( int source, unsigned int calib_flag,
  */
      (void) SCIA_LV1_RD_SIP( fp, num_dsd, dsd, &sip );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SIP" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SIP" );
 /*
  * read variable portion of the dark-current parameters
  */
      Use_Extern_Alloc = FALSE;
      num_dsr = SCIA_LV1_RD_VLCP( fp, num_dsd, dsd, &vlcp_orig );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "VLCP" );
+          NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "VLCP" );
      Use_Extern_Alloc = Save_Extern_Alloc;
 /*
  * extend vlcp with two records to cover orbit phases between zero and one
  */
      vlcp = (struct vlcp_scia *) 
 	  malloc( (num_dsr + 2) * sizeof( struct vlcp_scia ) );
-     if ( vlcp == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vlcp" );
+     if ( vlcp == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vlcp" );
      (void) memcpy( vlcp, vlcp_orig+(num_dsr-1), sizeof( struct vlcp_scia ) );
      (void) memcpy( vlcp+1, vlcp_orig, num_dsr * sizeof( struct vlcp_scia ) );
      (void) memcpy( vlcp+(num_dsr+1), vlcp_orig, sizeof( struct vlcp_scia ) );
@@ -372,8 +368,6 @@ void SCIA_ATBD_CAL_DARK( const struct file_rec *fileParam,
 			 const struct state1_scia *state,
 			 struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_ATBD_CAL_DARK";
-
      register unsigned short num = 0u;     /* counter for number of clusters */
 
      static struct DarkRec DarkData_Save;
@@ -392,7 +386,7 @@ void SCIA_ATBD_CAL_DARK( const struct file_rec *fileParam,
 	  readDarkDataADS( fileParam->calibFlag, fileParam->fp, 
 			   fileParam->num_dsd, fileParam->dsd, &DarkData_Save );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "DARK" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "DARK" );
      }
      (void) memcpy( &DarkData, &DarkData_Save, sizeof( struct DarkRec ) );
      if ( fileParam->flagInitFile || fileParam->flagInitPhase ) {
@@ -401,7 +395,7 @@ void SCIA_ATBD_CAL_DARK( const struct file_rec *fileParam,
 				fileParam->num_dsd, fileParam->dsd, 
 				state->orbit_phase, &DarkData );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "OrbitDARK" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "OrbitDARK" );
 	  }
      }
 /*
@@ -437,8 +431,6 @@ void SCIA_get_AtbdDark( FILE *fp, unsigned int calib_flag, float orbit_phase,
      /*@globals  errno, nadc_stat, nadc_err_stack@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fp@*/
 {
-     const char prognm[] = "SCIA_get_AtbdDark";
-
      unsigned int num_dsd;
 
      struct mph_envi   mph;
@@ -454,21 +446,21 @@ void SCIA_get_AtbdDark( FILE *fp, unsigned int calib_flag, float orbit_phase,
      ENVI_RD_MPH( fp, &mph );
      dsd = (struct dsd_envi *) 
 	  malloc( (mph.num_dsd-1) * sizeof(struct dsd_envi) );
-     if ( dsd == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dsd" );
+     if ( dsd == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dsd" );
      num_dsd = ENVI_RD_DSD( fp, mph, dsd );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "DSD" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "DSD" );
 /*
  * read calibration data for DarkCurrent correction
  */
      readDarkDataADS( calib_flag, fp, num_dsd, dsd, &DarkData );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DarkADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DarkADS" );
      if ( do_vardark ) {
 	  addOrbitDarkADS( SCIA_NADIR, calib_flag, fp, num_dsd, dsd, 
 			   orbit_phase, &DarkData );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "OrbitDARK" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "OrbitDARK" );
      }
      (void) memcpy( analogOffs, DarkData.AnalogOffs, nr_byte );
      (void) memcpy( darkCurrent, DarkData.DarkCurrent, nr_byte );

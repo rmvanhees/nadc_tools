@@ -50,11 +50,9 @@ int IDL_STDCALL _GOME_LV1_RD_FSR ( int argc, void *argv[] )
 {
      struct fsr1_gome *fsr;
 
-     const char prognm[] = "LV1_RD_FSR";
-
-     if ( argc != 1 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 1 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      fsr = (struct fsr1_gome *) argv[0];
      GOME_LV1_RD_FSR( fd_nadc, fsr );
@@ -67,14 +65,12 @@ int IDL_STDCALL _GOME_LV1_RD_FSR ( int argc, void *argv[] )
 
 int IDL_STDCALL _GOME_LV1_RD_SPH ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_RD_SPH";
-
      struct fsr1_gome *fsr;
      struct sph1_gome *sph;
 
-     if ( argc != 2 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 2 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      fsr = (struct fsr1_gome *) argv[0];
      sph = (struct sph1_gome *) argv[1];
@@ -88,8 +84,6 @@ int IDL_STDCALL _GOME_LV1_RD_SPH ( int argc, void *argv[] )
 
 int IDL_STDCALL _GOME_LV1_RD_FCD ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_RD_FCD";
-
      struct fsr1_gome *fsr;
      struct fcd_gome  C_fcd;
      struct lv1_leak  *leak;
@@ -131,9 +125,9 @@ int IDL_STDCALL _GOME_LV1_RD_FCD ( int argc, void *argv[] )
 	  IDL_ULONG  pntr_calib;               /* IDL uses 32-bit addresses */
      } *fcd;
 
-     if ( argc != 6 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 6 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      fsr   = (struct fsr1_gome *) argv[0];
      fcd   = (struct IDL_fcd_gome *) argv[1];
@@ -205,17 +199,15 @@ int IDL_STDCALL _GOME_LV1_RD_FCD ( int argc, void *argv[] )
 
 int IDL_STDCALL _GOME_LV1_RD_PCD ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_RD_PCD";
-
      int nr_pcd;
 
      struct fsr1_gome *fsr;
      struct sph1_gome *sph;
      struct pcd_gome  *pcd;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      fsr = (struct fsr1_gome *) argv[0];
      sph = (struct sph1_gome *) argv[1];
@@ -230,8 +222,6 @@ int IDL_STDCALL _GOME_LV1_RD_PCD ( int argc, void *argv[] )
 
 int IDL_STDCALL _GOME_LV1_RD_SMCD ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_RD_SMCD";
-
      unsigned char source;
 
      int nr_smcd;
@@ -240,9 +230,9 @@ int IDL_STDCALL _GOME_LV1_RD_SMCD ( int argc, void *argv[] )
      struct sph1_gome *sph;
      struct smcd_gome *smcd;
 
-     if ( argc != 4 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 4 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      source = *(unsigned char *) argv[0];
      fsr = (struct fsr1_gome *) argv[1];
@@ -258,8 +248,6 @@ int IDL_STDCALL _GOME_LV1_RD_SMCD ( int argc, void *argv[] )
 
 int IDL_STDCALL _GOME_LV1_PCD_PMD ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_PCD_PMD";
-
      short nr_pcd, *indx_pcd;
 
      unsigned short   calib_mask;
@@ -267,9 +255,9 @@ int IDL_STDCALL _GOME_LV1_PCD_PMD ( int argc, void *argv[] )
      struct fcd_gome  fcd;
      struct pcd_gome  *pcd;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      calib_mask = *(unsigned short *) argv[0];
      fsr = (struct fsr1_gome *) argv[1];
@@ -306,8 +294,6 @@ int IDL_STDCALL _GOME_LV1_PCD_PMD ( int argc, void *argv[] )
 
 int IDL_STDCALL _GOME_LV1_SMCD_PMD ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_SMCD_PMD";
-
      short nr_smcd, *indx_smcd;
 
      unsigned short   calib_mask;
@@ -315,9 +301,9 @@ int IDL_STDCALL _GOME_LV1_SMCD_PMD ( int argc, void *argv[] )
      struct fcd_gome  fcd;
      struct smcd_gome  *smcd;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      calib_mask = *(unsigned short *) argv[0];
      fsr = (struct fsr1_gome *) argv[1];
@@ -372,8 +358,6 @@ short SELECT_PCD_REC( short nr_pcd, const short *indx_pcd,
 
 int IDL_STDCALL _GOME_LV1_RD_BDR ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_RD_BDR";
-
      register int nr, np;
 
      short channel, nband;
@@ -386,9 +370,9 @@ int IDL_STDCALL _GOME_LV1_RD_BDR ( int argc, void *argv[] )
      struct pcd_gome  *pcd;
      struct rec_gome  *rec, *rec_tmp;
 
-     if ( argc != 7 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 7 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      nband = *(short *) argv[0];
      calib_mask = *(unsigned short *) argv[1];
@@ -473,8 +457,6 @@ short SELECT_SMCD_REC( short nband, short nr_smcd, const short *indx_smcd,
 
 int IDL_STDCALL _GOME_LV1_RD_SMBDR ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1_RD_SMBDR";
-
      register int nr, np;
 
      short channel, nband;
@@ -487,9 +469,9 @@ int IDL_STDCALL _GOME_LV1_RD_SMBDR ( int argc, void *argv[] )
      struct smcd_gome *smcd;
      struct rec_gome  *rec, *rec_tmp;
 
-     if ( argc != 7 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 7 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      nband = *(short *) argv[0];
      calib_mask = *(unsigned short *) argv[1];

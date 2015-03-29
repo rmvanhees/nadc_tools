@@ -87,8 +87,6 @@ unsigned int SCIA_RD_LADS( FILE *fd, unsigned int num_dsd,
 			   const struct dsd_envi *dsd,
 			   struct lads_scia **lads_out )
 {
-     const char prognm[]  = "SCIA_RD_LADS";
-
      register int ni;
 
      char         *lads_pntr, *lads_char = NULL;
@@ -110,7 +108,7 @@ unsigned int SCIA_RD_LADS( FILE *fd, unsigned int num_dsd,
 	  NADC_ERR_RESTORE();
           indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name_lv1 );
 	  if ( IS_ERR_STAT_ABSENT )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name_lv1 );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name_lv1 );
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
      if ( ! Use_Extern_Alloc ) {
@@ -118,13 +116,13 @@ unsigned int SCIA_RD_LADS( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct lads_scia));
      }
      if ( (lads = lads_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lads" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lads" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (lads_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lads_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lads_char" );
 /*
  * rewind/read input data file
  */
@@ -134,7 +132,7 @@ unsigned int SCIA_RD_LADS( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( lads_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to LADS structure
  */
@@ -156,7 +154,7 @@ unsigned int SCIA_RD_LADS( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(lads_pntr - lads_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name_lv1 );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name_lv1 );
 /*
  * byte swap data to local representation
  */
@@ -192,8 +190,6 @@ unsigned int SCIA_RD_LADS( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_LADS( FILE *fd, unsigned int num_lads, 
 		       const struct lads_scia *lads_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_LADS";
-
      register int ni;
 
      struct lads_scia  lads;
@@ -217,23 +213,23 @@ void SCIA_LV1_WR_LADS( FILE *fd, unsigned int num_lads,
  * write LADS structure to data buffer
  */
 	  if ( fwrite( &lads.mjd.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 	  if ( fwrite( &lads.mjd.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &lads.mjd.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &lads.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  for ( ni = 0; ni < NUM_CORNERS; ni++ ) {
 	       if ( fwrite( &lads.corner[ni].lat, ENVI_INT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_INT;
 	       if ( fwrite( &lads.corner[ni].lon, ENVI_INT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_INT;
 	  }
 	  lads_in++;

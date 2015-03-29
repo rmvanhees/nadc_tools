@@ -295,8 +295,6 @@ unsigned short GET_SCIA_LV0C_MDS( const unsigned int num_det,
 				  const struct mds0_det *det, 
 				  struct mds1c_scia **mds_out )
 {
-     const char prognm[] = "GET_SCIA_LV0C_MDS";
-
      register unsigned short np;
 
      register unsigned int   nc;
@@ -329,7 +327,7 @@ unsigned short GET_SCIA_LV0C_MDS( const unsigned int num_det,
      mds_1c = (struct mds1c_scia *) 
 	  malloc( (size_t) num_mds * sizeof( struct mds1c_scia ) );
      if ( mds_1c == NULL ) {
-          NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds1c_scia" );
+          NADC_ERROR( NADC_ERR_ALLOC, "mds1c_scia" );
 	  return 0;
      }
 /*
@@ -374,7 +372,7 @@ unsigned short GET_SCIA_LV0C_MDS( const unsigned int num_det,
 		       * sizeof(float) );
 	  if ( mds_1c[nc].pixel_ids == NULL 
 	       || mds_1c[nc].pixel_val == NULL ) {
-	       NADC_ERROR(prognm, NADC_ERR_ALLOC, "pixel_ids/pixel_val");
+	       NADC_ERROR( NADC_ERR_ALLOC, "pixel_ids/pixel_val" );
 	       return 0; /* Oeps, we can't release (mds_1c) memory */
 	  }
 	  /* store pixel IDs */

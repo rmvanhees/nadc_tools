@@ -63,8 +63,6 @@ void SCIA_ATBD_CAL_ETALON( const struct file_rec *fileParam,
 			   const struct state1_scia *state, 
 			   struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_ATBD_CAL_ETALON";
-
      register unsigned short num = 0u;
 
      static float etalon[SCIENCE_PIXELS];
@@ -79,7 +77,7 @@ void SCIA_ATBD_CAL_ETALON( const struct file_rec *fileParam,
 	  (void) SCIA_LV1_RD_PPG( fileParam->fp, fileParam->num_dsd, 
 				  fileParam->dsd, &ppg );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "PPG" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "PPG" );
 	  (void) memcpy( etalon, ppg.etalon_fact, 
 			 SCIENCE_PIXELS * sizeof(float) );
      }

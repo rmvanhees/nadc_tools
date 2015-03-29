@@ -76,8 +76,6 @@ static const double Msec2DecimalDay = 1000 * 24. * 60. * 60.;
 void GOME_LV1_WR_ASCII_FSR( struct param_record param, 
 			    const struct fsr1_gome *fsr )
 {
-     const char prognm[] = "GOME_LV1_WR_ASCII_FSR";
-
      register unsigned short nb;
      register unsigned int nr = 0;
 
@@ -91,7 +89,7 @@ void GOME_LV1_WR_ASCII_FSR( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "fsr" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of FSR record
  */
@@ -132,8 +130,6 @@ void GOME_LV1_WR_ASCII_FSR( struct param_record param,
 void GOME_LV1_WR_ASCII_SPH( struct param_record param, 
 			    const struct sph1_gome *sph )
 {
-     const char prognm[] = "GOME_LV1_WR_ASCII_SPH";
-
      register short ni;
      register unsigned int nr = 0;
 
@@ -144,7 +140,7 @@ void GOME_LV1_WR_ASCII_SPH( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "sph" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SPH record
  */
@@ -243,8 +239,6 @@ void GOME_LV1_WR_ASCII_SPH( struct param_record param,
 void GOME_LV1_WR_ASCII_FCD( struct param_record param, 
 			    const struct fcd_gome *fcd )
 {
-     const char prognm[] = "GOME_LV1_WR_ASCII_FCD";
-
      register short nl;
      register unsigned nr = 0;
 
@@ -255,7 +249,7 @@ void GOME_LV1_WR_ASCII_FCD( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "fcd" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of FCD record
  */
@@ -489,12 +483,10 @@ void GOME_LV1_WR_ASCII_PCD( struct param_record param, short nr_pcd,
      char date_str[25];
      unsigned int count[2];
 
-     const char prognm[] = "GOME_LV1_WR_ASCII_PCD";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "pcd" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of PCD record
  */
@@ -738,8 +730,6 @@ void GOME_LV1_WR_ASCII_SMCD( unsigned char flag_origin,
 			     short nr_smcd, const short *indx_smcd, 
 			     const struct smcd_gome *smcd )
 {
-     const char prognm[] = "GOME_LV1_WR_ASCII_SMCD";
-
      register short ni;
      register unsigned int nr = 0;
      char date_str[25];
@@ -752,13 +742,13 @@ void GOME_LV1_WR_ASCII_SMCD( unsigned char flag_origin,
      if ( flag_origin == FLAG_SUN ) {
 	  if ( (outfl = CRE_ASCII_File( param.outfile, "scd" )) == NULL 
 	       || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, nr, param.infile, 
 			      "Sun Specific Calibration Record" );
      } else {
 	  if ( (outfl = CRE_ASCII_File( param.outfile, "mcd" )) == NULL 
 	       || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, nr, param.infile, 
 			      "Moon Specific Calibration Record" );
      }
@@ -870,8 +860,6 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
 			    short nr_rec, short bcr_start, short bcr_count,
 			    const struct rec_gome *rec )
 {
-     const char prognm[] = "GOME_LV1_WR_ASCII_REC";
-
      register unsigned int ni, nx, ny;
      register unsigned int nr = 0;
 
@@ -900,7 +888,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
 	  (void) snprintf( string, 16, "earth.%s", band_names[nband] );
 	  if ( (outfl = CRE_ASCII_File( param.outfile, string )) == NULL
 	       || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, nr, param.infile, 
 			      "Earth Spectral Band Records" );
      } else if ( flag_origin == FLAG_SUN ) {
@@ -908,7 +896,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
 	  (void) snprintf( string, 16, "sun.%s", band_names[nband] );
 	  if ( (outfl = CRE_ASCII_File( param.outfile, string )) == NULL
 	       || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, nr, param.infile, 
 			      "Sun Spectral Band Records" );
      } else {
@@ -916,7 +904,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
 	  (void) snprintf( string, 16, "moon.%s", band_names[nband] );
 	  if ( (outfl = CRE_ASCII_File( param.outfile, string )) == NULL
 	       || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, nr, param.infile, 
 			      "Moon Spectral Band Records" );
      }
@@ -937,7 +925,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
  */     
      count[0] = (unsigned int) nr_rec;
      cbuff = (unsigned char *) malloc( count[0] * sizeof( unsigned char ));
-     if ( cbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+     if ( cbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
 	  cbuff[nx] = (unsigned char) rec[nx].quality.field.dead;
      nadc_write_arr_uchar( outfl, ++nr, "FlagDeadPixels", 1, count, cbuff );
@@ -955,7 +943,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
  * Indices to Polarisation Sensitivity Parameters
  */
      sbuff = (short *) malloc( count[0] * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      for ( nx = 0; nx < count[0]; nx++ )
 	  sbuff[nx] = rec[nx].indx_psp;
      nadc_write_arr_short( outfl, ++nr, "IndexPolarisation", 1, count, 
@@ -972,7 +960,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
  * Integration Times
  */
      rbuff = (float *) malloc( count[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      if ( nband == BAND_1b || nband == BAND_2b ) { 
 	  for ( nx = 0; nx < count[0]; nx++ )
 	       rbuff[nx] = rec[nx].integration[1];
@@ -1002,7 +990,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
 	  usbuff = (unsigned short *) 
 	       malloc( nrpix * sizeof( unsigned short ));
 	  if ( usbuff == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "usbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "usbuff" );
 	  for ( ni = ny = 0; ny < count[1]; ny++ )
 	       for ( nx = 0; nx < count[0]; nx++ )
 		    usbuff[ni++] = (unsigned short) rec[ny].data[nx+bcr_start];
@@ -1012,7 +1000,7 @@ void GOME_LV1_WR_ASCII_REC( unsigned char flag_origin, short nband,
      } else {
 	  rbuff = (float *) malloc( nrpix * sizeof( float ));
 	  if ( rbuff == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  for ( ni = ny = 0; ny < count[1]; ny++ )
 	       for ( nx = 0; nx < count[0]; nx++ )
 		    rbuff[ni++] = rec[ny].data[nx+bcr_start];

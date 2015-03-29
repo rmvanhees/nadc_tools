@@ -80,8 +80,6 @@ static
 int INITIALISE_DORIS_GEO( const double MJD, 
 			  bool *por_flag, double *time_valid, double *mjdp)
 {
-     const char prognm[] = "INITIALISE_DORIS_GEO";
-
      char   tmpstring[UTC_STRING_LENGTH], date1[9], date2[9];
      char   globstring[MAX_STRING_LENGTH];
      double mjd_int, mjd_frac;
@@ -128,7 +126,7 @@ int INITIALISE_DORIS_GEO( const double MJD,
 
 	       (void) pl_vector_msg( &func_id, ierr, &nm, msg );
 	       while ( --nm >= 0 )
-		    NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+		    NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
 	       if ( status <= PL_ERR ) return PL_ERR;
 	  }
      }
@@ -164,7 +162,7 @@ int INITIALISE_DORIS_GEO( const double MJD,
 	       (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
 				"No DORIS precise file found for %s-%s", 
 				date1, date2 );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+	       NADC_ERROR( NADC_ERR_NONE, str_msg );
 	       return PO_ERR;
 	  }
      } else /* found Doris precise orbit files */
@@ -189,7 +187,7 @@ int INITIALISE_DORIS_GEO( const double MJD,
 
 	  (void) po_vector_msg( &func_id, ierr, &nm, msg );
 	  while ( --nm >= 0 )
-	       NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+	       NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
 	  return PO_ERR;
      }
      time_valid[0] = mjdr0;
@@ -221,8 +219,6 @@ int INTERPOLATE_DORIS_GEO( const double MJD, double *geo,
 			   double *pos, double *vel, 
 			   double *acc, double *mjdp )
 {
-     const char prognm[] = "INTERPOLATE_DORIS_GEO";
-
      /* po_interpol variables */
      long status;                         /* Main status flag */
 
@@ -256,11 +252,11 @@ int INTERPOLATE_DORIS_GEO( const double MJD, double *geo,
 	  (void) po_vector_msg( &func_id, ierr, &nm, msg );
 	  if ( status == PO_ERR ) {
 	       while ( --nm >= 0 ) 
-		    NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+		    NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
 	       return PO_ERR;
 	  } else {
 	       while ( --nm >= 0 ) 
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg[nm] );
+		    NADC_ERROR( NADC_ERR_NONE, msg[nm] );
 	  }
      }
      geo[0] = res[PO_PPFORB_RES_GEOC_LAT];                       /* latitude */
@@ -277,8 +273,6 @@ static
 int GET_ATTITUDE( double MJD, /*@out@*/ double *aocs, /*@out@*/ double *att, 
 		  /*@out@*/ double *datt )
 {
-     const char prognm[] = "GET_ATTITUDE";
-
      int   status;
      long  ierr[1];
      long  perfo_flag;
@@ -293,7 +287,7 @@ int GET_ATTITUDE( double MJD, /*@out@*/ double *aocs, /*@out@*/ double *att,
 
 	  (void) pp_vector_msg( &func_id, ierr, &nm, msg );
 	  while ( --nm >= 0 ) 
-	       NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+	       NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
 	  if ( status <= PP_ERR ) return PP_ERR;
      }
      return PP_OK;
@@ -302,8 +296,6 @@ int GET_ATTITUDE( double MJD, /*@out@*/ double *aocs, /*@out@*/ double *att,
 static 
 int INITIALISE_AUX_FRA( const double MJD, double *time_valid )
 {
-     const char prognm[] = "INITIALISE_AUX_FRA";
-    
      double  mjd_int, mjd_frac;
      glob_t  globvor[1];
      char    aux_fra_dir[]="/SCIA/share/Doris/aux_fra";
@@ -333,7 +325,7 @@ int INITIALISE_AUX_FRA( const double MJD, double *time_valid )
 		      aux_fra_dir, year, month, day );
      (void) glob( globstring, GLOB_ERR, NULL, globvor );
      if ( globvor->gl_pathc == 0 ) {
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "No AUX_FRA file found" );
+	  NADC_ERROR( NADC_ERR_NONE, "No AUX_FRA file found" );
 	  return PP_WARN;
      }
      (void) nadc_strlcpy( aux_fra_file, globvor->gl_pathv[globvor->gl_pathc-1], 
@@ -364,7 +356,7 @@ int INITIALISE_AUX_FRA( const double MJD, double *time_valid )
 
 	       (void) pp_vector_msg( &func_id, ierr, &nm, msg );
 	       while ( --nm >= 0 ) 
-		    NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+		    NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
 	       if ( status <= PP_ERR ) return PP_ERR;
 	  }
      }
@@ -382,8 +374,6 @@ int GET_ORBIT_PARAMETERS( double MJD, float esm_angle,
 			  /*@out@*/ float  *sun_el_out, 
 			  /*@out@*/ double *geo )
 {
-     const char prognm[] = "GET_ORBIT_PARAMETERS";
-
      register int  ii;
 
      double pos[3], vel[3], acc[3];
@@ -447,7 +437,7 @@ int GET_ORBIT_PARAMETERS( double MJD, float esm_angle,
 			(int) *ierr);
 	  while ( --nm >= 0 ) {
 	       printf("%s\n", msg[nm]);
-	       NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+	       NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
           }
 	  if ( status <= PP_ERR ) goto error;
      }
@@ -477,7 +467,7 @@ int GET_ORBIT_PARAMETERS( double MJD, float esm_angle,
 			(int) *ierr);
 	  while ( --nm >= 0 ) {
 	       printf("%s\n", msg[nm]);
-	       NADC_ERROR( prognm, NADC_ERR_DORIS, msg[nm] );
+	       NADC_ERROR( NADC_ERR_DORIS, msg[nm] );
           }
 	  if ( status <= PP_ERR ) goto error;
      }
@@ -563,13 +553,12 @@ int SCIA_GET_ORBIT_PARAMS( double *mjds, float *esms, int n_mjds, float *lats,
 
 unsigned short IDL_STDCALL _SCIA_GET_ORBIT_PARAMS( int argc, void *argv[] )
 {
-    const char prognm[] = "_SCIA_GET_ORBIT_PARAMS";
     int n_mjds;
     double *mjds;
     float *lats, *lons, *sunels, *sunazs, *esms;
 
     if (argc != 7) {
-        NADC_GOTO_ERROR(prognm, NADC_ERR_PARAM, "wrong nr of arguments!\n");
+        NADC_GOTO_ERROR( NADC_ERR_PARAM, "wrong nr of arguments!\n" );
     }
     mjds     = (double *) argv[0];
     esms     = (float *) argv[1];

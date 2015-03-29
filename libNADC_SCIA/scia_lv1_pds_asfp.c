@@ -78,8 +78,6 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct asfp_scia **asfp_out )
 {
-     const char prognm[]   = "SCIA_LV1_RD_ASFP";
-
      char         *asfp_pntr, *asfp_char = NULL;
      size_t       dsr_size;
 
@@ -94,7 +92,7 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           asfp_out[0] = NULL;
           return 0u;
@@ -104,13 +102,13 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct asfp_scia));
      }
      if ( (asfp = asfp_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "asfp" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "asfp" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (asfp_char = (char *) malloc( dsr_size )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "asfp_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "asfp_char" );
 /*
  * rewind/read input data file
  */
@@ -120,7 +118,7 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( asfp_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to ASFP structure
  */
@@ -138,7 +136,7 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
  */
 	  if ( (size_t)(asfp_pntr - asfp_char) != dsr_size ) {
 	       free( asfp_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  }
 /*
  * byte swap data to local representation
@@ -173,8 +171,6 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_ASFP( FILE *fd, unsigned int num_asfp,
 		       const struct asfp_scia *asfp_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASFP";
-
      struct asfp_scia asfp;
 
      struct dsd_envi dsd = {
@@ -197,16 +193,16 @@ void SCIA_LV1_WR_ASFP( FILE *fd, unsigned int num_asfp,
 	  Sun2Intel_ASFP( &asfp );
 #endif
 	  if ( fwrite( &asfp.pix_pos_slit_fun, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &asfp.type_slit_fun, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &asfp.fwhm_slit_fun, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &asfp.f_voi_fwhm_gauss, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
 	  asfp_in++;

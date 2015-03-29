@@ -72,8 +72,6 @@ static const size_t geo_offs[NFIELDS] = {
 void SCIA_LV2_WR_H5_GEO( struct param_record param, unsigned int nr_geo,
 			 const struct geo_scia *geo )
 {
-     const char prognm[] = "SCIA_LV2_WR_H5_GEO";
-
      hid_t   ads_id;
      hid_t   type_id;
      hbool_t compress;
@@ -100,7 +98,7 @@ void SCIA_LV2_WR_H5_GEO( struct param_record param, unsigned int nr_geo,
  * create group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * define user-defined data types of the Table-fields
  */

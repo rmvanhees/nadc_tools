@@ -126,8 +126,6 @@ void HPSORT( unsigned int dim, double *jday, struct tosomi_rec *rec )
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 int main ( int argc, char *argv[] )
 {
-     const char prognm[] = "adaguc_tosomi";
-
      register int na = 0;
 
      char flname[MAX_STRING_LENGTH];
@@ -146,8 +144,7 @@ int main ( int argc, char *argv[] )
  * check command-line parameters
  */
      ADAGUC_INIT_PARAM( argc, argv, &param );
-     if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "" );
+     if ( IS_ERR_STAT_FATAL ) NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
 /*
  * check if we have to display version and exit
  */
@@ -155,7 +152,7 @@ int main ( int argc, char *argv[] )
 	  (void) fprintf( stdout, "\nFile format:\n" );
 	  (void) fprintf( stdout, "\tconforms to \"%s\" version (%s)\n\n", 
 			  "ADAGUC Data Product Standard", ADAGUC_REF_VERSION );
-	  NADC_SHOW_VERSION( stdout, prognm );
+	  NADC_SHOW_VERSION( stdout, "adaguc_tosomi" );
 	  exit( EXIT_SUCCESS );
      }
 /*
@@ -170,11 +167,11 @@ int main ( int argc, char *argv[] )
 			       param.name_infiles[na], MAX_STRING_LENGTH );
 	  if ( H5Fis_hdf5( flname ) ) {
 	       if ( (retval = nc_open(flname, NC_NOWRITE, &ncid)) != NC_NOERR )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,nc_strerror(retval));
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 	       NADC_TOSOMI_RD_NC_META( ncid, &hdr_tmp );
 	       hdr_tmp.numRec = NADC_TOSOMI_RD_NC_REC( ncid, &rec_tmp );
 	       if ( nc_close( ncid ) != NC_NOERR )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,nc_strerror(retval));
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 	  } else {
 	       (void) NADC_RD_TOSOMI( flname, &hdr_tmp, &rec_tmp );
 	       if ( IS_ERR_STAT_WARN ) { 
@@ -192,7 +189,7 @@ int main ( int argc, char *argv[] )
 #endif
 	  }
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,"failed to read product");
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "failed to read product" );
 
 	  if ( hdr.numProd == 0 ) {
 	       (void) memcpy( &hdr, &hdr_tmp, sizeof(struct tosomi_hdr) ); 
@@ -200,13 +197,13 @@ int main ( int argc, char *argv[] )
 		    rec = (struct tosomi_rec *)
 			 malloc( hdr_tmp.numRec * sizeof( struct tosomi_rec ));
 		    if ( rec == NULL ) 
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rec" );
 		    (void) memcpy( rec, rec_tmp, 
 				   hdr_tmp.numRec * sizeof(struct tosomi_rec) );
 	       }
 	  } else {
 	       if ( strcmp( hdr.software_version, hdr_tmp.software_version ) != 0 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL,
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL,
 				     "inconsistent product versions" );
 
 	       /* update header struct */
@@ -221,7 +218,7 @@ int main ( int argc, char *argv[] )
 		    rec = (struct tosomi_rec *)
 			 realloc( rec, hdr.numRec * sizeof(struct tosomi_rec));
 		    if ( rec == NULL ) 
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rec" );
 		    (void) memcpy( rec + (hdr.numRec - hdr_tmp.numRec), 
 				   rec_tmp, 
 				   hdr_tmp.numRec * sizeof(struct tosomi_rec) );
@@ -233,7 +230,7 @@ int main ( int argc, char *argv[] )
  * check number of records read from IMAP product
  */
      if ( hdr.numRec == 0u || rec == NULL ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, 
+          NADC_GOTO_ERROR( NADC_ERR_NONE, 
                            "No valid retrievals found in product" );
      }
 /*
@@ -241,7 +238,7 @@ int main ( int argc, char *argv[] )
  */
      if ( hdr.numRec > 1 ) {
 	  jday = (double *) malloc( hdr.numRec * sizeof(double) );
-	  if ( jday == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "jday" );
+	  if ( jday == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "jday" );
 	  for ( nr = 0; nr < hdr.numRec; nr++ ) jday[nr] = rec[nr].jday;
 	  HPSORT( hdr.numRec, jday, rec );
 
@@ -261,7 +258,7 @@ int main ( int argc, char *argv[] )
 		    if ( jday[ihigh] <= jdayStop ) break;
 
 	       if ( ihigh <= ilow ) {
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "all records outside clipRange" );
 	       } else if ( ilow > 0 || ihigh < (hdr.numRec-1) ) {
 		    hdr.numRec = ihigh - ilow + 1;
@@ -284,18 +281,18 @@ int main ( int argc, char *argv[] )
 		      hdr.validity_start, hdr.validity_stop, 1 );
 
      if ( (retval = nc_create( flname, NC_NETCDF4, &ncid ))!= NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 
      NADC_TOSOMI_WR_NC_META( ncid, &hdr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "TOSOMI header" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "TOSOMI header" );
 
      NADC_TOSOMI_WR_NC_REC( ncid, hdr.numRec, rec );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "TOSOMI records" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "TOSOMI records" );
 
      if ( nc_close( ncid ) != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 /*
  * free allocated memory
  */

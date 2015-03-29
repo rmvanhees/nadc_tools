@@ -93,8 +93,6 @@ int SCIA_LV2_RD_BIAS( FILE *fd, const char bias_name[],
 		      unsigned int num_dsd, const struct dsd_envi *dsd, 
 		      struct bias_scia **bias_out )
 {
-     const char prognm[] = "SCIA_LV2_RD_BIAS";
-
      char         *bias_pntr, *bias_char = NULL;
      size_t       dsd_size, nr_byte;
      unsigned int indx_dsd;
@@ -107,26 +105,26 @@ int SCIA_LV2_RD_BIAS( FILE *fd, const char bias_name[],
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, bias_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, bias_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, bias_name );
      if ( dsd[indx_dsd].size == 0u ) return 0;
      if ( ! Use_Extern_Alloc ) {
 	  bias_out[0] = (struct bias_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct bias_scia));
      }
      if ( (bias = bias_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "bias" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "bias" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsd_size = (size_t) dsd[indx_dsd].size;
      if ( (bias_char = (char *) malloc( dsd_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "bias_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "bias_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( bias_char, dsd_size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to BIAS structure
  */
@@ -179,7 +177,7 @@ int SCIA_LV2_RD_BIAS( FILE *fd, const char bias_name[],
 	  nr_byte = (size_t) n_cross * sizeof( float );
 	  bias->corrpar = (float *) malloc( nr_byte );
 	  if ( bias->corrpar == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "corrpar" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "corrpar" );
 	  (void) memcpy( bias->corrpar, bias_pntr, nr_byte ); 
 	  bias_pntr += nr_byte;
 	  (void) memcpy( &bias->vcdflag, bias_pntr, ENVI_USHRT );
@@ -194,7 +192,7 @@ int SCIA_LV2_RD_BIAS( FILE *fd, const char bias_name[],
  * check if we read the whole DSR
  */
      if ( (unsigned int)(bias_pntr - bias_char) != dsd[indx_dsd].size )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, bias_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, bias_name );
      bias_pntr = NULL;
 /*
  * set return values

@@ -66,12 +66,9 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "scia_imlm_h2o";
-
 #ifdef _WITH_SQL
      PGconn *conn = NULL;
 #endif
-     
      bool flag_remove  = FALSE;
      bool flag_replace = FALSE;
 
@@ -94,13 +91,13 @@ int main( int argc, char *argv[] )
 	       if ( strncmp( argv[nr], "-replace", 8 ) == 0 )
 		    flag_replace = TRUE;
 	       else
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
+		    NADC_GOTO_ERROR( NADC_ERR_PARAM, NADC_PARAMS );
 	  } while( ++nr < (argc-1) );
 	  (void) nadc_strlcpy( flname, argv[argc-1], MAX_STRING_LENGTH );
      } else if ( argc == 2 ) {
 	  (void) nadc_strlcpy( flname, argv[1], MAX_STRING_LENGTH );
      } else
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, NADC_PARAMS );
 /*
  * strip path of file-name & remove extension ".gz"
  */
@@ -114,37 +111,37 @@ int main( int argc, char *argv[] )
  * read the IMLM-H2O product
  */
      if ( (retval = nc_open( flname, NC_NOWRITE, &ncid )) != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      SCIA_RD_NC_H2O_META( ncid, &hdr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "ADAGUC meta data" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "ADAGUC meta data" );
      if ( hdr.numProd > 1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 			   "no more than one orbit per ingest" );
      (void) nadc_strlcpy( hdr.product, ctemp, SHORT_STRING_LENGTH );
      NADC_RECEIVEDATE( flname, hdr.receive_date );
      hdr.file_size = nadc_file_size( flname );
      hdr.numRec = SCIA_RD_NC_H2O_REC( ncid, &rec );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "ADAGUC data-records" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "ADAGUC data-records" );
      if ( (retval = nc_close( ncid )) != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, flname );
 /*
  * connect to PostgreSQL database
  */
 #ifdef _WITH_SQL
      CONNECT_NADC_DB( &conn, "scia" );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_SQL, "IMLM-H2O (connect)" );
+	  NADC_ERROR( NADC_ERR_SQL, "IMLM-H2O (connect)" );
 	  NADC_Err_Trace( stderr );
 	  return NADC_ERR_FATAL;
      }
      if ( flag_remove || flag_replace ) {
 	  SCIA_DEL_ENTRY_IMLM_H2O( conn, hdr.product );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "IMLM-H2O (remove)" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "IMLM-H2O (remove)" );
      }
 /*
  * write meta-information to database
@@ -152,11 +149,11 @@ int main( int argc, char *argv[] )
      if ( ! flag_remove ) {
 	  SCIA_WR_SQL_H2O_META( conn, &hdr );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, "IMLM-H2O (header)" );
+	       NADC_ERROR( NADC_ERR_SQL, "IMLM-H2O (header)" );
 	  } else {
 	       SCIA_WR_SQL_H2O_TILE(conn, hdr.product, hdr.numRec, rec);
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_ERROR( prognm, NADC_ERR_SQL, "IMLM-H2O (records)" );
+		    NADC_ERROR( NADC_ERR_SQL, "IMLM-H2O (records)" );
 	  }
      }
 #endif

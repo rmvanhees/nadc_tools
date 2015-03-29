@@ -108,8 +108,6 @@ short GOME_LV1_RD_SMCD( unsigned char source, FILE *infl,
 			const struct sph1_gome *sph,
 			struct smcd_gome **smcd_out )
 {
-     const char prognm[] = "GOME_LV1_RD_SMCD";
-
      register int nr;
 
      char  *smcd_char = NULL;
@@ -153,12 +151,12 @@ short GOME_LV1_RD_SMCD( unsigned char source, FILE *infl,
 	       malloc( num_smcd * sizeof( struct smcd_gome ) );
      }
      if ( (smcd = smcd_out[0]) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "smcd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "smcd" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (smcd_char = (char *) malloc( (size_t) sz_smcd )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "smcd_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "smcd_char" );
 /*
  * rewind/read input data file
  */
@@ -168,7 +166,7 @@ short GOME_LV1_RD_SMCD( unsigned char source, FILE *infl,
  */
      do {
 	  if ( fread( smcd_char, sz_smcd, 1, infl ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  (void) memcpy( &smcd->utc_date, smcd_char, GOME_UINT );
 	  smcd_pntr = smcd_char + GOME_UINT;
 	  (void) memcpy( &smcd->utc_time, smcd_pntr, GOME_UINT );
@@ -235,7 +233,7 @@ short GOME_LV1_RD_SMCD( unsigned char source, FILE *infl,
  * check if we read the whole DSR
  */
 	  if ( smcd_pntr - smcd_char != sz_smcd )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "SMCD size" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "SMCD size" );
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_SMCD( smcd );

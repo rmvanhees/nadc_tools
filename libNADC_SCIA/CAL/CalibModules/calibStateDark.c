@@ -189,8 +189,6 @@ void readStateDark_ADS( const struct file_rec *fileParam,
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack, fileParam->fp, darkCorr@*/
 {
-     const char prognm[] = "readStateDark_ADS";
-
      register unsigned short nc, nd, ni;
      register unsigned int   nr;
 
@@ -209,23 +207,23 @@ void readStateDark_ADS( const struct file_rec *fileParam,
 				  fileParam->dsd, &dark );
      if ( IS_ERR_STAT_ABSENT || num_dark == 0 ) {
 	  nadc_stat &= ~NADC_STAT_ABSENT;
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_WARN, "no DARK_AVERAGE found" );
+	  NADC_RETURN_ERROR( NADC_ERR_WARN, "no DARK_AVERAGE found" );
      } else if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DARK" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DARK" );
 /*
  * read/write Summary of Quality Flags per State records
  */
      num_sqads = SCIA_LV1_RD_SQADS( fileParam->fp, fileParam->num_dsd, 
 				    fileParam->dsd, &sqads );
      if ( IS_ERR_STAT_FATAL || num_sqads == 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SQADS" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SQADS" );
 /*
  * read/write States of the Product
  */
      num_state = SCIA_LV1_RD_STATE( fileParam->fp, fileParam->num_dsd, 
 				    fileParam->dsd, &state );
      if ( IS_ERR_STAT_FATAL || num_state == 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "STATE" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "STATE" );
      Use_Extern_Alloc = Save_Extern_Alloc;
 /*
  * initialise darkCorr array
@@ -333,8 +331,6 @@ void readStateDark_SDMF( const struct file_rec *fileParam,
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack, fileParam->fp, darkCorr@*/
 {
-     const char prognm[] = "readStateDark_SDMF";
-
      const int absOrbit = fileParam->absOrbit;
 
      register unsigned short nc, nr;
@@ -364,9 +360,9 @@ void readStateDark_SDMF( const struct file_rec *fileParam,
  */
      found = SDMF_get_StateDark( 8, 0, absOrbit, pet, darkcorr, darknoise );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "failed for state_08" ) ;
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "failed for state_08" ) ;
      if ( ! found )
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF state_08" );
+	  NADC_ERROR( NADC_ERR_NONE, "no SDMF state_08" );
      else {
 	  for ( nc = 0; nc < SCIENCE_CHANNELS; nc++ )
 	       darkCorr[num_dark].num[nc] = 1;
@@ -381,9 +377,9 @@ void readStateDark_SDMF( const struct file_rec *fileParam,
      }
      found = SDMF_get_StateDark( 26, 0, absOrbit, pet, darkcorr, darknoise );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "failed for state_26" ) ;
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "failed for state_26" ) ;
      if ( ! found )
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF state_26" );
+	  NADC_ERROR( NADC_ERR_NONE, "no SDMF state_26" );
      else {
 	  for ( nc = 0; nc < SCIENCE_CHANNELS; nc++ )
 	       darkCorr[num_dark].num[nc] = 1;
@@ -398,9 +394,9 @@ void readStateDark_SDMF( const struct file_rec *fileParam,
      }
      found = SDMF_get_StateDark( 46, 0, absOrbit, pet, darkcorr, darknoise );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "failed for state_46" ) ;
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "failed for state_46" ) ;
      if ( ! found )
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF state_46" );
+	  NADC_ERROR( NADC_ERR_NONE, "no SDMF state_46" );
      else {
 	  for ( nc = 0; nc < SCIENCE_CHANNELS; nc++ )
 	       darkCorr[num_dark].num[nc] = 1;
@@ -415,9 +411,9 @@ void readStateDark_SDMF( const struct file_rec *fileParam,
      }
      found = SDMF_get_StateDark( 63, 0, absOrbit, pet, darkcorr, darknoise );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "failed for state_63" ) ;
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "failed for state_63" ) ;
      if ( ! found )
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF state_63" );
+	  NADC_ERROR( NADC_ERR_NONE, "no SDMF state_63" );
      else {
 	  for ( nc = 0; nc < SCIENCE_CHANNELS; nc++ )
 	       darkCorr[num_dark].num[nc] = 1;
@@ -432,9 +428,9 @@ void readStateDark_SDMF( const struct file_rec *fileParam,
      }
      found = SDMF_get_StateDark( 67, 0, absOrbit, pet, darkcorr, darknoise );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "failed for state_67" ) ;
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "failed for state_67" ) ;
      if ( ! found )
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF state_67" );
+	  NADC_ERROR( NADC_ERR_NONE, "no SDMF state_67" );
      else {
 	  for ( nc = 0; nc < SCIENCE_CHANNELS; nc++ )
 	       darkCorr[num_dark].num[nc] = 1;
@@ -467,8 +463,6 @@ void applyStateDarkData( const struct darkCorr_rec *darkCorr,
 		       struct mds1c_scia *mds_1c )
      /*@modifies mds_1c->pixel_val@*/
 {
-     const char prognm[] = "applyStateDarkData";
-
      register unsigned short nd, ni, nj;
      register float diff;
 
@@ -537,7 +531,7 @@ void applyStateDarkData( const struct darkCorr_rec *darkCorr,
      (void) snprintf( msg, 64, "state/cluster [%-hhu,%-hhu]"
 		     " required interpolation for PET: %.4f",
 		     mds_1c->state_id, mds_1c->clus_id, mds_1c->pet );
-     NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+     NADC_ERROR( NADC_ERR_NONE, msg );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -545,8 +539,6 @@ void SCIA_STATE_CAL_DARK( const struct file_rec *fileParam,
 			  const struct state1_scia *state,
 			  struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_STATE_CAL_DARK";
-
      register unsigned short num = 0u;     /* counter for number of clusters */
 
      struct darkCorr_rec darkCorr[NUM_DARKCORR];
@@ -558,7 +550,7 @@ void SCIA_STATE_CAL_DARK( const struct file_rec *fileParam,
      else
 	  readStateDark_ADS( fileParam, darkCorr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "readStateDark" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "readStateDark" );
 /*
  * do actual dark current correction
  */

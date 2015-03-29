@@ -101,8 +101,6 @@ void readConstDarkSDMF( const struct file_rec *fileParam,
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, DarkData@*/
 {
-     const char prognm[] = "readDarkDataADS";
-
      bool  found;
 #ifdef DEBUG
      register unsigned short ii;
@@ -138,9 +136,9 @@ void readConstDarkSDMF( const struct file_rec *fileParam,
 	  break;
      }
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_FittedDark" );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, "SDMF_get_FittedDark" );
      if ( ! found ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, "no SDMF Dark data" );
+	  NADC_RETURN_ERROR( NADC_ERR_NONE, "no SDMF Dark data" );
 /*
  * invert channel 2 dark parameters
  */
@@ -204,8 +202,6 @@ void addOrbitDarkSDMF( const struct file_rec *fileParam,
      /*@globals  errno, nadc_stat, nadc_err_stack@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, DarkData@*/
 {
-     const char prognm[] = "addOrbitDarkSDMF";
-
      bool   found;
      float  ao[CHANNEL_SIZE], ao_err[CHANNEL_SIZE];
      float  lc[CHANNEL_SIZE], lc_err[CHANNEL_SIZE];
@@ -232,9 +228,9 @@ void addOrbitDarkSDMF( const struct file_rec *fileParam,
 			 lc_err, CHANNEL_SIZE * sizeof(float) );
      }
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "OrbitDARK" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "OrbitDARK" );
      if ( ! found )
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF orbitalDark data" );
+	  NADC_ERROR( NADC_ERR_NONE, "no SDMF orbitalDark data" );
 }
 
 /*+++++++++++++++++++++++++
@@ -284,8 +280,6 @@ void SCIA_SRON_CAL_DARK( const struct file_rec *fileParam,
 			 const struct state1_scia *state,
 			 struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_SRON_CAL_DARK";
-
      register unsigned short num = 0u;     /* counter for number of clusters */
 
      static struct DarkRec DarkData_Save;
@@ -299,14 +293,14 @@ void SCIA_SRON_CAL_DARK( const struct file_rec *fileParam,
      if ( fileParam->flagInitFile ) {
 	  readConstDarkSDMF( fileParam, &DarkData_Save );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "DARK" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "DARK" );
      }
      (void) memcpy( &DarkData, &DarkData_Save, sizeof( struct DarkRec ) );
      if ( fileParam->flagInitFile || fileParam->flagInitPhase ) {
           if ( do_vardark ) {
 	       addOrbitDarkSDMF( fileParam, state->orbit_phase, &DarkData );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "OrbitDARK" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "OrbitDARK" );
 	  }
      }
 /*

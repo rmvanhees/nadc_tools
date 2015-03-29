@@ -85,8 +85,6 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
 		      const struct dsd_envi *dsd, 
 		      struct lcld_scia **lcld_out )
 {
-     const char prognm[]  = "SCIA_OL2_RD_LCLD";
-
      char         *lcld_pntr, *lcld_char = NULL;
      size_t       adim, dsd_size;
      unsigned int indx_dsd;
@@ -102,7 +100,7 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL || IS_ERR_STAT_ABSENT )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
           NADC_ERR_RESTORE();
           lcld_out[0] = NULL;
@@ -117,18 +115,18 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct lcld_scia));
      }
      if ( (lcld = lcld_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lcld" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lcld" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (lcld_char = (char *) malloc( dsd_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lcld_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lcld_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( lcld_char, dsd_size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to LCLD structure
  */
@@ -189,7 +187,7 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
 	       lcld->tangent_hghts = (float *) 
 		    malloc( (size_t) lcld->num_tangent_hghts * sizeof(float) );
 	       if ( lcld->tangent_hghts == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "tangent_hghts" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "tangent_hghts" );
 	       (void) memcpy( &lcld->tangent_hghts, lcld_pntr, 
 			      (size_t) lcld->num_tangent_hghts * ENVI_FLOAT );
 	       lcld_pntr += lcld->num_tangent_hghts * ENVI_FLOAT;
@@ -203,7 +201,7 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
 	  if ( adim > USHRT_ZERO ) {
 	       lcld->cir = (float *) malloc( adim * sizeof(float) );
 	       if ( lcld->cir == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cir" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cir" );
 	       (void) memcpy( &lcld->cir, lcld_pntr, adim * ENVI_FLOAT );
 	       lcld_pntr += adim * ENVI_FLOAT;
 	  }
@@ -216,7 +214,7 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
 	       lcld->limb_para = (float *) 
 		    malloc( (size_t) lcld->num_limb_para * sizeof(float) );
 	       if ( lcld->limb_para == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "limb_para" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "limb_para" );
 	       (void) memcpy( &lcld->limb_para, lcld_pntr, 
 			      (size_t) lcld->num_limb_para * ENVI_FLOAT );
 	       lcld_pntr += lcld->num_limb_para * ENVI_FLOAT;
@@ -230,7 +228,7 @@ int SCIA_OL2_RD_LCLD( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
      if ( (unsigned int)(lcld_pntr - lcld_char) != dsd[indx_dsd].size )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
      lcld_pntr = NULL;
 /*
  * set return values

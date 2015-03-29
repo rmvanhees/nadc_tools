@@ -76,7 +76,6 @@ void GOME_LV1_WR_H5_REC( unsigned char flag_origin, short nband,
      hbool_t compress;
      hsize_t nrpix, dims[2];
 
-     const char prognm[] = "GOME_LV1_WR_H5_REC";
      const char *band_names[] = { 
 	  "Band-1a", "Band-1b", "Band-2a", "Band-2b", "Band-3", 
 	  "Band-4", "Blind", "Stray-1a", "Stray-1b", "Stray-2a"
@@ -97,20 +96,20 @@ void GOME_LV1_WR_H5_REC( unsigned char flag_origin, short nband,
  */
      if ( flag_origin == FLAG_EARTH ) {
 	  if ( (grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/EARTH" )) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/EARTH" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/EARTH" );
      } else if ( flag_origin == FLAG_SUN ) {
 	  if ( (grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/SUN" )) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/SUN" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/SUN" );
      } else if ( flag_origin == FLAG_MOON ) {
 	  if ( (grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MOON" )) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MOON" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MOON" );
      } else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "unknown data source" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "unknown data source" );
 
      sub_grp_id = H5Gcreate( grp_id, band_names[nband], 
 			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( sub_grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, band_names[nband] );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, band_names[nband] );
 /*
  * +++++ create/write attributes in the /PCD/BDR-group
  */
@@ -127,39 +126,39 @@ void GOME_LV1_WR_H5_REC( unsigned char flag_origin, short nband,
  * Quality flags
  */
      cbuff = (unsigned char *) malloc( dims[0] * sizeof( unsigned char ));
-     if ( cbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+     if ( cbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      for ( nx = 0; nx < dims[0]; nx++ )
 	  cbuff[nx] = (unsigned char) rec[nx].quality.field.dead;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagDeadPixels", 
-			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
+			   H5T_NATIVE_UCHAR, 1, dims, cbuff );
      for ( nx = 0; nx < dims[0]; nx++ )
 	  cbuff[nx] = (unsigned char) rec[nx].quality.field.hot;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagHotPixels", 
-			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
+			   H5T_NATIVE_UCHAR, 1, dims, cbuff );
      for ( nx = 0; nx < dims[0]; nx++ )
 	  cbuff[nx] = (unsigned char) rec[nx].quality.field.saturate;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagSaturatePixels", 
-			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
+			   H5T_NATIVE_UCHAR, 1, dims, cbuff );
      for ( nx = 0; nx < dims[0]; nx++ )
 	  cbuff[nx] = (unsigned char) rec[nx].quality.field.spectral;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "FlagSpectralPixels", 
-			  H5T_NATIVE_UCHAR, 1, dims, cbuff );
+			   H5T_NATIVE_UCHAR, 1, dims, cbuff );
      free( cbuff );
 /*
  * Indices
  */
      sbuff = (short *) malloc( dims[0] * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      for ( nx = 0; nx < dims[0]; nx++ )
 	  sbuff[nx] = rec[nx].indx_psp;
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "IndexPolarisation", 
-			  H5T_NATIVE_SHORT, 1, dims, sbuff );
+			   H5T_NATIVE_SHORT, 1, dims, sbuff );
      free( sbuff );
 /*
  * Integration Times
  */
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      if ( nband == BAND_1b || nband == BAND_2b )
 	  for ( nx = 0; nx < dims[0]; nx++ )
 	       rbuff[nx] = rec[nx].integration[1];
@@ -167,7 +166,7 @@ void GOME_LV1_WR_H5_REC( unsigned char flag_origin, short nband,
 	  for ( nx = 0; nx < dims[0]; nx++ )
 	       rbuff[nx] = rec[nx].integration[0];
      NADC_WR_HDF5_Dataset( compress, sub_grp_id, "IntegrationTime", 
-			  H5T_NATIVE_FLOAT, 1, dims, rbuff );
+			   H5T_NATIVE_FLOAT, 1, dims, rbuff );
      free( rbuff );
 /*
  * Spectral data
@@ -181,21 +180,21 @@ void GOME_LV1_WR_H5_REC( unsigned char flag_origin, short nband,
 	  usbuff = (unsigned short *) 
 	       malloc( nrpix * sizeof( unsigned short ));
 	  if ( usbuff == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "usbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "usbuff" );
 	  for ( nr = ny = 0; ny < dims[0]; ny++ )
 	       for ( nx = 0; nx < dims[1]; nx++ )
 		    usbuff[nr++] = (unsigned short) rec[ny].data[nx+bcr_start];
 	  NADC_WR_HDF5_Dataset( compress, sub_grp_id, "DataValues", 
-			       H5T_NATIVE_USHORT, 2, dims, usbuff );
+				H5T_NATIVE_USHORT, 2, dims, usbuff );
 	  free( usbuff );
      } else {
 	  if ( (rbuff = (float *) malloc( nrpix * sizeof( float ))) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  for ( nr = ny = 0; ny < dims[0]; ny++ )
 	       for ( nx = 0; nx < dims[1]; nx++ )
 		    rbuff[nr++] = rec[ny].data[nx+bcr_start];
 	  NADC_WR_HDF5_Dataset( compress, sub_grp_id, "DataValues", 
-			       H5T_NATIVE_FLOAT, 2, dims, rbuff );
+				H5T_NATIVE_FLOAT, 2, dims, rbuff );
 	  free( rbuff );
      }
 /*

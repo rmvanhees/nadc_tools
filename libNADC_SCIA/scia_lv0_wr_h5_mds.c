@@ -78,8 +78,6 @@
 void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index, 
                          unsigned int nr_aux, const struct mds0_aux *aux )
 {
-     const char prognm[] = "SCIA_LV0_WR_H5_AUX";
-
      hid_t   grpID = -1;
      hid_t   ptable;
 
@@ -109,10 +107,10 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
 	  (void) snprintf( grpName, 11, "occult_%03hu", state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      grpID = NADC_OPEN_HDF5_Group( param.hdf_file_id, grpName );
-     if ( grpID < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+     if ( grpID < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 /*
  * create table: AUX MDS
  */
@@ -276,21 +274,21 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );
 	  (void) H5Tclose( tid );
 	  if ( ptable == H5I_BADID )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      } else {
 	  ptable = H5PTopen( grpID, tblName );
  	  if ( ptable == H5I_BADID )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      }
      if ( H5PTappend( ptable, nr_aux, aux ) < 0 )
-          NADC_ERROR( prognm, NADC_ERR_HDF_WR, tblName );
+          NADC_ERROR( NADC_ERR_HDF_WR, tblName );
      (void) H5PTclose( ptable );
 /*
  * close interface
  */
 done:
      if ( H5Gclose( grpID ) < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 }
 
 /*+++++++++++++++++++++++++
@@ -310,8 +308,6 @@ done:
 void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index, 
                          unsigned int nr_pmd, const struct mds0_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV0_WR_H5_PMD";
-
      char    grpName[11];
 
      hid_t   grpID = -1;
@@ -341,10 +337,10 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index,
 	  (void) snprintf( grpName, 11, "occult_%03hu", state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      grpID = NADC_OPEN_HDF5_Group( param.hdf_file_id, grpName );
-     if ( grpID < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+     if ( grpID < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 /*
  * create table: PMD MDS
  */
@@ -462,21 +458,21 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index,
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );
 	  (void) H5Tclose( tid );
 	  if ( ptable == H5I_BADID )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      } else {
 	  ptable = H5PTopen( grpID, tblName );
  	  if ( ptable == H5I_BADID )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      }
      if ( H5PTappend( ptable, nr_pmd, pmd ) < 0 )
-          NADC_ERROR( prognm, NADC_ERR_HDF_WR, tblName );
+          NADC_ERROR( NADC_ERR_HDF_WR, tblName );
      (void) H5PTclose( ptable );
 /*
  * close interface
  */
 done:
      if ( H5Gclose( grpID ) < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 }
 
 /*+++++++++++++++++++++++++
@@ -496,8 +492,6 @@ done:
 void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
                          unsigned int nr_det, const struct mds0_det *det )
 {
-     const char prognm[] = "SCIA_LV0_WR_H5_DET";
-
      register unsigned short nc;
 
      int     abs_orbit;
@@ -542,10 +536,10 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 	  (void) snprintf( grpName, 11, "occult_%03hu", state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      grpID = NADC_OPEN_HDF5_Group( param.hdf_file_id, grpName );
-     if ( grpID < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+     if ( grpID < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 /*
  * create table: Detector MDS
  */
@@ -664,21 +658,21 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 	  ptable = H5PTcreate_fl( grpID, tblName, tid, chunk_sz, compress );
 	  (void) H5Tclose( tid );
 	  if ( ptable == H5I_BADID )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      } else {
 	  ptable = H5PTopen( grpID, tblName );
  	  if ( ptable == H5I_BADID )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, tblName );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      }
      if ( H5PTappend( ptable, nr_det, det ) < 0 )
-          NADC_ERROR( prognm, NADC_ERR_HDF_WR, tblName );
+          NADC_ERROR( NADC_ERR_HDF_WR, tblName );
      (void) H5PTclose( ptable );
 /*
  * allocate memory for channel/cluster header
  */
      chan_hdr = (struct chan_hdr *) malloc( nr_det * sizeof(struct chan_hdr));
      if ( chan_hdr == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "chan_hdr" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "chan_hdr" );
 /*
  *
  */
@@ -702,7 +696,7 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
  * allocate memory and intitialize pointers
  */
 	  data = (char *) malloc(nr_det * clusDef[nc].length * sizeof(int));
-	  if ( data == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "data" );
+	  if ( data == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "data" );
 	  ptr_short = (unsigned short *) data;
 	  ptr_int = (unsigned int *) data;
 
@@ -769,7 +763,7 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 
 	       subgrpID = NADC_OPEN_HDF5_Group( grpID, grpName );
 	       if ( subgrpID < 0 ) 
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+		    NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 	       (void) H5LTset_attribute_uchar( grpID, grpName, "channel",
 					       &clusDef[nc].chanID, 1 );
 	       (void) H5LTset_attribute_uchar( grpID, grpName, "cluster_id",
@@ -819,7 +813,7 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 					     chunk_sz, compress );
 		    (void) H5Tclose( tid );
 		    if ( pt_clus == H5I_BADID )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, clusName );
+			 NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, clusName );
 		    
 		    adim = ptr_chan_src->length;
 		    if ( ptr_chan_src->co_adding == UCHAR_ONE )	
@@ -830,23 +824,23 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
 					     chunk_sz, compress );
 		    (void) H5Tclose( tid );
 		    if ( pt_data == H5I_BADID )
-			 NADC_GOTO_ERROR(prognm,NADC_ERR_HDF_DATA,"mds0_data");
+			 NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "mds0_data" );
 	       } else {
 		    pt_clus = H5PTopen( subgrpID, clusName );
 		    if ( pt_clus == H5I_BADID )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, clusName );
+			 NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, clusName );
 		    pt_data = H5PTopen( subgrpID, "mds0_data" );
 		    if ( pt_data == H5I_BADID )
-			 NADC_GOTO_ERROR(prognm,NADC_ERR_HDF_DATA,"mds0_data");
+			 NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "mds0_data" );
 	       }
 	       if ( H5PTappend( pt_clus, numHDR, chan_hdr ) < 0 )
-		    NADC_ERROR( prognm, NADC_ERR_HDF_WR, clusName );
+		    NADC_ERROR( NADC_ERR_HDF_WR, clusName );
 	       if ( H5PTappend( pt_data, numHDR, data ) < 0 )
-		    NADC_ERROR( prognm, NADC_ERR_HDF_WR, "mds0_data" );
+		    NADC_ERROR( NADC_ERR_HDF_WR, "mds0_data" );
 	       (void) H5PTclose( pt_clus );
 	       (void) H5PTclose( pt_data );
 	       if ( H5Gclose( subgrpID ) < 0 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+		    NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 	  }
 	  free( data );
      }
@@ -856,5 +850,5 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
  done:
      if ( chan_hdr != NULL ) free( chan_hdr );
      if ( H5Gclose( grpID ) < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grpName );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grpName );
 }

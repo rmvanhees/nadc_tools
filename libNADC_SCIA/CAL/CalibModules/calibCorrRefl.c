@@ -269,8 +269,6 @@ void SCIA_ATBD_CAL_REFL( const struct file_rec *fileParam,
 			 const struct state1_scia *state,
 			 struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_ATBD_CAL_REFL";
-
      register unsigned short num = 0u;
      static struct srs_scia srs;
 
@@ -285,7 +283,7 @@ void SCIA_ATBD_CAL_REFL( const struct file_rec *fileParam,
 				     fileParam->dsd, &srs_all );
 	  Use_Extern_Alloc = Save_Extern_Alloc;
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SRS" );
 
 	  (void) memcpy( &srs, &srs_all[indx_smr], sizeof(struct srs_scia) );
 	  free ( srs_all );
@@ -312,7 +310,7 @@ void SCIA_ATBD_CAL_REFL( const struct file_rec *fileParam,
 	       break;
 	  }
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "AKIMA" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "AKIMA" );
      } while ( ++mds_1c, ++num < state->num_clus );
 }
 
@@ -320,8 +318,6 @@ void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
 			 const struct state1_scia *state,
 			 struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_SRON_CAL_REFL";
-
      register unsigned short num = 0u;
      static struct srs_scia srs;
 
@@ -338,7 +334,7 @@ void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
 				  fileParam->dsd, &srs_all );
 	  Use_Extern_Alloc = Save_Extern_Alloc;
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SRS" );
 
 	  (void) memcpy( &srs, &srs_all[indx_smr], sizeof(struct srs_scia) );
 	  free ( srs_all );
@@ -346,7 +342,7 @@ void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
 	  /* read SDMF Solar spectrum */
 	  if ( ! SDMF_get_SMR_30( TRUE, fileParam->absOrbit, 0, 
 				  srs.wvlen_sun, smr ) )
-              NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "SMR_v3.0" );
+              NADC_RETURN_ERROR( NADC_ERR_FATAL, "SMR_v3.0" );
 	  (void) memcpy( srs.mean_sun, smr, SCIENCE_PIXELS * sizeof(float) );
 
 	  /* KB: Apply mfactor, if needed */
@@ -371,6 +367,6 @@ void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
 	       break;
 	  }
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "AKIMA" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "AKIMA" );
      } while ( ++mds_1c, ++num < state->num_clus );
 }

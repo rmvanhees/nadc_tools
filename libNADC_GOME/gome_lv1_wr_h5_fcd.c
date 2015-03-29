@@ -68,8 +68,6 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
      hid_t   grp_id;
      hbool_t compress;
      hsize_t dims[3];
-
-     const char prognm[] = "GOME_LV1_WR_H5_FCD";
 /*
  * set HDF5 boolean variable for compression
  */
@@ -82,7 +80,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
  */
      grp_id = H5Gcreate( param.hdf_file_id, "/FCD", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/FCD" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/FCD" );
 /*
  * +++++ create/write attributes and datasets in the /FCD group
  *
@@ -208,7 +206,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
      dims[1] = 3; dims[0] = NUM_SPEC_BANDS;
      nrpix = (size_t) (dims[0] * dims[1]);
      sbuff = (short *) malloc( nrpix * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      nr = nx = 0;
      do {
 	  sbuff[nr++] = fcd->bcr[nx].array_nr;
@@ -227,7 +225,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
 	  dims[2] = NUM_SPEC_COEFFS; 
 	  nrpix = dims[0] * dims[1] * dims[2];
 	  if ( (dbuff  = (double *) malloc( nrpix * sizeof(double))) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "dbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "dbuff" );
 	  nr = nz = 0;
 	  do {
 	       ny = 0;
@@ -249,7 +247,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
 	  nrpix = dims[0] * dims[1];
 	  nrbyte = dims[1] * sizeof( double );
 	  if ( (dbuff = (double *) malloc( nrpix * sizeof(double))) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "dbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "dbuff" );
 	  dpntr = dbuff;
 	  ny = 0;
 	  do {
@@ -289,7 +287,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
 	  nrpix = dims[0] * dims[1];
 	  nrbyte = dims[1] * sizeof( float );
 	  if ( (rbuff = (float *) malloc( nrpix * sizeof( float ))) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  rpntr = rbuff;
 	  ny = 0;
 	  do {
@@ -315,7 +313,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
      grp_id = H5Gcreate( param.hdf_file_id, "/FCD/Leakage", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/FCD/Leakage" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/FCD/Leakage" );
 /*
  * +++++ create datasets in the /FCD/Leakage group
  *
@@ -327,7 +325,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
      nrpix = dims[0] * dims[1] * dims[2];
      nrbyte = SCIENCE_PIXELS * sizeof( float );
      rpntr = rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      nz = 0;
      do {
 	  (void) memcpy( rpntr, fcd->leak[nz].dark, nrbyte );
@@ -341,7 +339,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
  */
      dims[0] = (hsize_t) fcd->nleak;
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      nr = 0;
      do { rbuff[nr] = fcd->leak[nr].noise; } while ( ++nr < dims[0] );
      NADC_WR_HDF5_Attribute( grp_id, "ArrayNoise",
@@ -356,7 +354,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
      dims[0] = (hsize_t) fcd->nleak;
      nrpix = dims[0] * dims[1];
      rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      nr = ny = 0;
      do {
 	  nx = 0;
@@ -374,7 +372,7 @@ void GOME_LV1_WR_H5_FCD( struct param_record param,
      grp_id = H5Gcreate( param.hdf_file_id, "/FCD/Sun", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/FCD/Sun" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/FCD/Sun" );
 /*
  * Sun Mean Reference Spectrum with relative errors
  */

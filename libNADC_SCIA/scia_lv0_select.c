@@ -291,8 +291,6 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
 			    size_t num_states, const struct mds0_states *states,
 			    struct mds0_states **states_out )
 {
-     const char prognm[] = "SCIA_LV0_SELECT_MDS";
-
      register size_t ni;
      register size_t nr_indx = num_states;
 
@@ -314,7 +312,7 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
  */
      indx_states = (size_t *) malloc( num_states * sizeof(size_t) );
      if ( indx_states == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_states" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indx_states" );
      for ( ni = 0; ni < num_states; ni++ ) indx_states[ni] = ni;
 /*
  * apply date-time criterium
@@ -354,7 +352,7 @@ size_t SCIA_LV0_SELECT_MDS( const struct param_record param,
      *states_out = (struct mds0_states *) 
 	  malloc( nr_indx * sizeof( struct mds0_states ));
      if ( *states_out == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_states" );
 
      for ( ni = 0; ni < nr_indx; ni++ ) {
 	  (void) memcpy( &(*states_out)[ni].mjd, &states[indx_states[ni]].mjd,

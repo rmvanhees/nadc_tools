@@ -66,12 +66,10 @@ void SCIA_LV2_WR_ASCII_SPH( struct param_record param,
      unsigned int   ndim;
      unsigned int   dims[2];
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_SPH";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "sph" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SPH record
  */

@@ -379,8 +379,6 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
        /*@globals  errno, nadc_stat, nadc_err_stack, source;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, mds@*/
 {
-     const char prognm[] = "SCIA_LV1_RD_ONE_MDS";
-
      register char           *mds_pntr;
      register unsigned short na, nc, ncc, ni, nr;
 
@@ -398,21 +396,21 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
  */
      glint_flags = (unsigned char *) malloc( (size_t) mds->n_aux );
      if ( glint_flags == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "glint_flags" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "glint_flags" );
 /*
  * allocate memory to temporary store data for output structure
  */
      mds_char = (char *) malloc( (size_t) state->length_dsr );
      if ( mds_char == NULL ) {
 	  free( glint_flags );
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mds_char" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mds_char" );
      }
 /*
  * read all MDS parameters of this state
  */
      if ( fread( mds_char, (size_t) state->length_dsr, 1, fd ) != 1 ) {
 	  (void) snprintf( msg, 64, "MDS[%-u]: read failed", state->indx );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, msg );
      }
 /*
  * read data buffer to MDS structure
@@ -429,7 +427,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  (void) snprintf( msg, 64, 
 			   "MDS[%-u]: Size according to State/DSR = %-u/%-u",
 			   state->indx, state->length_dsr, mds->dsr_length );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, msg );
      }
      (void) memcpy( &mds->quality_flag, mds_pntr, ENVI_CHAR );
      mds_pntr += ENVI_CHAR;
@@ -444,7 +442,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
  */
      nr_byte = mds->n_aux * ENVI_UCHAR;
      if ( (mds->sat_flags = (unsigned char *) malloc( nr_byte )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sat_flags" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sat_flags" );
      (void) memcpy( mds->sat_flags, mds_pntr, nr_byte );
      mds_pntr += nr_byte;
 /*
@@ -452,7 +450,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
  */
      nr_byte = (size_t) state->num_clus * mds->n_aux;
      if ( (mds->red_grass = (unsigned char *) malloc( nr_byte )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "red_grass" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "red_grass" );
      (void) memcpy( mds->red_grass, mds_pntr, nr_byte );
      mds_pntr += nr_byte;
 /*
@@ -470,7 +468,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  mds->geoN = (struct geoN_scia *) 
 	       malloc( mds->n_aux * sizeof( struct geoN_scia ) );
 	  if ( mds->geoN == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  mds_pntr += SCIA_LV1_RD_GeoN( mds_pntr, mds->n_aux, mds->geoN );
 
           /* set Rainbow/Sun glint flag and pixel type: 0 (= backscan) or 1 */
@@ -491,7 +489,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  mds->geoL = (struct geoL_scia *) 
 	       malloc( mds->n_aux * sizeof( struct geoL_scia ) );
 	  if ( mds->geoL == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  mds_pntr += SCIA_LV1_RD_GeoL( mds_pntr, mds->n_aux, mds->geoL );
 
           /* set Rainbow/Sun glint flags and pixel type */
@@ -509,7 +507,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  mds->geoL = (struct geoL_scia *) 
 	       malloc( mds->n_aux * sizeof( struct geoL_scia ) );
 	  if ( mds->geoL == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  mds_pntr += SCIA_LV1_RD_GeoL( mds_pntr, mds->n_aux, mds->geoL );
 
           /* set Rainbow/Sun glint flags and pixel type */
@@ -522,7 +520,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  mds->geoC = (struct geoC_scia *) 
 	       malloc( mds->n_aux * sizeof( struct geoC_scia ) );
 	  if ( mds->geoC == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoC" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoC" );
 	  mds_pntr += SCIA_LV1_RD_GeoC( mds_pntr, mds->n_aux, mds->geoC );
 	  break;
      }
@@ -532,7 +530,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
      mds->lv0 = (struct lv0_hdr *) 
 	  malloc( mds->n_aux * sizeof( struct lv0_hdr ) );
      if ( mds->lv0 == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lv0" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lv0" );
      mds_pntr += SCIA_LV1_RD_LV0Hdr( mds_pntr, mds->n_aux, mds->lv0 );
 /*
  * PMD values
@@ -541,7 +539,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  nr_byte = mds->n_pmd * ENVI_FLOAT;
 	  mds->int_pmd = (float *) malloc( nr_byte );
 	  if ( mds->int_pmd == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "int_pmd" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "int_pmd" );
 	  (void) memcpy( mds->int_pmd, mds_pntr, nr_byte );
 	  mds_pntr += nr_byte;
 /*
@@ -550,7 +548,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  mds->polV = (struct polV_scia *) 
 	       malloc( mds->n_pol * sizeof( struct polV_scia ) );
 	  if ( mds->polV == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds->polV" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds->polV" );
 	  mds_pntr += SCIA_LV1_RD_PolV( mds_pntr, mds->n_pol, mds->polV );
 /*
  * add integration times
@@ -591,7 +589,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 			 malloc( (size_t) num * SCIA_SIG );
 		    if ( mds->clus[ncc].sig == NULL ) {
 			 (void) snprintf( msg, 25, "clus[%-hu].sig", nc );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, msg );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, msg );
 		    }
 		    nr = 0;
 		    do {
@@ -629,7 +627,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 			 malloc( (size_t) num * SCIA_SIGC );
 		    if ( mds->clus[ncc].sigc == NULL ) {
 			 (void) snprintf( msg, 25, "clus[%-hu].sigc", nc );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, msg );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, msg );
 		    }
 		    nr = 0;
 		    do {
@@ -652,7 +650,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	  default:
 	       (void) snprintf( msg, 25, "unknown reticon type: %02hu",
 				(unsigned short) state->Clcon[nc].type );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, msg );
 	  }
      } while ( ++nc < state->num_clus );
      mds->n_clus = ncc;
@@ -662,7 +660,7 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
      if ( (nr_byte = mds_pntr - mds_char) != (size_t) state->length_dsr ) {
 	  (void) snprintf( msg, 64, "MDS[%-u]: expected: %6u - read: %6zd",
 			   state->indx, state->length_dsr, nr_byte );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, msg );
      }
 /*
  * deallocate memory
@@ -701,8 +699,6 @@ unsigned int SCIA_LV1_RD_MDS( FILE *fd, unsigned long long clus_mask,
      /*@globals  source;@*/
      /*@modifies source@*/
 {
-     const char prognm[] = "SCIA_LV1_RD_MDS";
-
      register unsigned short nc, ncc;
      register unsigned int   nr_mds = 0;
 
@@ -722,7 +718,7 @@ unsigned int SCIA_LV1_RD_MDS( FILE *fd, unsigned long long clus_mask,
  * allocate memory to store output records
  */
      mds = (struct mds1_scia *) malloc( num_mds * sizeof(struct mds1_scia));
-     if ( mds == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1_scia" );
+     if ( mds == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds1_scia" );
      *mds_out = mds;
 /*
  * rewind/read input data file
@@ -762,7 +758,7 @@ unsigned int SCIA_LV1_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	  }
 	  SCIA_LV1_RD_ONE_MDS( fd, clus_mask, state, mds );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "ONE_MDS" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "ONE_MDS" );
 /*
  * byte swap data to local representation
  */
@@ -817,8 +813,6 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
      /*@globals  source;@*/
      /*@modifies source@*/
 {
-     const char prognm[] = "SCIA_LV1C_RD_MDS";
-
      register unsigned short nc, ncc, ni, nobs;
      register unsigned int   nr_mds = 0u;
 
@@ -862,7 +856,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
  */
      mds = (struct mds1c_scia *) 
 	  malloc( num_clus_out * sizeof(struct mds1c_scia));
-     if ( mds == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1_scia" );
+     if ( mds == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds1_scia" );
      *mds_out = mds;
 /*
  * initialize MDS-structure
@@ -894,10 +888,10 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	  mds->dur_scan    = state->dur_scan;
 /* 1 */
 	  if ( fread( &mds->mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* 2 */
 	  if ( fread( &mds->dsr_length, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  mds->dsr_length = byte_swap_u32( mds->dsr_length );
 #endif
@@ -907,9 +901,9 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	  dsr_length_left = mds->dsr_length - DSR_Read;
 	  mds_char = (char *) malloc( dsr_length_left );
 	  if ( mds_char == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds_char" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds_char" );
 	  if ( fread( mds_char, dsr_length_left, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* 3 */
 	  (void) memcpy( &mds->quality_flag, mds_char, ENVI_CHAR );
 	  mds_pntr = mds_char + ENVI_CHAR;
@@ -965,7 +959,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	       mds->pixel_ids = (unsigned short *) malloc( nr_byte );
 	       if ( mds->pixel_ids == NULL ) {
 		    free( mds_char );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_ids" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_ids" );
 	       }
 	       (void) memcpy( mds->pixel_ids, mds_pntr, nr_byte );
 	       mds_pntr += nr_byte;
@@ -974,7 +968,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	       mds->pixel_wv = (float *) malloc( nr_byte );
 	       if ( mds->pixel_wv == NULL ) {
 		    free( mds_char );
-		    NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "pixel_wv");
+		    NADC_GOTO_ERROR(NADC_ERR_ALLOC, "pixel_wv");
 	       }
 	       (void) memcpy( mds->pixel_wv, mds_pntr, nr_byte );
 	       mds_pntr += nr_byte;
@@ -982,7 +976,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	       mds->pixel_wv_err = (float *) malloc( nr_byte );
 	       if ( mds->pixel_wv_err == NULL ) {
 		    free( mds_char );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_wv_err" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_wv_err" );
 	       }
 	       (void) memcpy( mds->pixel_wv_err, mds_pntr, nr_byte );
 	       mds_pntr += nr_byte;
@@ -991,7 +985,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	       mds->pixel_val = (float *) malloc( nr_byte );
 	       if ( mds->pixel_val == NULL ) {
 		    free( mds_char );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_val" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_val" );
 	       }
 	       (void) memcpy( mds->pixel_val, mds_pntr, nr_byte );
 	       mds_pntr += nr_byte;
@@ -999,7 +993,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 	       mds->pixel_err = (float *) malloc( nr_byte );
 	       if ( mds->pixel_err == NULL ) {
 		    free( mds_char );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_err" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_err" );
 	       }
 	       (void) memcpy( mds->pixel_err, mds_pntr, nr_byte );
 	       mds_pntr += nr_byte;
@@ -1010,7 +1004,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 			 malloc( mds->num_obs * sizeof( struct geoN_scia ));
 		    if ( mds->geoN == NULL ) {
 			 free( mds_char );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 		    }
 		    mds_pntr += SCIA_LV1_RD_GeoN( mds_pntr, mds->num_obs, 
 						  mds->geoN );
@@ -1033,7 +1027,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 			 malloc( mds->num_obs * sizeof( struct geoL_scia ));
 		    if ( mds->geoL == NULL ) {
 			 free( mds_char );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 		    }
 		    mds_pntr += SCIA_LV1_RD_GeoL( mds_pntr, mds->num_obs, 
 						  mds->geoL );
@@ -1061,7 +1055,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 			 malloc( mds->num_obs * sizeof( struct geoL_scia ));
 		    if ( mds->geoL == NULL ) {
 			 free( mds_char );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 		    }
 		    mds_pntr += SCIA_LV1_RD_GeoL( mds_pntr, mds->num_obs, 
 						  mds->geoL );
@@ -1078,7 +1072,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 			 malloc( mds->num_obs * sizeof( struct geoC_scia ));
 		    if ( mds->geoC == NULL ) {
 			 free( mds_char );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoC" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoC" );
 		    }
 		    mds_pntr += SCIA_LV1_RD_GeoC( mds_pntr, mds->num_obs, 
 						  mds->geoC );
@@ -1091,7 +1085,7 @@ unsigned int SCIA_LV1C_RD_MDS( FILE *fd, unsigned long long clus_mask,
 		    const char *dsd_names[] = { "UNKNOWN", "NADIR", "LIMB",
 						"OCCULTATION", "MONITORING" };
 		    free( mds_char );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 				     dsd_names[source] );
 	       }
 /*
@@ -1160,8 +1154,6 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
      /*@globals  source;@*/
      /*@modifies source@*/
 {
-     const char prognm[] = "SCIA_LV1C_RD_MDS_PMD";
-
      char         *mds_char, *mds_pntr;
      size_t       dsr_length_left, nr_byte;
 
@@ -1186,7 +1178,7 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
  */
      *pmd_out = (struct mds1c_pmd *) malloc( sizeof(struct mds1c_pmd));
      if ( (pmd = *pmd_out) == NULL ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1c_pmd" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds1c_pmd" );
      }
 /*
  * initialize MDS-structure
@@ -1207,10 +1199,10 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
      pmd->state_index = (unsigned char) state->indx;
 /* 1 */
      if ( fread( &pmd->mjd, sizeof( struct mjd_envi ), 1 , fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* 2 */
      if ( fread( &pmd->dsr_length, ENVI_UINT, 1 , fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      pmd->dsr_length = byte_swap_u32( pmd->dsr_length );
 #endif
@@ -1220,9 +1212,9 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
      dsr_length_left = pmd->dsr_length - DSR_Read;
      mds_char = (char *) malloc( dsr_length_left );
      if ( mds_char == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds_char" );
      if ( fread( mds_char, dsr_length_left, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* 3 */
      (void) memcpy( &pmd->quality_flag, mds_char, ENVI_CHAR );
      mds_pntr = mds_char + ENVI_CHAR;
@@ -1263,7 +1255,7 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
      pmd->int_pmd = (float *) malloc( nr_byte );
      if ( pmd->int_pmd == NULL ) {
 	  free( mds_char );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "int_pmd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "int_pmd" );
      }
      (void) memcpy( pmd->int_pmd, mds_pntr, nr_byte );
      mds_pntr += nr_byte;
@@ -1274,7 +1266,7 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
 	       malloc( pmd->num_geo * sizeof( struct geoN_scia ) );
 	  if ( pmd->geoN == NULL ) {
 	       free( mds_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  }
 	  mds_pntr += 
 	       SCIA_LV1_RD_GeoN(mds_pntr, pmd->num_geo, pmd->geoN);
@@ -1285,7 +1277,7 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
 	       malloc( pmd->num_geo * sizeof( struct geoL_scia ) );
 	  if ( pmd->geoL == NULL ) {
 	       free( mds_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  }
 	  mds_pntr += 
 	       SCIA_LV1_RD_GeoL(mds_pntr, pmd->num_geo, pmd->geoL);
@@ -1299,7 +1291,7 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
 				      "OCCULTATION_PMD" };
 
 	  free( mds_char );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_names[source] );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_names[source] );
      }
      free( mds_char );
 /*
@@ -1336,11 +1328,9 @@ unsigned int SCIA_LV1C_RD_MDS_PMD( FILE *fd, const struct state1_scia *state,
 -------------------------*/
 unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
 				    struct mds1c_polV **polV_out )
-/*@globals  source;@*/
-/*@modifies source@*/
+     /*@globals  source;@*/
+     /*@modifies source@*/
 {
-     const char prognm[] = "SCIA_LV1C_RD_MDS_POLV";
-
      char         *mds_char, *mds_pntr;
      size_t       dsr_length_left, nr_byte;
 
@@ -1366,7 +1356,7 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
  */
      *polV_out = (struct mds1c_polV *) malloc( sizeof(struct mds1c_polV) );
      if ( (polV = *polV_out) == NULL ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1c_polV" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds1c_polV" );
      }
 /*
  * initialize MDS-structure
@@ -1387,10 +1377,10 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
      polV->state_index = (unsigned char) state->indx;
 /* 1 */
      if ( fread( &polV->mjd, sizeof( struct mjd_envi ), 1 , fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* 2 */
      if ( fread( &polV->dsr_length, ENVI_UINT, 1 , fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      polV->dsr_length = byte_swap_u32( polV->dsr_length );
 #endif
@@ -1400,9 +1390,9 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
      dsr_length_left = polV->dsr_length - DSR_Read;
      mds_char = (char *) malloc( dsr_length_left );
      if ( mds_char == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds_char" );
      if ( fread( mds_char, dsr_length_left, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* 3 */
      (void) memcpy( &polV->quality_flag, mds_char, ENVI_CHAR );
      mds_pntr = mds_char + ENVI_CHAR;
@@ -1453,7 +1443,7 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
      polV->polV = (struct polV_scia *) malloc( nr_byte );
      if ( polV->polV == NULL ) {
 	  free( mds_char );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "polV" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "polV" );
      }
      mds_pntr += 
 	  SCIA_LV1_RD_PolV( mds_pntr, polV->total_polV, polV->polV );
@@ -1464,7 +1454,7 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
 	       malloc( polV->num_geo * sizeof( struct geoN_scia ) );
 	  if ( polV->geoN == NULL ) {
 	       free( mds_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  }
 	  mds_pntr += 
 	       SCIA_LV1_RD_GeoN(mds_pntr, polV->num_geo, polV->geoN);
@@ -1475,7 +1465,7 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
 	       malloc( polV->num_geo * sizeof( struct geoL_scia ) );
 	  if ( polV->geoL == NULL ) {
 	       free( mds_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  }
 	  mds_pntr += 
 	       SCIA_LV1_RD_GeoL(mds_pntr, polV->num_geo, polV->geoL);
@@ -1489,7 +1479,7 @@ unsigned int SCIA_LV1C_RD_MDS_POLV( FILE *fd, const struct state1_scia *state,
 				      "LIMB_FRAC_POL", "OCCULTATION_FRAC_POL" };
 
 	  free( mds_char );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_names[source] );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_names[source] );
      }
      free( mds_char );
 /*

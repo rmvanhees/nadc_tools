@@ -205,8 +205,6 @@ int SCIA_OL2_RD_NGEO( FILE *fd, unsigned int num_dsd,
 		      const struct dsd_envi *dsd, 
 		      struct ngeo_scia **geo_out )
 {
-     const char prognm[] = "SCIA_OL2_RD_NGEO";
-
      char         *geo_pntr, *geo_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -222,7 +220,7 @@ int SCIA_OL2_RD_NGEO( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
           NADC_ERR_RESTORE();
           geo_out[0] = NULL;
@@ -237,12 +235,12 @@ int SCIA_OL2_RD_NGEO( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct ngeo_scia));
      }
      if ( (geo = geo_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geo" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (geo_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geo_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geo_char" );
 /*
  * rewind/read input data file
  */
@@ -252,7 +250,7 @@ int SCIA_OL2_RD_NGEO( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( geo_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to GEO structure
  */
@@ -290,7 +288,7 @@ int SCIA_OL2_RD_NGEO( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(geo_pntr - geo_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -318,8 +316,6 @@ int SCIA_OL2_RD_LGEO( FILE *fd, unsigned int num_dsd,
 		      const struct dsd_envi *dsd, 
 		      struct lgeo_scia **geo_out )
 {
-     const char prognm[] = "SCIA_OL2_RD_LGEO";
-
      char         *geo_pntr, *geo_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -335,7 +331,7 @@ int SCIA_OL2_RD_LGEO( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
           NADC_ERR_RESTORE();
           geo_out[0] = NULL;
@@ -350,12 +346,12 @@ int SCIA_OL2_RD_LGEO( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct lgeo_scia));
      }
      if ( (geo = geo_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geo" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (geo_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geo_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geo_char" );
 /*
  * rewind/read input data file
  */
@@ -365,7 +361,7 @@ int SCIA_OL2_RD_LGEO( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( geo_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to GEO structure
  */
@@ -402,7 +398,7 @@ int SCIA_OL2_RD_LGEO( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(geo_pntr - geo_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */

@@ -97,8 +97,6 @@ unsigned int SCIA_LV1C_RD_CALOPT( FILE *fd, unsigned int num_dsd,
 				  const struct dsd_envi *dsd,
 				  struct cal_options *calopt )
 {
-     const char prognm[] = "SCIA_LV1C_RD_CALOPT";
-
      char         *calopt_pntr, *calopt_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -109,7 +107,7 @@ unsigned int SCIA_LV1C_RD_CALOPT( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ){
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0u;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
@@ -118,7 +116,7 @@ unsigned int SCIA_LV1C_RD_CALOPT( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (calopt_char = (char *) malloc( dsr_size )) == NULL )  { 
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "calopt_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "calopt_char" );
 	  return 0u;
      }
 /*
@@ -127,7 +125,7 @@ unsigned int SCIA_LV1C_RD_CALOPT( FILE *fd, unsigned int num_dsd,
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( calopt_char, dsr_size, 1, fd ) != 1 ) {
 	  free( calopt_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_ERROR( NADC_ERR_PDS_RD, "" );
 	  return 0u;
      }
      calopt_pntr = calopt_char;
@@ -234,7 +232,7 @@ unsigned int SCIA_LV1C_RD_CALOPT( FILE *fd, unsigned int num_dsd,
  */
      if ( (size_t)(calopt_pntr - calopt_char) != dsr_size ) {
 	  free( calopt_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  return 0u;
      }
 /*
@@ -587,8 +585,6 @@ void SCIA_LV1C_UPDATE_CALOPT( int is_scia_lv1c,
 void SCIA_LV1C_WR_CALOPT( FILE *fd, unsigned int num_calopt,
 			  const struct cal_options calopt_in )
 {
-     const char prognm[] = "SCIA_LV1C_WR_CALOPT";
-
      struct cal_options calopt;
 
      struct dsd_envi dsd = {
@@ -609,142 +605,142 @@ void SCIA_LV1C_WR_CALOPT( FILE *fd, unsigned int num_calopt,
  * write CALOPT structure to file
  */
      if ( fwrite( calopt.l1b_prod_name, ENVI_FILENAME_SIZE-1, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_FILENAME_SIZE-1;
      if ( fwrite( &calopt.geo_filter, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.start_lat, ENVI_INT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_INT;
      if ( fwrite( &calopt.start_lon, ENVI_INT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_INT;
      if ( fwrite( &calopt.end_lat, ENVI_INT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_INT;
      if ( fwrite( &calopt.end_lon, ENVI_INT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_INT;
 
      if ( fwrite( &calopt.time_filter, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.start_time.days, ENVI_INT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_INT;
      if ( fwrite( &calopt.start_time.secnd, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_UINT;
      if ( fwrite( &calopt.start_time.musec, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_UINT;
      if ( fwrite( &calopt.stop_time.days, ENVI_INT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_INT;
      if ( fwrite( &calopt.stop_time.secnd, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_UINT;
      if ( fwrite( &calopt.stop_time.musec, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_UINT;
 
      if ( fwrite( &calopt.category_filter, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( calopt.category, 5 * ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += 5 * ENVI_USHRT;
 
      if ( fwrite( &calopt.nadir_mds, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.limb_mds, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.occ_mds, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.moni_mds, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.pmd_mds, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.frac_pol_mds, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
 
      if ( fwrite( &calopt.slit_function, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.sun_mean_ref, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.leakage_current, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.spectral_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.pol_sens, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.rad_sens, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.ppg_etalon, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
 
      if ( fwrite( &calopt.num_nadir, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_USHRT;
      if ( fwrite( &calopt.num_limb, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_USHRT;
      if ( fwrite( &calopt.num_occ, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_USHRT;
      if ( fwrite( &calopt.num_moni, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_USHRT;
      if ( fwrite( calopt.nadir_cluster, MAX_CLUSTER, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += MAX_CLUSTER;
      if ( fwrite( calopt.limb_cluster, MAX_CLUSTER, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += MAX_CLUSTER;
      if ( fwrite( calopt.occ_cluster, MAX_CLUSTER, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += MAX_CLUSTER;
      if ( fwrite( calopt.moni_cluster, MAX_CLUSTER, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += MAX_CLUSTER;
 
      if ( fwrite( &calopt.mem_effect_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.leakage_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.straylight_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.ppg_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.etalon_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.wave_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.polarisation_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
      if ( fwrite( &calopt.radiance_cal, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += ENVI_CHAR;
 /*
  * update list of written DSD records

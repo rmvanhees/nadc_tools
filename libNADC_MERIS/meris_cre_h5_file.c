@@ -166,14 +166,13 @@ void WRITE_HDF5_HISTORY( hid_t file_id,
 /*+++++++++++++++++++++++++ Main Program or Function(s) +++++++++++++++*/
 hid_t MERIS_CRE_H5_FILE( int instrument, const struct param_record *param )
 {
-     const char prognm[] = "MERIS_CRE_H5_FILE";
 /*
  * create HDF5-file
  */
      hid_t file_id = H5Fcreate( param->hdf5_name, H5F_ACC_TRUNC, 
 				H5P_DEFAULT, H5P_DEFAULT );
      if ( file_id < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, param->hdf5_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param->hdf5_name );
 /*
  * write global attributes
  */

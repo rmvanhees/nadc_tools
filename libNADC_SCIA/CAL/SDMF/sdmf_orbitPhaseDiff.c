@@ -58,8 +58,6 @@
 /*+++++++++++++++++++++++++ SDMF version 2.4 ++++++++++++++++++++++++++++++*/
 float SDMF_orbitPhaseDiff( int orbit )
 {
-     const char prognm[] = "SDMF_orbitPhaseDiff";
-
      register hsize_t ni;
 
      char   rsp_file[MAX_STRING_LENGTH];
@@ -83,7 +81,7 @@ float SDMF_orbitPhaseDiff( int orbit )
                            "%s/%s", DATA_DIR, roe_flname );
           file_id = H5Fopen( rsp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, rsp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, rsp_file );
      }
 /*
  * read info_h5 records
@@ -96,9 +94,9 @@ float SDMF_orbitPhaseDiff( int orbit )
 
      orbitList = (int *) malloc( num_roe * sizeof( int ));
      if ( orbitList == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitList" );
      if ( H5LTread_dataset_int( file_id, "orbitList", orbitList ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "orbitList" );
 
      for ( ni = 0; ni < num_roe; ni++ ) {
 	  if ( orbitList[ni] == orbit ) break;
@@ -135,8 +133,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_orbitalPhaseDiff";
-
      register unsigned short orbit = 200;
 
      do {

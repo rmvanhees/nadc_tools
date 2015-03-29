@@ -72,8 +72,6 @@
 void SCIA_LV1_WR_ASCII_SIP( struct param_record param, 
 			    const struct sip_scia *sip )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SIP";
-
      register unsigned int nr = 0;
 
      unsigned int  count[2];
@@ -81,7 +79,7 @@ void SCIA_LV1_WR_ASCII_SIP( struct param_record param,
      FILE  *outfl = CRE_ASCII_File( param.outfile, "sip" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SIP record
  */
@@ -158,8 +156,6 @@ void SCIA_LV1_WR_ASCII_SIP( struct param_record param,
 void SCIA_LV1_WR_ASCII_CLCP( struct param_record param, 
 			     const struct clcp_scia *clcp )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_CLCP";
-
      register unsigned int nr = 0;
 
      unsigned int count[2];
@@ -167,7 +163,7 @@ void SCIA_LV1_WR_ASCII_CLCP( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "clcp" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of CLCP record
  */
@@ -213,8 +209,6 @@ void SCIA_LV1_WR_ASCII_CLCP( struct param_record param,
 void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
 			     const struct vlcp_scia *vlcp )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_VLCP";
-
      register unsigned int nd;
 
      unsigned int  count[2];
@@ -222,7 +216,7 @@ void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "vlcp" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of VLCP record
  */
@@ -280,8 +274,6 @@ void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_PPG( struct param_record param,
 			    const struct ppg_scia *ppg )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PPG";
-
      register unsigned int nr = 0;
 
      unsigned int  count[2];
@@ -289,7 +281,7 @@ void SCIA_LV1_WR_ASCII_PPG( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "ppg" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of PPG record
  */
@@ -324,14 +316,12 @@ void SCIA_LV1_WR_ASCII_PPG( struct param_record param,
 void SCIA_LV1_WR_ASCII_BASE( struct param_record param, 
 			     const struct base_scia *base )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_BASE";
-
      unsigned int  count[2];
 
      FILE *outfl = CRE_ASCII_File( param.outfile, "base" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SPECTRAL_BASE record
  */
@@ -360,8 +350,6 @@ void SCIA_LV1_WR_ASCII_BASE( struct param_record param,
 void SCIA_LV1_WR_ASCII_SCP( struct param_record param, unsigned int num_dsr,
 			    const struct scp_scia *scp )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SCP";
-
      register unsigned int nd, nr;
 
      unsigned int  count[2];
@@ -369,7 +357,7 @@ void SCIA_LV1_WR_ASCII_SCP( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "scp" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SCP record
  */
@@ -408,8 +396,6 @@ void SCIA_LV1_WR_ASCII_SCP( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_SRS( struct param_record param, unsigned int num_dsr,
 			    const struct srs_scia *srs )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SRS";
-
      register unsigned int nd, nr;
 
      unsigned int  count[2];
@@ -417,7 +403,7 @@ void SCIA_LV1_WR_ASCII_SRS( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "srs" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SRS record
  */
@@ -477,8 +463,6 @@ void SCIA_LV1_WR_ASCII_SRS( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_PSPN( struct param_record param, unsigned int num_dsr,
 			     const struct pspn_scia *pspn )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PSPN";
-
      register unsigned int nd, nr;
 
      unsigned int  count[2];
@@ -486,7 +470,7 @@ void SCIA_LV1_WR_ASCII_PSPN( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "pspn" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of PSPN record
  */
@@ -524,8 +508,6 @@ void SCIA_LV1_WR_ASCII_PSPN( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_PSPL( struct param_record param, unsigned int num_dsr,
 			     const struct psplo_scia *pspl )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PSPL";
-
      register unsigned int nd, nr;
 
      unsigned int  count[2];
@@ -533,7 +515,7 @@ void SCIA_LV1_WR_ASCII_PSPL( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "pspl" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of PSPL record
  */
@@ -573,8 +555,6 @@ void SCIA_LV1_WR_ASCII_PSPL( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_PSPO( struct param_record param, unsigned int num_dsr,
 			     const struct psplo_scia *pspo )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PSPO";
-
      register unsigned int nd, nr;
 
      unsigned int  count[2];
@@ -582,7 +562,7 @@ void SCIA_LV1_WR_ASCII_PSPO( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "pspo" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of PSPO record
  */
@@ -622,8 +602,6 @@ void SCIA_LV1_WR_ASCII_PSPO( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_RSPN( struct param_record param, unsigned int num_dsr, 
 			     const struct rspn_scia *rspn )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_RSPN";
-
      register unsigned int nd, nr;
 
      unsigned int  count[2];
@@ -631,7 +609,7 @@ void SCIA_LV1_WR_ASCII_RSPN( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "rspn" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of RSPN record
  */
@@ -671,10 +649,8 @@ void SCIA_LV1_WR_ASCII_RSPL( struct param_record param, unsigned int num_dsr,
 
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_RSPL";
-
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of RSPL record
  */
@@ -716,10 +692,8 @@ void SCIA_LV1_WR_ASCII_RSPO( struct param_record param, unsigned int num_dsr,
 
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_RSPO";
-
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of RSPO record
  */
@@ -754,8 +728,6 @@ void SCIA_LV1_WR_ASCII_RSPO( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_EKD( struct param_record param,
 			    const struct ekd_scia *ekd )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_EKD";
-
      register unsigned int nr = 0;
 
      unsigned int  count[2];
@@ -763,7 +735,7 @@ void SCIA_LV1_WR_ASCII_EKD( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "ekd" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of EKD record
  */
@@ -807,8 +779,6 @@ void SCIA_LV1_WR_ASCII_EKD( struct param_record param,
 void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
 			    const struct sfp_scia *sfp )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SFP";
-
      register unsigned int na, nr = 1;
 
      unsigned char  *cbuff;
@@ -819,7 +789,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "sfp" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SFP record
  */
@@ -828,7 +798,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
      count[0] = num_dsr;
      ubuff = (unsigned short *) malloc( num_dsr * sizeof( short ));
      if ( ubuff == NULL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ubuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ubuff" );
      na = 0;
      do { ubuff[na] = sfp[na].pix_pos_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_ushort( outfl, nr++, "Pixel position of slit function", 
@@ -837,7 +807,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
 
      cbuff = (unsigned char *) malloc( (size_t) num_dsr );
      if ( cbuff == NULL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      na = 0;
      do { cbuff[na] = sfp[na].type_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_uchar( outfl, nr++, "Type of slit function", 
@@ -846,7 +816,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
 
      rbuff = (float *) malloc( num_dsr * sizeof( float ));
      if ( rbuff == NULL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      na = 0;
      do { rbuff[na] = sfp[na].fwhm_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_float( outfl, nr++, "fwhm_slit_fun", 1, count, 5, rbuff );
@@ -875,8 +845,6 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
 			     const struct asfp_scia *asfp )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_ASFP";
-
      register unsigned int na, nr = 1;
 
      unsigned char  *cbuff;
@@ -887,7 +855,7 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
      FILE *outfl = CRE_ASCII_File( param.outfile, "asfp" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of ASFP record
  */
@@ -896,7 +864,7 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
      count[0] = num_dsr;
      ubuff = (unsigned short *) malloc( num_dsr * sizeof( short ));
      if ( ubuff == NULL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ubuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ubuff" );
      na = 0;
      do { ubuff[na] = asfp[na].pix_pos_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_ushort( outfl, nr++, "Pixel position of slit function", 
@@ -905,7 +873,7 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
 
      cbuff = (unsigned char *) malloc( (size_t) num_dsr );
      if ( cbuff == NULL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cbuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      na = 0;
      do { cbuff[na] = asfp[na].type_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_uchar( outfl, nr++, "Type of slit function", 
@@ -914,7 +882,7 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
 
      rbuff = (float *) malloc( num_dsr * sizeof( float ));
      if ( rbuff == NULL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      na = 0;
      do { rbuff[na] = asfp[na].fwhm_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_float( outfl, nr++, "fwhm_slit_fun", 1, count, 5, rbuff );

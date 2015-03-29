@@ -104,8 +104,6 @@ int main( int argc, char *argv[] )
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "scia_ol2";
-
      register unsigned short n_nfit, n_lfit, n_ofit;
 
      unsigned int nr_state, num_dsd, num_dsr, num_geo;
@@ -132,12 +130,12 @@ int main( int argc, char *argv[] )
  */
      SCIA_SET_PARAM( argc, argv, SCIA_LEVEL_2, &param );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "" );
+          NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
 /*
  * check if we have to display version and exit
  */
      if ( param.flag_version == PARAM_SET ) {
-	  SCIA_SHOW_VERSION( stdout, prognm );
+	  SCIA_SHOW_VERSION( stdout, "scia_ol2" );
 	  exit( EXIT_SUCCESS );
      }
 /*
@@ -154,12 +152,12 @@ int main( int argc, char *argv[] )
      if ( param.write_sql == PARAM_SET ) {
 	  CONNECT_NADC_DB( &conn, "scia" );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL" );
 	  if ( param.flag_sql_remove == PARAM_SET 
 	       || param.flag_sql_replace == PARAM_SET )
 	       SCIA_OL2_DEL_ENTRY( conn, param.flag_verbose, param.infile );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL(remove)" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL(remove)" );
 	  if ( param.flag_sql_remove == PARAM_SET ) goto done;
      }
 #endif
@@ -167,21 +165,21 @@ int main( int argc, char *argv[] )
  * open input-file
  */
      if ( (fp = fopen( param.infile, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
 /*
  * create output HDF5 file
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  param.hdf_file_id = SCIA_CRE_H5_FILE( SCIA_LEVEL_2, &param );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
 	  SCIA_WR_H5_VERSION( param.hdf_file_id );
 /*
  * create for data structures for SCIAMACHY level 1b data
  */
 	  CRE_SCIA_OL2_H5_STRUCTS( param );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "STRUCTS" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "STRUCTS" );
      }
 /*
  * -------------------------
@@ -189,18 +187,18 @@ int main( int argc, char *argv[] )
  */
      ENVI_RD_MPH( fp, &mph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MPH" );
      if ( mph.tot_size != nadc_file_size( param.infile ) )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "file size check failed" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "file size check failed" );
      if ( param.write_ascii == PARAM_SET ) {
 	  ENVI_WR_ASCII_MPH( param, &mph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "MPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "MPH" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
 	  SCIA_WR_H5_MPH( param, &mph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "MPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "MPH" );
      }
 /*
  * -------------------------
@@ -208,16 +206,16 @@ int main( int argc, char *argv[] )
  */
      SCIA_OL2_RD_SPH( fp, mph, &sph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
      if ( param.write_ascii == PARAM_SET ) {
 	  SCIA_OL2_WR_ASCII_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
 	  SCIA_OL2_WR_H5_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SPH" );
      }
 /*
  * -------------------------
@@ -225,14 +223,14 @@ int main( int argc, char *argv[] )
  */
      dsd = (struct dsd_envi *)
 	  malloc( (mph.num_dsd-1) * sizeof( struct dsd_envi ) );
-     if ( dsd == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dsd" );
+     if ( dsd == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dsd" );
      num_dsd = ENVI_RD_DSD( fp, mph, dsd );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DSD" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DSD" );
      if ( param.write_ascii == PARAM_SET ) {
 	  ENVI_WR_ASCII_DSD( param, num_dsd, dsd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "DSD" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DSD" );
      }
      if ( param.write_meta == PARAM_SET ) goto done;
 #ifdef _WITH_SQL
@@ -241,12 +239,12 @@ int main( int argc, char *argv[] )
 
 	  unsigned int indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  SCIA_OL2_WR_SQL_META( conn, param.flag_verbose, param.infile, 
 				dsd[indx_dsd].flname, &mph, &sph );
 	  if ( IS_ERR_STAT_WARN ) goto done;
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_META" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_META" );
      }
 #endif
 /*
@@ -255,17 +253,17 @@ int main( int argc, char *argv[] )
  */
      num_dsr = SCIA_OL2_RD_SQADS( fp, num_dsd, dsd, &sqads );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SQADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SQADS" );
      if ( num_dsr > 0 ) {
 	  if ( param.write_ascii == PARAM_SET ) {
 	       SCIA_OL2_WR_ASCII_SQADS( param, num_dsr, sqads );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SQADS" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SQADS" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
 	       SCIA_OL2_WR_H5_SQADS( param, num_dsr, sqads );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "SQADS" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SQADS" );
 	  }
 	  free( sqads );
      }
@@ -275,17 +273,17 @@ int main( int argc, char *argv[] )
  */
      num_dsr = SCIA_RD_LADS( fp, num_dsd, dsd, &lads );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LADS" );
      if ( num_dsr > 0 ) {
 	  if ( param.write_ascii == PARAM_SET ) {
 	       SCIA_WR_ASCII_LADS( param, num_dsr, lads );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "LADS" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LADS" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
 	       SCIA_WR_H5_LADS( param, num_dsr, lads );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "LADS" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "LADS" );
 	  }
 	  free( lads );
      }
@@ -299,24 +297,24 @@ int main( int argc, char *argv[] )
  */
      nr_state = SCIA_LV2_RD_STATE( fp, num_dsd, dsd, &state );
      if ( IS_ERR_STAT_FATAL || nr_state  ==  0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "STATE" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "STATE" );
 
      if ( param.write_ascii == PARAM_SET ) {
 	  SCIA_LV2_WR_ASCII_STATE( param, nr_state, state );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "STATE" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "STATE" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
 	  SCIA_LV2_WR_H5_STATE( param, nr_state, state );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "STATE" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "STATE" );
      }
 #ifdef _WITH_SQL
      if ( param.write_sql == PARAM_SET ) {
 	  SCIA_OL2_MATCH_STATE( conn, param.flag_verbose, 
 				&mph, nr_state, state );
 	  if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_STATE" );
+               NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_STATE" );
      }
 #endif
      free( state );
@@ -326,17 +324,17 @@ int main( int argc, char *argv[] )
  */
      num_geo = SCIA_OL2_RD_NGEO( fp, num_dsd, dsd, &ngeo );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "NGEO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "NGEO" );
      if ( num_geo > 0 ) {
 	  if ( param.write_ascii == PARAM_SET ) {
 	       SCIA_OL2_WR_ASCII_NGEO( param, num_geo, ngeo );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "NGEO" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "NGEO" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
 	       SCIA_OL2_WR_H5_NGEO( param, num_geo, ngeo );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "NGEO" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "NGEO" );
 	  }
      }
 /*
@@ -345,17 +343,17 @@ int main( int argc, char *argv[] )
  */
      num_dsr = SCIA_OL2_RD_LGEO( fp, num_dsd, dsd, &lgeo );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LGEO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LGEO" );
      if ( num_dsr > 0 ) {
 	  if ( param.write_ascii == PARAM_SET ) {
 	       SCIA_OL2_WR_ASCII_LGEO( param, num_dsr, lgeo );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "LGEO" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LGEO" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
 	       SCIA_OL2_WR_H5_LGEO( param, num_dsr, lgeo );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "LGEO" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "LGEO" );
 	  }
 	  free( lgeo );
      }
@@ -366,17 +364,17 @@ int main( int argc, char *argv[] )
      if ( param.write_cld == PARAM_SET ) {
 	  num_dsr = SCIA_OL2_RD_CLD( fp, num_dsd, dsd, &cld );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "CLD" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "CLD" );
 	  if ( num_dsr > 0 ) {
 	       if ( param.write_ascii == PARAM_SET ) {
                     SCIA_OL2_WR_ASCII_CLD( param, num_dsr, cld );
                     if ( IS_ERR_STAT_FATAL )
-                         NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "CLD" );
+                         NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "CLD" );
                }
                if ( param.write_hdf5 == PARAM_SET ) {
                     SCIA_OL2_WR_H5_CLD( param, num_dsr, cld );
                     if ( IS_ERR_STAT_FATAL )
-                         NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "CLD" );
+                         NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "CLD" );
                }
 #ifdef _WITH_SQL
 	       if ( param.write_sql == PARAM_SET ) {
@@ -388,7 +386,7 @@ int main( int argc, char *argv[] )
 					 num_dsr, ngeo, cld );
 #endif
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_CLD" );
+			 NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_CLD" );
 	       }
 #endif
                free( cld );
@@ -407,20 +405,20 @@ int main( int argc, char *argv[] )
 		    (void) fprintf( stdout, "%s:\t%6u\n", 
 				    nfit_name[n_nfit] , num_dsr );
 	       if ( IS_ERR_STAT_FATAL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, 
 				     nfit_name[n_nfit] );
 	       if ( num_dsr > 0 ) {
 		    if ( param.write_ascii == PARAM_SET ) {
 			 SCIA_OL2_WR_ASCII_NFIT( nfit_name[n_nfit], param, 
 						 num_dsr, nfit );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_WR,"NFIT");
+			      NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "NFIT" );
 		    }
 		    if ( param.write_hdf5 == PARAM_SET ) {
 			 SCIA_OL2_WR_H5_NFIT( nfit_name[n_nfit], param, 
 					      num_dsr, nfit );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, 
+			      NADC_GOTO_ERROR( NADC_ERR_HDF_WR, 
 					       nfit_name[n_nfit] );
 		    }
 #ifdef _WITH_SQL
@@ -436,7 +434,7 @@ int main( int argc, char *argv[] )
 					       num_geo, ngeo, num_dsr, nfit );
 #endif
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR(prognm,NADC_ERR_SQL,"SQL_NFIT");
+			      NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_NFIT" );
 		    }
 #endif
 		    free( nfit );
@@ -456,20 +454,20 @@ int main( int argc, char *argv[] )
 		    (void) fprintf( stdout, "%s:\t%6u\n", 
 				    lfit_name[n_lfit], num_dsr );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, 
 				     lfit_name[n_lfit] );
 	       if ( num_dsr > 0 ) {
 		    if ( param.write_ascii == PARAM_SET ) {
 			 SCIA_OL2_WR_ASCII_LFIT( lfit_name[n_lfit], param, 
 						 num_dsr, lfit );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_WR,"LFIT");
+			      NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LFIT" );
 		    }
 		    if ( param.write_hdf5 == PARAM_SET ) {
 			 SCIA_OL2_WR_H5_LFIT( lfit_name[n_lfit], param, 
 					      num_dsr, lfit );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, 
+			      NADC_GOTO_ERROR( NADC_ERR_HDF_WR, 
 					       lfit_name[n_lfit] );
 		    }
 		    free( lfit );
@@ -489,20 +487,20 @@ int main( int argc, char *argv[] )
 		    (void) fprintf( stdout, "%s:\t%6u\n", 
 				    ofit_name[n_ofit], num_dsr );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, 
 				     ofit_name[n_ofit] );
 	       if ( num_dsr > 0 ) {
 		    if ( param.write_ascii == PARAM_SET ) {
 			 SCIA_OL2_WR_ASCII_LFIT( ofit_name[n_ofit], param, 
 						 num_dsr, ofit );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR(prognm,NADC_ERR_FILE_WR,"OFIT");
+			      NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "OFIT" );
 		    }
 		    if ( param.write_hdf5 == PARAM_SET ) {
 			 SCIA_OL2_WR_H5_LFIT( ofit_name[n_ofit], param, 
 					      num_dsr, ofit );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, 
+			      NADC_GOTO_ERROR( NADC_ERR_HDF_WR, 
 					       ofit_name[n_ofit] );
 		    }
 		    free( ofit );
@@ -515,17 +513,17 @@ int main( int argc, char *argv[] )
  */
      num_dsr = SCIA_OL2_RD_LCLD( fp, num_dsd, dsd, &lcld );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LCLD" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LCLD" );
      if ( num_dsr > 0 ) {
 	  if ( param.write_ascii == PARAM_SET ) {
 	       SCIA_OL2_WR_ASCII_LCLD( param, num_dsr, lcld );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "LCLD" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LCLD" );
 	  }
 	  if ( param.write_hdf5 == PARAM_SET ) {
 	       SCIA_OL2_WR_H5_LCLD( param, num_dsr, lcld );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "LCLD" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "LCLD" );
 	  }
 	  free( lcld );
      }
@@ -552,7 +550,7 @@ int main( int argc, char *argv[] )
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, param.hdf5_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
      }
 /*
  * free allocated memory

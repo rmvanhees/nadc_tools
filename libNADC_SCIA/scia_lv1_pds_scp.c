@@ -95,7 +95,6 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
 
      struct scp_scia *scp;
 
-     const char prognm[]   = "SCIA_LV1_RD_SCP";
      const char dsd_name[] = "SPECTRAL_CALIBRATION";
 
      if ( ! Use_Extern_Alloc ) scp_out[0] = NULL;
@@ -104,7 +103,7 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -113,11 +112,11 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
 	  scp = (struct scp_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct scp_scia));
 	  if ( scp == NULL ) {
-	       NADC_ERROR( prognm, NADC_ERR_ALLOC, "scp" );
+	       NADC_ERROR( NADC_ERR_ALLOC, "scp" );
 	       return 0;
 	  }
      } else if ( (scp = scp_out[0]) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "scp_out[0]" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "scp_out[0]" );
 	  return 0;
      }
 /*
@@ -126,7 +125,7 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (scp_char = (char *) malloc( dsr_size )) == NULL ) {
 	  if ( ! Use_Extern_Alloc ) free( scp );
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "scp_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "scp_char" );
 	  return 0;
      }
 /*
@@ -139,7 +138,7 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
      do {
 	  if ( fread( scp_char, dsr_size, 1, fd ) != 1 ) {
 	       free( scp_char );
-	       NADC_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_ERROR( NADC_ERR_PDS_RD, "" );
 	       return 0;
 	  }
 /*
@@ -163,7 +162,7 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
 	  if ( (size_t)(scp_pntr - scp_char) != dsr_size ) {
 	       free( scp_char );
 	       if ( ! Use_Extern_Alloc ) free( scp );
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	       return 0;
 	  }
 /*
@@ -202,8 +201,6 @@ unsigned int SCIA_LV1_RD_SCP( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_SCP( FILE *fd, unsigned int num_scp, 
 		      const struct scp_scia *scp_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_SCP";
-
      size_t nr_byte;
 
      struct scp_scia scp;
@@ -231,19 +228,19 @@ void SCIA_LV1_WR_SCP( FILE *fd, unsigned int num_scp,
  * write SCP structure to data buffer
  */
 	  if ( fwrite( &scp.orbit_phase, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  nr_byte = 5 * SCIENCE_CHANNELS * ENVI_DBLE;
 	  if ( fwrite( scp.coeffs, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = SCIENCE_CHANNELS * ENVI_USHRT;
 	  if ( fwrite( scp.num_lines, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = SCIENCE_CHANNELS * ENVI_FLOAT;
 	  if ( fwrite( scp.wv_error_calib, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  scp_in++;

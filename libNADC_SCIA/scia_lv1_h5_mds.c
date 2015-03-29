@@ -472,8 +472,6 @@ unsigned int SCIA_LV1_RD_H5_MDS( const char *scia_fl,
 				 const struct state1_scia *state,
 				 struct mds1_scia **mds_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_H5_MDS";
-
      char grp_name[10];
 
      struct mds1_scia *mds = NULL;
@@ -510,18 +508,18 @@ unsigned int SCIA_LV1_RD_H5_MDS( const char *scia_fl,
      *mds_out = (struct mds1_scia *) 
           malloc( num_mds * sizeof(struct mds1_scia));
      if ( (mds = *mds_out) == NULL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1_scia" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds1_scia" );
 /*
  * open output HDF5-file
  */
      file_id = H5Fopen( scia_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
      if ( file_id < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, scia_fl );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, scia_fl );
 /*
  * open group /MDS
  */
      grp_id = NADC_OPEN_HDF5_Group( file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      switch ( source ) {
      case SCIA_NADIR:
 	  (void) snprintf( grp_name, 10, "nadir_%02u", state->indx );
@@ -536,11 +534,11 @@ unsigned int SCIA_LV1_RD_H5_MDS( const char *scia_fl,
 	  (void) snprintf( grp_name, 10, "occult_%02u", state->indx );
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      subgrp_id = NADC_OPEN_HDF5_Group( grp_id, grp_name );
      if ( subgrp_id < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, grp_name );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
 /*
  * define data types of table-fields
  */
@@ -574,8 +572,6 @@ unsigned int SCIA_LV1_RD_H5_MDS( const char *scia_fl,
 void SCIA_LV1_WR_H5_MDS( const struct param_record param, 
 			 unsigned int num_mds, const struct mds1_scia *mds )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_MDS";
-
      register unsigned short nc;
      register hsize_t        nr, ny;
 
@@ -652,7 +648,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
  * open/create group /MDS
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      switch ( (int) mds->type_mds ) {
      case SCIA_NADIR:
 	  (void) snprintf( grp_name, 10, "nadir_%02u", mds->state_index );
@@ -667,11 +663,11 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 	  (void) snprintf( grp_name, 10, "occult_%02u", mds->state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      subgrp_id = NADC_OPEN_HDF5_Group( grp_id, grp_name );
      if ( subgrp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grp_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grp_name );
 /*
  * define data types of table-fields
  */
@@ -702,7 +698,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
      nrpix = num_mds * mds->n_aux;
      ucbuff = (unsigned char *) malloc( nrpix );
      if ( ucbuff == NULL ) 
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ucbuff" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ucbuff" );
      for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_aux )
           (void) memcpy( ucbuff+ny, mds[nr].sat_flags, mds->n_aux );
 
@@ -715,7 +711,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
      if ( (dims[1] = (hsize_t) (mds->n_aux * mds->n_clus)) > 0 ) {
 	  nrpix = mds->n_aux * mds->n_clus;
 	  if ( (ucbuff = (unsigned char *) malloc( num_mds * nrpix )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ucbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ucbuff" );
 	  for ( ny = nr = 0; nr < num_mds; nr++, ny += nrpix )
 	       (void) memcpy( ucbuff+ny, mds[nr].red_grass, nrpix );
 
@@ -730,7 +726,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 	  dims[1] = (hsize_t) mds->n_pmd;
 	  nrpix = num_mds * mds->n_pmd;
 	  if ( (rbuff = (float *) malloc( nrpix * sizeof( float ))) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_pmd ) {
 	       (void) memcpy( rbuff+ny, mds[nr].int_pmd,
 			      mds->n_pmd * sizeof( float ) );
@@ -746,7 +742,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
      lv0_hdr = (struct lv0_hdr *)
 	  malloc( nrpix * sizeof( struct lv0_hdr ) );
      if ( lv0_hdr == NULL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "lv0_hdr" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "lv0_hdr" );
      for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_aux ) {
           (void) memcpy( lv0_hdr+ny, mds[nr].lv0,
 			 mds->n_aux * sizeof( struct lv0_hdr ) );
@@ -762,7 +758,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 	  geoN = (struct geoN_scia *)
 	       malloc( nrpix * sizeof( struct geoN_scia ) );
 	  if ( geoN == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_aux ) {
 	       (void) memcpy( geoN+ny, mds[nr].geoN, 
 			      mds->n_aux * sizeof( struct geoN_scia ) );
@@ -774,7 +770,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 	  geoC = (struct geoC_scia *)
 	       malloc( nrpix * sizeof( struct geoC_scia ) );
 	  if ( geoC == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoC" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoC" );
 	  for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_aux ) {
 	       (void) memcpy( geoC+ny, mds[nr].geoC, 
 			      mds->n_aux * sizeof( struct geoC_scia ) );
@@ -786,7 +782,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 	  geoL = (struct geoL_scia *)
 	       malloc( nrpix * sizeof( struct geoL_scia ) );
 	  if ( geoL == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_aux ) {
 	       (void) memcpy( geoL+ny, mds[nr].geoL, 
 			      mds->n_aux * sizeof( struct geoL_scia ) );
@@ -802,7 +798,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 	  nrpix = num_mds * mds->n_pol;
 	  polV = (struct polV_scia *) malloc(nrpix * sizeof(struct polV_scia));
           if ( polV == NULL ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "polV" );
+               NADC_RETURN_ERROR( NADC_ERR_ALLOC, "polV" );
 	  for ( ny = nr = 0; nr < num_mds; nr++, ny += mds->n_pol ) {
 	       (void) memcpy( polV+ny, mds[nr].polV,
 			      mds->n_pol * sizeof( struct polV_scia ) );
@@ -887,8 +883,6 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
 			  unsigned int num_mds, 
 			  const struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV1C_WR_H5_MDS";
-
      register unsigned int nf, nr;
 
      char  clus_name[12], grp_name[15];
@@ -932,7 +926,7 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
      if ( init ) {
 	  grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
 	  if ( grp_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
 	  (void) H5Gclose( grp_id );
 	  init = FALSE;
      }
@@ -957,11 +951,11 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
 			   mds_1c->state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, grp_name );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grp_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grp_name );
 /*
  * write table with MDS-header info
  */
@@ -999,7 +993,7 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
 	  (void) snprintf( clus_name, 11, "cluster_%02hhu", mds_1c->clus_id );
 	  if ( subgrp_id >= 0 ) (void) H5Gclose( subgrp_id );
 	  if ( (subgrp_id = NADC_OPEN_HDF5_Group( grp_id, clus_name )) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, clus_name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, clus_name );
 /*
  * radiance units flag
  */
@@ -1055,20 +1049,20 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
 	       SCIA_WR_H5_GEON( param.hdf_file_id, subgrp_id, compress, 
 				mds_1c->num_obs, mds_1c->geoN );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "geoN" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "geoN" );
 	       break;
 	  case SCIA_OCCULT:
 	  case SCIA_LIMB:
 	       SCIA_WR_H5_GEOL( param.hdf_file_id, subgrp_id, compress, 
 				mds_1c->num_obs, mds_1c->geoL );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "geoL" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "geoL" );
 	       break;
 	  case SCIA_MONITOR:
 	       SCIA_WR_H5_GEOC( param.hdf_file_id, subgrp_id, compress, 
 				mds_1c->num_obs, mds_1c->geoC );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "geoC" );
+		    NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "geoC" );
 	       break;
 	  }
      }
@@ -1097,8 +1091,6 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
 void SCIA_LV1C_WR_H5_MDS_PMD( const struct param_record param, 
 			      const struct mds1c_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV1C_WR_H5_MDS_PMD";
-
      register unsigned int nf;
 
      char    grp_name[20];
@@ -1141,7 +1133,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD( const struct param_record param,
      if ( init ) {
 	  grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
 	  if ( grp_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
 	  (void) H5Gclose( grp_id );
 	  init = FALSE;
      }
@@ -1166,11 +1158,11 @@ void SCIA_LV1C_WR_H5_MDS_PMD( const struct param_record param,
 			   pmd->state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, grp_name );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grp_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grp_name );
 /*
  * +++++ create/write datasets in the /MDS/<source>_<state_id>/PMD group
  *
@@ -1252,8 +1244,6 @@ void SCIA_LV1C_WR_H5_MDS_PMD( const struct param_record param,
 void SCIA_LV1C_WR_H5_MDS_POLV( const struct param_record param, 
 			       const struct mds1c_polV *polV )
 {
-     const char prognm[] = "SCIA_LV1C_WR_H5_MDS_POLV";
-
      register unsigned int nf;
 
      char    grp_name[21];
@@ -1296,7 +1286,7 @@ void SCIA_LV1C_WR_H5_MDS_POLV( const struct param_record param,
      if ( init ) {
 	  grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
 	  if ( grp_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
 	  (void) H5Gclose( grp_id );
 	  init = FALSE;
      }
@@ -1321,11 +1311,11 @@ void SCIA_LV1C_WR_H5_MDS_POLV( const struct param_record param,
 			   polV->state_index );
 	  break;
      default:
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS type" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
      }
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, grp_name );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, grp_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, grp_name );
 /*
  * +++++ create/write datasets in the /MDS/<source>_<state_id>/polV group
  *

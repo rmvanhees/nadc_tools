@@ -91,8 +91,6 @@ static const size_t sip_offs[NFIELDS] = {
 void SCIA_LV1_WR_H5_SIP( struct param_record param, 
 			 const struct sip_scia *sip )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_SIP";
-
      hid_t   gads_id;
      hsize_t adim;
 
@@ -155,7 +153,7 @@ void SCIA_LV1_WR_H5_SIP( struct param_record param,
  * create group /GADS/SIP
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * define user-defined data types of the Table-fields
  */

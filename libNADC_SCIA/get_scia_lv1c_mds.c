@@ -72,8 +72,6 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 				struct mds1_scia *mds_1b, 
 				struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "GET_SCIA_LV1C_MDS";
-
      register unsigned int   nc, nd, ng;
      register unsigned short nb, np;
 
@@ -134,7 +132,7 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 	       mds_1c->geoN = (struct geoN_scia *)
 		    malloc(mds_1c->num_obs * sizeof(struct geoN_scia));
 	       if ( mds_1c->geoN == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 	       mds_1c->geoL = NULL;
 	       mds_1c->geoC = NULL;
 	       break;
@@ -146,7 +144,7 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 	       mds_1c->geoL = (struct geoL_scia *)
 		    malloc(mds_1c->num_obs * sizeof(struct geoL_scia));
 	       if ( mds_1c->geoL == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	       mds_1c->geoN = NULL;
 	       mds_1c->geoC = NULL;
 	       break;
@@ -158,7 +156,7 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 	       mds_1c->geoL = (struct geoL_scia *)
 		    malloc(mds_1c->num_obs * sizeof(struct geoL_scia));
 	       if ( mds_1c->geoL == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	       mds_1c->geoN = NULL;
 	       mds_1c->geoC = NULL;
 	       break;
@@ -170,7 +168,7 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 	       mds_1c->geoC = (struct geoC_scia *)
 		    malloc(mds_1c->num_obs * sizeof(struct geoC_scia));
 	       if ( mds_1c->geoC == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoC" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoC" );
 	       mds_1c->geoN = NULL;
 	       mds_1c->geoL = NULL;
 	       break;
@@ -178,21 +176,21 @@ unsigned int GET_SCIA_LV1C_MDS( unsigned long long clus_mask,
 	  nrpix = (size_t) mds_1c->num_pixels;
 	  mds_1c->pixel_ids = (unsigned short *) malloc( nrpix * sizeof(short));
 	  if ( mds_1c->pixel_ids == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_ids" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_ids" );
 	  mds_1c->pixel_wv = (float *) calloc( nrpix, sizeof( float ));
 	  if ( mds_1c->pixel_wv == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_wv" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_wv" );
 	  mds_1c->pixel_wv_err = (float *) calloc( nrpix, sizeof( float ));
 	  if ( mds_1c->pixel_wv_err == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_wv_err" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_wv_err" );
 
 	  nrpix = (size_t) (mds_1c->num_obs * mds_1c->num_pixels);
 	  mds_1c->pixel_val = (float *) malloc( nrpix * sizeof( float ));
 	  if ( mds_1c->pixel_val == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_val" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_val" );
 	  mds_1c->pixel_err = (float *) calloc( nrpix, sizeof( float ));
 	  if ( mds_1c->pixel_err == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel_err" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel_err" );
 /*
  * set pixel ID and initialize wavelength arrays
  */

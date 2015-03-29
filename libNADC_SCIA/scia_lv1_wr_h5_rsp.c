@@ -61,8 +61,6 @@
 void SCIA_LV1_WR_H5_RSPN( struct param_record param, unsigned int nr_rsp,
 			  const struct rspn_scia *rspn )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_RSPN";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -85,7 +83,7 @@ void SCIA_LV1_WR_H5_RSPN( struct param_record param, unsigned int nr_rsp,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write RSPN data sets
  */
@@ -96,7 +94,7 @@ void SCIA_LV1_WR_H5_RSPN( struct param_record param, unsigned int nr_rsp,
                             2, nr_rsp, rspn_size, rspn_names,
                             rspn_offs, rspn_type, 1,
                             NULL, compress, rspn );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "rspn" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "rspn" );
 /*
  * close interface
  */
@@ -108,8 +106,6 @@ void SCIA_LV1_WR_H5_RSPN( struct param_record param, unsigned int nr_rsp,
 void SCIA_LV1_WR_H5_RSPL( struct param_record param, unsigned int nr_rsp,
 			  const struct rsplo_scia *rspl )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_RSPL";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -133,7 +129,7 @@ void SCIA_LV1_WR_H5_RSPL( struct param_record param, unsigned int nr_rsp,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write RSPL data sets
  */
@@ -144,7 +140,7 @@ void SCIA_LV1_WR_H5_RSPL( struct param_record param, unsigned int nr_rsp,
                             3, nr_rsp, rspl_size, rspl_names,
                             rspl_offs, rspl_type, 1,
                             NULL, compress, rspl );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "rspl" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "rspl" );
 /*
  * close interface
  */
@@ -156,8 +152,6 @@ void SCIA_LV1_WR_H5_RSPL( struct param_record param, unsigned int nr_rsp,
 void SCIA_LV1_WR_H5_RSPO( struct param_record param, unsigned int nr_rsp,
 			  const struct rsplo_scia *rspo )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_RSPO";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -181,7 +175,7 @@ void SCIA_LV1_WR_H5_RSPO( struct param_record param, unsigned int nr_rsp,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write RSPO data sets
  */
@@ -192,7 +186,7 @@ void SCIA_LV1_WR_H5_RSPO( struct param_record param, unsigned int nr_rsp,
                             3, nr_rsp, rspo_size, rspo_names,
                             rspo_offs, rspo_type, 1,
                             NULL, compress, rspo );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "rspo" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "rspo" );
 /*
  * close interface
  */

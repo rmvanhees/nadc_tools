@@ -481,39 +481,37 @@ static
 void Set_Time_Window( int argc, char *argv[], int *narg,
 		      /*@out@*/ char *bgn_date, /*@out@*/ char *end_date )
 {
-     const char prognm[] = "Set_Time_Window";
-
      int num;
 /*
  * first parameter has to be a Date-string
  */
      *bgn_date = *end_date = '\0';
      if ( ++(*narg) >= argc ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
      if ( strchr( argv[(*narg)], '-' ) == NULL ||
 	  Conv_Date( argv[(*narg)], bgn_date ) != NADC_ERR_NONE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
 /*
  * second parameter has to be a Time-string (always HH:MM:SS[.SSS])
  */
      if ( ++(*narg) >= argc ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
      if ( strchr( argv[(*narg)], ':' ) != NULL ) {
 	  (void) strcat( bgn_date, " " );
 	  num = (int) strlen( argv[(*narg)] );
 	  if ( num <= TIME_ONLY_STRING_LENGTH )
 	       (void) strcat( bgn_date, argv[(*narg)]);
 	  else
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	       NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
      } else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
 /*
  * third parameter can be a Time-string, then duplicate previous Date-string
  * otherwise the third parameter has to be Date-string, 
  * and fourth parameter has to be Time-string
  */
      if ( ++(*narg) >= argc )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
      if ( strchr( argv[(*narg)], ':' ) != NULL ) {
 	  (void) Conv_Date( argv[(*narg)-2], end_date);
 	  (void) strcat( end_date, " " );
@@ -521,22 +519,22 @@ void Set_Time_Window( int argc, char *argv[], int *narg,
 	  if ( num <= TIME_ONLY_STRING_LENGTH )
 	       (void) strcat( end_date, argv[(*narg)]);
 	  else
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	       NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
      } else if ( strchr( argv[(*narg)], '-' ) != NULL ) {
 	  if ( Conv_Date( argv[(*narg)], end_date ) \
 	       != NADC_ERR_NONE ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	       NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
 	  (void) strcat( end_date, " " );
 	  if ( ++(*narg) >= argc ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	       NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
 	  num = (int) strlen( argv[(*narg)] );
 	  if ( strchr( argv[(*narg)], ':' ) != NULL &&
 	       num <= TIME_ONLY_STRING_LENGTH )
 	       (void) strcat( end_date, argv[(*narg)]);
 	  else
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	       NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
      } else
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[(*narg)] );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[(*narg)] );
 }
 
 /*+++++++++++++++++++++++++
@@ -635,8 +633,6 @@ void Do_Not_Extract_MDS( int instrument, struct param_record *param )
 void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 		     struct param_record *param )
 {
-     const char prognm[] = "SCIA_SET_PARAM";
-
      char   *cpntr;
      char   outfile[MAX_STRING_LENGTH];
      char   prog_master[SHORT_STRING_LENGTH];
@@ -653,7 +649,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
  * check number of options
  */
      if ( argc == 0 || argv[0] == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, "none found!?!" );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, "none found!?!" );
 /*
  * strip path to program
  */
@@ -682,11 +678,11 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 					 "Filename too long (max: %d)\n",
 					 (int) MAX_STRING_LENGTH );
 			 
-			 NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, cbuff );
+			 NADC_RETURN_ERROR( NADC_ERR_FATAL, cbuff );
 		    }
 		    param->flag_infile = PARAM_SET;
 	       } else {
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[narg] );
+		    NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 	       }
 /*
  * process command-line options starting with one "-" (= standalone options)
@@ -727,7 +723,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 #if defined(_WITH_SQL)
 		    param->write_sql = PARAM_SET;
 #else
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 				"no PostgreSQL support, recompile" );
 #endif
 	       } else if ( strncmp( argv[narg]+1, "remove", 6 ) == 0 ) {
@@ -835,7 +831,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 			 Set_Time_Window( argc, argv, &narg, 
 					  param->bgn_date, param->end_date );
 			 if ( IS_ERR_STAT_FATAL )
-			      NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, "");
+			      NADC_RETURN_ERROR( NADC_ERR_PARAM, "" );
 		    }
 		    /* perform selection on geo-location */
 	       } else if ( strncmp( argv[narg]+2, "region", 6 ) == 0 ) {
@@ -858,15 +854,14 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 			      param->geo_lon[1] = 
 				   max_t( float, rbuff[2], rbuff[3] );
 			 } else {
-			      NADC_RETURN_ERROR( prognm, 
-						 NADC_ERR_PARAM, argv[narg] );
+			      NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 			 }
 			 param->flag_geoloc = PARAM_SET;
 		    }
 		    /* perform selection on measurement category */
                } else if ( strncmp( argv[narg]+2, "cat", 3 ) == 0 ) {
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL ) 
-			 NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
+			 NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 		    (void) NADC_USRINP( UINT8_T, ++cpntr, 
 					MAX_NUM_STATE, param->catID, &num );
 		    if ( num > 0 && num < MAX_NUM_STATE )
@@ -874,7 +869,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 		    /* perform selection on measurement state ID(s) */
 	       } else if ( strncmp( argv[narg]+2, "state", 4 ) == 0 ) {
 		    if ( (cpntr = strchr( argv[narg], '=' )) == NULL ) 
-			 NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
+			 NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] ); 
 		    (void) NADC_USRINP( UINT8_T, ++cpntr, 
 					MAX_NUM_STATE, param->stateID, &num );
 		    if ( num > 0 && num < MAX_NUM_STATE )
@@ -886,8 +881,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 		    } else {
 			 param->chan_mask = Set_Band_Val( ++cpntr );
 			 if ( param->chan_mask == BAND_NONE ) {
-			      NADC_RETURN_ERROR( prognm, 
-						 NADC_ERR_PARAM, argv[narg] );
+			      NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 			 }
 		    }
 		    /* perform selection on cluster ID(s) */
@@ -908,8 +902,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 					       (unsigned char)(clusID[nr]-1));
 			      }
 			 } else {
-			      NADC_RETURN_ERROR( prognm, 
-						 NADC_ERR_PARAM, argv[narg] );
+			      NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 			 }
 		    }
 		    /* perform calibration on measurement data (L1b only) */
@@ -929,7 +922,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 
 	       if ( strncmp( argv[narg]+2, "output=", 7 ) == 0 ) {
 		    if ( strlen( argv[narg]+9 ) == 0 )
-			 NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
+			 NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 
 		    if ( param->flag_outfile == PARAM_UNSET ) {
 			 (void) snprintf( outfile, MAX_STRING_LENGTH, 
@@ -1021,7 +1014,7 @@ void SCIA_SET_PARAM( int argc, char *argv[], int instrument,
 
 	  if ( (instrument == SCIA_PATCH_1 || param->write_pds == PARAM_SET)
 	       && nadc_file_equal( param->infile, param->outfile ) ) {
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, 
+	       NADC_RETURN_ERROR( NADC_ERR_PARAM, 
 				  "input file same as output file" );
 	  }
      }

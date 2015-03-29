@@ -107,8 +107,6 @@ void Sun2Intel_SPH( struct sph1_gome *sph )
 void GOME_LV1_RD_SPH( FILE *infl, const struct fsr1_gome *fsr,
 		      struct sph1_gome *sph )
 {
-     const char prognm[] = "GOME_LV1_RD_SPH";
-
      register int np;
 
      char   *sph_char;
@@ -119,13 +117,13 @@ void GOME_LV1_RD_SPH( FILE *infl, const struct fsr1_gome *fsr,
  * allocate memory to store data from SPH-record
  */
      if ( (sph_char = (char *) malloc( fsr->sz_sph )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sph_char" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sph_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( infl, SPH_BYTE_OFFS, SEEK_SET );
      if ( fread( sph_char, (size_t) fsr->sz_sph, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 
      (void) memcpy( &sph->nr_inref, sph_char, GOME_SHORT );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
@@ -225,7 +223,7 @@ void GOME_LV1_RD_SPH( FILE *infl, const struct fsr1_gome *fsr,
  * check if we read the whole DSR
  */
      if ( sph_pntr - sph_char !=  fsr->sz_sph )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
 /*
  * byte swap data to local representation
  */

@@ -80,8 +80,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
 {
-     const char prognm[] = "NADC_TOGOMI_WR_SQL_META";
-
      PGresult *res;
 
      char prod_version[8], l1b_version[8], l1b_product[ERS2_FILENAME_SIZE];
@@ -98,10 +96,10 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
 		      META_TBL_NAME, hdr->product );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL_TWICE, hdr->product );
+          NADC_GOTO_ERROR( NADC_ERR_SQL_TWICE, hdr->product );
      }
      PQclear( res );
 /*
@@ -110,7 +108,7 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
      res = PQexec( conn,
                    "SELECT nextval(\'meta_togomi_pk_meta_seq\')" );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      pntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );
      PQclear( res );
@@ -128,7 +126,7 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
 			   l1b_product );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-	       NADC_GOTO_ERROR(prognm,NADC_ERR_SQL,PQresultErrorMessage(res));
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 
 	  if ( (nrow = PQntuples( res )) > 0 ) {
 	       pntr = PQgetvalue( res, 0, 0 );
@@ -136,7 +134,7 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
 	       pntr = PQgetvalue( res, 0, 1 );
 	       (void) nadc_strlcpy( l1b_version, pntr, 8 );
 	  } else 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				"input level 1b product not available" );
 	  PQclear( res );
      }
@@ -164,13 +162,13 @@ int NADC_TOGOMI_WR_SQL_META( PGconn *conn, const struct togomi_hdr *hdr )
      }
 /*      (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_GOTO_ERROR( NADC_ERR_STRLEN, "sql_query" );
 /*
  * do the actual insert
  */
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      return meta_id;

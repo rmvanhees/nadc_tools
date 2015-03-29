@@ -102,8 +102,6 @@ void NADC_AKIMA_EX( int x_type_id, int y_type_id, size_t dim_in,
 		    /*@out@*/ double *xx, /*@out@*/ double *yy, 
 		    /*@out@*/ double *st )
 {
-     const char prognm[] = "NADC_AKIMA_EX";
-
      register size_t ii;
      register double tmp;
 /*
@@ -119,7 +117,7 @@ void NADC_AKIMA_EX( int x_type_id, int y_type_id, size_t dim_in,
      } else if ( x_type_id == FLT64_T ) {
 	  (void) memcpy( xx+2, x_in, dim_in * sizeof( double ) );
      } else
-          NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, "x_type_id" );
+          NADC_RETURN_ERROR( NADC_ERR_PARAM, "x_type_id" );
 
      if ( y_type_id == FLT32_T ) {
 	  const float *y_pntr = (const float *) y_in;
@@ -129,7 +127,7 @@ void NADC_AKIMA_EX( int x_type_id, int y_type_id, size_t dim_in,
      } else if ( y_type_id == FLT64_T ) {
 	  (void) memcpy( yy+2, y_in, dim_in * sizeof( double ) );
      } else
-          NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, "y_type_id" );
+          NADC_RETURN_ERROR( NADC_ERR_PARAM, "y_type_id" );
 /*
  * calculation of extrapolated x-values left and right
  */
@@ -208,8 +206,6 @@ void NADC_AKIMA_SU( int x_type_id, int y_type_id, size_t dim_in,
 		    double *a_coef, double *b_coef, 
 		    double *c_coef, double *d_coef )
 {
-     const char prognm[] = "NADC_AKIMA_SU";
-
      register size_t  ii;
      register double  tmp1, tmp2;
 
@@ -221,26 +217,26 @@ void NADC_AKIMA_SU( int x_type_id, int y_type_id, size_t dim_in,
 
      xx = (double *) malloc( akima_points * sizeof( double ));
      if ( xx == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "xx" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "xx" );
      yy = (double *) malloc( akima_points * sizeof( double ));
      if ( yy == NULL ) {
 	  free( xx );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "yy" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "yy" );
      }
      tt = (double *) calloc( akima_points, sizeof( double ));
      if ( tt == NULL ) {
 	  free( xx ); free( yy );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "tt" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "tt" );
      }
      st = (double *) calloc( akima_points, sizeof( double ));
      if ( st == NULL ) {
 	  free( xx ); free( yy ); free( tt );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "st" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "st" );
      }
      NADC_AKIMA_EX( x_type_id, y_type_id, dim_in, x_in, y_in, xx, yy, st );
      if ( IS_ERR_STAT_FATAL ) {
 	  free( xx ); free( yy ); free( tt ); free( st );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "NADC_AKIMA_EX" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "NADC_AKIMA_EX" );
      }
 /*
  * calculation of all polynomial slopes
@@ -357,8 +353,6 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
 		     int x_type_out, int y_type_out, size_t dim_out, 
 		     const void *x_out, void *y_out )
 {
-     const char prognm[] = "FIT_GRID_AKIMA";
-
      register size_t nr, xi;
      register double xdelta, y_dbl_val;
 
@@ -379,7 +373,7 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
 	  || (x_type_out != FLT32_T && x_type_out != FLT64_T)
 	  || (y_type_in != FLT32_T && y_type_in != FLT64_T) 
 	  || (y_type_out != FLT32_T && y_type_out != FLT64_T) )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "invalid types used" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "invalid types used" );
 /*
  * do all calculation in double precision
  */
@@ -388,7 +382,7 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
 
 	  xbuff_in = (double *) malloc( dim_in * sizeof( double ));
 	  if ( xbuff_in == NULL ) {
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "xbuff_in" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "xbuff_in" );
 	  }
 
 	  nr = 0;
@@ -402,7 +396,7 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
 
 	  xbuff_out = (double *) malloc( dim_out * sizeof( double ));
 	  if ( xbuff_out == NULL ) {
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "xbuff_out" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "xbuff_out" );
 	  }
 
 	  nr = 0;
@@ -421,7 +415,7 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
 
 	       (void) sprintf(msg, 
 			      "x_in is not monotonic increasing at %-zd", nr );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, msg ); 
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, msg ); 
 	  }
      } while ( ++nr < dim_in-1 );
 /*
@@ -429,21 +423,21 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
  */
      a_coef = (double *) malloc( dim_in * sizeof( double ));
      if ( a_coef == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "a_coef");
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "a_coef");
      b_coef = (double *) malloc( dim_in * sizeof( double ));
      if ( b_coef == NULL ) {
 	  free( a_coef );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "b_coef");
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "b_coef");
      }
      c_coef = (double *) malloc( dim_in * sizeof( double ));
      if ( c_coef == NULL ) {
 	  free( a_coef ); free( b_coef );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "c_coef" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "c_coef" );
      }
      d_coef = (double *) malloc( dim_in * sizeof( double ));
      if ( d_coef == NULL ) {
 	  free( a_coef ); free( b_coef ); free( c_coef );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "d_coef" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "d_coef" );
      }
 /*
  * calculate polynomials
@@ -451,7 +445,7 @@ void FIT_GRID_AKIMA( int x_type_in, int y_type_in, size_t dim_in,
      NADC_AKIMA_SU( x_type_in, y_type_in, dim_in, x_in, y_in, 
 		    a_coef, b_coef, c_coef, d_coef );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NADC_AKIMA_SU" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "NADC_AKIMA_SU" );
 /*
  * check if the x_out is monotonic increasing or decreasing
  */

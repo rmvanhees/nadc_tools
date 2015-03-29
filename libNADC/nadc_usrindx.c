@@ -53,8 +53,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 short NADC_USRINDX( const char str_range[], int max_indx, short *indices )
 {
-     const char prognm[] = "NADC_USRINDX";
-
      register int nr;
 
      char    *cpntr, cbuff[MAX_STRING_LENGTH];
@@ -74,7 +72,7 @@ short NADC_USRINDX( const char str_range[], int max_indx, short *indices )
 	  if ( indices[nr] < 0 ) indices[nr] += (short) max_indx;
 	  if ( indices[nr] < 0 || indices[nr] >= (short) max_indx ) {
 	       num = nr;
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "indices" );
+	       NADC_GOTO_ERROR( NADC_ERR_PARAM, "indices" );
 	  }
      }
  done:

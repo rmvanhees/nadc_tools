@@ -86,8 +86,6 @@ short GOME_LV1_RD_REC( FILE *infl, short nband,
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, infl, *rec_out@*/
 {
-     const char  prognm[] = "GOME_LV1_RD_REC";
-
      register short nb, ni;
 
      char           *rec_char = NULL;
@@ -115,12 +113,12 @@ short GOME_LV1_RD_REC( FILE *infl, short nband,
      rec_out[0] = (struct rec_gome *)
 	  malloc( fsr->nr_band[nband] * sizeof( struct rec_gome ) );
      if ( (rec = rec_out[0]) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rec" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (rec_char = (char *) malloc((size_t) fsr->sz_band[nband] )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rec_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rec_char" );
 /*
  * rewind/read input data file
  */
@@ -139,7 +137,7 @@ short GOME_LV1_RD_REC( FILE *infl, short nband,
      do {
 	  rec_pntr = rec_char;
 	  if ( fread( rec_pntr, (size_t) fsr->sz_band[nband], 1, infl ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * (1) quality flags
  */
@@ -190,7 +188,7 @@ short GOME_LV1_RD_REC( FILE *infl, short nband,
  * check if we read the whole DSR
  */
 	  if ( rec_pntr - rec_char != fsr->sz_band[nband] )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "REC size" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "REC size" );
 /*
  * go to next record
  */
@@ -210,8 +208,6 @@ short GOME_LV1_RD_BDR( FILE *infl, short nband,
 		       const struct fcd_gome *fcd, 
 		       struct rec_gome **rec_out )
 {
-     const char prognm[]  = "GOME_LV1_RD_BDR";
-
      register short nr;
 
      short nr_rec = 0;
@@ -231,7 +227,7 @@ short GOME_LV1_RD_BDR( FILE *infl, short nband,
 	  || nband == STRAY_1b || nband == STRAY_2a ) {
 	  nr_rec = GOME_LV1_RD_REC( infl, nband, fsr, fcd, &rec );
 	  if ( rec == NULL || nr_rec != fsr->nr_band[nband] ) {
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, "REC" );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, "REC" );
 	       if ( rec != NULL ) free( rec );
 	       return 0;
 	  }
@@ -257,7 +253,7 @@ short GOME_LV1_RD_BDR( FILE *infl, short nband,
  */
 	  nr_rec = GOME_LV1_RD_REC( infl, nband, fsr, fcd, &rec );
 	  if ( rec == NULL || nr_rec != fsr->nr_band[nband] ) {
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, "rec(A)" );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, "rec(A)" );
 	       if ( rec != NULL ) free( rec );
 	       return 0;
 	  }
@@ -266,7 +262,7 @@ short GOME_LV1_RD_BDR( FILE *infl, short nband,
  */
 	  nr_recB = GOME_LV1_RD_REC( infl, nbandB, fsr, fcd, &recB );
 	  if ( recB == NULL || nr_recB != fsr->nr_band[nbandB] ) {
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, "rec(B)" );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, "rec(B)" );
 	       free( rec );
 	       if ( recB != NULL ) free( recB );
 	       return 0;
@@ -310,7 +306,7 @@ short GOME_LV1_RD_BDR( FILE *infl, short nband,
  */
 	  nr_recA = GOME_LV1_RD_REC( infl, nbandA, fsr, fcd, &recA );
 	  if ( recA == NULL || nr_recA != fsr->nr_band[nbandA] ) {
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, "rec(A)" );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, "rec(A)" );
 	       if ( recA != NULL ) free( recA );
 	       return 0;
 	  }
@@ -319,7 +315,7 @@ short GOME_LV1_RD_BDR( FILE *infl, short nband,
  */
 	  nr_rec = GOME_LV1_RD_REC( infl, nband, fsr, fcd, &rec );
 	  if ( rec == NULL || nr_rec != fsr->nr_band[nband] ) {
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, "rec(B)" );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, "rec(B)" );
 	       free( recA );
 	       if ( rec != NULL ) free( rec );
 	       return 0;

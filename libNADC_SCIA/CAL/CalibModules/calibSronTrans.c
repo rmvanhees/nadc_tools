@@ -68,8 +68,6 @@ void SCIA_SRON_CAL_TRANS( const struct file_rec *fileParam,
 			  const struct state1_scia *state, 
 			  struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_SRON_CAL_TRANS";
-
      register unsigned short np;
      register unsigned short num = 0u;
 
@@ -97,9 +95,9 @@ void SCIA_SRON_CAL_TRANS( const struct file_rec *fileParam,
 	       found = SDMF_get_Transmission_30( FALSE, fileParam->absOrbit, 
 						 8, trans_fact );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm,NADC_ERR_FATAL,"SDMF_get_Transmission");
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "SDMF_get_Transmission" );
 	  if ( ! found )
-	       NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF Transmission data" );
+	       NADC_ERROR( NADC_ERR_NONE, "no SDMF Transmission data" );
      }
 /*
  * calculate average transmission

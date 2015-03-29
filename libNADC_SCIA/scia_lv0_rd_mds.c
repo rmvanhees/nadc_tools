@@ -136,8 +136,6 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
        /*@globals  nadc_stat, nadc_err_stack, numClusDef, clusDef;@*/
        /*@modifies nadc_stat, nadc_err_stack, det_src@*/
 {
-     const char prognm[] = "_CHECK_CLUSTERDEF";
-
      register unsigned short nc;
 
      char msg[SHORT_STRING_LENGTH];
@@ -192,7 +190,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 	  det_src->pixel[ncl].cluster_id = clusDef[nc].clusID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CLUSID, 
 			   chanID, clusID, start, length, clusDef[nc].clusID );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_ERROR( NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_CLUSID;
      }
 
@@ -207,7 +205,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 	  det_src->hdr.channel.field.id = clusDef[nc].chanID;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CHANID, 
 			   chanID, clusID, start, length, clusDef[nc].chanID );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_ERROR( NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_CHANID;
      }
 
@@ -222,7 +220,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 	  det_src->pixel[ncl].start = clusDef[nc].start;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_START, 
 			   chanID, clusID, start, length, clusDef[nc].start );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_ERROR( NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_START;
      }
 
@@ -237,14 +235,14 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 	  det_src->pixel[ncl].length = clusDef[nc].length;
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_LENGTH,
 			   chanID, clusID, start, length, clusDef[nc].length );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_ERROR( NADC_ERR_NONE, msg );
 	  return DET_SRC_MODIFIED_LENGTH;
      }
 
      /* Oeps, can not correct inconsistent header fields */
      (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_FAIL,
 		      chanID, clusID, start, length );
-     NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+     NADC_ERROR( NADC_ERR_NONE, msg );
      return DET_SRC_READ_FAILED;
 }
 
@@ -428,8 +426,6 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, *pmtc_frame@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_PMTC_FRAME";
-     
      register unsigned short nb = 0;
      register const char *cpntr = cbuff;
 
@@ -450,7 +446,7 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
           /* check data integrity */
 	  if ( pmtc_frame->bcp[nb].sync != USHRT_ZERO
 	       && pmtc_frame->bcp[nb].sync != AUX_SYNC ) {
-	       NADC_RETURN_ERROR( prognm, NADC_WARN_PDS_RD, 
+	       NADC_RETURN_ERROR( NADC_WARN_PDS_RD, 
 				  "incorrect AUX Sync value(s) found" );
 	  }
 	  (void) memcpy( &pmtc_frame->bcp[nb].bcps, cpntr, ENVI_USHRT );
@@ -522,8 +518,6 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, data_src@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_MDS_DET_SRC";
-
      register unsigned short n_ch = 0;
      register unsigned short n_cl;
 
@@ -548,7 +542,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 
           /* check data integrity */
 	  if ( data_src->hdr.sync != CHANNEL_SYNC )
-	       NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD, 
+	       NADC_GOTO_ERROR( NADC_WARN_PDS_RD, 
 				"incorrect Channel Sync value found" );
 
 	  (void) memcpy( &data_src->hdr.channel.two_byte, cpntr, ENVI_USHRT );
@@ -577,7 +571,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 	       data_src->pixel = (struct chan_src *)
 		    malloc ( numClusters * sizeof( struct chan_src ) );
 	       if ( data_src->pixel == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel" );
 	  } else {
 	       data_src->pixel = dummy_pixel;
 	  }
@@ -599,7 +593,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 			 data_src->hdr.channel.field.clusters = 0;
 		    } else 
 			 data_src->pixel = NULL;
-		    NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD, 
+		    NADC_GOTO_ERROR( NADC_WARN_PDS_RD, 
 				 "corrupted cluster Sync, remainder skipped" );
 	       }
 	       /* cluster block identifier */
@@ -645,7 +639,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 			      free( data_src->pixel );
 			      data_src->hdr.channel.field.clusters = 0;
 			 }
-			 NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD,
+			 NADC_GOTO_ERROR( NADC_WARN_PDS_RD,
 				"corrupted cluster block, remainder skipped" );
 		    }
 	       }
@@ -665,7 +659,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 		    data_src->pixel[n_cl].data = 
 			 (unsigned char *) malloc( num_byte );
 		    if ( data_src->pixel[n_cl].data == NULL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, 
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, 
 					  "pixel->data" );
 		    (void) memcpy( data_src->pixel[n_cl].data, 
 				   cpntr, num_byte );
@@ -685,7 +679,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 			   "Detector[%-hu] MDS size: %zd instead of %zd", 
 			   numClusters, (size_t)(cpntr - cbuff), 
 			   det_length );
-	  NADC_GOTO_ERROR( prognm, NADC_WARN_PDS_RD, msg );
+	  NADC_GOTO_ERROR( NADC_WARN_PDS_RD, msg );
      }
 /*
  * release allocated memory
@@ -713,8 +707,6 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, *pmd_src@*/
 {
-     const char prognm[]  = "SCIA_LV0_RD_MDS_PMD_SRC";
-
      register unsigned short np;
      register const char *cpntr = cbuff;
 
@@ -739,7 +731,7 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
           /* check data integrity */
 	  if ( pmd_src->packet[np].sync != USHRT_ZERO
 	       && pmd_src->packet[np].sync != PMD_SYNC ) {
-	       NADC_RETURN_ERROR( prognm, NADC_WARN_PDS_RD, 
+	       NADC_RETURN_ERROR( NADC_WARN_PDS_RD, 
 				  "incorrect PMD Sync value(s) found" );
 	  }
 	  (void) memcpy( pmd_src->packet[np].data, cpntr, nr_byte );
@@ -776,8 +768,6 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, aux@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_ONE_AUX";
-
      const size_t lv0_aux_dsr_size = LV0_ANNOTATION_LENGTH 
 	  + LV0_PACKET_HDR_LENGTH + LV0_DATA_HDR_LENGTH + LV0_PMTC_HDR_LENGTH
 	  + NUM_LV0_AUX_PMTC_FRAME * AUX_DATA_SRC_LENGTH;
@@ -794,7 +784,7 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
  * read Auxiliary DSR from file as a character array
  */
      if ( fread( cbuff, lv0_aux_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "LV0_AUX_DSR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_AUX_DSR" );
      cpntr = cbuff;
 /*
  * read Annotation (ISP, FEP)
@@ -835,7 +825,7 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
 	  SCIA_LV0_RD_MDS_PMTC_FRAME( cpntr, &aux->data_src[nf] );
 	  cpntr += AUX_DATA_SRC_LENGTH;
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
      } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
@@ -861,8 +851,6 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, det@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_ONE_DET";
-
      const size_t lv0_det_dsr_size = LV0_ANNOTATION_LENGTH 
 	  + LV0_PACKET_HDR_LENGTH + LV0_DATA_HDR_LENGTH + LV0_PMTC_HDR_LENGTH
 	  + ENVI_USHRT + 8 * ENVI_INT + ENVI_USHRT;
@@ -880,7 +868,7 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
  * read PMD DSR from file as a character array
  */
      if ( fread( cbuff, lv0_det_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "LV0_DET_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_DET_HDR" );
      cpntr = cbuff;
 /*
  * read Annotation (ISP, FEP)
@@ -944,10 +932,10 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
  */
      det_length = (size_t) (det->packet_hdr.length - DET_DATA_HDR_LENGTH + 1);
      if ( (cdet = (char *) malloc( det_length )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cdet" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cdet" );
      if ( fread( cdet, det_length, 1, fd ) != 1 ) {
 	  free( cdet );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, "cdet" );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, "cdet" );
      }
      if ( ! Use_Extern_Alloc ) {
 	  det->data_src = (struct det_src *) 
@@ -955,7 +943,7 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
      }
      if ( det->data_src == NULL ) {
 	  free( cdet );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "det_src" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "det_src" );
      }
      det->num_chan = SCIA_LV0_RD_MDS_DET_SRC( cdet, det_length, chan_mask, 
 					      det->num_chan, det->data_src );
@@ -966,11 +954,11 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 			   "Read failed for on_board_time %-u state_id %hhu",
 			   info->on_board_time, info->state_id );
 	  nadc_stat &= ~(NADC_STAT_WARN);
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_RETURN_ERROR( NADC_ERR_NONE, msg );
      }
      if ( IS_ERR_STAT_FATAL ) {
 	  if ( ! Use_Extern_Alloc ) free( det->data_src );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_DATA_SRC" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_DATA_SRC" );
      }
 }
 
@@ -994,8 +982,6 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, pmd@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_ONE_PMD";
-
      const size_t lv0_pmd_dsr_size = LV0_ANNOTATION_LENGTH 
 	  + LV0_PACKET_HDR_LENGTH + LV0_DATA_HDR_LENGTH + PMD_DATA_SRC_LENGTH;
 
@@ -1010,7 +996,7 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
  * read PMD DSR from file as a character array
  */
      if ( fread( cbuff, lv0_pmd_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "LV0_PMD_DSR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_PMD_DSR" );
      cpntr = cbuff;
 /*
  * read Annotation (ISP, FEP)
@@ -1043,7 +1029,7 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
  */
      SCIA_LV0_RD_MDS_PMD_SRC( cpntr, &pmd->data_src );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMD_SRC" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_PMD_SRC" );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
@@ -1067,8 +1053,6 @@ unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
 			      unsigned int num_info, 
 			      struct mds0_aux **aux_out )
 {
-     const char prognm[] = "SCIA_LV0_RD_AUX";
-
      register unsigned int nr_aux = 0;
 
      struct mds0_aux *aux;
@@ -1085,7 +1069,7 @@ unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
 	       malloc( num_info * sizeof(struct mds0_aux));
      }
      if ( (aux = *aux_out) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_aux" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_aux" );
 /*
  * read data buffer to MDS structure
  */
@@ -1096,7 +1080,7 @@ unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
 
 	       free( *aux_out );
 	       (void) snprintf( msg, 32, "MDS_AUX[%-u]", nr_aux );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, msg );
 	  }
 /*
  * go to next MDS info data set
@@ -1130,8 +1114,6 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 			      unsigned char chan_mask,
 			      struct mds0_det **det_out )
 {
-     const char prognm[] = "SCIA_LV0_RD_DET";
-
      register unsigned int nr_det = 0;
 
      struct mds0_det *det;
@@ -1170,7 +1152,7 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 	       malloc( num_info * sizeof(struct mds0_det));
      }
      if ( (det = *det_out) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_det" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_det" );
 /*
  * read data buffer to MDS structure
  */
@@ -1181,7 +1163,7 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 
 	       free( *det_out );
 	       (void) snprintf( msg, 32, "MDS_DET[%-u]", nr_det );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, msg );
 	  }
 /*
  * go to next MDS info data set
@@ -1213,8 +1195,6 @@ unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 			      unsigned int num_info, 
 			      struct mds0_pmd **pmd_out )
 {
-     const char prognm[] = "SCIA_LV0_RD_PMD";
-
      register unsigned int nr_pmd = 0;
 
      struct mds0_pmd *pmd;
@@ -1231,7 +1211,7 @@ unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 	       malloc( num_info * sizeof(struct mds0_pmd));
      }
      if ( (pmd = *pmd_out) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_pmd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_pmd" );
 /*
  * read data buffer to MDS structure
  */
@@ -1242,7 +1222,7 @@ unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 
 	       free( *pmd_out );
 	       (void) snprintf( msg, 32, "MDS_PMD[%-u]", nr_pmd );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, msg );
 	  }
 /*
  * go to next MDS info data set
@@ -1307,8 +1287,6 @@ void SCIA_LV0_FREE_MDS_DET( unsigned int num_det, struct mds0_det *det )
 -------------------------*/
 void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 {
-     const char prognm[] = "SCIA_LV0_RD_LV1_AUX";
-
      const size_t lv0_aux_dsr_size = LV0_PACKET_HDR_LENGTH 
 	  + LV0_DATA_HDR_LENGTH + LV0_PMTC_HDR_LENGTH
 	  + NUM_LV0_AUX_PMTC_FRAME * AUX_DATA_SRC_LENGTH;
@@ -1321,7 +1299,7 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
  * read Auxiliary DSR from file as a character array
  */
      if ( fread( cbuff, lv0_aux_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "LV0_AUX_DSR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_AUX_DSR" );
      cpntr = cbuff;
 /*
  * read Packet Header
@@ -1337,7 +1315,7 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
  * check packet ID
  */
      if ( (int) aux->data_hdr.id.field.packet != SCIA_AUX_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 			     "not an Auxiliary data packet" );
 /*
  * read PMTC settings
@@ -1352,7 +1330,7 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 	  SCIA_LV0_RD_MDS_PMTC_FRAME( cpntr, &aux->data_src[nf] );
 	  cpntr += AUX_DATA_SRC_LENGTH;
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
      } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
@@ -1371,8 +1349,6 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 -------------------------*/
 void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds1_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV0_RD_LV1_PMD";
-
      const size_t lv0_pmd_dsr_size = LV0_PACKET_HDR_LENGTH
 	  + LV0_DATA_HDR_LENGTH + PMD_DATA_SRC_LENGTH;
 
@@ -1383,7 +1359,7 @@ void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds1_pmd *pmd )
  * read PMD DSR from file as a character array
  */
      if ( fread( cbuff, lv0_pmd_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "LV0_PMD_DSR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_PMD_DSR" );
      cpntr = cbuff;
 /*
  * read Packet Header
@@ -1399,7 +1375,7 @@ void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds1_pmd *pmd )
  * check packet ID
  */
      if ( (int) pmd->data_hdr.id.field.packet != SCIA_PMD_PACKET )
- 	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "not a PMD data packet" );
+ 	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "not a PMD data packet" );
 /*
  * read ISP PMD data source packet
  */

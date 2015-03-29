@@ -59,8 +59,6 @@
 void GOME_LV2_WR_H5_IRR( struct param_record param, 
 			 short nr_ddr, const struct ddr_gome *ddr )
 {
-     const char prognm[] = "GOME_LV2_WR_H5_IRR";
-
      register short nt;
      register short nd = 0;
 
@@ -194,7 +192,7 @@ void GOME_LV2_WR_H5_IRR( struct param_record param,
  * create group /DDR
  */
      grp_id = H5Gopen( param.hdf_file_id, "/DDR", H5P_DEFAULT );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/DDR" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/DDR" );
 /*
  * write IRR data sets
  */
@@ -237,7 +235,7 @@ void GOME_LV2_WR_H5_IRR( struct param_record param,
 				 NFIELDS_IRR1, 1, irr1_size, irr1_names,
 				 irr1_offs, irr1_type, 1,
 				 NULL, compress, ddr->irr1 );
-	  if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "irr1" );
+	  if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "irr1" );
 
 	  for ( nd = 1; nd < nr_ddr; nd++ )
 	       H5TBappend_records( grp_id, "IRR", 1, irr1_size, irr1_offs, 
@@ -282,7 +280,7 @@ void GOME_LV2_WR_H5_IRR( struct param_record param,
 				 NFIELDS_IRR2, 1, irr2_size, irr2_names,
 				 irr2_offs, irr2_type, 1,
 				 NULL, compress, ddr->irr2 );
-	  if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "irr2" );
+	  if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "irr2" );
 
 	  for ( nd = 1; nd < nr_ddr; nd++ )
 	       H5TBappend_records( grp_id, "IRR", 1, irr2_size, irr2_offs, 

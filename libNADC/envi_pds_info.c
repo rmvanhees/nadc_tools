@@ -57,8 +57,6 @@
 unsigned int ENVI_RD_PDS_INFO( FILE *fd, /*@out@*/ char *keyword, 
 			       /*@out@*/ char *keyvalue )
 {
-     const char prognm[] = "ENVI_RD_PDS_INFO";
-
      char         *sep, *newline;
      char         line[PDS_ASCII_HDR_LENGTH];
      unsigned int nbyte = 0u;
@@ -73,8 +71,7 @@ unsigned int ENVI_RD_PDS_INFO( FILE *fd, /*@out@*/ char *keyword,
  */
      do { 
 	  if ( fgets( line, PDS_ASCII_HDR_LENGTH-1, fd ) == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, 
-				"error reading PDS header" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "error reading PDS header" );
 
 	  nbyte = (unsigned int) strlen( line );
      } while ((sep = strchr( line, '=' )) == NULL );
@@ -82,8 +79,7 @@ unsigned int ENVI_RD_PDS_INFO( FILE *fd, /*@out@*/ char *keyword,
  * check if we found a newline
  */
      if ( (newline = strchr( line, '\n' )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, 
-			   "no newline: corrupted input?!?" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "no newline: corrupted input?!?" );
 /*
  * get keyword name
  */

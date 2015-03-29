@@ -69,8 +69,6 @@
 static
 void SCIA_SET_FIXED_PPG( float *ppg_fact )
 {
-     const char prognm[] = "SCIA_GET_FIXED_PPG";
-
      const char ppg_fl[] = DATA_DIR"/ppg_fixed_ch8.h5";
 
      const size_t offs = 7 * CHANNEL_SIZE;
@@ -79,12 +77,12 @@ void SCIA_SET_FIXED_PPG( float *ppg_fact )
 
      hid_t file_id = H5Fopen( ppg_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
      if ( file_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, ppg_fl );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_FILE, ppg_fl );
 
      stat = H5LTread_dataset_float( file_id, "ppg", ppg_fact+offs );
      (void) H5Fclose( file_id );
      if ( stat < 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "ppg" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_RD, "ppg" );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -92,8 +90,6 @@ void SCIA_SRON_CAL_PPG( const struct file_rec *fileParam,
 			const struct state1_scia *state, 
 			struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_SRON_CAL_PPG";
-
      register unsigned short num = 0u;
 
      register double derror;
@@ -112,14 +108,14 @@ void SCIA_SRON_CAL_PPG( const struct file_rec *fileParam,
           else
                found = SDMF_get_PPG_30( fileParam->absOrbit, 0, ppg_fact );
           if ( IS_ERR_STAT_FATAL )
-               NADC_RETURN_ERROR( prognm,NADC_ERR_FATAL,"SDMF_get_PPG" );
+               NADC_RETURN_ERROR( NADC_ERR_FATAL, "SDMF_get_PPG" );
 	  if ( ! found )
-	       NADC_ERROR( prognm, NADC_ERR_NONE, "no SDMF PPG data" );
+	       NADC_ERROR( NADC_ERR_NONE, "no SDMF PPG data" );
 
 	  if ( (fileParam->calibFlag & DO_FIXED_PPG) != UINT_ZERO ) {
 	       SCIA_SET_FIXED_PPG( ppg_fact );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "PPG_FIXED" );
+		    NADC_RETURN_ERROR( NADC_ERR_FATAL, "PPG_FIXED" );
 	  }
      }
 /*

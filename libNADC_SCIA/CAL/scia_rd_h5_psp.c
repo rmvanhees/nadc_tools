@@ -67,8 +67,6 @@
 -------------------------*/
 unsigned short SCIA_RD_H5_PSPN( /*@out@*/ struct pspn_scia **pspn_out )
 {
-     const char prognm[] = "SCIA_RD_H5_PSPN";
-
      unsigned short num_psp = 0;
 
      register hsize_t ni;
@@ -97,29 +95,29 @@ unsigned short SCIA_RD_H5_PSPN( /*@out@*/ struct pspn_scia **pspn_out )
                            "%s/psp_patch.h5", DATA_DIR );
           file_id = H5Fopen( psp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, psp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, psp_file );
      }
 /*
  * open group /PSPN
  */
      if ( (grp_id = H5Gopen( file_id, "/PSPN", H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/PSPN" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/PSPN" );
 /*
  * read data from HDF5-file into pspn structs
  */
      (void) H5LTget_dataset_info( grp_id, "elevation", dims, class_id, tsize );
      ang_esm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_esm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_esm");
+     if ( ang_esm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_esm");
      (void) H5LTread_dataset_float( grp_id, "elevation", ang_esm );
 
      (void) H5LTget_dataset_info( grp_id, "mu2", dims, class_id, tsize );
      mu2 = (float *) malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
-     if ( mu2 == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mu2" );
+     if ( mu2 == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mu2" );
      (void) H5LTread_dataset_float( grp_id, "mu2", mu2 );
 
      (void) H5LTget_dataset_info( grp_id, "mu3", dims, class_id, tsize );
      mu3 = (float *) malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
-     if ( mu3 == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mu3" );
+     if ( mu3 == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mu3" );
      (void) H5LTread_dataset_float( grp_id, "mu3", mu3 );
 
      if ( ! Use_Extern_Alloc ) {
@@ -127,7 +125,7 @@ unsigned short SCIA_RD_H5_PSPN( /*@out@*/ struct pspn_scia **pspn_out )
 	       malloc( (size_t) dims[0] * sizeof(struct pspn_scia));
      }
      if ( (pspn = pspn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspn" );
 
      for ( offs = 0, ni = 0; ni < dims[0]; ni++ ) {
 	  pspn[ni].ang_esm = ang_esm[ni];
@@ -143,7 +141,7 @@ unsigned short SCIA_RD_H5_PSPN( /*@out@*/ struct pspn_scia **pspn_out )
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
                  "\n\tapplied auxiliary Polarization Sensitivity Parameters" );
  done:
      if ( grp_id >= 0 ) (void) H5Gclose( grp_id );
@@ -166,8 +164,6 @@ unsigned short SCIA_RD_H5_PSPN( /*@out@*/ struct pspn_scia **pspn_out )
 -------------------------*/
 unsigned short SCIA_RD_H5_PSPL( /*@out@*/ struct psplo_scia **pspl_out )
 {
-     const char prognm[] = "SCIA_RD_H5_PSPL";
-
      unsigned short num_psp = 0;
 
      register hsize_t ni;
@@ -196,34 +192,34 @@ unsigned short SCIA_RD_H5_PSPL( /*@out@*/ struct psplo_scia **pspl_out )
                            "%s/psp_patch.h5", DATA_DIR );
           file_id = H5Fopen( psp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, psp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, psp_file );
      }
 /*
  * open group /PSPL
  */
      if ( (grp_id = H5Gopen( file_id, "/PSPL", H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/PSPL" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/PSPL" );
 /*
  * read data from HDF5-file into pspl structs
  */
      (void) H5LTget_dataset_info( grp_id, "azimuth", dims, class_id, tsize );
      ang_asm = (float *) malloc( (size_t) dims[0] * sizeof(float));
-     if ( ang_asm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_asm");
+     if ( ang_asm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_asm");
      (void) H5LTread_dataset_float( grp_id, "azimuth", ang_asm );
 
      (void) H5LTget_dataset_info( grp_id, "elevation", dims, class_id, tsize );
      ang_esm = (float *) malloc( (size_t) dims[0] * sizeof(float));
-     if ( ang_esm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_esm");
+     if ( ang_esm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_esm");
      (void) H5LTread_dataset_float( grp_id, "elevation", ang_esm );
 
      (void) H5LTget_dataset_info( grp_id, "mu2", dims, class_id, tsize );
      mu2 = (float *) malloc( (size_t) (dims[0] * dims[1]) * sizeof(float));
-     if ( mu2 == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mu2" );
+     if ( mu2 == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mu2" );
      (void) H5LTread_dataset_float( grp_id, "mu2", mu2 );
 
      (void) H5LTget_dataset_info( grp_id, "mu3", dims, class_id, tsize );
      mu3 = (float *) malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
-     if ( mu3 == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mu3" );
+     if ( mu3 == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mu3" );
      (void) H5LTread_dataset_float( grp_id, "mu3", mu3 );
 
      if ( ! Use_Extern_Alloc ) {
@@ -231,7 +227,7 @@ unsigned short SCIA_RD_H5_PSPL( /*@out@*/ struct psplo_scia **pspl_out )
 	       malloc( (size_t) dims[0] * sizeof(struct psplo_scia));
      }
      if ( (pspl = pspl_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspl" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspl" );
      for ( offs = 0, ni = 0; ni < dims[0]; ni++ ) {
 	  pspl[ni].ang_asm = ang_asm[ni];
 	  pspl[ni].ang_esm = ang_esm[ni];
@@ -248,7 +244,7 @@ unsigned short SCIA_RD_H5_PSPL( /*@out@*/ struct psplo_scia **pspl_out )
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE,
+     NADC_ERROR( NADC_ERR_NONE,
                  "\n\tapplied auxiliary Polarization Sensitivity Parameters" );
  done:
      if ( grp_id >= 0 ) (void) H5Gclose( grp_id );
@@ -271,8 +267,6 @@ unsigned short SCIA_RD_H5_PSPL( /*@out@*/ struct psplo_scia **pspl_out )
 -------------------------*/
 unsigned short SCIA_RD_H5_PSPO( /*@out@*/ struct psplo_scia **pspo_out )
 {
-     const char prognm[] = "SCIA_RD_H5_PSPO";
-
      unsigned short num_psp = 0;
 
      register hsize_t ni;
@@ -301,34 +295,34 @@ unsigned short SCIA_RD_H5_PSPO( /*@out@*/ struct psplo_scia **pspo_out )
                            "%s/psp_patch.h5", DATA_DIR );
           file_id = H5Fopen( psp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, psp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, psp_file );
      }
 /*
  * open group /PSPO
  */
      if ( (grp_id = H5Gopen( file_id, "/PSPO", H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/PSPO" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/PSPO" );
 /*
  * read data from HDF5-file into pspo structs
  */
      (void) H5LTget_dataset_info( grp_id, "azimuth", dims, class_id, tsize );
      ang_asm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_asm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_asm");
+     if ( ang_asm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_asm");
      (void) H5LTread_dataset_float( grp_id, "azimuth", ang_asm );
 
      (void) H5LTget_dataset_info( grp_id, "elevation", dims, class_id, tsize );
      ang_esm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_esm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_esm");
+     if ( ang_esm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_esm");
      (void) H5LTread_dataset_float( grp_id, "elevation", ang_esm );
 
      (void) H5LTget_dataset_info( grp_id, "mu2", dims,class_id,tsize );
      mu2 = (float *) malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
-     if ( mu2 == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mu2" );
+     if ( mu2 == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mu2" );
      (void) H5LTread_dataset_float( grp_id, "mu2", mu2 );
 
      (void) H5LTget_dataset_info( grp_id, "mu3", dims,class_id,tsize );
      mu3 = (float *) malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
-     if ( mu3 == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mu3" );
+     if ( mu3 == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mu3" );
      (void) H5LTread_dataset_float( grp_id, "mu3", mu3 );
 
      if ( ! Use_Extern_Alloc ) {
@@ -336,7 +330,7 @@ unsigned short SCIA_RD_H5_PSPO( /*@out@*/ struct psplo_scia **pspo_out )
 	       malloc( (size_t) dims[0] * sizeof(struct psplo_scia));
      }
      if ( (pspo = pspo_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspo" );
      for ( offs = 0, ni = 0; ni < dims[0]; ni++ ) {
 	  pspo[ni].ang_asm = ang_asm[ni];
 	  pspo[ni].ang_esm = ang_esm[ni];
@@ -353,7 +347,7 @@ unsigned short SCIA_RD_H5_PSPO( /*@out@*/ struct psplo_scia **pspo_out )
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
                  "\n\tapplied auxiliary Polarization Sensitivity Parameters" );
  done:
      if ( grp_id >= 0 ) (void) H5Gclose( grp_id );

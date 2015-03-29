@@ -80,8 +80,6 @@ unsigned int SCIA_LV1_WR_GeoN( unsigned short num_geo,
      /*@globals  errno@*/
      /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_GeoN";
-
      unsigned int nr_byte = 0u;
 
      const size_t sz_coord_envi = sizeof(struct coord_envi);
@@ -89,34 +87,34 @@ unsigned int SCIA_LV1_WR_GeoN( unsigned short num_geo,
      register unsigned short ng = 0;
      do {
 	  if ( fwrite( &geoN->pos_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( geoN->sun_zen_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( geoN->sun_azi_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( geoN->los_zen_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( geoN->los_azi_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( &geoN->sat_h, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoN->earth_rad, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoN->sub_sat_point, sz_coord_envi, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += sz_coord_envi;
 	  if ( fwrite(geoN->corner, sz_coord_envi * NUM_CORNERS, 1, fd) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += NUM_CORNERS * sz_coord_envi;
 	  if ( fwrite( &geoN->center, sz_coord_envi, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += sz_coord_envi;
      } while ( geoN++, ++ng < num_geo );
  done:
@@ -142,8 +140,6 @@ unsigned int SCIA_LV1_WR_GeoL( unsigned short num_geo,
      /*@globals  errno@*/
      /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_GeoL";
-
      unsigned int nr_byte = 0u;
 
      const size_t sz_coord_envi = sizeof(struct coord_envi);
@@ -151,40 +147,40 @@ unsigned int SCIA_LV1_WR_GeoL( unsigned short num_geo,
      register unsigned short ng = 0;
      do {
 	  if ( fwrite( &geoL->pos_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoL->pos_asm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( geoL->sun_zen_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( geoL->sun_azi_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( geoL->los_zen_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( geoL->los_azi_ang, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( &geoL->sat_h, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoL->earth_rad, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoL->sub_sat_point, sz_coord_envi, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += sz_coord_envi;
 	  if ( fwrite( geoL->tang_ground_point, sz_coord_envi, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * sz_coord_envi;
 	  if ( fwrite( geoL->tan_h, ENVI_FLOAT, 3, fd ) != 3 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 3 * ENVI_FLOAT;
 	  if ( fwrite( &geoL->dopp_shift, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
      } while ( geoL++, ++ng < num_geo );
  done:
@@ -210,8 +206,6 @@ unsigned int SCIA_LV1_WR_GeoC( unsigned short num_geo,
      /*@globals  errno@*/
      /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_GeoC";
-
      unsigned int nr_byte = 0u;
 
      const size_t sz_coord_envi = sizeof(struct coord_envi);
@@ -219,16 +213,16 @@ unsigned int SCIA_LV1_WR_GeoC( unsigned short num_geo,
      register unsigned short ng = 0;
      do {
 	  if ( fwrite( &geoC->pos_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoC->pos_asm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoC->sun_zen_ang, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &geoC->sub_sat_point, sz_coord_envi, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += sz_coord_envi;
      } while ( geoC++, ++ng < num_geo );
  done:
@@ -254,62 +248,60 @@ unsigned int SCIA_LV1_WR_LV0Hdr( unsigned short num_lv0hdr,
      /*@globals  errno@*/
      /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_LV0Hdr";
-
      unsigned int nr_byte = 0u;
 
      unsigned short nl = 0;
      do {
 	  if ( fwrite(&lv0->packet_hdr.api.two_byte, ENVI_USHRT, 1, fd) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->packet_hdr.seq_cntrl, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->packet_hdr.length, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->data_hdr.length, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->data_hdr.category, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_UCHAR;
 	  if ( fwrite( &lv0->data_hdr.state_id, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_UCHAR;
 	  if ( fwrite( &lv0->data_hdr.on_board_time, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_UINT;
 	  if ( fwrite( &lv0->data_hdr.rdv.two_byte, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->data_hdr.id.two_byte, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->bcps, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite(&lv0->pmtc_hdr.pmtc_1.two_byte, ENVI_USHRT, 1, fd) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite( &lv0->pmtc_hdr.scanner_mode, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
 	  if ( fwrite(&lv0->pmtc_hdr.az_param.four_byte, ENVI_UINT, 1, fd) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_UINT;
 	  if ( fwrite(&lv0->pmtc_hdr.elv_param.four_byte, ENVI_UINT, 1, fd) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_UINT;
 	  if ( fwrite( lv0->pmtc_hdr.factor, 6 * ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 6 * ENVI_UCHAR;
 	  if ( fwrite( lv0->orbit_vector, 8 * ENVI_INT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += 8 * ENVI_INT;
 	  if ( fwrite( &lv0->num_chan, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_USHRT;
      } while( lv0++, ++nl < num_lv0hdr );
  done:
@@ -335,35 +327,33 @@ unsigned int SCIA_LV1_WR_PolV( unsigned short num_polV,
      /*@globals  errno@*/
      /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_PolV";
-
      unsigned int nr_byte = 0u;
 
      register unsigned short np = 0;
      do {
 	  if ( fwrite( polV->Q, ENVI_FLOAT * NUM_FRAC_POLV, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += NUM_FRAC_POLV * ENVI_FLOAT;
 	  if ( fwrite( polV->error_Q, ENVI_FLOAT * NUM_FRAC_POLV, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += NUM_FRAC_POLV * ENVI_FLOAT;
 	  if ( fwrite( polV->U, ENVI_FLOAT * NUM_FRAC_POLV, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += NUM_FRAC_POLV * ENVI_FLOAT;
 	  if ( fwrite( polV->error_U, ENVI_FLOAT * NUM_FRAC_POLV, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += NUM_FRAC_POLV * ENVI_FLOAT;
 	  if ( fwrite(polV->rep_wv, ENVI_FLOAT * (NUM_FRAC_POLV+1), 1, fd) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += (NUM_FRAC_POLV+1) * ENVI_FLOAT;
 	  if ( fwrite( &polV->gdf.p_bar, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &polV->gdf.beta, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
 	  if ( fwrite( &polV->gdf.w0, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += ENVI_FLOAT;
      } while ( polV++, ++np < num_polV );
  done:
@@ -387,8 +377,6 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
        /*@globals  errno, nadc_stat, nadc_err_stack, source;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_ONE_MDS";
-
      register unsigned short na, nc;
      register unsigned int   nr;
 
@@ -420,44 +408,44 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
      mjd.secnd = byte_swap_u32( mds->mjd.secnd );
      mjd.musec = byte_swap_u32( mds->mjd.musec );	  
      if ( fwrite( &mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 #else
      if ( fwrite( &mds->mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      nr_byte += sizeof( struct mjd_envi );
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      ubuff = byte_swap_u32( mds->dsr_length );
      if ( fwrite( &ubuff, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 #else
      if ( fwrite( &mds->dsr_length, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      nr_byte += ENVI_UINT;
 
      if ( fwrite( &mds->quality_flag, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_CHAR;
 /*
  * write scale factor [SCIENCE_CHANNELS]
  */
      if ( fwrite( mds->scale_factor, SCIENCE_CHANNELS, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += SCIENCE_CHANNELS;
 /*
  * write satellite flags
  */
      if ( fwrite( mds->sat_flags, (size_t) mds->n_aux, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += mds->n_aux;
 /*
  * write red grass flags
  */
      nmemb = (size_t) mds->n_clus * mds->n_aux;
      if ( fwrite( mds->red_grass, nmemb, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += nmemb;
 /*
  * write Sun glint flags
@@ -468,7 +456,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
  */
 	  glint_flags = (unsigned char *) malloc( (size_t) mds->n_aux );
 	  if ( glint_flags == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "glint_flags" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "glint_flags" );
 
 	  if ( source == SCIA_NADIR ) {
 	       na = 0;
@@ -482,7 +470,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 	       } while ( ++na < mds->n_aux );
 	  }
 	  if ( fwrite( glint_flags, (size_t) mds->n_aux, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  nr_byte += mds->n_aux;
 
 	  free( glint_flags );
@@ -495,7 +483,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  byte_size = (size_t) mds->n_aux * sizeof( struct geoN_scia );
 	  if ( (geoN = (struct geoN_scia *) malloc( byte_size )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  (void) memcpy( geoN, mds->geoN, byte_size );
 	  for ( ni = 0; ni < mds->n_aux; ni++ ) Sun2Intel_GeoN( &geoN[ni] );
 	  nr_byte += SCIA_LV1_WR_GeoN( mds->n_aux, geoN, fd );
@@ -509,7 +497,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  byte_size = (size_t) mds->n_aux * sizeof( struct geoL_scia );
 	  if ( (geoL = (struct geoL_scia *) malloc( byte_size )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  (void) memcpy( geoL, mds->geoL, byte_size );
 	  for ( ni = 0; ni < mds->n_aux; ni++ )
 	       Sun2Intel_GeoL( &geoL[ni] );
@@ -523,7 +511,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  byte_size = (size_t) mds->n_aux * sizeof( struct geoC_scia );
 	  if ( (geoC = (struct geoC_scia *) malloc( byte_size )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoC" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoC" );
 	  (void) memcpy( geoC, mds->geoC, byte_size );
 	  for ( ni = 0; ni < mds->n_aux; ni++ ) Sun2Intel_GeoC( &geoC[ni] );
 	  nr_byte += SCIA_LV1_WR_GeoC( mds->n_aux, geoC, fd );
@@ -540,7 +528,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  byte_size = (size_t) mds->n_aux * sizeof( struct lv0_hdr );
 	  if ( (lv0 = (struct lv0_hdr *) malloc( byte_size )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lv0" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lv0" );
 	  (void) memcpy( lv0, mds->lv0, byte_size );
 	  for ( ni = 0; ni < mds->n_aux; ni++ ) Sun2Intel_LV0Hdr( &lv0[ni] );
 	  nr_byte += SCIA_LV1_WR_LV0Hdr( mds->n_aux, lv0, fd );
@@ -556,15 +544,15 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  byte_size = mds->n_pmd * ENVI_FLOAT;
 	  if ( (rbuff = (float *) malloc( byte_size )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
 	  (void) memcpy( rbuff, mds->int_pmd, byte_size );
 	  for ( ni = 0; ni < mds->n_pmd; ni++ ) IEEE_Swap__FLT( &rbuff[ni] );
 	  if ( fwrite( rbuff, (size_t) mds->n_pmd * ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 	  free( rbuff );
 #else
 	  if ( fwrite( mds->int_pmd, ENVI_FLOAT * mds->n_pmd, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
 	  nr_byte += mds->n_pmd * ENVI_FLOAT;
      }
@@ -575,7 +563,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  byte_size = mds->n_pol * sizeof( struct polV_scia );
 	  if ( (polV = (struct polV_scia *) malloc( byte_size )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "polV" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "polV" );
 	  (void) memcpy( polV, mds->polV, byte_size );
 	  for ( ni = 0; ni < mds->n_pol; ni++ ) 
 	       Sun2Intel_polV( &polV[ni] );
@@ -594,17 +582,17 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 	       nr = 0;
 	       do {
 		    if ( fwrite( &mds->clus[nc].sig[nr].corr, ENVI_CHAR, 1, fd ) != 1 )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 		    nr_byte += ENVI_CHAR;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 		    mds->clus[nc].sig[nr].sign = 
 			 byte_swap_u16( mds->clus[nc].sig[nr].sign );
 #endif
 		    if ( fwrite( &mds->clus[nc].sig[nr].sign, ENVI_USHRT, 1, fd ) != 1 )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 		    nr_byte += ENVI_USHRT;		    
 		    if ( fwrite( &mds->clus[nc].sig[nr].stray, ENVI_CHAR, 1, fd ) != 1 )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 		    nr_byte += ENVI_CHAR;
 	       } while ( ++nr < mds->clus[nc].n_sig );
 	  } else if ( mds->clus[nc].n_sigc > 0u ) {
@@ -616,10 +604,10 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
 			      mds->clus[nc].sigc[nr].det.four_byte );
 #endif
 		    if ( fwrite( &mds->clus[nc].sigc[nr].det.four_byte, ENVI_UINT, 1, fd ) != 1 )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 		    nr_byte += ENVI_UINT;
 		    if ( fwrite( &mds->clus[nc].sigc[nr].stray, ENVI_CHAR, 1, fd ) != 1 )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 		    nr_byte += ENVI_CHAR;
 	       } while ( ++nr < mds->clus[nc].n_sigc );
 	  }
@@ -628,7 +616,7 @@ unsigned int SCIA_LV1_WR_ONE_MDS( FILE *fd, const struct mds1_scia *mds )
  * check written bytes against DSR length
  */
      if ( nr_byte != mds->dsr_length )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "MDS(1b)"  );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "MDS(1b)"  );
  done:
      return nr_byte;
 }
@@ -653,8 +641,6 @@ void SCIA_LV1_WR_MDS( FILE *fd, unsigned int num_mds,
      /*@globals  errno, nadc_stat, nadc_err_stack, source;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fd, source@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_MDS";
-
      struct dsd_envi dsd = {
           "", "M",
           "                                                              ",
@@ -691,7 +677,7 @@ void SCIA_LV1_WR_MDS( FILE *fd, unsigned int num_mds,
      do {
 	  dsd.size += SCIA_LV1_WR_ONE_MDS( fd, mds );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "ONE_MDS" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "ONE_MDS" );
 	  mds++;
      } while ( ++dsd.num_dsr < num_mds );
 /*
@@ -719,8 +705,6 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
      /*@globals  errno, nadc_stat, nadc_err_stack, source;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fd, source@*/
 {
-     const char prognm[] = "SCIA_LV1C_WR_MDS";
-
      register unsigned short ni;
      register unsigned int   bytes_written;
 
@@ -785,25 +769,25 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  mjd.secnd = byte_swap_u32( mds->mjd.secnd );
 	  mjd.musec = byte_swap_u32( mds->mjd.musec );	  
 	  if ( fwrite( &mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #else
 	  if ( fwrite( &mds->mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
 	  bytes_written += sizeof( struct mjd_envi );
 /* 2 */
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  ubuff = byte_swap_u32( mds->dsr_length );
 	  if ( fwrite( &ubuff, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #else
 	  if ( fwrite( &mds->dsr_length, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
 	  bytes_written += ENVI_UINT;
 /* 3 */
 	  if ( fwrite( &mds->quality_flag, ENVI_CHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_CHAR;
 /* 4 */
 	  rbuff = mds->orbit_phase; 
@@ -811,7 +795,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  IEEE_Swap__FLT( &rbuff );
 #endif
 	  if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_FLOAT;
 /* 5 */
 	  usbuff = (unsigned short) mds->category;
@@ -819,7 +803,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  usbuff = byte_swap_u16( usbuff );
 #endif
 	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_USHRT;
 /* 6 */
 	  usbuff = (unsigned short) mds->state_id;
@@ -827,7 +811,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  usbuff = byte_swap_u16( usbuff );
 #endif
 	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_USHRT;
 /* 7 */
 	  usbuff = (unsigned short) mds->clus_id;
@@ -835,7 +819,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  usbuff = byte_swap_u16( usbuff );
 #endif
 	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_USHRT;
 /* 8 */
 	  usbuff = (unsigned short) mds->num_obs;
@@ -843,7 +827,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  usbuff = byte_swap_u16( usbuff );
 #endif
 	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_USHRT;
 /* 9 */
 	  usbuff = (unsigned short) mds->num_pixels;
@@ -851,17 +835,17 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  usbuff = byte_swap_u16( usbuff );
 #endif
 	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  bytes_written += ENVI_USHRT;
 /* 10 */
 	  if ( fwrite( &mds->rad_units_flag, ENVI_CHAR, 1 , fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 
 	  bytes_written += ENVI_CHAR;
 /* 11 */
 	  nr_byte = (size_t) mds->num_pixels * ENVI_USHRT;
 	  if ( (utemp = (unsigned short *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "utemp" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "utemp" );
 	  for ( ni = 0; ni < mds->num_pixels; ni++ ) {
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       utemp[ni] = byte_swap_u16( mds->pixel_ids[ni] % CHANNEL_SIZE );
@@ -871,7 +855,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	  }
 	  if ( fwrite( utemp, nr_byte, 1, fd ) != 1 ) {
 	       free( utemp );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  }
 	  bytes_written += nr_byte;
 	  free( utemp );
@@ -879,25 +863,25 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  nr_byte = (size_t) mds->num_pixels * ENVI_FLOAT;
 	  if ( (rtemp = (float *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rtemp" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rtemp" );
 	  for ( ni = 0; ni < mds->num_pixels; ni++ ) {
 	       rtemp[ni] = mds->pixel_wv[ni];
 	       IEEE_Swap__FLT( &rtemp[ni] );
 	  }
 	  if ( fwrite( rtemp, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  for ( ni = 0; ni < mds->num_pixels; ni++ ) {
 	       rtemp[ni] = mds->pixel_wv_err[ni];
 	       IEEE_Swap__FLT( &rtemp[ni] );
 	  }
 	  if ( fwrite( rtemp, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  free( rtemp );
 #else
 	  if ( fwrite( mds->pixel_wv, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" ) 
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" ) 
 	  if ( fwrite( mds->pixel_wv_err, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" ) 
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" ) 
 #endif
 	  bytes_written += 2 * mds->num_pixels * ENVI_FLOAT;
 /* 14 & 15 */
@@ -905,14 +889,14 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  nr_byte = nr_memb * ENVI_FLOAT;
 	  if ( (rtemp = (float *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rtemp" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rtemp" );
 	  nm = 0;
 	  do {
 	       rtemp[nm] = mds->pixel_val[nm];
 	       IEEE_Swap__FLT( &rtemp[nm] );
 	  } while ( ++nm < nr_memb );
 	  if ( fwrite( rtemp, ENVI_FLOAT, nr_memb, fd ) != nr_memb )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 
 	  nm = 0;
 	  do { 
@@ -920,13 +904,13 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 	       IEEE_Swap__FLT( &rtemp[nm] );
 	  } while ( ++nm < nr_memb );
 	  if ( fwrite( rtemp, ENVI_FLOAT, nr_memb, fd ) != nr_memb )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  free( rtemp );
 #else
 	  if ( fwrite( mds->pixel_val, nr_memb * ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  if ( fwrite( mds->pixel_err, nr_memb * ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
 	  bytes_written += 2 * nr_memb * ENVI_FLOAT;
 /* 16 */
@@ -935,7 +919,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       nr_byte = mds->num_obs * sizeof( struct geoN_scia );
 	       if ( (geoN = (struct geoN_scia *) malloc( nr_byte )) == NULL ) 
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+		    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoN" );
 	       (void) memcpy( geoN, mds->geoN, nr_byte );
 	       for ( ni = 0; ni < mds->num_obs; ni++ )
 		    Sun2Intel_GeoN( &geoN[ni] );
@@ -950,7 +934,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       nr_byte = mds->num_obs * sizeof( struct geoL_scia );
 	       if ( (geoL = (struct geoL_scia *) malloc( nr_byte )) == NULL ) 
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+		    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoL" );
 	       (void) memcpy( geoL, mds->geoL, nr_byte );
 	       for ( ni = 0; ni < mds->num_obs; ni++ )
 		    Sun2Intel_GeoL( &geoL[ni] );
@@ -964,7 +948,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       nr_byte = mds->num_obs * sizeof( struct geoC_scia );
 	       if ( (geoC = (struct geoC_scia *) malloc( nr_byte )) == NULL ) 
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoC" );
+		    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoC" );
 	       (void) memcpy( geoC, mds->geoC, nr_byte );
 	       for ( ni = 0; ni < mds->num_obs; ni++ )
 		    Sun2Intel_GeoC( &geoC[ni] );
@@ -979,7 +963,7 @@ void SCIA_LV1C_WR_MDS( FILE *fd, unsigned int num_mds,
  * check written bytes against DSR length
  */
 	  if ( bytes_written != mds->dsr_length )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "MDS(1c)"  );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "MDS(1c)"  );
 
 	  dsd.size += bytes_written;
 	  mds++;
@@ -1007,8 +991,6 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      /*@globals  errno, nadc_stat, nadc_err_stack, source;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fd, source@*/
 {
-     const char prognm[] = "SCIA_LV1C_WR_MDS_PMD";
-
      register unsigned int bytes_written;
 
      size_t         nr_byte;
@@ -1067,10 +1049,10 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      mjd.secnd = byte_swap_u32( pmd->mjd.secnd );
      mjd.musec = byte_swap_u32( pmd->mjd.musec );	  
      if ( fwrite( &mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #else
      if ( fwrite( &pmd->mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      bytes_written += sizeof( struct mjd_envi );   
 /* 2 */
@@ -1079,11 +1061,11 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      ubuff = byte_swap_u32( ubuff );
 #endif
      if ( fwrite( &ubuff, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_UINT;   
 /* 3 */
      if ( fwrite( &pmd->quality_flag, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_CHAR;   
 /* 4 */
      rbuff = pmd->orbit_phase; 
@@ -1091,7 +1073,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      IEEE_Swap__FLT( &rbuff );
 #endif
      if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_FLOAT;   
 /* 5 */
      usbuff = (unsigned short) pmd->category;
@@ -1099,7 +1081,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;   
 /* 6 */
      usbuff = (unsigned short) pmd->state_id;
@@ -1107,7 +1089,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;   
 /* 7 */
      usbuff = (unsigned short) pmd->dur_scan;
@@ -1115,7 +1097,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;   
 /* 8 */
      usbuff = (unsigned short) pmd->num_pmd;
@@ -1123,7 +1105,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;   
 /* 9 */
      usbuff = (unsigned short) pmd->num_geo;
@@ -1131,23 +1113,23 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;   
 /* 10 */
      nr_byte = (size_t) pmd->num_pmd * ENVI_FLOAT;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      if ( (rtemp = (float *) malloc( nr_byte )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rtemp" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rtemp" );
      for ( ni = 0; ni < pmd->num_pmd; ni++ ) {
 	  rtemp[ni] = pmd->int_pmd[ni];
 	  IEEE_Swap__FLT( &rtemp[ni] );
      }
      if ( fwrite( rtemp, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      free( rtemp );
 #else
      if ( fwrite( pmd->int_pmd, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      bytes_written += pmd->num_pmd * ENVI_FLOAT;   
 /* 11 */
@@ -1156,7 +1138,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  nr_byte = pmd->num_geo * sizeof( struct geoN_scia );
 	  if ( (geoN = (struct geoN_scia *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  (void) memcpy( geoN, pmd->geoN, nr_byte );
 	  for ( ni = 0; ni < pmd->num_geo; ni++ )
 	       Sun2Intel_GeoN( &geoN[ni] );
@@ -1171,7 +1153,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  nr_byte = pmd->num_geo * sizeof( struct geoL_scia );
 	  if ( (geoL = (struct geoL_scia *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  (void) memcpy( geoL, pmd->geoL, nr_byte );
 	  for ( ni = 0; ni < pmd->num_geo; ni++ )
 	       Sun2Intel_GeoL( &geoL[ni] );
@@ -1186,7 +1168,7 @@ void SCIA_LV1C_WR_MDS_PMD( FILE *fd, const struct mds1c_pmd *pmd )
  * check written bytes against DSR length
  */
      if ( bytes_written != pmd->dsr_length )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "MDS(1b)"  );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "MDS(1b)"  );
 /*
  * update list of written DSD records
  */
@@ -1212,8 +1194,6 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      /*@globals  errno, nadc_stat, nadc_err_stack, source;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fd, source@*/
 {
-     const char prognm[] = "SCIA_LV1C_WR_MDS_POLV";
-
      register unsigned int bytes_written;
 
      unsigned short usbuff;
@@ -1273,10 +1253,10 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      mjd.secnd = byte_swap_u32( polV->mjd.secnd );
      mjd.musec = byte_swap_u32( polV->mjd.musec );	  
      if ( fwrite( &mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #else
      if ( fwrite( &polV->mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      bytes_written += sizeof( struct mjd_envi );
 /* 2 */
@@ -1285,11 +1265,11 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      ubuff = byte_swap_u32( ubuff );
 #endif
      if ( fwrite( &ubuff, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_UINT;
 /* 3 */
      if ( fwrite( &polV->quality_flag, ENVI_CHAR, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_CHAR;
 /* 4 */
      rbuff = polV->orbit_phase; 
@@ -1297,7 +1277,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      IEEE_Swap__FLT( &rbuff );
 #endif
      if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_FLOAT;
 /* 5 */
      usbuff = (unsigned short) polV->category;
@@ -1305,7 +1285,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;
 /* 6 */
      usbuff = (unsigned short) polV->state_id;
@@ -1313,7 +1293,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;
 /* 7 */
      usbuff = (unsigned short) polV->dur_scan;
@@ -1321,7 +1301,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;
 /* 8 */
      usbuff = (unsigned short) polV->num_geo;
@@ -1329,7 +1309,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;
 /* 9 */
      usbuff = (unsigned short) polV->total_polV;
@@ -1337,7 +1317,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;
 /* 10 */
      usbuff = (unsigned short) polV->num_diff_intg;
@@ -1345,20 +1325,20 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      usbuff = byte_swap_u16( usbuff );
 #endif
      if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      bytes_written += ENVI_USHRT;
 /* 11 */
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      utemp = (unsigned short *) calloc( MAX_CLUSTER, ENVI_USHRT );
      if ( utemp == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "utemp" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "utemp" );
      for ( ni = 0; ni < polV->num_diff_intg; ni++ )
 	  utemp[ni] = byte_swap_u16( polV->intg_times[ni] );
      if ( fwrite( utemp, (size_t) MAX_CLUSTER * ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #else
      if ( fwrite( polV->intg_times, MAX_CLUSTER * ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      bytes_written += MAX_CLUSTER * ENVI_USHRT;
 /* 12 */
@@ -1366,18 +1346,18 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
      for ( ni = 0; ni < polV->num_diff_intg; ni++ )
 	  utemp[ni] = byte_swap_u16( polV->num_polar[ni] );
      if ( fwrite( utemp, (size_t) MAX_CLUSTER * ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      free( utemp );
 #else
      if ( fwrite( polV->num_polar, (size_t) MAX_CLUSTER * ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 #endif
      bytes_written += MAX_CLUSTER * ENVI_USHRT;
 /* 13 */
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      nr_byte = polV->total_polV * sizeof( struct polV_scia );
      if ( (polval = (struct polV_scia *) malloc( nr_byte )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "polval" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "polval" );
      (void) memcpy( polval, polV->polV, nr_byte );
      for ( ni = 0; ni < polV->total_polV; ni++ )
 	  Sun2Intel_polV( polval + ni );
@@ -1392,7 +1372,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  nr_byte = polV->num_geo * sizeof( struct geoN_scia );
 	  if ( (geoN = (struct geoN_scia *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  (void) memcpy( geoN, polV->geoN, nr_byte );
 	  for ( ni = 0; ni < polV->num_geo; ni++ )
 	       Sun2Intel_GeoN( &geoN[ni] );
@@ -1408,7 +1388,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  nr_byte = polV->num_geo * sizeof( struct geoL_scia );
 	  if ( (geoL = (struct geoL_scia *) malloc( nr_byte )) == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  (void) memcpy( geoL, polV->geoL, nr_byte );
 	  for ( ni = 0; ni < polV->num_geo; ni++ )
 	       Sun2Intel_GeoL( &geoL[ni] );
@@ -1424,7 +1404,7 @@ void SCIA_LV1C_WR_MDS_POLV( FILE *fd, const struct mds1c_polV *polV )
  * check written bytes against DSR length
  */
      if ( bytes_written != polV->dsr_length )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "MDS(1b)"  );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "MDS(1b)"  );
 /*
  * update list of written DSD records
  */

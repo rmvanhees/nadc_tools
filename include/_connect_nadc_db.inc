@@ -15,8 +15,6 @@ void CONNECT_NADC_DB( PGconn **conn, const char *database )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, conn@*/
 {
-     const char prognm[] = "CONNECT_NADC_DB";
-
      char conninfo[MAX_STRING_LENGTH];
 
      char xml_db_host[SHORT_STRING_LENGTH];
@@ -48,7 +46,7 @@ void CONNECT_NADC_DB( PGconn **conn, const char *database )
 	       (void) snprintf( config_file, MAX_STRING_LENGTH,
 				"%s/nadc.config.xml", user_home );
 	       if ( (fp = fopen( config_file, "r" )) == NULL )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, config_file );
+		    NADC_RETURN_ERROR( NADC_ERR_FILE, config_file );
 	  }
 	  NADC_GET_XML_METADB( fp, xml_db_host, xml_db_port, 
 			       xml_db_user, xml_db_pass );
@@ -85,6 +83,6 @@ void CONNECT_NADC_DB( PGconn **conn, const char *database )
 
      *conn = PQconnectdb( conninfo );
      if ( PQstatus( *conn ) != CONNECTION_OK ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_SQL, PQerrorMessage(*conn) );
+	  NADC_RETURN_ERROR( NADC_ERR_SQL, PQerrorMessage(*conn) );
 }
 #endif /* LIBPQ_FE_H */

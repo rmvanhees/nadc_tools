@@ -67,8 +67,6 @@ unsigned int GET_SCIA_LV1C_POLV( const struct state1_scia *state,
 				 const struct mds1_scia *mds_1b, 
 				 struct mds1c_polV *mds_polV )
 {
-     const char prognm[] = "GET_SCIA_LV1C_POLV";
-
      register unsigned short nr;
      register unsigned short n_pol_intg, indx_pol_1b, indx_pol_1c;
      register unsigned int   ni;
@@ -111,8 +109,7 @@ unsigned int GET_SCIA_LV1C_POLV( const struct state1_scia *state,
  */
      mds_polV->polV = (struct polV_scia *)
 	  malloc(mds_polV->total_polV * sizeof(struct polV_scia));
-     if ( mds_polV->polV == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "polV" );
+     if ( mds_polV->polV == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "polV" );
      switch ( (int) mds_1b->type_mds ) {
      case SCIA_NADIR:
 	  mds_polV->dsr_length = 289u +
@@ -121,7 +118,7 @@ unsigned int GET_SCIA_LV1C_POLV( const struct state1_scia *state,
 	  mds_polV->geoN = (struct geoN_scia *)
 	       malloc(mds_polV->total_polV * sizeof(struct geoN_scia));
 	  if ( mds_polV->geoN == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 	  break;
      case SCIA_LIMB:
      case SCIA_OCCULT:
@@ -131,7 +128,7 @@ unsigned int GET_SCIA_LV1C_POLV( const struct state1_scia *state,
 	  mds_polV->geoL = (struct geoL_scia *)
 	       malloc(mds_polV->total_polV * sizeof(struct geoL_scia));
 	  if ( mds_polV->geoL == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  break;
      }
 /*

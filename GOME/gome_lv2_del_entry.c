@@ -74,8 +74,6 @@
 void GOME_LV2_DEL_ENTRY( PGconn *conn, const char *flname,
 			 const char *softVersion )
 {
-     const char prognm[] = "GOME_LV2_DEL_ENTRY";
-
      char     sql_query[SQL_STR_SIZE];
 
      char     *cpntr, ctemp[SHORT_STRING_LENGTH];
@@ -97,7 +95,7 @@ void GOME_LV2_DEL_ENTRY( PGconn *conn, const char *flname,
 		      ctemp, softVersion );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  return;
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
@@ -114,6 +112,6 @@ void GOME_LV2_DEL_ENTRY( PGconn *conn, const char *flname,
      (void) snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_META, meta_id );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 }

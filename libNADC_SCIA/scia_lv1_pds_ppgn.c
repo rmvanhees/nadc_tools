@@ -89,8 +89,6 @@ unsigned int SCIA_LV1_RD_PPGN( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct ppgn_scia **ppgn_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_PPGN";
-
      char         *ppgn_pntr, *ppgn_char = NULL;
      size_t       dsr_size, nr_byte;
      unsigned int indx_dsd;
@@ -106,7 +104,7 @@ unsigned int SCIA_LV1_RD_PPGN( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
 	  NADC_ERR_RESTORE();
           ppgn_out[0] = NULL;
@@ -121,12 +119,12 @@ unsigned int SCIA_LV1_RD_PPGN( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct ppgn_scia));
      }
      if ( (ppgn = ppgn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ppgn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ppgn" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (ppgn_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ppgn_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ppgn_char" );
 /*
  * rewind/read input data file
  */
@@ -136,7 +134,7 @@ unsigned int SCIA_LV1_RD_PPGN( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( ppgn_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to PPGN structure
  */
@@ -168,7 +166,7 @@ unsigned int SCIA_LV1_RD_PPGN( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(ppgn_pntr - ppgn_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -203,8 +201,6 @@ unsigned int SCIA_LV1_RD_PPGN( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_PPGN( FILE *fd, unsigned int num_ppgn,
 		       const struct ppgn_scia *ppgn_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_PPGN";
-
      size_t nr_byte;
 
      struct ppgn_scia ppgn;
@@ -232,38 +228,38 @@ void SCIA_LV1_WR_PPGN( FILE *fd, unsigned int num_ppgn,
  * write PPGN structure to file
  */
 	  if ( fwrite( &ppgn.mjd.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 	  if ( fwrite( &ppgn.mjd.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &ppgn.mjd.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &ppgn.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( ppgn.gain_fact, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( ppgn.etalon_fact, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( ppgn.etalon_resid, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( ppgn.avg_wls_spec, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( ppgn.sd_wls_spec, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_UCHAR;
 	  if ( fwrite( ppgn.bad_pixel, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  ppgn_in++;

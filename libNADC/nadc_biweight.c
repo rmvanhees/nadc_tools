@@ -133,8 +133,6 @@ float _MEDIAN( const size_t dim, const float *arr )
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "_MEDIAN";
-
      float med = 0.f;
      float *rbuff;
 
@@ -143,7 +141,7 @@ float _MEDIAN( const size_t dim, const float *arr )
 
      /* initialize working buffer */
      rbuff = (float *) malloc( (dim+1) * sizeof(float) );
-     if ( rbuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
      rbuff[0] = 0;
      (void) memcpy( rbuff+1, arr, dim * sizeof(float) );
 
@@ -180,8 +178,6 @@ float _MAD( const size_t dim, const float *arr, const float med )
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "_MAD";
-
      register size_t ni = 1;
 
      float mad = 0.f;
@@ -191,7 +187,7 @@ float _MAD( const size_t dim, const float *arr, const float med )
 
      /* initialize working buffer */
      rbuff = (float *) malloc( (dim+1) * sizeof(float) );
-     if ( rbuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
      rbuff[0] = 0.f;
      do {
 	  rbuff[ni] = fabsf(*arr - med);

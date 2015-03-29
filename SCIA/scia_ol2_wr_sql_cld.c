@@ -216,8 +216,6 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
 			  const struct ngeo_scia *geo,
 			  const struct cld_sci_ol *cld )
 {
-     const char prognm[] = "SCIA_OL2_WR_SQL_CLD";
-
      register unsigned int nc;
      register unsigned int affectedRows = 0u;
 
@@ -247,10 +245,10 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
 		      META_TBL_NAME, sciafl );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, sciafl );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, sciafl );
      }
      cpntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( cpntr, (char **) NULL, 10 );     
@@ -260,7 +258,7 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * insert all cloud/aerosol records
@@ -275,11 +273,11 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
 			   CHECK_IF_PRESENT, TILE_TBL_NAME, jday );
           res = PQexec( conn, sql_query );
           if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
           } 
@@ -296,7 +294,7 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
 	       res = PQexec( conn,
 			     "SELECT nextval(\'tile_cld_ol_pk_tile_seq\')" );
 	       if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
+		    NADC_GOTO_ERROR( NADC_ERR_SQL, 
 				     PQresultErrorMessage(res) );
 	       cpntr = PQgetvalue( res, 0, 0 );
 	       tile_id = strtoll( cpntr, (char **) NULL, 10 );
@@ -305,23 +303,23 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
 					   jday, geo+nc, cld+nc );
           }
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE ) {
-               NADC_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+               NADC_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
 /* do actual insert */
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -335,10 +333,10 @@ void SCIA_OL2_WR_SQL_CLD( PGconn *conn, bool be_verbose, const char *flname,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE, "affectedRows=%-u", 
 		      affectedRows );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
 }

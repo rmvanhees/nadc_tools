@@ -117,8 +117,6 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies fp, errno, nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "PROCESS_LV1B_MDS";
-
      register unsigned short ns;
      
      unsigned int       nr_mds;
@@ -136,7 +134,7 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
      state = (struct state1_scia *) 
 	  malloc( num_state * sizeof( struct state1_scia ));
      if ( state == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "state" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "state" );
      (void) memcpy( state, state_in, num_state * sizeof( struct state1_scia ));
 /*
  * read from level 1b and write to level 1b product
@@ -153,7 +151,7 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       /* read level 1b MDS-records */
 	       nr_mds = SCIA_LV1_RD_MDS( fp, clus_mask, state+ns, &mds );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 				     "SCIA_LV1_RD_MDS" );
 #ifdef _WITH_SQL
 	       if ( param.write_sql == PARAM_SET ) {
@@ -167,14 +165,14 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 #endif
 		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR(prognm, NADC_ERR_SQL, "SQL_LV1_TILES");
+			 NADC_GOTO_ERROR(NADC_ERR_SQL, "SQL_LV1_TILES");
 	       } else {
 #endif
 		    /* write level 1c MDS-records */
 		    SCIA_WRITE_MDS_1B( param, nr_mds, mds );
 		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+			 NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 					  "SCIA_WR_MDS_1B" );
 #ifdef _WITH_SQL
 	       }
@@ -217,19 +215,19 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       if ( patch_scia == SCIA_PATCH_NONE ) {
 		    nr_mds = SCIA_LV1_RD_MDS( fp, clus_mask, state+ns, &mds );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 					  "SCIA_LV1_RD_MDS" );
 		    if ( state[ns].num_clus == 0 ) continue;
 	       } else {
 		    nr_mds = SCIA_LV1_RD_MDS( fp, ~0ULL, state+ns, &mds );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 					  "SCIA_LV1_RD_MDS" );
 		    /* patch MDS level 1b record */
 		    SCIA_LV1_PATCH_MDS( fp, patch_scia, state+ns, mds );
 		    if ( IS_ERR_STAT_FATAL ) {
 			 SCIA_LV1_FREE_MDS( source, nr_mds, mds );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+			 NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 					  "SCIA_LV1_PATCH_MDS" );
 		    }
 	       }
@@ -241,7 +239,7 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       mds1c = (struct mds1c_scia *) malloc( 
 		    state[ns].num_clus * sizeof(struct mds1c_scia) );
 	       if ( mds1c == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds1c" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds1c" );
 
 	       if ( patch_scia != SCIA_PATCH_NONE ) {
 		    nr_mds1c = GET_SCIA_LV1C_MDS( clus_mask, state+ns, mds, 
@@ -252,7 +250,7 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       if ( IS_ERR_STAT_FATAL ) {
 		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 		    SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "GET_SCIA_LV1C_MDS" );
 	       }
 	       /* calibrate detector read-outs */
@@ -260,14 +258,14 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 	       if ( IS_ERR_STAT_FATAL ) {
 		    SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "SCIA_LV1_CALIB" );
 	       }
 	       /* write level 1c MDS-records */
 	       SCIA_WRITE_MDS_1C( param, nr_mds1c, mds1c );
 	       SCIA_LV1C_FREE_MDS( source, nr_mds1c, mds1c );
 	       if ( IS_ERR_STAT_FATAL ) {
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 				     "SCIA_WRITE_MDS_1C" );
 	       }
 	  } /* loop over num_state */
@@ -284,24 +282,24 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       for ( ns = 0; ns < (unsigned short) num_state; ns++ ) {
 		    nr_mds = SCIA_LV1_RD_MDS( fp, clus_mask, state+ns, &mds );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 					  "SCIA_LV1_RD_MDS" );
 		    pmd = (struct mds1c_pmd *) 
 			 malloc( sizeof(struct mds1c_pmd) );
 		    if ( pmd == NULL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pmd" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pmd" );
 
 		    (void) GET_SCIA_LV1C_PMD( state+ns, mds, pmd );
 		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 		    if ( IS_ERR_STAT_FATAL ) {
 			 SCIA_LV1C_FREE_MDS_PMD( source, pmd );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+			 NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 					  "GET_SCIA_LV1C_PMD" );
 		    }
 		    SCIA_WRITE_MDS_PMD( param, pmd );
 		    SCIA_LV1C_FREE_MDS_PMD( source, pmd );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+			 NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 					  "SCIA_WRITE_MDS_PMD" );
 	       }
 	  }
@@ -318,25 +316,25 @@ void PROCESS_LV1B_MDS( const struct param_record param, FILE *fp,
 	       for ( ns = 0; ns < (unsigned short) num_state; ns++ ) {
 		    nr_mds = SCIA_LV1_RD_MDS( fp, clus_mask, state+ns, &mds );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+			 NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 					  "SCIA_LV1_RD_MDS" );
 	       
 		    polV = (struct mds1c_polV *) 
 			 malloc( sizeof(struct mds1c_polV));
 		    if ( polV == NULL )
-			 NADC_GOTO_ERROR( prognm,NADC_ERR_ALLOC,"polV" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "polV" );
 
 		    (void) GET_SCIA_LV1C_POLV( state+ns, mds, polV );
 		    SCIA_LV1_FREE_MDS( source, nr_mds, mds );
 		    if ( IS_ERR_STAT_FATAL ) {
 			 SCIA_LV1C_FREE_MDS_POLV( source, polV );
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+			 NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 					  "GET_SCIA_LV1C_PMD" );
 		    }
 		    SCIA_WRITE_MDS_POLV( param, polV );
 		    SCIA_LV1C_FREE_MDS_POLV( source, polV );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+			 NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 					  "SCIA_WRITE_MDS_POLV" );
 	       }
 	  }
@@ -369,8 +367,6 @@ void PROCESS_LV1C_MDS( const struct param_record param, FILE *fp,
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, fp@*/
 {
-     const char prognm[] = "PROCESS_LV1C_MDS";
-
      register unsigned short nc, ns;
 
      int                source;
@@ -387,7 +383,7 @@ void PROCESS_LV1C_MDS( const struct param_record param, FILE *fp,
      state = (struct state1_scia *) 
 	  malloc( num_state * sizeof( struct state1_scia ));
      if ( state == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "state" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "state" );
      (void) memcpy( state, state_in, num_state * sizeof( struct state1_scia ));
 /*
  * loop over all states
@@ -435,7 +431,7 @@ void PROCESS_LV1C_MDS( const struct param_record param, FILE *fp,
  */
 	  nr_mds = SCIA_LV1C_RD_MDS( fp, clus_mask, state+ns, &mds );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, 
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, 
 				  "SCIA_LV1C_RD_MDS" );
 /* 
  * correct radiances by a multiplication factor
@@ -443,14 +439,14 @@ void PROCESS_LV1C_MDS( const struct param_record param, FILE *fp,
 	  if ( (param.calib_scia & DO_PATCH_L1C) != UINT_ZERO ) {
 	       SCIA_LV1C_SCALE( nr_mds, mds );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SCIA_LV1C_CAL");
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "SCIA_LV1C_CAL");
 	  }
 /*
  * write measurement data sets
  */
 	  SCIA_WRITE_MDS_1C( param, nr_mds, mds );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 				  "SCIA_WRITE_MDS_1C" );
 	  SCIA_LV1C_FREE_MDS( source, nr_mds, mds );
      }
@@ -464,11 +460,11 @@ void PROCESS_LV1C_MDS( const struct param_record param, FILE *fp,
 	  for ( ns = 0; ns < (unsigned short) num_state; ns++ ) {
 	       (void) SCIA_LV1C_RD_MDS_PMD( fp, state+ns, &mds_pmd );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, 
 				     "SCIA_LV1C_RD_MDS_PMD" );
 	       SCIA_WRITE_MDS_PMD( param, mds_pmd );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 				     "SCIA_WRITE_MDS_PMD" );
 	       SCIA_LV1C_FREE_MDS_PMD( (int) state[ns].type_mds, mds_pmd );
 	  }
@@ -483,11 +479,11 @@ void PROCESS_LV1C_MDS( const struct param_record param, FILE *fp,
 	  for ( ns = 0; ns < (unsigned short) num_state; ns++ ) {
 	       (void) SCIA_LV1C_RD_MDS_POLV( fp, state+ns, &mds_polV );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, 
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, 
 				     "SCIA_LV1C_RD_MDS_POLV" );
 	       SCIA_WRITE_MDS_POLV( param, mds_polV );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, 
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, 
 				     "SCIA_WRITE_MDS_POLV" );
 	       SCIA_LV1C_FREE_MDS_POLV( (int) state[ns].type_mds, mds_polV );
 	  }
@@ -502,8 +498,6 @@ int main( int argc, char *argv[] )
        Use_Extern_Alloc;@*/
      /*@modifies errno, stderr, stdout, nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "scia_nl1";
-
      unsigned int num_dsd, num_dsr, num_state;
      unsigned int num;
 
@@ -547,12 +541,12 @@ int main( int argc, char *argv[] )
  */
      SCIA_SET_PARAM( argc, argv, SCIA_LEVEL_1, &param );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "NADC_INIT_PARAM" );
+          NADC_GOTO_ERROR( NADC_ERR_PARAM, "NADC_INIT_PARAM" );
 /*
  * check if we have to display version and exit
  */
      if ( param.flag_version == PARAM_SET ) {
-	  SCIA_SHOW_VERSION( stdout, prognm );
+	  SCIA_SHOW_VERSION( stdout, "scia_nl1" );
 	  exit( EXIT_SUCCESS );
      }
 /*
@@ -569,12 +563,12 @@ int main( int argc, char *argv[] )
      if ( param.write_sql == PARAM_SET ) {
 	  CONNECT_NADC_DB( &conn, "scia" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL" );
 	  if ( param.flag_sql_remove == PARAM_SET
 	       || param.flag_sql_replace == PARAM_SET )
 	       SCIA_LV1_DEL_ENTRY( conn, param.flag_verbose, param.infile );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL(remove)" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL(remove)" );
 	  if ( param.flag_sql_remove == PARAM_SET ) goto done;
      }
 #endif
@@ -582,21 +576,21 @@ int main( int argc, char *argv[] )
  * open input-file
  */
      if ( (fp = fopen( param.infile, "rb" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
 /*
  * create output HDF5 file
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  param.hdf_file_id = SCIA_CRE_H5_FILE( SCIA_LEVEL_1, &param );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
 	  SCIA_WR_H5_VERSION( param.hdf_file_id );
 /*
  * create for data structures for SCIAMACHY level 1b data
  */
 	  CRE_SCIA_LV1_H5_STRUCTS( param );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "STRUCTS" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "STRUCTS" );
      }
 /*
  * -------------------------
@@ -604,36 +598,36 @@ int main( int argc, char *argv[] )
  */
      ENVI_RD_MPH( fp, &mph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MPH" );
      if ( mph.tot_size != nadc_file_size( param.infile ) )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "file size check failed" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "file size check failed" );
      SCIA_WRITE_MPH( param, &mph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "MPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "MPH" );
 /*
  * -------------------------
  * read/write Specific Product Header
  */
      SCIA_LV1_RD_SPH( fp, mph, &sph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
      SCIA_WRITE_SPH( param, mph, &sph );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
 /*
  * -------------------------
  * read/write Data Set Descriptor records
  */
      dsd = (struct dsd_envi *)
 	  malloc( (mph.num_dsd-1) * sizeof( struct dsd_envi ) );
-     if ( dsd == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dsd" );
+     if ( dsd == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dsd" );
      num_dsd = ENVI_RD_DSD( fp, mph, dsd );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DSD" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DSD" );
      is_scia_lv1c = IS_SCIA_LV1C( num_dsd, dsd );
      SCIA_WRITE_DSD( param, num_dsd, dsd );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "DSD" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DSD" );
      if ( param.write_meta == PARAM_SET ) goto done;
 #ifdef _WITH_SQL
      if ( param.write_sql == PARAM_SET ) {
@@ -641,10 +635,10 @@ int main( int argc, char *argv[] )
 				&mph, &sph );
 	  if ( IS_ERR_STAT_WARN ) goto done;
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_META" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_META" );
 	  SCIA_LV1_WR_SQL_AUX( conn, param.flag_verbose, &mph, num_dsd, dsd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_AUX" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_AUX" );
      }
 #endif
      SCIA_LV1_SET_NUM_ATTACH( param, fp, num_dsd, dsd );
@@ -654,24 +648,24 @@ int main( int argc, char *argv[] )
  */
      num_dsr = SCIA_LV1_RD_SQADS( fp, num_dsd, dsd, &sqads );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SQADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SQADS" );
      if ( param.write_pds == PARAM_SET )
 	  num_dsr = SCIA_LV1_UPDATE_SQADS( sqads );
      SCIA_WRITE_SQADS( param, num_dsr, sqads );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SQADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SQADS" );
 /*
  * -------------------------
  * read/write Geolocation of the States
  */
      num_dsr = SCIA_RD_LADS( fp, num_dsd, dsd, &lads );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LADS" );
      if ( param.write_pds == PARAM_SET )
 	  num_dsr = SCIA_LV1_UPDATE_LADS( lads );
      SCIA_WRITE_LADS( param, num_dsr, lads );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "LADS" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LADS" );
 /*
  * -------------------------
  * read/write Static Instrument Parameters
@@ -679,10 +673,10 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_SIP( fp, num_dsd, dsd, &sip );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SIP" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SIP" );
 	  SCIA_WRITE_SIP( param, num_dsr, sip );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SIP" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SIP" );
      }
 /*
  * -------------------------
@@ -691,10 +685,10 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_CLCP( fp, num_dsd, dsd, &clcp );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "CLCP" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "CLCP" );
 	  SCIA_WRITE_CLCP( param, num_dsr, clcp );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "CLCP" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "CLCP" );
      }
 /*
  * -------------------------
@@ -703,11 +697,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_VLCP( fp, num_dsd, dsd, &vlcp );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "VLCP" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "VLCP" );
 	  SCIA_WRITE_VLCP( param, num_dsr, vlcp );
 	  if ( num_dsr > 0 ) free( vlcp );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "VLCP" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "VLCP" );
      }
 /*
  * -------------------------
@@ -716,10 +710,10 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_PPG( fp, num_dsd, dsd, &ppg );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PPG" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PPG" );
 	  SCIA_WRITE_PPG( param, num_dsr, ppg );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "PPG" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "PPG" );
      }
 /*
  * -------------------------
@@ -728,10 +722,10 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_BASE( fp, num_dsd, dsd, &base );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "BASE" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "BASE" );
 	  if ( num_dsr > 0 ) SCIA_WRITE_BASE( param, &base );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "BASE" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "BASE" );
      }
 /*
  * -------------------------
@@ -740,11 +734,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_SCP( fp, num_dsd, dsd, &scp );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCP" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCP" );
 	  SCIA_WRITE_SCP( param, num_dsr, scp );
 	  if ( num_dsr > 0 ) free( scp );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SCP" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SCP" );
      }
 /*
  * -------------------------
@@ -753,17 +747,17 @@ int main( int argc, char *argv[] )
  */
      num_dsr = SCIA_LV1_RD_SRS( fp, num_dsd, dsd, &srs );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SRS" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SRS" );
      /* KB: apply m-factor from ext. database, if requested */
      SCIA_LV1_MFACTOR_SRS( mph.sensing_start, param.calib_scia, num_dsr, srs );
      if ( IS_ERR_STAT_FATAL ) {
 	  if ( num_dsr > 0 ) free( srs );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SRS(mfactor)" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "SRS(mfactor)" );
      }
      SCIA_WRITE_SRS( param, num_dsr, srs );
      if ( num_dsr > 0 ) free( srs );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SRS" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SRS" );
 /*
  * -------------------------
  * read/write Polarisation Sensitivity Parameters Nadir
@@ -771,11 +765,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) { 
 	  num_dsr = SCIA_LV1_RD_PSPN( fp, num_dsd, dsd, &pspn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PSPN" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PSPN" );
 	  SCIA_WRITE_PSPN( param, num_dsr, pspn );
 	  if ( num_dsr > 0 ) free( pspn );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "PSPN" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "PSPN" );
      }
 /*
  * -------------------------
@@ -784,11 +778,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) { 
 	  num_dsr = SCIA_LV1_RD_PSPL( fp, num_dsd, dsd, &pspl );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PSPL" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PSPL" );
 	  SCIA_WRITE_PSPL( param, num_dsr, pspl );
 	  if ( num_dsr > 0 ) free( pspl );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "PSPL" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "PSPL" );
      }
 /*
  * -------------------------
@@ -797,11 +791,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) { 
 	  num_dsr = SCIA_LV1_RD_PSPO( fp, num_dsd, dsd, &pspo );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PSPO" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PSPO" );
 	  SCIA_WRITE_PSPO( param, num_dsr, pspo );
 	  if ( num_dsr > 0 ) free( pspo );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "PSPO" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "PSPO" );
      }
 /*
  * -------------------------
@@ -810,11 +804,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) { 
 	  num_dsr = SCIA_LV1_RD_RSPN( fp, num_dsd, dsd, &rspn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "RSPN" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "RSPN" );
 	  SCIA_WRITE_RSPN( param, num_dsr, rspn );
 	  if ( num_dsr > 0 ) free( rspn );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "RSPN" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "RSPN" );
      }
 /*
  * -------------------------
@@ -823,11 +817,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_RSPL( fp, num_dsd, dsd, &rspl );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "RSPL" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "RSPL" );
 	  SCIA_WRITE_RSPL( param, num_dsr, rspl );
 	  if ( num_dsr > 0 ) free( rspl );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "RSPL" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "RSPL" );
      }
 /*
  * -------------------------
@@ -836,11 +830,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) { 
 	  num_dsr = SCIA_LV1_RD_RSPO( fp, num_dsd, dsd, &rspo );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "RSPO" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "RSPO" );
 	  SCIA_WRITE_RSPO( param, num_dsr, rspo );
 	  if ( num_dsr > 0 ) free( rspo );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "RSPO" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "RSPO" );
      }
 /*
  * -------------------------
@@ -849,10 +843,10 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_EKD( fp, num_dsd, dsd, &ekd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "EKD" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "EKD" );
 	  SCIA_WRITE_EKD( param, num_dsr, ekd );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "EKD" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "EKD" );
      }
 /*
  * -------------------------
@@ -861,11 +855,11 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_SFP( fp, num_dsd, dsd, &sfp );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SFP" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SFP" );
 	  SCIA_WRITE_SFP( param, num_dsr, sfp );
 	  if ( num_dsr > 0 ) free( sfp );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SFP" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFP" );
      }
 /*
  * -------------------------
@@ -874,18 +868,18 @@ int main( int argc, char *argv[] )
      if ( param.write_gads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_ASFP( fp, num_dsd, dsd, &asfp );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "ASFP" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "ASFP" );
 	  SCIA_WRITE_ASFP( param, num_dsr, asfp );
 	  if ( num_dsr > 0 ) free( asfp );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "ASFP" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "ASFP" );
      }
 /* -------------------------
  * read/write States of the Product
  */
      num_state = SCIA_LV1_RD_STATE( fp, num_dsd, dsd, &state );
      if ( IS_ERR_STAT_FATAL || num_state  ==  0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "STATE" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "STATE" );
      if ( param.write_pds == PARAM_SET )
 	  num_state = SCIA_LV1_UPDATE_STATE( state );
      SCIA_WRITE_STATE( param, num_state, state );
@@ -893,7 +887,7 @@ int main( int argc, char *argv[] )
 	  free( sqads );
 	  free( lads );
 	  free( state );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "STATE" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "STATE" );
      }
 #ifdef _WITH_SQL
      if ( param.write_sql == PARAM_SET ) {
@@ -903,7 +897,7 @@ int main( int argc, char *argv[] )
 	       free( sqads );
 	       free( lads );
 	       free( state );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_STATE" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_STATE" );
 	  }
      }
 #endif
@@ -922,12 +916,12 @@ int main( int argc, char *argv[] )
      if ( is_scia_lv1c ) {
 	  num_dsr = SCIA_LV1C_RD_CALOPT( fp, num_dsd, dsd, &calopt );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "CALOPT" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "CALOPT" );
 	  if ( num_dsr > 0 ) {
 	       if ( param.write_ascii == PARAM_SET ) {
 		    SCIA_LV1C_WR_ASCII_CALOPT( param, &calopt );
 		    if ( IS_ERR_STAT_FATAL ) 
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "CALOPT" );
+			 NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "CALOPT" );
 	       }
 	       if ( param.write_pds == PARAM_SET ) {
 		    SCIA_LV1C_UPDATE_CALOPT( is_scia_lv1c, param, &calopt );
@@ -946,7 +940,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET && param.write_pmd0 == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_PMD( fp, num_dsd, dsd, &pmd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PMD" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PMD" );
 	  SCIA_WRITE_PMD( param, num_dsr, pmd );
 	  if ( num_dsr > 0 ) free( pmd );
      }
@@ -957,7 +951,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET && param.write_aux0 == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_AUX( fp, num_dsd, dsd, &aux );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "AUX" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "AUX" );
 	  SCIA_WRITE_AUX( param, num_dsr, aux );
 	  if ( num_dsr > 0 ) free( aux );
      }
@@ -968,7 +962,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_LCPN( fp, num_dsd, dsd, &lcpn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LCPN" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LCPN" );
 	  SCIA_WRITE_LCPN( param, num_dsr, lcpn );
 	  if ( num_dsr > 0 ) free( lcpn );
      }
@@ -979,7 +973,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_DARK( fp, num_dsd, dsd, &dark );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DARK" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DARK" );
 	  SCIA_WRITE_DARK( param, num_dsr, dark );
 	  if ( num_dsr > 0 ) free( dark );
      }
@@ -990,7 +984,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_PPGN( fp, num_dsd, dsd, &ppgn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PPGN" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PPGN" );
 	  SCIA_WRITE_PPGN( param, num_dsr, ppgn );
 	  if ( num_dsr > 0 ) free( ppgn );
      }
@@ -1001,7 +995,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_SCPN( fp, num_dsd, dsd, &scpn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCPN" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCPN" );
 	  SCIA_WRITE_SCPN( param, num_dsr, scpn );
 	  if ( num_dsr > 0 ) free( scpn );
      }
@@ -1012,7 +1006,7 @@ int main( int argc, char *argv[] )
      if ( param.write_ads == PARAM_SET ) {
 	  num_dsr = SCIA_LV1_RD_SRSN( fp, num_dsd, dsd, &srsn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SRSN" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SRSN" );
 	  SCIA_WRITE_SRSN( param, num_dsr, srsn );
 	  if ( num_dsr > 0 ) free( srsn );
      }
@@ -1032,7 +1026,7 @@ int main( int argc, char *argv[] )
 	       PROCESS_LV1B_MDS( param, fp, num, mds_state );
 	  free( mds_state );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
 	  if ( param.flag_silent == PARAM_UNSET 
 	       && param.write_sql == PARAM_UNSET )
                NADC_Info_Finish( stdout, 2, num );
@@ -1055,7 +1049,7 @@ int main( int argc, char *argv[] )
 	       PROCESS_LV1B_MDS( param, fp, num, mds_state );
 	  free( mds_state );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
 	  if ( param.flag_silent == PARAM_UNSET 
 	       && param.write_sql == PARAM_UNSET )
                NADC_Info_Finish( stdout, 2, num );
@@ -1078,7 +1072,7 @@ int main( int argc, char *argv[] )
 	       PROCESS_LV1B_MDS( param, fp, num, mds_state );
 	  free( mds_state );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
 	  if ( param.flag_silent == PARAM_UNSET 
 	       && param.write_sql == PARAM_UNSET )
                NADC_Info_Finish( stdout, 2, num );
@@ -1101,7 +1095,7 @@ int main( int argc, char *argv[] )
 	       PROCESS_LV1B_MDS( param, fp, num, mds_state );
 	  free( mds_state );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "PROCESS_LV1x_MDS" );
 	  if ( param.flag_silent == PARAM_UNSET 
 	       && param.write_sql == PARAM_UNSET )
                NADC_Info_Finish( stdout, 2, num );
@@ -1123,7 +1117,7 @@ int main( int argc, char *argv[] )
 	  if ( ! IS_ERR_STAT_FATAL && param.write_pds == PARAM_SET ) {
 	       SCIA_LV1_WR_DSD_UPDATE( fp, fp_out );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_ERROR( prognm, NADC_ERR_FATAL, "LV1_WR_DSD_UPDATE" );
+		    NADC_ERROR( NADC_ERR_FATAL, "LV1_WR_DSD_UPDATE" );
 	  }
 	  (void) fclose( fp );
      }
@@ -1138,7 +1132,7 @@ int main( int argc, char *argv[] )
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_ERROR( prognm, NADC_ERR_HDF_FILE, param.hdf5_name );
+	       NADC_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
      }
 /*
  * display error messages?

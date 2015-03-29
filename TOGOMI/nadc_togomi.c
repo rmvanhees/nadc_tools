@@ -69,8 +69,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 int main ( int argc, char *argv[] )
 {
-     const char prognm[] = "nadc_togomi";
-
      register int          na;
 
 #ifdef _WITH_NC4
@@ -93,7 +91,7 @@ int main ( int argc, char *argv[] )
 /*
  * check command-line parameters
  */
-     if ( argc == 1 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
+     if ( argc == 1 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, NADC_PARAMS );
      na = 1;
      do {
 	  if ( strncmp( argv[na], "-sql", 4 ) == 0 )
@@ -109,9 +107,9 @@ int main ( int argc, char *argv[] )
  */
      numRec = NADC_RD_TOGOMI( flname, &hdr, &togomi );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, flname );
      if ( hdr.numRec == 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_WARN, "empty product");
+	  NADC_GOTO_ERROR( NADC_ERR_WARN, "empty product");
 /*
  * connect to PostgreSQL database
  */
@@ -119,14 +117,14 @@ int main ( int argc, char *argv[] )
 #ifdef _WITH_SQL
 	  CONNECT_NADC_DB( &conn, "gome" );
 	  if ( IS_ERR_STAT_FATAL ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, "TOGOMI (connect)" );
+	       NADC_ERROR( NADC_ERR_SQL, "TOGOMI (connect)" );
 	       NADC_Err_Trace( stderr );
 	       return NADC_ERR_FATAL;
 	  }
 	  if ( flag_remove || flag_replace ) {
 	       NADC_TOGOMI_DEL_ENTRY( conn, hdr.product );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "TOGOMI (remove)" );
+		    NADC_GOTO_ERROR( NADC_ERR_SQL, "TOGOMI (remove)" );
 	  }
 /*
  * write meta-information to database
@@ -134,12 +132,12 @@ int main ( int argc, char *argv[] )
 	  if ( ! flag_remove ) {
 	       int meta_id = NADC_TOGOMI_WR_SQL_META( conn, &hdr );
 	       if ( IS_ERR_STAT_FATAL ) {
-		    NADC_ERROR( prognm, NADC_ERR_SQL, "TOGOMI (meta)" );
+		    NADC_ERROR( NADC_ERR_SQL, "TOGOMI (meta)" );
 	       } else {
 		    NADC_TOGOMI_WR_SQL_TILE( conn, meta_id,
 					     numRec, togomi );
 		    if ( IS_ERR_STAT_FATAL )
-			 NADC_ERROR( prognm, NADC_ERR_SQL, "TOGOMI (tiles)" );
+			 NADC_ERROR( NADC_ERR_SQL, "TOGOMI (tiles)" );
 	       }
 	  }
 /*
@@ -156,18 +154,18 @@ int main ( int argc, char *argv[] )
 			   "CONS", hdr.validity_start, hdr.validity_stop, 1 );
 
           if ( (retval = nc_create( flname, NC_NETCDF4, &ncid ))!= NC_NOERR )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+               NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 
           NADC_TOGOMI_WR_NC_META( ncid, &hdr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "TOGOMI header" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "TOGOMI header" );
 
           NADC_TOGOMI_WR_NC_REC( ncid, numRec, togomi );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "TOGOMI records" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "TOGOMI records" );
 
           if ( nc_close( ncid ) != NC_NOERR )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+               NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 #endif
      }
 /*

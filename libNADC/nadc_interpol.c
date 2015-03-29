@@ -75,8 +75,6 @@ void NADC_INTERPOL( float X, float X_left, float X_right,
 		    unsigned int num_Y, const float *Y_left_in, 
 		    const float *Y_right_in, /*@unique@*/ float *Y )
 {
-     const char prognm[] = "NADC_INTERPOL";
-
      register unsigned int nr = 0;
 
      double xval = X;
@@ -100,7 +98,7 @@ void NADC_INTERPOL( float X, float X_left, float X_right,
 	  Y_right = Y_right_in;
      }
      if ( (xval - xright) > DBL_EPSILON || (xleft - xval) > DBL_EPSILON )
-	  NADC_ERROR( prognm, NADC_ERR_WARN, "doing Linear Extrapolation" );
+	  NADC_ERROR( NADC_ERR_WARN, "doing Linear Extrapolation" );
 
      dX = (xright - xval) / (xright - xleft);
      do {
@@ -130,8 +128,6 @@ void NADC_INTERPOL_d( float X, float X_left, float X_right,
 		      unsigned int num_Y, const float *Y_left_in, 
 		      const float *Y_right_in, /*@unique@*/ double *Y )
 {
-     const char prognm[] = "NADC_INTERPOL_d";
-
      register unsigned int nr = 0;
      
      double xval = X;
@@ -155,7 +151,7 @@ void NADC_INTERPOL_d( float X, float X_left, float X_right,
 	  Y_right = Y_right_in;
      }
      if ( (xval - xright) > DBL_EPSILON || (xleft - xval) > DBL_EPSILON )
-	  NADC_ERROR( prognm, NADC_ERR_WARN, "doing Linear Extrapolation" );
+	  NADC_ERROR( NADC_ERR_WARN, "doing Linear Extrapolation" );
 
      dX = (xright - xval) / (xright - xleft);
      do {

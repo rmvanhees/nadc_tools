@@ -146,8 +146,6 @@ short GOME_LV1_RD_PCD( FILE *infl, const struct fsr1_gome *fsr,
 		       const struct sph1_gome *sph,
 		       struct pcd_gome **pcd_out )
 {
-     const char prognm[] = "GOME_LV1_RD_PCD";
-
      register short ni;
      register int   nr;
 
@@ -177,12 +175,12 @@ short GOME_LV1_RD_PCD( FILE *infl, const struct fsr1_gome *fsr,
 	       malloc( fsr->nr_pcd * sizeof( struct pcd_gome ) );
      }
      if ( (pcd = pcd_out[0]) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pcd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pcd" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (pcd_char = (char *) malloc( (size_t) fsr->sz_pcd )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pcd_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pcd_char" );
 /*
  * rewind/read input data file
  */
@@ -193,7 +191,7 @@ short GOME_LV1_RD_PCD( FILE *infl, const struct fsr1_gome *fsr,
      do { 
 	  pcd_pntr = pcd_char;
 	  if ( fread( pcd_pntr, (size_t) fsr->sz_pcd, 1, infl ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /* copy data of GLR1 record */
 	  (void) memcpy( &pcd->glr.utc_date, pcd_pntr, GOME_UINT );
 	  pcd_pntr += GOME_UINT;
@@ -391,7 +389,7 @@ short GOME_LV1_RD_PCD( FILE *infl, const struct fsr1_gome *fsr,
  * check if we read the whole DSR
  */
 	  if ( pcd_pntr - pcd_char != fsr->sz_pcd )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "PCD size" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "PCD size" );
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_PCD( pcd );

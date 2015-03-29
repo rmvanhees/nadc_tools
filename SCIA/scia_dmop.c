@@ -79,8 +79,6 @@ static inline
 void Adjust_JulianDay( const double jday_anx, 
 		       char *sciaDate, const char *sciaTime )
 {
-     const char prognm[] = "Adjust_JulianDay";
-
      char dateTime[UTC_STRING_LENGTH];
      int  mjd2000;
      unsigned int seconds, mu_sec;
@@ -88,7 +86,7 @@ void Adjust_JulianDay( const double jday_anx,
      double jday = GET_JulianDay( sciaDate, sciaTime );
 
      if ( jday < jday_anx-1 || jday > jday_anx+2 ) {
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "wrong Julian Day" );
+	  NADC_ERROR( NADC_ERR_NONE, "wrong Julian Day" );
      } else if ( jday < jday_anx ) {
 	  (void) snprintf( dateTime, UTC_STRING_LENGTH, 
 			   "%s %s", sciaDate, sciaTime );
@@ -98,7 +96,7 @@ void Adjust_JulianDay( const double jday_anx,
 
 	  (void) nadc_strlcpy( sciaDate, dateTime, 12 );
 
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "adjust Julian Day(+1)");
+	  NADC_ERROR( NADC_ERR_NONE, "adjust Julian Day(+1)");
      } else if ( jday > jday_anx+1 ) {
 	  (void) snprintf( dateTime, UTC_STRING_LENGTH, 
 			   "%s %s", sciaDate, sciaTime );
@@ -108,7 +106,7 @@ void Adjust_JulianDay( const double jday_anx,
 
 	  (void) nadc_strlcpy( sciaDate, dateTime, 12 );
 
-	  NADC_ERROR( prognm, NADC_ERR_NONE, "adjust Julian Day(-1)");
+	  NADC_ERROR( NADC_ERR_NONE, "adjust Julian Day(-1)");
      }
 }
 
@@ -139,8 +137,6 @@ void Adjust_JulianDay( const double jday_anx,
 static
 unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
 {
-     char prognm[] = "NADC_RD_DMOP";
-
      char           line[256];
      char           elapse[9];
      char           startDate[12], startTime[16];
@@ -222,14 +218,14 @@ unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
 			 && (orbit == startOrbit || orbit > startOrbit + 1) ) {
 			 orbit = startOrbit + 1;
 			 (*dmop)[numRec].orbitPhase -= 1.f;
-			 NADC_ERROR( prognm,NADC_ERR_NONE,"adjust absOrbit" );
+			 NADC_ERROR( NADC_ERR_NONE, "adjust absOrbit" );
 		    } else if ( orbit < startOrbit || orbit > startOrbit+1 )
-                         NADC_ERROR( prognm,NADC_ERR_NONE,"wrong absOrbit" );
+                         NADC_ERROR( NADC_ERR_NONE, "wrong absOrbit" );
 		    (*dmop)[numRec].stateID = stateID;
 		    (*dmop)[numRec].absOrbit = orbit;
 		    numRec++;
 	       } else
-		    NADC_ERROR( prognm,NADC_ERR_NONE,"incomplete record" );
+		    NADC_ERROR( NADC_ERR_NONE, "incomplete record" );
 	       break;
 	  } case 113: {
 	       if ( strncmp( line, " STATE_ID", 9 ) == 0 )
@@ -257,7 +253,7 @@ unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
 		    *dmop = (struct dmop_rec *)
 			 malloc( maxRec * sizeof( struct dmop_rec ));
 		    if ( *dmop == NULL )
-			 NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dmop" );
+			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dmop" );
 	       } else if ( strncmp( keyword, "ABS_START_ORBIT", 15 ) == 0 ) {
 		    startOrbit = (unsigned short) 
 			 strtoul( keyval, (char **)NULL, 10 );
@@ -267,7 +263,7 @@ unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
      } while( 1 == 1 );
  done:
      if ( numRec > 0 && numRec < maxRec ) {
-	  NADC_ERROR( prognm, NADC_ERR_NONE, 
+	  NADC_ERROR( NADC_ERR_NONE, 
 		      "not all State_summary records read" );
      }
      return numRec;
@@ -302,8 +298,6 @@ static
 void SCIA_DEL_SQL_DMOP( PGconn *conn, unsigned int numRec, 
 			const struct dmop_rec *dmop )
 {
-     const char prognm[] = "SCIA_DEL_SQL_DMOP";
-
      const size_t SQL_STR_SIZE = 128;
 
      char sql_query[SQL_STR_SIZE];
@@ -317,7 +311,7 @@ void SCIA_DEL_SQL_DMOP( PGconn *conn, unsigned int numRec,
 /*    (void) fprintf( stderr, "%s\n", sql_query ); */
      res_del = PQexec( conn, sql_query );
      if ( PQresultStatus( res_del ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res_del) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res_del) );
      PQclear( res_del );
 }
 
@@ -338,8 +332,6 @@ static
 void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec, 
 		       const struct dmop_rec *dmop )
 {
-     const char prognm[] = "SCIA_WR_SQL_DMOP";
-
      const size_t SQL_STR_SIZE = 512;
 
      register unsigned int nr;
@@ -354,7 +346,7 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      PQclear( res );
 /*
@@ -396,18 +388,18 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
 /* 	  (void) fprintf( stderr, "%s [%-zd]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE ) {
 	       res = PQexec( conn, "ROLLBACK" );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_STRLEN,  "sql_query" );
+	       NADC_GOTO_ERROR( NADC_ERR_STRLEN,  "sql_query" );
 	  }
 /*
  * do the actual insert
  */
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR(prognm,NADC_ERR_SQL,PQresultErrorMessage(res));
+		    NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       goto done;
 	  }
 	  PQclear( res );
@@ -417,7 +409,7 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
  done:
      PQclear( res );
@@ -427,8 +419,6 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "scia_dmop";
-
      FILE *fp = NULL;
 
      bool flag_debug   = FALSE;
@@ -453,21 +443,21 @@ int main( int argc, char *argv[] )
 	  else if ( strncmp( argv[1], "-debug", 6 ) == 0 )
 	       flag_debug = TRUE;
 	  else
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
+	       NADC_GOTO_ERROR( NADC_ERR_PARAM, NADC_PARAMS );
 
 	  (void) nadc_strlcpy( flname, argv[2], MAX_STRING_LENGTH );
      } else if ( argc == 2 ) {
 	  (void) nadc_strlcpy( flname, argv[1], MAX_STRING_LENGTH );
      } else
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, NADC_PARAMS );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, NADC_PARAMS );
 /*
  * read records from DMOP product
  */
      if ( (fp = fopen( flname, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, flname );
      numRec = NADC_RD_DMOP( fp, &dmop );
      if ( numRec == 0 || dmop == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_NONE, "State_summary is empty" );
+	  NADC_GOTO_ERROR( NADC_ERR_NONE, "State_summary is empty" );
      if ( flag_debug ) {
 	  for ( nr = 0; nr < numRec; nr++ ) {
 	       (void) printf( "[%03u] %s %s %s %6u %6u %10.6f %3hhu %5hu\n",
@@ -484,14 +474,14 @@ int main( int argc, char *argv[] )
 #ifdef _WITH_SQL
      CONNECT_NADC_DB( &conn, "scia" );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_SQL, "PSQL" );
+	  NADC_ERROR( NADC_ERR_SQL, "PSQL" );
 	  NADC_Err_Trace( stderr );
 	  return NADC_ERR_FATAL;
      }
      if ( flag_remove || flag_replace ) {
 	  SCIA_DEL_SQL_DMOP( conn, numRec, dmop );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_ERROR( prognm, NADC_ERR_SQL, "DMOP (remove)" );
+	       NADC_ERROR( NADC_ERR_SQL, "DMOP (remove)" );
      }
 /*
  * write meta-information to database
@@ -499,7 +489,7 @@ int main( int argc, char *argv[] )
      if ( ! flag_remove ) {
 	  SCIA_WR_SQL_DMOP( conn, numRec, dmop );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_ERROR( prognm, NADC_ERR_SQL, "DMOP (stateinfo)" );
+	       NADC_ERROR( NADC_ERR_SQL, "DMOP (stateinfo)" );
      }
 /*
  * close connection to PostgreSQL database

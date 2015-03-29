@@ -83,8 +83,6 @@ int SCIA_LV2_RD_CLD( FILE *fd, unsigned int num_dsd,
 		     const struct dsd_envi *dsd, 
 		     struct cld_scia **cld_out )
 {
-     const char prognm[]   = "SCIA_LV2_RD_CLD";
-
      char         *cld_pntr, *cld_char = NULL;
      size_t       dsd_size;
      unsigned int indx_dsd;
@@ -99,25 +97,25 @@ int SCIA_LV2_RD_CLD( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( ! Use_Extern_Alloc ) {
 	  cld_out[0] = (struct cld_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct cld_scia));
      }
      if ( (cld = cld_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cld" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cld" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsd_size = (size_t) dsd[indx_dsd].size;
      if ( (cld_char = (char *) malloc( dsd_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cld_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cld_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( cld_char, dsd_size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to CLD structure
  */
@@ -143,7 +141,7 @@ int SCIA_LV2_RD_CLD( FILE *fd, unsigned int num_dsd,
 	  cld->pmdcloudfrac = 
 	       (float *) malloc((size_t) cld->numpmd * sizeof( float ));
 	  if ( cld->pmdcloudfrac == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pmdcloudfrac" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pmdcloudfrac" );
 	  (void) memcpy( cld->pmdcloudfrac, cld_pntr, 
 			   cld->numpmd * ENVI_FLOAT );
 	  cld_pntr += cld->numpmd * ENVI_FLOAT;
@@ -170,7 +168,7 @@ int SCIA_LV2_RD_CLD( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
      if ( (unsigned int)(cld_pntr - cld_char) != dsd[indx_dsd].size )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
      cld_pntr = NULL;
 /*
  * set return values

@@ -78,8 +78,6 @@ static const char  tableName[] = "metaTable";
 int SDMF_get_metaIndex( hid_t locID, int absOrbit, 
 			int *numIndx, int *metaIndx )
 {
-     const char prognm[] = "SDMF_get_metaIndex";
-     
      register int nrr;
 
      int   nrows, rowIndex = 0;
@@ -107,18 +105,18 @@ int SDMF_get_metaIndex( hid_t locID, int absOrbit,
  * read orbitList and orbitIndex
  */
      stat = H5LTget_dataset_info( locID, listName, &adim, NULL, NULL );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, listName );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, listName );
      nrows = (int) adim;
 
      if ( (orbitList = (int *) malloc( nrows * sizeof(int)))  == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitList" );
      if ( H5LTread_dataset_int( locID, listName, orbitList ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, listName );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, listName );
 
      if ( (orbitIndex = (int *) malloc( nrows * sizeof(int)))  == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitIndex" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitIndex" );
      if ( H5LTread_dataset_int( locID, indexName, orbitIndex ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, indexName );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, indexName );
 /*
  * quick check if new data is within stored orbit range
  */
@@ -179,8 +177,6 @@ int SDMF_get_metaIndex( hid_t locID, int absOrbit,
 int SDMF_get_metaIndex_range( hid_t locID, const int *orbit_range, 
 			      int *numIndx, int *metaIndx, int use_neighbours )
 {
-     const char prognm[] = "SDMF_get_metaIndex_range";
-
      int   nrr_lo;
     
      int   nrows;
@@ -214,18 +210,18 @@ int SDMF_get_metaIndex_range( hid_t locID, const int *orbit_range,
  * read orbitList and orbitIndex
  */
      stat = H5LTget_dataset_info( locID, listName, &adim, NULL, NULL );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, listName );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, listName );
      nrows = (int) adim;
 
      if ( (orbitList = (int *) malloc( nrows * sizeof(int)))  == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitList" );
      if ( H5LTread_dataset_int( locID, listName, orbitList ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, listName );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, listName );
 
      if ( (orbitIndex = (int *) malloc( nrows * sizeof(int)))  == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitIndex" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitIndex" );
      if ( H5LTread_dataset_int( locID, indexName, orbitIndex ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, indexName );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, indexName );
 /*
  * quick check if new data is within stored orbit range, else clip or exit
  */
@@ -318,8 +314,6 @@ done:
 void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                           struct mtbl_calib_rec **mtbl_out )
 {
-     const char prognm[] = "SDMF30_rd_metaTable";
-
      int     nrows;
      herr_t  stat;
      hsize_t nfields, nrecords;
@@ -364,7 +358,7 @@ void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
  * obtain table info
  */
      stat = H5TBget_table_info(locID, tableName, &nfields, &nrecords );
-     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, tableName );
      nrows = (int) nrecords;
      if ( *numIndx == 0 || metaIndx == NULL ) *numIndx = nrows;
      if ( nrows == 0 ) return;
@@ -374,7 +368,7 @@ void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
      mtbl = (struct mtbl_calib_rec *) 
 	  malloc( (size_t) (*numIndx) * mtbl_size );
      if ( mtbl == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mtbl" );
 /*
  * read table
  */
@@ -383,7 +377,7 @@ void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                                  mtbl_calib_sizes, mtbl );
           if ( stat < 0 ) {
                free( mtbl );
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+               NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
           }
      } else {
           register int nm;
@@ -395,7 +389,7 @@ void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                                         mtbl_calib_sizes, mtbl+nm );
                if ( stat < 0 ) {
                     free( mtbl );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+                    NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
                } 
           }
      }
@@ -423,8 +417,6 @@ void SDMF30_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
 void SDMF31_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                           struct mtbl_calib2_rec **mtbl_out )
 {
-     const char prognm[] = "SDMF31_rd_metaTable";
-
      int     nrows;
      herr_t  stat;
      hsize_t nfields, nrecords;
@@ -470,7 +462,7 @@ void SDMF31_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
  * obtain table info
  */
      stat = H5TBget_table_info(locID, tableName, &nfields, &nrecords );
-     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, tableName );
      nrows = (int) nrecords;
      if ( *numIndx == 0 || metaIndx == NULL ) *numIndx = nrows;
      if ( nrows == 0 ) return;
@@ -480,7 +472,7 @@ void SDMF31_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
      mtbl = (struct mtbl_calib2_rec *) 
 	  malloc( (size_t) (*numIndx) * mtbl_size );
      if ( mtbl == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mtbl" );
 /*
  * read table
  */
@@ -489,7 +481,7 @@ void SDMF31_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                                  mtbl_calib2_sizes, mtbl );
           if ( stat < 0 ) {
                free( mtbl );
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+               NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
           }
      } else {
           register int nm;
@@ -501,7 +493,7 @@ void SDMF31_rd_metaTable( hid_t locID, int *numIndx, const int *metaIndx,
                                         mtbl_calib2_sizes, mtbl+nm );
                if ( stat < 0 ) {
                     free( mtbl );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+                    NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
                } 
           }
      }

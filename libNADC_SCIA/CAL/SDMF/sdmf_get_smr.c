@@ -87,8 +87,6 @@ bool SDMF_get_SMR_30( bool calibRad,
 		      unsigned short absOrbit, unsigned short channel,
 		      /*@null@*/ const float *wvlen, float *solarMean )
 {
-     const char prognm[] = "SDMF_get_SMR_30";
-
      const char msg_found[] =
           "\n\tapplied SDMF Sun-Mean-Reference spectrum (v3.0) of Orbit %-d";
      const char msg_notfound[] =
@@ -128,7 +126,7 @@ bool SDMF_get_SMR_30( bool calibRad,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, sdmf_db );
 /*
  * find SMR values, requirements:
  *  - orbit number within a range MAX_DiffOrbitNumber
@@ -138,7 +136,7 @@ bool SDMF_get_SMR_30( bool calibRad,
 	  numIndx = 1;
 	  (void) SDMF_get_metaIndex( fid, orbit + delta, &numIndx, &metaIndx );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_metaIndex" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_metaIndex" );
 	  if ( numIndx > 0 ) {
 	       found = TRUE;
 	  } else {
@@ -146,12 +144,12 @@ bool SDMF_get_SMR_30( bool calibRad,
 	       if ( abs( delta ) > MAX_DiffOrbitNumber )  {
 		    (void) snprintf( str_msg, SHORT_STRING_LENGTH, 
 				     msg_notfound, orbit );
-		    NADC_GOTO_ERROR( prognm, NADC_SDMF_ABSENT, str_msg );
+		    NADC_GOTO_ERROR( NADC_SDMF_ABSENT, str_msg );
 	       }
 	  }
      } while ( ! found );
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg_found, orbit + delta );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     NADC_ERROR( NADC_ERR_NONE, str_msg );
 /*
  * read SMR data
  */
@@ -207,8 +205,6 @@ bool SDMF_get_SMR_31( bool calibRad,
 		      unsigned short absOrbit, unsigned short channel,
 		      /*@null@*/ const float *wvlen, float *solarMean )
 {
-     const char prognm[] = "SDMF_get_SMR_31";
-
      const char msg_found[] =
           "\n\tapplied SDMF Sun-Mean-Reference spectrum (v3.1) of Orbit %-d";
      const char msg_notfound[] =
@@ -267,21 +263,21 @@ bool SDMF_get_SMR_31( bool calibRad,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, sdmf_db );
 /*
  * find SMR values, requirements:
  *  - orbit number within a range MAX_DiffOrbitNumber
  */
      if ( H5LTget_dataset_info( fid, "orbitList", &nrecords, NULL, NULL ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, "orbitList" );
      if ( nrecords <= 0 ) goto done;
 
      orbitList = (int *) malloc( (size_t) nrecords * sizeof(int) );
      if ( orbitList == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitList" );
 
      if ( H5LTread_dataset_int ( fid, "orbitList", orbitList ) < 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "orbitList" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbitList" );
 
      for ( nr = 0; nr < (int) nrecords; nr++ ) {
 	  delta = (orbitList[nr] >  absOrbit) ? 
@@ -293,12 +289,12 @@ bool SDMF_get_SMR_31( bool calibRad,
      }
      if ( delta_min > MAX_DiffOrbitNumber ) {
 	  (void) snprintf(str_msg, SHORT_STRING_LENGTH, msg_notfound, absOrbit);
-	  NADC_GOTO_ERROR( prognm, NADC_SDMF_ABSENT, str_msg );
+	  NADC_GOTO_ERROR( NADC_SDMF_ABSENT, str_msg );
      }
      found = TRUE;
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg_found, 
 		      orbitList[metaIndx] );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     NADC_ERROR( NADC_ERR_NONE, str_msg );
 /*
  * read SMR data
  */
@@ -323,7 +319,7 @@ bool SDMF_get_SMR_31( bool calibRad,
 	  stat = H5TBread_records( fid, "metaTable", metaIndx, 1, mtbl_size, 
 				   mtbl_offs, mtbl_smr2_sizes, &mtbl );
 	  if ( stat < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "metaTable" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "metaTable" );
 
 	  SCIA_SMR_CAL_RAD( absOrbit, channel, mtbl.asmAngle, 
 			    mtbl.sunElev, wvlen, solarMean );
@@ -345,8 +341,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_get_smr";
-
      register unsigned short np = 0;
 
      unsigned short orbit;
@@ -379,12 +373,12 @@ int main( int argc, char *argv[] )
 
      fnd_30 = SDMF_get_SMR_30( calibRad, orbit, channel, NULL, smr_30 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_SMR_30" );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_SMR_30" );
      if ( ! fnd_30 ) (void) fprintf( stderr, "# no solution for SDMF v3.0\n" );
 
      fnd_31 = SDMF_get_SMR_31( calibRad, orbit, channel, NULL, smr_31 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_SMR_31" );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_SMR_31" );
      if ( ! fnd_31 ) (void) fprintf( stderr, "# no solution for SDMF v3.1\n" );
 
      if ( ! (fnd_30 || fnd_31) ) goto done;

@@ -108,8 +108,6 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 		      unsigned int num_dsd, const struct dsd_envi *dsd, 
 		      struct nfit_scia **nfit_out )
 {
-     const char prognm[]   = "SCIA_OL2_RD_NFIT";
-
      char         *nfit_pntr, *nfit_char = NULL;
      size_t       dsd_size, n_corr;
      unsigned int indx_dsd;
@@ -123,7 +121,7 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, nfit_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, nfit_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, nfit_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
           NADC_ERR_RESTORE();
           nfit_out[0] = NULL;
@@ -138,18 +136,18 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct nfit_scia));
      }
      if ( (nfit = nfit_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "nfit" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "nfit" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (nfit_char = (char *) malloc( dsd_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "nfit_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "nfit_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( nfit_char, dsd_size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to NFIT structure
  */
@@ -175,13 +173,13 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 	  if ( nfit->numvcd > 0u ) {
 	       nfit->vcd = (float *) malloc( nfit->numvcd * sizeof(float) );
 	       if ( nfit->vcd == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "vcd" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "vcd" );
 	       (void) memcpy( nfit->vcd, nfit_pntr, 
 			      nfit->numvcd * ENVI_FLOAT );
 	       nfit_pntr += nfit->numvcd * ENVI_FLOAT;
 	       nfit->errvcd = (float *) malloc( nfit->numvcd * sizeof(float) );
 	       if ( nfit->errvcd == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "errvcd" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "errvcd" );
 	       (void) memcpy( nfit->errvcd, nfit_pntr, 
 			      nfit->numvcd * ENVI_FLOAT );
 	       nfit_pntr += nfit->numvcd * ENVI_FLOAT;
@@ -204,14 +202,14 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 	       nfit->linpars = (float *) 
 		    malloc( nfit->num_fitp * sizeof(float) );
 	       if ( nfit->linpars == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "linpars" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "linpars" );
 	       (void) memcpy( nfit->linpars, nfit_pntr, 
 				nfit->num_fitp * ENVI_FLOAT );
 	       nfit_pntr += nfit->num_fitp * ENVI_FLOAT;
 	       nfit->errlinpars = (float *)
 		    malloc((size_t) nfit->num_fitp * sizeof( float ));
 	       if ( nfit->errlinpars == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "errlinpars" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "errlinpars" );
 	       (void) memcpy( nfit->errlinpars, nfit_pntr, 
 				nfit->num_fitp * ENVI_FLOAT );
 	       nfit_pntr += nfit->num_fitp * ENVI_FLOAT;
@@ -220,7 +218,7 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 	  if ( n_corr > 0u ) {
 	       nfit->lincorrm = (float *) malloc( n_corr * sizeof(float) );
 	       if ( nfit->lincorrm == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lincorrm" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lincorrm" );
 	       (void) memcpy( nfit->lincorrm, nfit_pntr, n_corr * ENVI_FLOAT );
 	       nfit_pntr += n_corr * ENVI_FLOAT;
 	  }
@@ -228,14 +226,14 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 	       nfit->nlinpars = (float *)
 		    malloc( nfit->num_nfitp * sizeof(float) );
 	       if ( nfit->nlinpars == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "nlinpars" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "nlinpars" );
 	       (void) memcpy( nfit->nlinpars, nfit_pntr, 
 				nfit->num_nfitp * ENVI_FLOAT );
 	       nfit_pntr += nfit->num_nfitp * ENVI_FLOAT;
 	       nfit->errnlinpars = (float *)
 		    malloc( nfit->num_nfitp * sizeof(float) );
 	       if ( nfit->errnlinpars == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "errnlinpars" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "errnlinpars" );
 	       (void) memcpy( nfit->errnlinpars, nfit_pntr, 
 				nfit->num_nfitp * ENVI_FLOAT );
 	       nfit_pntr += nfit->num_nfitp * ENVI_FLOAT;
@@ -245,7 +243,7 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
 	       nfit->nlincorrm = (float *)
 		    malloc((size_t) n_corr * sizeof( float ));
 	       if ( nfit->nlincorrm == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "nlincorrm" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "nlincorrm" );
 	       (void) memcpy( nfit->nlincorrm, nfit_pntr, 
 				n_corr * ENVI_FLOAT );
 	       nfit_pntr += n_corr * ENVI_FLOAT;
@@ -282,7 +280,7 @@ int SCIA_OL2_RD_NFIT( FILE *fd, const char nfit_name[],
  * check if we read the whole DSR
  */
      if ( (unsigned int)(nfit_pntr - nfit_char) != dsd[indx_dsd].size )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, nfit_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, nfit_name );
      nfit_pntr = NULL;
 /*
  * set return values

@@ -158,8 +158,6 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
 				  const struct dsd_envi *dsd,
 				  struct state1_scia **mds_state )
 {
-     const char prognm[] = "SCIA_LV1_SELECT_MDS";
-
      register unsigned int ni = 0;
      register unsigned int num_not = 0;
      register unsigned int num_select = 0;
@@ -191,32 +189,32 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
 	  if ( param.write_nadir != PARAM_SET ) return 0u;
 	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "NADIR" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "NADIR" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "NADIR" );
 	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
 	  break;
      case SCIA_LIMB:
 	  if ( param.write_limb != PARAM_SET ) return 0u;
 	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "LIMB" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LIMB" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LIMB" );
 	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
 	  break;
      case SCIA_OCCULT:
 	  if ( param.write_occ != PARAM_SET ) return 0u;
 	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "OCCULTATION" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "OCCULTATION" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "OCCULTATION" );
 	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
 	  break;
      case SCIA_MONITOR:
 	  if ( param.write_moni != PARAM_SET ) return 0u;
 	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "MONITORING" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MONITORING" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MONITORING" );
 	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "unknown MDS state" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "unknown MDS state" );
      }
 /*
  * initialize begin and end julian date of time window
@@ -234,7 +232,7 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
      num_state = SCIA_LV1_RD_STATE( fp, num_dsd, dsd, &state );
      Use_Extern_Alloc = Save_Extern_Alloc;
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "STATE" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "STATE" );
 /*
  * read Geolocation of States (LADS)
  */
@@ -242,13 +240,13 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
      (void) SCIA_RD_LADS( fp, num_dsd, dsd, &lads );
      Use_Extern_Alloc = Save_Extern_Alloc;
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "LADS" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LADS" );
 /*
  * allocate memory to store indices to selected MDS records
  */
      indx_state = (unsigned int *) malloc( num_state * sizeof( unsigned int ));
      if ( indx_state == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_state" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indx_state" );
 /*
  * go through all state-records
  */
@@ -321,7 +319,7 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
 	       malloc( num_select * sizeof( struct state1_scia ));
 	  if ( *mds_state == NULL ) {
 	       num_select = 0u;
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds_state" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds_state" );
 	  }
 	  for ( ni = 0; ni < num_select; ni++ )
 	       (void) memcpy( &(*mds_state)[ni], &state[indx_state[ni]],

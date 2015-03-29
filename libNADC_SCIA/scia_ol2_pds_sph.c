@@ -131,8 +131,6 @@ void SCIA_OL2_RD_SPH( FILE *fd, const struct mph_envi mph,
 		      struct sph_sci_ol *sph )
        /*@globals sph2_items;@*/
 {
-     const char prognm[] = "SCIA_OL2_RD_SPH";
-
      int    ibuff;
 
      unsigned int nr_byte;
@@ -151,7 +149,7 @@ void SCIA_OL2_RD_SPH( FILE *fd, const struct mph_envi mph,
  */
      nr_byte = NADC_RD_PDS_HDR( fd, NUM_SPH2_ITEMS, sph2_items );
      if ( nr_byte != Length_SPH )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
 /*
  * fill sph2_scia struct
  */
@@ -289,8 +287,6 @@ void SCIA_OL2_WR_SPH( FILE *fd, const struct mph_envi mph,
 		      const struct sph_sci_ol sph )
        /*@globals sph2_items;@*/
 {
-     const char prognm[] = "SCIA_OL2_WR_SPH";
-
      int ibuff;
 
      const unsigned int Length_SPH = mph.sph_size - mph.num_dsd * mph.dsd_size;
@@ -365,5 +361,5 @@ void SCIA_OL2_WR_SPH( FILE *fd, const struct mph_envi mph,
  * write PDS header
  */
      if ( NADC_WR_PDS_HDR( NUM_SPH2_ITEMS, sph2_items, fd ) != Length_SPH )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
 }

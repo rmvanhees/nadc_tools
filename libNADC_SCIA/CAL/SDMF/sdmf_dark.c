@@ -84,8 +84,6 @@ static const size_t mtbl_offs[DIM_MTBL_DARK] = {
 void SDMF_rd_darkTable( hid_t locID, int *numIndx, int *metaIndx,
 			  struct mtbl_dark_rec **mtbl_out )
 {
-     const char prognm[] = "SDMF_rd_darkTable";
-
      int     nrows;
      herr_t  stat;
      hsize_t nfields, nrecords;
@@ -107,7 +105,7 @@ void SDMF_rd_darkTable( hid_t locID, int *numIndx, int *metaIndx,
  * obtain table info
  */
      stat = H5TBget_table_info(locID, tableName, &nfields, &nrecords );
-     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, tableName );
+     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, tableName );
      nrows = (int) nrecords;
      if ( *numIndx == 0 ) *numIndx = nrows;
      if ( nrows == 0 ) return;
@@ -117,7 +115,7 @@ void SDMF_rd_darkTable( hid_t locID, int *numIndx, int *metaIndx,
      mtbl = (struct mtbl_dark_rec *) 
 	  malloc( (size_t) (*numIndx) * mtbl_size );
      if ( mtbl == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mtbl" );
 /*
  * read table
  */
@@ -126,7 +124,7 @@ void SDMF_rd_darkTable( hid_t locID, int *numIndx, int *metaIndx,
 				 mtbl_dark_sizes, mtbl );
 	  if ( stat < 0 ) {
 	       free( mtbl );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
 	  } 
      } else {
 	  register int nm;
@@ -137,7 +135,7 @@ void SDMF_rd_darkTable( hid_t locID, int *numIndx, int *metaIndx,
 					mtbl+nm );
 	       if ( stat < 0 ) {
 		    free( mtbl );
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+		    NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
 	       } 
 	  }
      }

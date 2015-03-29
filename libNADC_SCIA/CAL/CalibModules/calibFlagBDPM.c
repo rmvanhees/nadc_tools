@@ -95,8 +95,6 @@ void SCIA_ATBD_FLAG_BDPM( const struct file_rec *fileParam,
 			  const struct state1_scia *state, 
 			  struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_ATBD_FLAG_BDPM";
-
      register unsigned short num = 0u;
 
      static unsigned char bdpm[SCIENCE_PIXELS];
@@ -111,7 +109,7 @@ void SCIA_ATBD_FLAG_BDPM( const struct file_rec *fileParam,
 	  (void) SCIA_LV1_RD_PPG( fileParam->fp, fileParam->num_dsd, 
 				  fileParam->dsd, &ppg );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "PPG" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "PPG" );
 	  (void) memcpy( bdpm, ppg.bad_pixel, SCIENCE_PIXELS );
      }
 /*
@@ -127,8 +125,6 @@ void SCIA_SRON_FLAG_BDPM( const struct file_rec *fileParam,
 			  const struct state1_scia *state, 
 			  struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_SRON_FLAG_BDPM";
-
      register unsigned short num = 0u;
 
      static unsigned char bdpm[SCIENCE_PIXELS];
@@ -148,14 +144,14 @@ void SCIA_SRON_FLAG_BDPM( const struct file_rec *fileParam,
 	  else
 	       found = SDMF_get_BDPM_30( orbit, bdpm );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_BDPM");
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "SDMF_get_BDPM");
 	  if ( ! found ) {
 	       struct ppg_scia ppg;
 
 	       (void) SCIA_LV1_RD_PPG( fileParam->fp, fileParam->num_dsd, 
 				       fileParam->dsd, &ppg );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "PPG" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "PPG" );
 	       (void) memcpy( bdpm, ppg.bad_pixel, SCIENCE_PIXELS );
 	  }
      }
@@ -170,8 +166,6 @@ void SCIA_SRON_FLAG_BDPM( const struct file_rec *fileParam,
 void SCIA_LV1C_FLAG_BDPM( unsigned short absOrbit, 
 			  unsigned short num_mds, struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV1C_FLAG_BDPM";
-
      register unsigned short num = 0u;     /* counter for number of clusters */
 
      static unsigned short orbit_old = 0;
@@ -192,7 +186,7 @@ void SCIA_LV1C_FLAG_BDPM( unsigned short absOrbit,
 		    found = SDMF_get_BDPM_30( absOrbit, bdpm );
 	  }
 	  if ( ! found || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_BDPM" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "SDMF_get_BDPM" );
 	  orbit_old = absOrbit;
      }
 /*

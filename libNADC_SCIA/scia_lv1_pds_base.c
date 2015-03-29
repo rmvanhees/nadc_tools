@@ -81,8 +81,6 @@ unsigned int SCIA_LV1_RD_BASE( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct base_scia *base )
 {
-     const char prognm[] = "SCIA_LV1_RD_BASE";
-
      size_t       dsr_size;
      unsigned int indx_dsd;
 
@@ -92,7 +90,7 @@ unsigned int SCIA_LV1_RD_BASE( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0u;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
@@ -102,7 +100,7 @@ unsigned int SCIA_LV1_RD_BASE( FILE *fd, unsigned int num_dsd,
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( base->wvlen_det_pix, dsr_size, 1, fd ) != 1 ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_ERROR( NADC_ERR_PDS_RD, "" );
 	  return 0u;
      }
 /*
@@ -132,8 +130,6 @@ unsigned int SCIA_LV1_RD_BASE( FILE *fd, unsigned int num_dsd,
 -------------------------*/
 void SCIA_LV1_WR_BASE( FILE *fd, const struct base_scia *base_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_BASE";
-
      size_t nr_byte;
 
      struct base_scia base;
@@ -152,7 +148,7 @@ void SCIA_LV1_WR_BASE( FILE *fd, const struct base_scia *base_in )
 #endif
      nr_byte = (size_t) (SCIENCE_PIXELS * ENVI_FLOAT);
      if ( fwrite( base.wvlen_det_pix, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
 /*
  * update list of written DSD records

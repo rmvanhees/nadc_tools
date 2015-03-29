@@ -57,8 +57,6 @@
 void SCIA_LV1_WR_H5_SRS( struct param_record param, unsigned int nr_srs,
 			 const struct srs_scia *srs )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_SRS";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -97,7 +95,7 @@ void SCIA_LV1_WR_H5_SRS( struct param_record param, unsigned int nr_srs,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write SRS data sets
  */
@@ -123,7 +121,7 @@ void SCIA_LV1_WR_H5_SRS( struct param_record param, unsigned int nr_srs,
                             NFIELDS, nr_srs, srs_size, srs_names,
                             srs_offs, srs_type, 1,
                             NULL, compress, srs );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "srs" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "srs" );
 /*
  * close interface
  */

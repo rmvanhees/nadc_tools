@@ -76,8 +76,6 @@ int SCIA_LV2_RD_STATE( FILE *fd, unsigned int num_dsd,
 		       const struct dsd_envi *dsd,
 		       struct state2_scia **state_out )
 {
-     const char prognm[]   = "SCIA_LV2_RD_STATE";
-
      char         *state_pntr, *state_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -92,20 +90,20 @@ int SCIA_LV2_RD_STATE( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
      if ( ! Use_Extern_Alloc ) {
 	  state_out[0] = (struct state2_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct state2_scia));
      }
      if ( (state = state_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "state" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "state" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (state_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "state_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "state_char" );
 /*
  * rewind/read input data file
  */
@@ -115,7 +113,7 @@ int SCIA_LV2_RD_STATE( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( state_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to STATE structure
  */
@@ -142,7 +140,7 @@ int SCIA_LV2_RD_STATE( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(state_pntr - state_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */

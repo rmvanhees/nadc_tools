@@ -90,8 +90,6 @@ unsigned int SCIA_LV1_RD_SQADS( FILE *fd, unsigned int num_dsd,
 				const struct dsd_envi *dsd,
 				struct sqads1_scia **sqads_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_SQADS";
-
      char         *sqads_pntr, *sqads_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -106,7 +104,7 @@ unsigned int SCIA_LV1_RD_SQADS( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           sqads_out[0] = NULL;
           return 0u;
@@ -116,13 +114,13 @@ unsigned int SCIA_LV1_RD_SQADS( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct sqads1_scia));
      }
      if ( (sqads = sqads_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sqads" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sqads" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (sqads_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sqads_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sqads_char" );
 /*
  * rewind/read input data file
  */
@@ -132,7 +130,7 @@ unsigned int SCIA_LV1_RD_SQADS( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( sqads_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  sqads_pntr = sqads_char;
 /*
  * read data buffer to SQADS structure
@@ -177,7 +175,7 @@ unsigned int SCIA_LV1_RD_SQADS( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(sqads_pntr - sqads_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -212,8 +210,6 @@ unsigned int SCIA_LV1_RD_SQADS( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_SQADS( FILE *fd, unsigned int num_sqads, 
 			const struct sqads1_scia *sqads_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_SQADS";
-
      size_t nr_byte;
 
      struct sqads1_scia sqads;
@@ -243,46 +239,46 @@ void SCIA_LV1_WR_SQADS( FILE *fd, unsigned int num_sqads,
  * write SQADS structure
  */
 	  if ( fwrite( &sqads.mjd.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 	  if ( fwrite( &sqads.mjd.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &sqads.mjd.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &sqads.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  nr_byte = (size_t) ENVI_FLOAT * SCIENCE_CHANNELS;
 	  if ( fwrite( sqads.mean_wv_diff, nr_byte, 1, fd) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	       if ( fwrite( sqads.sdev_wv_diff, nr_byte, 1, fd) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( &sqads.missing_readouts, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  nr_byte = (size_t) ENVI_FLOAT * ALL_CHANNELS;
 	  if ( fwrite( sqads.mean_diff_leak, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( &sqads.flag_glint, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &sqads.flag_rainbow, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &sqads.flag_saa_region, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  nr_byte = (size_t) ENVI_USHRT * ALL_CHANNELS;
 	  if ( fwrite( sqads.hotpixel, nr_byte,1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( StringSpareFlags, NumSpareFlags, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += NumSpareFlags;
 
 	  sqads_in++;

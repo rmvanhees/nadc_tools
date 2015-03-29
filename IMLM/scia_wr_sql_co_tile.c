@@ -86,8 +86,6 @@ void SCIA_WR_SQL_CO_TILE( PGconn *conn, const char *prodName,
 			    unsigned int num_rec, 
 			    const struct imlm_rec *rec )
 {
-     const char prognm[] = "SCIA_WR_SQL_CO_TILE";
-
      register unsigned int nr;
      register unsigned int affectedRows = 0u;
 
@@ -107,10 +105,10 @@ void SCIA_WR_SQL_CO_TILE( PGconn *conn, const char *prodName,
 		      META_TBL_NAME, prodName );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, prodName );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, prodName );
      }
      pntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );     
@@ -120,7 +118,7 @@ void SCIA_WR_SQL_CO_TILE( PGconn *conn, const char *prodName,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * insert all tiles in products
@@ -130,7 +128,7 @@ void SCIA_WR_SQL_CO_TILE( PGconn *conn, const char *prodName,
 	  res = PQexec( conn,
 			"SELECT nextval(\'tile_imlm_co_pk_tile_seq\')" );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, 
 				PQresultErrorMessage(res) );
 	  pntr = PQgetvalue( res, 0, 0 );
 	  tile_id = strtoll( pntr, (char **) NULL, 10 );
@@ -166,14 +164,14 @@ void SCIA_WR_SQL_CO_TILE( PGconn *conn, const char *prodName,
 
 /* 	  (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -186,9 +184,9 @@ void SCIA_WR_SQL_CO_TILE( PGconn *conn, const char *prodName,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE, "affectedRows=%-u", affectedRows );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
 }

@@ -48,14 +48,14 @@ extern "C" {
 #define IS_ERR_STAT_WARN    ((nadc_stat & NADC_STAT_WARN) != UCHAR_ZERO)
 #define IS_ERR_STAT_FATAL   ((nadc_stat & NADC_STAT_FATAL) != UCHAR_ZERO)
 
-#define NADC_ERROR( prognm, num, str ) \
-   NADC_Err_Push( num, __FILE__, prognm, __LINE__, str )
+#define NADC_ERROR( num, str ) \
+   NADC_Err_Push( num, __FILE__, __FUNCTION__, __LINE__, str )
 
-#define NADC_RETURN_ERROR( prognm, num, str ) \
-   { NADC_ERROR( prognm, num, str ); return; }
+#define NADC_RETURN_ERROR( num, str ) \
+   { NADC_ERROR( num, str ); return; }
 
-#define NADC_GOTO_ERROR( prognm, num, str ) \
-   { NADC_ERROR( prognm, num, str ); goto done; }
+#define NADC_GOTO_ERROR( num, str ) \
+   { NADC_ERROR( num, str ); goto done; }
 
 #define NADC_ERR_SAVE()      NADC_Err_Keep( TRUE )
 #define NADC_ERR_RESTORE()   NADC_Err_Keep( FALSE )

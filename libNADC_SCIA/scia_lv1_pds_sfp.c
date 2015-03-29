@@ -79,8 +79,6 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
 			      const struct dsd_envi *dsd,
 			      struct sfp_scia **sfp_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_SFP";
-
      char         *sfp_pntr, *sfp_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -95,7 +93,7 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           sfp_out[0] = NULL;
           return 0u;
@@ -105,13 +103,13 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct sfp_scia));
      }
      if ( (sfp = sfp_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sfp" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sfp" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (sfp_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sfp_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sfp_char" );
 /*
  * rewind/read input data file
  */
@@ -121,7 +119,7 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( sfp_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to SFP structure
  */
@@ -139,7 +137,7 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
  */
 	  if ( (size_t)(sfp_pntr - sfp_char) != dsr_size ) {
 	       free( sfp_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  }
 /*
  * byte swap data to local representation
@@ -175,8 +173,6 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_SFP( FILE *fd, unsigned int num_sfp,
 		      const struct sfp_scia *sfp_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_SFP";
-
      struct sfp_scia sfp;
 
      struct dsd_envi dsd = {
@@ -202,16 +198,16 @@ void SCIA_LV1_WR_SFP( FILE *fd, unsigned int num_sfp,
  * write SFP structure file
  */
 	  if ( fwrite( &sfp.pix_pos_slit_fun, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &sfp.type_slit_fun, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &sfp.fwhm_slit_fun, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &sfp.f_voi_fwhm_loren, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
 	  sfp_in++;

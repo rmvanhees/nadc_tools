@@ -85,8 +85,6 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
 			      const struct dsd_envi *dsd,
 			      struct ppg_scia *ppg )
 {
-     const char prognm[]   = "SCIA_LV1_RD_PPG";
-
      char         *ppg_char, *ppg_pntr;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -99,7 +97,7 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0u;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -108,7 +106,7 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (ppg_char = (char *) malloc( dsr_size )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "ppg_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "ppg_char" );
 	  return 0u;
      }
 /*
@@ -117,7 +115,7 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( ppg_char, dsr_size, 1, fd ) != 1 ) {
 	  free( ppg_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_ERROR( NADC_ERR_PDS_RD, "" );
 	  return 0u;
      }
      ppg_pntr = ppg_char;
@@ -139,7 +137,7 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
  */
      if ( (size_t)(ppg_pntr - ppg_char) != dsr_size ) {
 	  free( ppg_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  return 0u;
      }
 /*
@@ -173,8 +171,6 @@ unsigned int SCIA_LV1_RD_PPG( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_PPG( FILE *fd, unsigned int num_ppg, 
 		      const struct ppg_scia ppg_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_PPG(";
-
      size_t nr_byte;
 
      struct ppg_scia ppg;
@@ -199,20 +195,20 @@ void SCIA_LV1_WR_PPG( FILE *fd, unsigned int num_ppg,
 #endif
      nr_byte = (size_t) (SCIENCE_PIXELS * ENVI_FLOAT);
      if ( fwrite( &ppg.ppg_fact, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( &ppg.etalon_fact, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( &ppg.etalon_resid, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( &ppg.wls_deg_fact, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      nr_byte = (size_t) (SCIENCE_PIXELS * ENVI_UCHAR);
      if ( fwrite( &ppg.bad_pixel, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
 /*
  * update list of written DSD records

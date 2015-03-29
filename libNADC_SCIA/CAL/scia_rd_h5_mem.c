@@ -64,8 +64,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_RD_H5_MEM( struct scia_memcorr *mem )
 {
-     const char prognm[] = "SCIA_RD_H5_MEM";
-
      hid_t  file_id = 0;
      hsize_t hdims[2];
 
@@ -78,11 +76,11 @@ void SCIA_RD_H5_MEM( struct scia_memcorr *mem )
 
           file_id = H5Fopen( nlin_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, nlin_fl );
+               NADC_RETURN_ERROR( NADC_ERR_HDF_FILE, nlin_fl );
      } else {
           file_id = H5Fopen( env_str, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_FILE, env_str );
+               NADC_RETURN_ERROR( NADC_ERR_HDF_FILE, env_str );
      }
 /*
  * read datasets
@@ -92,12 +90,12 @@ void SCIA_RD_H5_MEM( struct scia_memcorr *mem )
      mem->dims[1] = (size_t) hdims[1];
      mem->matrix = ALLOC_R2D( mem->dims[0], mem->dims[1] );
      if ( mem->matrix == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mem->matrix" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mem->matrix" );
      (void) H5LTread_dataset_float( file_id, "MemTable", mem->matrix[0] );
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
              "\n\tapplied memory correction (SRON-SCIA-PhE-RP-011)" );
  done:
      if ( file_id >= 0 ) (void) H5Fclose( file_id );
@@ -117,15 +115,13 @@ void SCIA_FREE_H5_MEM( struct scia_memcorr *mem )
 
 int main()
 {
-     const char prognm[] = "test_rd_h5_mem";
-
      register size_t ii;
 
      struct scia_memcorr mem = { {0,0}, NULL };
 
      SCIA_RD_H5_MEM( &mem );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_RD_H5_MEM" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "SCIA_RD_H5_MEM" );
      (void) fprintf( stdout, "DIMS: %zd %zd\n", mem.dims[0], mem.dims[1] );
      for ( ii = 0; ii < mem.dims[1]; ii++ )
 	  (void) fprintf( stdout, "%15.6E", mem.matrix[0][ii] );

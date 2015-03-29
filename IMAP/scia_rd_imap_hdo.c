@@ -84,8 +84,6 @@ unsigned int Read_IMAP_Record( const char flname[],
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, rec@*/
 {
-     const char prognm[] = "Read_IMAP_Record";
-
      char   line[MAX_LINE_LENGTH];
      int    numItems;
      int    iday, imon, iyear;
@@ -99,7 +97,7 @@ unsigned int Read_IMAP_Record( const char flname[],
  * open the IMAP product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, flname );
 
      do {
 	  char *cpntr;
@@ -131,7 +129,7 @@ unsigned int Read_IMAP_Record( const char flname[],
 	  if ( numItems != NUM_COLUMNS ) {
 	       char msg[80];
 	       (void) snprintf( msg, 80, "incomplete record[%-u]\n", numRec );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, msg );
 	  }
 	  rec->meta.stateID = UCHAR_ZERO;
 	  rec->meta.bs = UCHAR_ZERO;
@@ -157,8 +155,6 @@ unsigned int Read_IMAP_Record( const char flname[],
 void SCIA_RD_IMAP_HDO( const char *flname, struct imap_hdr *hdr,
 		       struct imap_rec **imap_out )
 {
-     const char prognm[] = "SCIA_RD_IMAP_HDO";
-
      char   *cpntr, ctemp[SHORT_STRING_LENGTH], line[MAX_LINE_LENGTH];
 
      gzFile fp;
@@ -206,7 +202,7 @@ void SCIA_RD_IMAP_HDO( const char *flname, struct imap_hdr *hdr,
  * obtain number of records
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, flname );
      hdr->numRec    = 0u;
      do {
           if ( gzeof ( fp ) == 1 ) break;
@@ -221,7 +217,7 @@ void SCIA_RD_IMAP_HDO( const char *flname, struct imap_hdr *hdr,
  */
      rec = (struct imap_rec *) 
 	  malloc( hdr->numRec * sizeof( struct imap_rec ));
-     if ( rec == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+     if ( rec == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rec" );
 /*
  * read records from the IMAP product
  */
@@ -232,7 +228,7 @@ void SCIA_RD_IMAP_HDO( const char *flname, struct imap_hdr *hdr,
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
 			   "failed to read all records %u out of %u\n", 
 			   numRec, hdr->numRec );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, msg );
      }
      SciaJDAY2adaguc( rec->jday, hdr->validity_start );
      SciaJDAY2adaguc( rec[hdr->numRec-1].jday, hdr->validity_stop );

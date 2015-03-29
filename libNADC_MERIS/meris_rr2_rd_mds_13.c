@@ -74,8 +74,6 @@ unsigned int MERIS_RR2_RD_MDS_13( int mds_number, FILE *fd,
 				  const struct dsd_envi *dsd, 
 				  struct mds_rr2_13_meris **mds_13_out )
 {
-     const char prognm[] = "MERIS_RR2_RD_MDS_13";
-
      char         dsd_name[25];
      char         *mds_13_char, *mds_13_pntr;
      size_t       dsr_size;
@@ -92,7 +90,7 @@ unsigned int MERIS_RR2_RD_MDS_13( int mds_number, FILE *fd,
      (void) snprintf( dsd_name, 25, "Norm. rho_surf - MDS(%-d)", mds_number );
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_ABSENT || IS_ERR_STAT_FATAL ) {
-          NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+          NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -101,7 +99,7 @@ unsigned int MERIS_RR2_RD_MDS_13( int mds_number, FILE *fd,
 	       malloc(dsd[indx_dsd].num_dsr * sizeof(struct mds_rr2_13_meris));
      }
      if ( (mds_13 = mds_13_out[0]) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds_13" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "mds_13" );
 	  return 0;
      }
 /*
@@ -109,7 +107,7 @@ unsigned int MERIS_RR2_RD_MDS_13( int mds_number, FILE *fd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (mds_13_char = (char *) malloc( dsr_size )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds_13_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "mds_13_char" );
 	  return 0;
      }
 /*
@@ -121,7 +119,7 @@ unsigned int MERIS_RR2_RD_MDS_13( int mds_number, FILE *fd,
  */
      do {
 	  if ( fread( mds_13_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to MDS_13 structure
  */
@@ -139,7 +137,7 @@ unsigned int MERIS_RR2_RD_MDS_13( int mds_number, FILE *fd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(mds_13_pntr - mds_13_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_MDS_13( mds_13 );

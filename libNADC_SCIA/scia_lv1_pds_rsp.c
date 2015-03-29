@@ -61,8 +61,6 @@ unsigned int SCIA_LV1_RD_RSPLO( FILE *fd, const struct dsd_envi dsd,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *rsplo@*/
 {
-     const char prognm[] = "SCIA_LV1_RD_RSPLO";
-
      register unsigned short ni;
 
      char         *rsplo_pntr, *rsplo_char = NULL;
@@ -75,7 +73,7 @@ unsigned int SCIA_LV1_RD_RSPLO( FILE *fd, const struct dsd_envi dsd,
  * allocate memory to temporary store data for output structure
  */
      if ( (rsplo_char = (char *) malloc( (size_t) dsd.dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rsplo_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rsplo_char" );
 /*
  * rewind/read input data file
  */
@@ -85,7 +83,7 @@ unsigned int SCIA_LV1_RD_RSPLO( FILE *fd, const struct dsd_envi dsd,
  */
      do {
 	  if ( fread( rsplo_char, dsd.dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  rsplo_pntr = rsplo_char;
 /*
  * read data buffer to RSPLO structure
@@ -100,7 +98,7 @@ unsigned int SCIA_LV1_RD_RSPLO( FILE *fd, const struct dsd_envi dsd,
  * check if we read the whole DSR
  */
 	  if ( (rsplo_pntr - rsplo_char) != dsd.dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd.name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd.name );
 /*
  * byte swap data to local representation
  */
@@ -134,8 +132,6 @@ void SCIA_LV1_WR_RSPLO( FILE *fd, struct dsd_envi dsd, unsigned int num_rsplo,
        /*@globals  errno;@*/
        /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_RSPLO";
-
      register unsigned short ni;
 
      float sensitivity[SCIENCE_PIXELS];
@@ -166,13 +162,13 @@ void SCIA_LV1_WR_RSPLO( FILE *fd, struct dsd_envi dsd, unsigned int num_rsplo,
  * write RSPLO structure to data buffer
  */
 	  if ( fwrite( &rsplo.ang_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &rsplo.ang_asm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( sensitivity, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  rsplo_in++;
@@ -205,8 +201,6 @@ unsigned int SCIA_LV1_RD_RSPN( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct rspn_scia **rspn_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_RSPN";
-
      register unsigned short ni;
 
      char         *rspn_pntr, *rspn_char = NULL;
@@ -225,7 +219,7 @@ unsigned int SCIA_LV1_RD_RSPN( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           rspn_out[0] = NULL;
           return 0u;
@@ -235,13 +229,13 @@ unsigned int SCIA_LV1_RD_RSPN( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct rspn_scia));
      }
      if ( (rspn = rspn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspn" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (rspn_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspn_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspn_char" );
 /*
  * rewind/read input data file
  */
@@ -251,7 +245,7 @@ unsigned int SCIA_LV1_RD_RSPN( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( rspn_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  rspn_pntr = rspn_char;
 /*
  * read data buffer to RSPN structure
@@ -264,7 +258,7 @@ unsigned int SCIA_LV1_RD_RSPN( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(rspn_pntr - rspn_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -312,8 +306,6 @@ unsigned int SCIA_LV1_RD_RSPL( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct rsplo_scia **rspl_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_RSPL";
-
      unsigned int indx_dsd;
 
      unsigned int nr_dsr = 0;
@@ -324,7 +316,7 @@ unsigned int SCIA_LV1_RD_RSPL( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           rspl_out[0] = NULL;
           return 0u;
@@ -334,13 +326,13 @@ unsigned int SCIA_LV1_RD_RSPL( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct rsplo_scia));
      }
      if ( rspl_out[0] == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspl" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspl" );
 /*
  * read radiance sensitivity parameters Limb/Occultation
  */
      nr_dsr = SCIA_LV1_RD_RSPLO( fd, dsd[indx_dsd], rspl_out[0] );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCIA_LV1_RD_RSPLO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCIA_LV1_RD_RSPLO" );
 /*
  * set return values
  */
@@ -368,8 +360,6 @@ unsigned int SCIA_LV1_RD_RSPO( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct rsplo_scia **rspo_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_RSPO";
-
      unsigned int indx_dsd;
 
      unsigned int nr_dsr = 0;
@@ -380,7 +370,7 @@ unsigned int SCIA_LV1_RD_RSPO( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           rspo_out[0] = NULL;
           return 0u;
@@ -390,13 +380,13 @@ unsigned int SCIA_LV1_RD_RSPO( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct rsplo_scia));
      }
      if ( rspo_out[0] == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspo" );
 /*
  * read radiance sensitivity parameters Limb/Occultation
  */
      nr_dsr = SCIA_LV1_RD_RSPLO( fd, dsd[indx_dsd], rspo_out[0] );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCIA_LV1_RD_RSPLO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCIA_LV1_RD_RSPLO" );
 /*
  * set return values
  */
@@ -421,8 +411,6 @@ unsigned int SCIA_LV1_RD_RSPO( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_RSPN( FILE *fd, unsigned int num_rspn, 
 		       const struct rspn_scia *rspn_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_RSPN";
-
      register unsigned short ni;
 
      float  sensitivity[SCIENCE_PIXELS];
@@ -461,10 +449,10 @@ void SCIA_LV1_WR_RSPN( FILE *fd, unsigned int num_rspn,
 	  } while ( ++ni < SCIENCE_PIXELS );
 #endif
 	  if ( fwrite( &rspn.ang_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( sensitivity, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  rspn_in++;

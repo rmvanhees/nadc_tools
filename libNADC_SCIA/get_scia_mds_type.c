@@ -69,13 +69,11 @@ const unsigned char SciaTypeMDS[MAX_NUM_STATE] = {
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 unsigned char GET_SCIA_MDS_TYPE( unsigned char stateID )
 {
-     const char prognm[] = "GET_SCIA_MDS_TYPE";
-
      if ( stateID >= (unsigned char) 1 
 	  && stateID <= (unsigned char) MAX_NUM_STATE )
 	  return SciaTypeMDS[stateID-1];
 
-     NADC_ERROR( prognm, NADC_ERR_FATAL, "state ID out-of-range" );
+     NADC_ERROR( NADC_ERR_FATAL, "state ID out-of-range" );
      return UCHAR_ZERO;
 }
 

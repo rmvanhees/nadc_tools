@@ -117,16 +117,15 @@ static NADC_pds_hdr_t mph_items[NUM_MPH_ITEMS] = {
 void ENVI_RD_MPH( FILE *fd, struct mph_envi *mph )
        /*@globals mph_items;@*/
 {
-     const char prognm[] = "ENVI_RD_MPH";
 /*
  * always rewind the file
  */
-     if ( fseek( fd, 0L, SEEK_SET ) != 0 ) perror( prognm );
+     if ( fseek( fd, 0L, SEEK_SET ) != 0 ) perror( __FUNCTION__ );
 /*
  * read PDS header
  */
      if ( NADC_RD_PDS_HDR( fd, NUM_MPH_ITEMS, mph_items ) != PDS_MPH_LENGTH )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "MPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "MPH size" );
 /*
  * fill mph_envi struct
  */
@@ -205,7 +204,6 @@ void ENVI_RD_MPH( FILE *fd, struct mph_envi *mph )
 void ENVI_WR_MPH( FILE *fd, const struct mph_envi mph )
        /*@globals mph_items;@*/
 {
-     const char prognm[] = "ENVI_WR_MPH";
 /*
  * fill struct "mph_envi"
  */
@@ -254,5 +252,5 @@ void ENVI_WR_MPH( FILE *fd, const struct mph_envi mph )
  * write PDS header
  */
      if ( NADC_WR_PDS_HDR( NUM_MPH_ITEMS, mph_items, fd ) != PDS_MPH_LENGTH )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "MPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "MPH size" );
 }

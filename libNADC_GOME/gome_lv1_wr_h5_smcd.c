@@ -71,8 +71,6 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
      hid_t   grp_id;
      hbool_t compress;
      hsize_t nrpix, dims[2];
-
-     const char prognm[] = "GOME_LV1_WR_H5_SMCD";
 /*
  * check number of SMCD records
  */
@@ -89,10 +87,10 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
  */
      if ( flag_origin == FLAG_SUN ) {
 	  if ( (grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/SUN" )) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/SUN" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/SUN" );
      } else {
 	  if ( (grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MOON" )) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MOON" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MOON" );
      }
      (void) H5Gclose( grp_id );
 /*
@@ -102,12 +100,12 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
 	  grp_id = H5Gcreate( param.hdf_file_id, "/SUN/SCD", 
 			      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( grp_id < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/SUN/SCD" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/SUN/SCD" );
      } else {
 	  grp_id = H5Gcreate( param.hdf_file_id, "/MOON/MCD", 
 			      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( grp_id < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MOON/MCD" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MOON/MCD" );
      }
 /*
  * +++++ create/write attributes
@@ -117,7 +115,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
  * UTC date and time
  */
      ubuff = (unsigned int *) malloc( dims[0] * sizeof( unsigned int));
-     if ( ubuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "ubuff" );
+     if ( ubuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ubuff" );
      ny = 0;
      do { ubuff[ny] = smcd[indx_smcd[ny]].utc_date; } while ( ++ny < dims[0] );
      NADC_WR_HDF5_Dataset( compress, grp_id, "UTC_date", 
@@ -131,7 +129,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
  * Sun zenith and azimuth angle
  */
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      ny = 0;
      do {
 	  rbuff[ny] = smcd[indx_smcd[ny]].north_sun_zen;
@@ -200,7 +198,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
  * Indices
  */
      sbuff = (short *) malloc( (size_t) nr_smcd * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      ny = 0;
      do { 
 	  sbuff[ny] = smcd[indx_smcd[ny]].indx_spec; 
@@ -220,7 +218,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
  */
      usbuff = (unsigned short *) malloc( dims[0] * sizeof( short ));
      if ( usbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "usbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "usbuff" );
      ny = 0;
      do {
 	  usbuff[ny] = smcd[indx_smcd[ny]].ihr.subsetcounter;
@@ -241,7 +239,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
      dims[1] = SCIENCE_CHANNELS; 
      nrpix = dims[0] * dims[1];
      sbuff = (short *) malloc( nrpix * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      nr = ny = 0;
      do {
 	  nx = 0;
@@ -256,7 +254,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
  * Pre-disperser prism temperature
  */
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      ny = 0;
      do {
 	  rbuff[ny] = (float) (-1.721 + 6.104e-3 * 
@@ -273,12 +271,12 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
 	  grp_id = H5Gcreate( param.hdf_file_id, "/SUN/PMD", 
 			      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( grp_id < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/SUN/PMD" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/SUN/PMD" );
      } else {
 	  grp_id = H5Gcreate( param.hdf_file_id, "/MOON/PMD", 
 			      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( grp_id < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MOON/PMD" );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MOON/PMD" );
      }
 /*
  * write PMD values
@@ -286,7 +284,7 @@ void GOME_LV1_WR_H5_SMCD( unsigned char flag_origin,
      dims[1] = PMD_NUMBER * PMD_IN_GRID;
      nrpix = (size_t) (dims[0] * dims[1]);
      rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      ni = 0; nr = 0;
      do {
 	  ny = 0;

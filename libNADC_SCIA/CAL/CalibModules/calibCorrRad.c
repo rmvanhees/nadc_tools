@@ -88,8 +88,6 @@ static
 void WRITE_H5_RSPN( const char *dbname, const char *table,
 		    unsigned short num_rsp, const struct rspn_scia *rspn )
 {
-     const char prognm[] = "WRITE_H5_RSPN";
-
      hid_t   file_id;
      hsize_t adim;
      herr_t  stat;
@@ -104,7 +102,7 @@ void WRITE_H5_RSPN( const char *dbname, const char *table,
      };
 
      file_id = H5Fcreate( dbname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, dbname );
+     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbname );
 
      adim = SCIENCE_PIXELS;
      rspn_type[1] = H5Tarray_create( H5T_NATIVE_DOUBLE, 1, &adim );
@@ -113,7 +111,7 @@ void WRITE_H5_RSPN( const char *dbname, const char *table,
                             2, num_rsp, rspn_size, rspn_names,
                             rspn_offs, rspn_type, 1,
                             NULL, FALSE, rspn );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, table );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, table );
 done:
      (void) H5Tclose( rspn_type[1] );
      (void) H5Fclose( file_id );
@@ -124,8 +122,6 @@ static
 void WRITE_H5_RSPLO( const char *dbname, const char *table,
 		     unsigned short num_rsp, const struct rsplo_scia *rspm )
 {
-     const char prognm[] = "WRITE_H5_RSPM";
-
      hid_t   file_id;
      hsize_t adim;
      herr_t  stat;
@@ -141,7 +137,7 @@ void WRITE_H5_RSPLO( const char *dbname, const char *table,
      };
 
      file_id = H5Fcreate( dbname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, dbname );
+     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbname );
 
      adim = SCIENCE_PIXELS;
      rspm_type[2] = H5Tarray_create( H5T_NATIVE_DOUBLE, 1, &adim );
@@ -150,7 +146,7 @@ void WRITE_H5_RSPLO( const char *dbname, const char *table,
                             3, num_rsp, rspm_size, rspm_names,
                             rspm_offs, rspm_type, 1,
                             NULL, FALSE, rspm );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, table );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, table );
 done:
      (void) H5Tclose( rspm_type[2] );
      (void) H5Fclose( file_id );
@@ -310,8 +306,6 @@ unsigned short Get_RadSensNadir( const struct file_rec *fileParam,
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, *rspn_out@*/
 {
-     const char prognm[] = "Get_RadSensNadir";
-
      register unsigned short n_ch, nr;
 
      unsigned short num_rsp = 0;
@@ -328,7 +322,7 @@ unsigned short Get_RadSensNadir( const struct file_rec *fileParam,
 						  fileParam->num_dsd, 
 						  fileParam->dsd, &rspn );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "RSPN" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "RSPN" );
 #ifdef DEBUG
      WRITE_H5_RSPN( "scia_l1b_rspn.h5", "rspn", num_rsp, rspn );
 #endif
@@ -378,8 +372,6 @@ unsigned short Get_H5_RadSensNadir( bool NDF, const float *wvlen,
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, *rspn_out@*/
 {
-     const char prognm[] = "Get_H5_RadSensNadir";
-
      register unsigned short np, nr, offs;
 
      unsigned short num_rsp = 0;
@@ -413,7 +405,7 @@ unsigned short Get_H5_RadSensNadir( bool NDF, const float *wvlen,
  */
      rspn = (struct rspn_scia *) 
 	  malloc( key.n_elev * sizeof(struct rspn_scia) );
-     if ( rspn == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspn" );
+     if ( rspn == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspn" );
      num_rsp = key.n_elev;
 /*
  * interpolate sensitivities to wavelength grid 
@@ -563,8 +555,6 @@ unsigned short Get_RadSensLimb( const struct file_rec *fileParam,
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, *rspl_out@*/
 {
-     const char prognm[] = "Get_RadSensLimb";
-
      register unsigned short n_ch, nr;
 
      unsigned short num_rsp = 0;
@@ -579,7 +569,7 @@ unsigned short Get_RadSensLimb( const struct file_rec *fileParam,
 						  fileParam->num_dsd, 
 						  fileParam->dsd, &rspl );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "RSPL" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "RSPL" );
 /*
  * interpolate sensitivities to wavelength grid (when do_pixelwise equals 'f')
  */
@@ -627,8 +617,6 @@ unsigned short Get_RadSensOccul( const struct file_rec *fileParam,
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, *rspo_out@*/
 {
-     const char prognm[] = "Get_RadSensOccul";
-
      register unsigned short n_ch, nr;
 
      unsigned short num_rsp = 0;
@@ -641,7 +629,7 @@ unsigned short Get_RadSensOccul( const struct file_rec *fileParam,
 						  fileParam->num_dsd, 
 						  fileParam->dsd, &rspo );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "RSPO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "RSPO" );
 /*
  * interpolate sensitivities to wavelength grid (when do_pixelwise equals 'f')
  */
@@ -689,8 +677,6 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const float *wvlen,
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, *rspl_out@*/
 {
-     const char prognm[] = "Get_H5_RadSensLimb";
-
      register unsigned short np, nr;
 
      unsigned short n_azi, n_elev;
@@ -725,10 +711,10 @@ unsigned short Get_H5_RadSensLimb( bool NDF, const float *wvlen,
  * allocate memory for the RSPL records
  */
      if ( key.n_el_az == 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspl" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspl" );
      rspl = (struct rsplo_scia *) 
 	  malloc( key.n_el_az * sizeof(struct rsplo_scia) );
-     if ( rspl == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspl" );
+     if ( rspl == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspl" );
      num_rsp = key.n_el_az;
 /*
  * interpolate sensitivities to wavelength grid 
@@ -803,8 +789,6 @@ unsigned short Get_H5_RadSensMoni( bool NDF, /*@null@*/ const float *wvlen_in,
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, *rspm_out@*/
 {
-     const char prognm[] = "Get_H5_RadSensMoni";
-
      register unsigned short np, nr, offs;
 
      unsigned short n_azi, n_elev;
@@ -847,10 +831,10 @@ unsigned short Get_H5_RadSensMoni( bool NDF, /*@null@*/ const float *wvlen_in,
  * allocate memory for the RSPM records
  */
      if ( key.n_brdf == 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspm" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspm" );
      rspm = (struct rsplo_scia *) 
 	  malloc( key.n_brdf * sizeof(struct rsplo_scia) );
-     if ( rspm == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspm" );
+     if ( rspm == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspm" );
      num_rsp = key.n_brdf;
 /*
  * interpolate sensitivities to wavelength grid 
@@ -929,8 +913,6 @@ struct rsplo_scia **Get_Matrix_RSPLO( unsigned short num_dsr,
                                       /*@out@*/ unsigned short *n_esm )
      /*@globals  nadc_stat, nadc_err_stack;@*/
 {
-     const char prognm[] = "Get_Matrix_RSPLO";
-
      register unsigned short nr, offs;
 
      const float tmpAzi  = rsplo->ang_asm;
@@ -944,14 +926,14 @@ struct rsplo_scia **Get_Matrix_RSPLO( unsigned short num_dsr,
           if ( rsplo[nr].ang_esm == tmpElev ) (*n_asm)++;
      }
      if ( (*n_esm) == 0 || (*n_asm) == 0 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mtx_rsplo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mtx_rsplo" );
 /*
  * allocate pointers to rows
  */
      mtx_rsplo = (const struct rsplo_scia **)
           malloc( (*n_esm) * sizeof( const struct rsplo_scia * ) );
      if ( mtx_rsplo == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mtx_rsplo" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mtx_rsplo" );
 /*
  * set pointes to rows
  */
@@ -1176,8 +1158,6 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 			struct mds1c_scia *mds_1c )
       /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
 {
-     const char prognm[] = "SCIA_ATBD_CAL_RAD";
-
      register unsigned short nr, np, num;
 
      unsigned short num_rsp = 0;
@@ -1208,7 +1188,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	  else 
 	       num_rsp = Get_RadSensNadir( fileParam, wvlen, &rspn );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensNadir" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_RadSensNadir" );
 
           /* apply m-factor to radiance sensitivity */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1238,7 +1218,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	  else
 	       num_rsp = Get_RadSensLimb( fileParam, wvlen, &rspl );
 	  if ( IS_ERR_STAT_FATAL )
-	    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensLimb" );
+	    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_RadSensLimb" );
 
           /* apply m-factor to radiance sensitivity */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1268,7 +1248,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	  else
 	       num_rsp = Get_RadSensOccul( fileParam, wvlen, &rspo );
 	  if ( IS_ERR_STAT_FATAL )
-	    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensOccul" );
+	    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_RadSensOccul" );
 
           /* apply m-factor to radiance sensitivity */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1323,7 +1303,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       else
 		    num_rsp = Get_RadSensLimb( fileParam, wvlen, &rspl );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "Get_RadSensLimb");
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_RadSensLimb");
 
                /* apply m-factor to radiance sensitivity */
 	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1358,7 +1338,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       } else
 		    num_rsp = Get_RadSensNadir( fileParam, wvlen, &rspn );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,"Get_RadSensNadir");
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_RadSensNadir" );
 
                /* apply m-factor to radiance sensitivity */
 	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1395,7 +1375,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       } else
 		    num_rsp = Get_RadSensNadir( fileParam, wvlen, &rspn );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR(prognm,NADC_ERR_FATAL,"Get_RadSensNadir");
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_RadSensNadir" );
 
                /* apply m-factor to radiance sensitivity */
 	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1428,7 +1408,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       NDF = (state->state_id == 62) ? TRUE : FALSE;
 	       num_rsp = Get_H5_RadSensMoni( NDF, wvlen.science, &rspm );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "Get_RadSensMoni");
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_RadSensMoni");
 
                /* apply m-factor to radiance sensitivity */
 	       if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
@@ -1454,7 +1434,7 @@ void SCIA_ATBD_CAL_RAD( const struct file_rec *fileParam,
 	       break;
 	  default:		 
 	       /* generate a message for states not defined yet */
-	       NADC_ERROR( prognm, NADC_ERR_FATAL,
+	       NADC_ERROR( NADC_ERR_FATAL,
 			   "RadSens correction for this Monitoring state"
 			   " not implemented" );
 	  }
@@ -1485,8 +1465,6 @@ void SCIA_SMR_CAL_RAD( unsigned short absOrbit, unsigned short channel,
 		       float *smr )
       /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
 {
-     const char prognm[] = "SCIA_SMR_CAL_RAD";
-
      const bool NDF = TRUE;
      const bool Save_Extern_Alloc = Use_Extern_Alloc;
 
@@ -1507,7 +1485,7 @@ void SCIA_SMR_CAL_RAD( unsigned short absOrbit, unsigned short channel,
      num_rsp = Get_H5_RadSensMoni( NDF, wvlen, &rspm );
      Use_Extern_Alloc = Save_Extern_Alloc;
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Get_RadSensMoni" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_RadSensMoni" );
 
      /* create 2D-matrix pointing to rspm structure */
      mtx_rspm = Get_Matrix_RSPLO( num_rsp, rspm, &n_asm, &n_esm );

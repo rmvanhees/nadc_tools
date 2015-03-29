@@ -90,8 +90,6 @@ unsigned int SCIA_LV1_RD_EKD( FILE *fd, unsigned int num_dsd,
 			      const struct dsd_envi *dsd,
 			      struct ekd_scia *ekd )
 {
-     const char prognm[]   = "SCIA_LV1_RD_EKD";
-
      char         *ekd_pntr, *ekd_char = NULL;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -103,7 +101,7 @@ unsigned int SCIA_LV1_RD_EKD( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0u;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
@@ -112,7 +110,7 @@ unsigned int SCIA_LV1_RD_EKD( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (ekd_char = (char *) malloc( dsr_size )) == NULL ) { 
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "ekd_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "ekd_char" );
 	  return 0u;
      }
 /*
@@ -121,7 +119,7 @@ unsigned int SCIA_LV1_RD_EKD( FILE *fd, unsigned int num_dsd,
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( ekd_char, dsr_size, 1, fd ) != 1 ) {
 	  free( ekd_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_ERROR( NADC_ERR_PDS_RD, "" );
 	  return 0u;
      }
      ekd_pntr = ekd_char;
@@ -151,7 +149,7 @@ unsigned int SCIA_LV1_RD_EKD( FILE *fd, unsigned int num_dsd,
  */
      if ( (size_t)(ekd_pntr - ekd_char) != dsr_size ) {
 	  free( ekd_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  return 0u;
      }
 /*
@@ -188,8 +186,6 @@ unsigned int SCIA_LV1_RD_EKD( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_EKD( FILE *fd, unsigned int num_ekd, 
 		      const struct ekd_scia ekd_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_EKD";
-
      struct ekd_scia ekd;
 
      struct dsd_envi dsd = {
@@ -216,31 +212,31 @@ void SCIA_LV1_WR_EKD( FILE *fd, unsigned int num_ekd,
  * write EKD structure to file
  */
      if ( fwrite( ekd.mu2_nadir, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.mu3_nadir, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.mu2_limb, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.mu3_limb, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.radiance_vis, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.radiance_nadir, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.radiance_limb, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.radiance_sun, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
      if ( fwrite( ekd.bsdf, nr_byte, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      dsd.size += nr_byte;
 /*
  * update list of written DSD records

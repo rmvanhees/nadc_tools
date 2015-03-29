@@ -64,12 +64,10 @@ void SCIA_LV2_WR_ASCII_CLD( struct param_record param, unsigned int num_dsr,
 
      unsigned int ndim;
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_CLD";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "cld" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of CLOUD_AEROSOL record
  */
@@ -126,22 +124,18 @@ void SCIA_LV2_WR_ASCII_BIAS( const char *mds_name, struct param_record param,
 
      unsigned int ndim;
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_BIAS";
-
      FILE *outfl;
 
      if ( init ) {
 	  outfl = CRE_ASCII_File( param.outfile, "bias" );
 	  if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, 
-				  param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, 0, param.infile, mds_name );
 	  init = FALSE;
      } else {
 	  outfl = CAT_ASCII_File( param.outfile, "bias" );
 	  if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, 
-				  param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_text( outfl, 0, "MDS name", mds_name );
      }
 /*
@@ -206,22 +200,18 @@ void SCIA_LV2_WR_ASCII_DOAS( const char *mds_name, struct param_record param,
 
      unsigned int ndim;
 
-     const char prognm[] = "SCIA_LV2_WR_ASCII_DOAS";
-
      FILE *outfl;
 
      if ( init ) {
 	  outfl = CRE_ASCII_File( param.outfile, "doas" );
 	  if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, 
-				  param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_header( outfl, 0, param.infile, mds_name );
 	  init = FALSE;
      } else {
 	  outfl = CAT_ASCII_File( param.outfile, "doas" );
 	  if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, 
-				  param.outfile );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 	  nadc_write_text( outfl, 0, "MDS name", mds_name );
      }
 /*

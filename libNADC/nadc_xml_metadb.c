@@ -76,8 +76,6 @@ static void NADC_STRIP_ALL( const char *str_in, char *str_out )
 void NADC_GET_XML_METADB( FILE *fp, char *host, char *port, 
 			  char *user, char *passwd )
 {
-     const char prognm[] = "NADC_GET_XML_METADB";
-
      char   line[MAX_LINE_LENGTH], line_strip[MAX_LINE_LENGTH];
      char   keyword[MAX_LINE_LENGTH];
      char   *sep;
@@ -92,24 +90,24 @@ void NADC_GET_XML_METADB( FILE *fp, char *host, char *port,
  */
      do {
           if ( fgets( line, MAX_LINE_LENGTH-1, fp ) == NULL )
-               NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD,
-                                "error reading nadc.config.xml" );
+               NADC_RETURN_ERROR( NADC_ERR_FILE_RD,
+				  "error reading nadc.config.xml" );
      } while (strstr( line, "metatables" ) == NULL );
 /*
  * read until tag "server"
  */
      do {
           if ( fgets( line, MAX_LINE_LENGTH-1, fp ) == NULL )
-               NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD,
-                                "error reading nadc.config.xml" );
+               NADC_RETURN_ERROR( NADC_ERR_FILE_RD,
+				  "error reading nadc.config.xml" );
      } while (strstr( line, "<server" ) == NULL );
 /*
  * read value for "host", "user", "passwd"
  */
      do {
           if ( fgets( line, MAX_LINE_LENGTH-1, fp ) == NULL )
-               NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD,
-                                "error reading nadc.config.xml" );
+               NADC_RETURN_ERROR( NADC_ERR_FILE_RD,
+				  "error reading nadc.config.xml" );
 	  NADC_STRIP_ALL( line, line_strip );
 
 	  if ( (sep = strchr( line_strip, '=' )) != NULL ) {

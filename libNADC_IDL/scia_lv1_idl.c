@@ -55,8 +55,6 @@ static const char err_msg[] = "invalid number of function arguments";
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
 int IDL_STDCALL _SCIA_LV1_RD_ASFP ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_ASFP";
-
      int nr_asfp;
 
      unsigned int num_dsd;
@@ -64,9 +62,9 @@ int IDL_STDCALL _SCIA_LV1_RD_ASFP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct asfp_scia *asfp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -82,8 +80,6 @@ int IDL_STDCALL _SCIA_LV1_RD_ASFP ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_AUX";
-
      int nr_aux;
 
      unsigned int num_dsd;
@@ -91,9 +87,9 @@ int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct mds1_aux *aux;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
@@ -109,16 +105,14 @@ int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_BASE ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_BASE";
-
      unsigned int num_dsd;
 
      struct dsd_envi  *dsd;
      struct base_scia *base;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -133,8 +127,6 @@ int IDL_STDCALL _SCIA_LV1_RD_BASE ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_CLCP ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_CLCP";
-
      int nr_clcp;
 
      unsigned int num_dsd;
@@ -142,9 +134,9 @@ int IDL_STDCALL _SCIA_LV1_RD_CLCP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct clcp_scia *clcp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -160,8 +152,6 @@ int IDL_STDCALL _SCIA_LV1_RD_CLCP ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_DARK ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_DARK";
-
      int nr_dark;
 
      unsigned int num_dsd;
@@ -169,9 +159,9 @@ int IDL_STDCALL _SCIA_LV1_RD_DARK ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct dark_scia *dark;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -187,8 +177,6 @@ int IDL_STDCALL _SCIA_LV1_RD_DARK ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_EKD ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_EKD";
-
      int nr_ekd;
 
      unsigned int num_dsd;
@@ -196,9 +184,9 @@ int IDL_STDCALL _SCIA_LV1_RD_EKD ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct ekd_scia *ekd;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -214,8 +202,6 @@ int IDL_STDCALL _SCIA_LV1_RD_EKD ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_LCPN ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_LCPN";
-
      int nr_lcpn;
 
      unsigned int num_dsd;
@@ -223,9 +209,9 @@ int IDL_STDCALL _SCIA_LV1_RD_LCPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct lcpn_scia *lcpn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -241,8 +227,6 @@ int IDL_STDCALL _SCIA_LV1_RD_LCPN ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_PMD";
-
      int nr_pmd;
 
      unsigned int num_dsd;
@@ -250,9 +234,9 @@ int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct mds1_pmd *pmd;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
@@ -268,8 +252,6 @@ int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_PPG ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_PPG";
-
      int nr_ppg;
 
      unsigned int num_dsd;
@@ -277,9 +259,9 @@ int IDL_STDCALL _SCIA_LV1_RD_PPG ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct ppg_scia *ppg;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -295,7 +277,6 @@ int IDL_STDCALL _SCIA_LV1_RD_PPG ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_PPGN ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_PPGN";
 
      int nr_ppgn;
 
@@ -304,9 +285,9 @@ int IDL_STDCALL _SCIA_LV1_RD_PPGN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct ppgn_scia *ppgn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -322,8 +303,6 @@ int IDL_STDCALL _SCIA_LV1_RD_PPGN ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_PSPN ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_PSPN";
-
      int nr_pspn;
 
      unsigned int num_dsd;
@@ -331,9 +310,9 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct pspn_scia *pspn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -349,8 +328,6 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPN ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_PSPL ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_PSPL";
-
      int nr_pspl;
 
      unsigned int num_dsd;
@@ -358,9 +335,9 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPL ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct psplo_scia *pspl;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -376,8 +353,6 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPL ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_PSPO ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_PSPO";
-
      int nr_pspo;
 
      unsigned int num_dsd;
@@ -385,9 +360,9 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPO ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct psplo_scia *pspo;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -403,8 +378,6 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPO ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_RSPN ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_RSPN";
-
      int nr_rspn;
 
      unsigned int num_dsd;
@@ -412,9 +385,9 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct rspn_scia *rspn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -430,8 +403,6 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPN ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_RSPL ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_RSPL";
-
      int nr_rspl;
 
      unsigned int num_dsd;
@@ -439,9 +410,9 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPL ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct rsplo_scia *rspl;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -457,8 +428,6 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPL ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_RSPO ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_RSPO";
-
      int nr_rspo;
 
      unsigned int num_dsd;
@@ -466,9 +435,9 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPO ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct rsplo_scia *rspo;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -484,8 +453,6 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPO ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SCP ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SCP";
-
      int nr_scp;
 
      unsigned int num_dsd;
@@ -493,9 +460,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SCP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct scp_scia *scp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -511,8 +478,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SCP ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SCPN ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SCPN";
-
      int nr_scpn;
 
      unsigned int num_dsd;
@@ -520,9 +485,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SCPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct scpn_scia *scpn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -538,8 +503,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SCPN ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SFP ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SFP";
-
      int nr_sfp;
 
      unsigned int num_dsd;
@@ -547,9 +510,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SFP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct sfp_scia *sfp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -565,8 +528,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SFP ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SIP ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SIP";
-
      int nr_sip;
 
      unsigned int num_dsd;
@@ -574,9 +535,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SIP ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct sip_scia *sip;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -591,14 +552,12 @@ int IDL_STDCALL _SCIA_LV1_RD_SIP ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SPH ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SPH";
-
      struct mph_envi  mph;
      struct sph1_scia *sph;
 
-     if ( argc != 2 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 2 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      mph = *(struct mph_envi *) argv[0];
      sph = (struct sph1_scia *) argv[1];
@@ -614,8 +573,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SPH ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SQADS ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SQADS";
-
      int nr_sqads;
 
      unsigned int num_dsd;
@@ -623,9 +580,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SQADS ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct sqads1_scia *sqads;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd   = (struct dsd_envi *) argv[1];
@@ -640,8 +597,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SQADS ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SRS ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SRS";
-
      int nr_srs;
 
      unsigned int num_dsd;
@@ -649,9 +604,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SRS ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct srs_scia *srs;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -667,8 +622,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SRS ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_SRSN ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_SRSN";
-
      int nr_srsn;
 
      unsigned int num_dsd;
@@ -676,9 +629,9 @@ int IDL_STDCALL _SCIA_LV1_RD_SRSN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct srsn_scia *srsn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -694,8 +647,6 @@ int IDL_STDCALL _SCIA_LV1_RD_SRSN ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_STATE ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_STATE";
-
      int nr_state;
 
      unsigned int num_dsd;
@@ -703,9 +654,9 @@ int IDL_STDCALL _SCIA_LV1_RD_STATE ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct state1_scia *state;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -720,8 +671,6 @@ int IDL_STDCALL _SCIA_LV1_RD_STATE ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_VLCP ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_VLCP";
-
      int nr_vlcp;
 
      unsigned int num_dsd;
@@ -729,9 +678,9 @@ int IDL_STDCALL _SCIA_LV1_RD_VLCP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct vlcp_scia *vlcp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -747,8 +696,6 @@ int IDL_STDCALL _SCIA_LV1_RD_VLCP ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_MDS";
-
      register int nr;
 
      char *env_str = getenv( "SCIA_CORR_LOS" );
@@ -798,9 +745,9 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoN;          /* IDL uses 32-bit addresses */
      } *mds;
 
-     if ( argc != 12 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 12 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      state = *(struct state1_scia *) argv[0];
      clus_mask = *(unsigned long long *) argv[1];
@@ -924,8 +871,6 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_MDS_PMD";
-
      int    nr_mds = 0;
      int    nr_mds1b;
      size_t nr_byte;
@@ -960,9 +905,9 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
 
      const unsigned long long clus_mask  = ~0ULL;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      state = *(struct state1_scia *) argv[0];
      mds_pmd = (struct IDL_mds1c_pmd *) argv[1];
@@ -1029,8 +974,6 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_RD_MDS_POLV";
-
      int    nr_mds = 0;
      int    nr_mds1b;
      size_t nr_byte;
@@ -1068,9 +1011,9 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
 
      const unsigned long long clus_mask  = ~0ULL;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      state = *(struct state1_scia *) argv[0];
      mds_polV = (struct IDL_mds1c_polV *) argv[1];
@@ -1143,16 +1086,14 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1C_RD_CALOPT ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1C_RD_CALOPT";
-
      unsigned int num_dsd;
 
      struct dsd_envi    *dsd;
      struct cal_options *calopt;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
@@ -1167,8 +1108,6 @@ int IDL_STDCALL _SCIA_LV1C_RD_CALOPT ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1C_RD_MDS";
-
      register int nr;
 
      int    nr_mds;
@@ -1211,9 +1150,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoC;          /* IDL uses 32-bit addresses */
      } *mds;
 
-     if ( argc != 11 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 11 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      clus_mask = *(unsigned long long *) argv[0];
      state = *(struct state1_scia *) argv[1];
@@ -1302,8 +1241,6 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1C_RD_MDS_PMD";
-
      int    nr_mds = 0;
      size_t nr_byte;
 
@@ -1331,9 +1268,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoL;          /* IDL uses 32-bit addresses */
      } *mds_pmd;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      state = *(struct state1_scia *) argv[0];
      mds_pmd = (struct IDL_mds1c_pmd *) argv[1];
@@ -1345,7 +1282,7 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
  */
      C_mds_pmd = (struct mds1c_pmd *) malloc( sizeof( struct mds1c_pmd ));
      if ( C_mds_pmd == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "C_mds_pmd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds_pmd" );
      nr_mds = (int) SCIA_LV1C_RD_MDS_PMD( fd_nadc, &state, &C_mds_pmd );
      if ( IS_ERR_STAT_FATAL ) {
 	  SCIA_LV1C_FREE_MDS_PMD( (int) state.type_mds, C_mds_pmd );
@@ -1389,8 +1326,6 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 {
-     const char prognm[] = "LV1C_RD_MDS_POLV";
-
      int    nr_mds = 0;
      size_t nr_byte;
 
@@ -1421,9 +1356,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoL;          /* IDL uses 32-bit addresses */
      } *mds_polV;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 
      state = *(struct state1_scia *) argv[0];
      mds_polV = (struct IDL_mds1c_polV *) argv[1];
@@ -1435,7 +1370,7 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
  */
      C_mds_polV = (struct mds1c_polV *) malloc( sizeof( struct mds1c_polV ));
      if ( C_mds_polV == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "C_mds_polV" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds_polV" );
      nr_mds = (int) SCIA_LV1C_RD_MDS_POLV( fd_nadc, &state, &C_mds_polV );
      if ( IS_ERR_STAT_FATAL ) {
 	  SCIA_LV1C_FREE_MDS_POLV( (int) state.type_mds, C_mds_polV );
@@ -1488,8 +1423,6 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_LV1_SCALE_MDS";
-
      register int ni, nr;
 
      int                dim_Y    = 0;
@@ -1525,9 +1458,9 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 /*
  * check input parameters
  */
-     if ( argc != 7 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 7 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, "No open stream" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
 /*
  * set pointers
  */
@@ -1567,7 +1500,7 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
      if ( is_level_1c ) {
 	  C_pmd1c = (struct mds1c_pmd *) malloc( sizeof( struct mds1c_pmd ));
 	  if ( C_pmd1c == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "C_pmd1c" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_pmd1c" );
 	  if ( SCIA_LV1C_RD_MDS_PMD( fd_nadc, &state, &C_pmd1c ) == 0 ) { 
 	       free( C_pmd1c ); 
 	       C_pmd1c = NULL; 
@@ -1577,7 +1510,7 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 	  C_mds1c = (struct mds1c_scia *)
 	       malloc( state.num_clus * sizeof( struct mds1c_scia ));
 	  if ( C_mds1c == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "C_mds1c" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds1c" );
 	  nr_mds1c = SCIA_LV1C_RD_MDS( fd_nadc, clus_mask, &state, &C_mds1c );
 	  if ( IS_ERR_STAT_FATAL ) goto done;
 /*
@@ -1596,7 +1529,7 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 	  C_mds1c = (struct mds1c_scia *)
 	       malloc( state.num_clus * sizeof( struct mds1c_scia ));
 	  if ( C_mds1c == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "C_mds1c" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds1c" );
 	  nr_mds1c = (int) 
 	       GET_SCIA_LV1C_MDS( clus_mask, &state, C_mds1b, C_mds1c );
 	  if ( IS_ERR_STAT_FATAL ) goto done;
@@ -1667,8 +1600,6 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 
 int IDL_STDCALL _SCIA_RD_MFACTOR( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_RD_MFACTOR";
-
      const unsigned int calibFlag = 0U;
 
      enum mf_type mftype;
@@ -1677,7 +1608,7 @@ int IDL_STDCALL _SCIA_RD_MFACTOR( int argc, void *argv[] )
      IDL_STRING   *sensing_start;
      float        *mfactor;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      mf_str        = (IDL_STRING *) argv[0];
      sensing_start = (IDL_STRING *) argv[1];
      mfactor       = (float *) argv[2];

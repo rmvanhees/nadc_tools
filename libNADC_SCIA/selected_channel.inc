@@ -34,8 +34,6 @@
 static inline
 bool SELECTED_CHANNEL( unsigned char chan_mask, unsigned char chan_id )
 {
-     const char prognm[] = "SELECTED_CHANNEL";
-
      switch ( (int) chan_id ) {
      case 1:
 	  if ( (chan_mask & BAND_ONE) == UCHAR_ZERO ) return FALSE;
@@ -62,7 +60,7 @@ bool SELECTED_CHANNEL( unsigned char chan_mask, unsigned char chan_id )
 	  if ( (chan_mask & BAND_EIGHT) == UCHAR_ZERO ) return FALSE;
 	  break;
      default:
-          NADC_ERROR( prognm, NADC_ERR_FATAL, "unknown detector band" );
+          NADC_ERROR( NADC_ERR_FATAL, "unknown detector band" );
           return FALSE;
      }
      return TRUE;

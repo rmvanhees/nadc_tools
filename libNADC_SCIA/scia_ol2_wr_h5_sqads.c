@@ -63,8 +63,6 @@ static const size_t sqads_offs[NFIELDS] = {
 void SCIA_OL2_WR_H5_SQADS( struct param_record param, unsigned int nr_sqads,
 			   const struct sqads_sci_ol *sqads )
 {
-     const char prognm[] = "SCIA_OL2_WR_H5_SQADS";
-
      hid_t   ads_id;
      hbool_t compress;
      hsize_t adim;
@@ -88,7 +86,7 @@ void SCIA_OL2_WR_H5_SQADS( struct param_record param, unsigned int nr_sqads,
  * create group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * define user-defined data types of the Table-fields
  */

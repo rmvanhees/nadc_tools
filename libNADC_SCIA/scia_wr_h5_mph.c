@@ -98,8 +98,6 @@ static const size_t mph_offs[NFIELDS] = {
 void SCIA_WR_H5_MPH( struct param_record param, 
 		     const struct mph_envi *mph )
 {
-/*     const char prognm[] = "SCIA_WR_H5_MPH"; */
-
      register unsigned short ni = 0;
 
      hid_t   mph_type[NFIELDS];

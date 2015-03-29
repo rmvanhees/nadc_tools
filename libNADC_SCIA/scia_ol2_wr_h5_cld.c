@@ -83,8 +83,6 @@ static const size_t cld_offs[NFIELDS] = {
 void SCIA_OL2_WR_H5_CLD( struct param_record param, unsigned int nr_cld,
 			 const struct cld_sci_ol *cld )
 {
-     const char prognm[] = "SCIA_OL2_WR_H5_CLD";
-
      register unsigned int  nr;
 
      hid_t   grp_id;
@@ -118,7 +116,7 @@ void SCIA_OL2_WR_H5_CLD( struct param_record param, unsigned int nr_cld,
  * create group /MDS
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -164,7 +162,7 @@ void SCIA_OL2_WR_H5_CLD( struct param_record param, unsigned int nr_cld,
  * Additional aerosol parameters
  */
      vdata = (hvl_t *) malloc( nr_cld * sizeof(hvl_t) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
 	  vdata[nr].len = (size_t) cld[nr].numaeropars;
@@ -172,7 +170,7 @@ void SCIA_OL2_WR_H5_CLD( struct param_record param, unsigned int nr_cld,
 	       vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
 	       if ( vdata[nr].p == NULL ) {
 		    free( vdata );
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+		    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
 	       }
 	       (void) memcpy( vdata[nr].p , cld[nr].aeropars,
 			      vdata[nr].len * sizeof(float) );

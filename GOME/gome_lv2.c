@@ -72,8 +72,6 @@ int main( int argc, char *argv[] )
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[]   = "gome_lv2";
-
      register short nr, nr_ddr;
 
      short  num_ddr = 0;
@@ -95,12 +93,12 @@ int main( int argc, char *argv[] )
  */
      GOME_SET_PARAM( argc, argv, GOME_LEVEL_2, &param );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "" );
+          NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
 /*
  * check if we gave to give version and exit
  */
      if ( param.flag_version == PARAM_SET ) {
-	  GOME_SHOW_VERSION( stdout, prognm );
+	  GOME_SHOW_VERSION( stdout, "gome_lv2" );
 	  exit( EXIT_SUCCESS );
      }
 /*
@@ -114,27 +112,27 @@ int main( int argc, char *argv[] )
  * open input-file
  */
      if ( (infl = fopen( param.infile, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
 /*
  *-------------------------
  * read/write Product Identifier Content
  */
      GOME_RD_PIR( infl, &pir );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PIR" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PIR" );
      if ( strncmp( pir.product, "LVL20", 5 ) != 0 
 	  && strncmp( pir.product, "TCDO3", 5 ) != 0 ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL,
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL,
 			  "input is not a valid GOME level 2 file" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
           param.hdf_file_id = GOME_CRE_H5_FILE( GOME_LEVEL_2, &param );
           if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
 
 	  GOME_WR_H5_PIR( param, &pir );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "PIR" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "PIR" );
      }
 /*
  * -------------------------
@@ -142,35 +140,35 @@ int main( int argc, char *argv[] )
  */
      GOME_LV2_RD_FSR( infl, &fsr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "FSR" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "FSR" );
      if ( param.write_ascii == PARAM_SET ) {
 	  GOME_LV2_WR_ASCII_FSR( param, &fsr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "FSR" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "FSR" );
      }
      GOME_LV2_CHK_SIZE( fsr, param.infile );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, param.infile );
 /*
  * -------------------------
  * read Specific Product Header
  */
      GOME_LV2_RD_SPH( infl, &fsr, &sph );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SPH" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
 /*
  * -------------------------
  * read DOAS Data Records
  */
      num_ddr = GOME_LV2_RD_DDR( infl, &fsr, &sph, &ddr ); 
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DDR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DDR" );
      if ( param.flag_pselect == PARAM_SET ) {
        short nr_indices, *ddr_indices;
 
 	  ddr_indices = (short *) malloc( num_ddr * sizeof(short));
 	  if ( ddr_indices == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ddr_indices" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ddr_indices" );
 	  nr_indices = NADC_USRINDX( param.pselect, num_ddr, ddr_indices );
 	  for ( nr = 0; nr < nr_indices; nr++ ) {
 	       (void) memcpy( &ddr[nr], &ddr[ddr_indices[nr]], 
@@ -213,12 +211,12 @@ int main( int argc, char *argv[] )
      if ( param.write_ascii == PARAM_SET ) {
 	  GOME_LV2_WR_ASCII_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
 	  GOME_LV2_WR_H5_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SPH" );
      }
 /*
  * write DDR records
@@ -226,15 +224,15 @@ int main( int argc, char *argv[] )
      if ( param.write_ascii == PARAM_SET ) {
 	  GOME_LV2_WR_ASCII_DDR( param, sph, nr_ddr, ddr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "DDR" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DDR" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
 	  GOME_LV2_WR_H5_DDR( param, nr_ddr, ddr );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "DDR" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "DDR" );
 	  GOME_LV2_WR_H5_IRR( param, nr_ddr, ddr );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "IRR" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "IRR" );
      }
 /*
  * connect to PostgreSQL database and write meta data
@@ -245,25 +243,25 @@ int main( int argc, char *argv[] )
 
 	  CONNECT_NADC_DB( &conn, "gome" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL" );
 
 	  if ( param.flag_sql_remove == PARAM_SET 
 	       || param.flag_sql_replace == PARAM_SET )
 	       GOME_LV2_DEL_ENTRY( conn, param.infile, sph.soft_version );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL(remove)" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL(remove)" );
 
 	  if ( param.flag_sql_remove == PARAM_SET ) goto done;
 
 	  meta_id = GOME_LV2_WR_SQL_META( conn, param.flag_verbose, 
 					  param.infile, &sph, &fsr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_META" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_META" );
 
 	  GOME_LV2_WR_SQL_TILE( conn, param.flag_verbose, meta_id, 
 				sph.soft_version, nr_ddr, ddr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_DDR" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_DDR" );
      }
 #endif
 /*
@@ -285,7 +283,7 @@ int main( int argc, char *argv[] )
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, param.hdf5_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
      }
 /*
  * free allocated memory

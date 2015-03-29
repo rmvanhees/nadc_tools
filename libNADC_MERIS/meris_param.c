@@ -276,8 +276,6 @@ void Check_User_Option( FILE *stream, int instrument,
 void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
 		      struct param_record *param )
 {
-     const char prognm[] = "MERIS_SET_PARAM";
-
      char   *cpntr;
      char   outfile[MAX_STRING_LENGTH];
      char   prog_master[SHORT_STRING_LENGTH];
@@ -291,7 +289,7 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
  * check number of options
  */
      if ( argc == 0 || argv[0] == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, "none found!?!" );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, "none found!?!" );
 /*
  * strip path to program
  */
@@ -320,11 +318,11 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
 					 "Filename too long (max: %d)\n",
 					 (int) MAX_STRING_LENGTH );
 			 
-			 NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, cbuff );
+			 NADC_RETURN_ERROR( NADC_ERR_FATAL, cbuff );
 		    }
 		    param->flag_infile = PARAM_SET;
 	       } else {
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[narg] );
+		    NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 	       }
 /*
  * process command-line options starting with one "-" (= standalone options)
@@ -358,7 +356,7 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
 	       while ( ++narg < argc && argv[narg][0] == '-' );
 	       if ( ++narg >= argc 
 		    || argv == NULL || argv[narg][0] == '-' ) 
-		    NADC_RETURN_ERROR(prognm, NADC_ERR_PARAM, argv[narg]);
+		    NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 
 	       if ( param->flag_outfile == PARAM_UNSET ) {
 		    (void) snprintf( outfile, MAX_STRING_LENGTH, 

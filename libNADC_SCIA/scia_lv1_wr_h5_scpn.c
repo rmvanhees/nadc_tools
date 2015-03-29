@@ -57,8 +57,6 @@
 void SCIA_LV1_WR_H5_SCPN( struct param_record param, unsigned int nr_scpn,
 			  const struct scpn_scia *scpn )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_SCPN";
-
      hid_t   ads_id;
      hsize_t adim;
      herr_t  stat;
@@ -90,7 +88,7 @@ void SCIA_LV1_WR_H5_SCPN( struct param_record param, unsigned int nr_scpn,
  * open/create group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * write SCPN data sets
  */
@@ -113,7 +111,7 @@ void SCIA_LV1_WR_H5_SCPN( struct param_record param, unsigned int nr_scpn,
                             NFIELDS, 1, scpn_size, scpn_names,
                             scpn_offs, scpn_type, 1,
                             NULL, compress, scpn );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "scpn" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "scpn" );
 /*
  * close interface
  */

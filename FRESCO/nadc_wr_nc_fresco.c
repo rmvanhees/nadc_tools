@@ -68,8 +68,6 @@
 -------------------------*/
 void NADC_FRESCO_WR_NC_META( int ncid, const struct fresco_hdr *hdr )
 {
-     const char prognm[] = "NADC_FRESCO_WR_NC_META";
-
      register unsigned short ni;
 
      int  retval;
@@ -85,14 +83,14 @@ void NADC_FRESCO_WR_NC_META( int ncid, const struct fresco_hdr *hdr )
                                     strlen(meta_root_list[ni].attr_value)+1,
                                     meta_root_list[ni].attr_value );
           if ( retval != NC_NOERR )
-               NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+               NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval));
      }
 /*
  * Product meta-data
  */
      retval = nc_def_var( ncid, "product", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = 0; ni < numProdKeys; ni++ ) {
 	  if ( strcmp(meta_prod_list[ni].attr_name, "input_products")  == 0 )
 	       meta_prod_list[ni].attr_value = hdr->l1b_product;
@@ -110,38 +108,38 @@ void NADC_FRESCO_WR_NC_META( int ncid, const struct fresco_hdr *hdr )
 				    strlen(meta_prod_list[ni].attr_value)+1,
 				    meta_prod_list[ni].attr_value );
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval));
      }
 /*
  * Custom meta-data
  */
      retval = nc_def_var( ncid, "custom", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_put_att_ushort( ncid, var_id, "number_input_products",
                                  NC_USHORT, 1, &hdr->numProd );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 /*
  * Projection meta-data
  */
      retval = nc_def_var( ncid, "projection", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = 0; ni < numGeoKeys; ni++ ) {
 	  retval = nc_put_att_text( ncid, var_id,
 				    geo_prod_list[ni].attr_name,
 				    strlen(geo_prod_list[ni].attr_value)+1,
 				    geo_prod_list[ni].attr_value );
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval));
      }
 /*
  * ISO meta-data
  */
      retval = nc_def_var( ncid, "iso_dataset", NC_CHAR, 0, NULL, &var_id );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( ni = 0; ni < numIsoKeys; ni++ ) {
 	  if ( strcmp(iso_prod_list[ni].attr_name, "uid")  == 0 ) {
 	       if ( strcmp( hdr->source, "GOME" ) == 0 )
@@ -190,7 +188,7 @@ void NADC_FRESCO_WR_NC_META( int ncid, const struct fresco_hdr *hdr )
 					 iso_prod_list[ni].attr_value );
 	  }
 	  if ( retval != NC_NOERR )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, nc_strerror(retval));
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval));
      }
 }
 
@@ -212,8 +210,6 @@ void NADC_FRESCO_WR_NC_META( int ncid, const struct fresco_hdr *hdr )
 void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			    const struct fresco_rec *rec )
 {
-     const char prognm[] = "NADC_FRESCO_WR_NC_REC";
-
      register unsigned int ni, nr;
 
      int    retval;
@@ -234,11 +230,11 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
  * write dimension scale "time"
  */
      dbuff = (double *) malloc( numRec * sizeof(double) );
-     if ( dbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "dbuff" );
+     if ( dbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "dbuff" );
 
      retval = nc_def_dim( ncid, "time", (size_t) numRec, &time_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) nc_def_var( ncid, "time", NC_DOUBLE, 1, &time_id, &var_id );
      (void) nc_put_att_text( ncid, var_id, "long_name", 4, "time" );
      if ( strncmp( instr, "SCIA", 4 ) == 0 )
@@ -257,16 +253,16 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 
      retval = nc_def_dim( ncid, "nv", NUM_CORNERS, &nv_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 /*
  * write longitude and latitude of measurements
  */
      rbuff = (float *) malloc( numRec * sizeof(float) );
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 
      retval = nc_def_var( ncid, "lon", NC_FLOAT, 1, &time_id, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
      (void) nc_put_att_text( ncid, var_id, "long_name", 9, "longitude" );
@@ -278,7 +274,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 
      retval = nc_def_var( ncid, "lat", NC_FLOAT, 1, &time_id, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
      (void) nc_put_att_text( ncid, var_id, "long_name", 8, "latitude" );
@@ -293,7 +289,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
      retval = nc_def_compound( ncid, sizeof(struct fresco_meta_rec),
                                "meta_rec", &meta_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      nc_insert_compound( ncid, meta_id, "integration_time",
                          HOFFSET( struct fresco_meta_rec, intg_time ), 
 			 NC_UBYTE );
@@ -321,7 +317,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
      mbuff = (struct fresco_meta_rec *) 
 	  malloc( numRec * sizeof(struct fresco_meta_rec) );
-     if ( mbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mbuff" );
+     if ( mbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mbuff" );
      for ( nr = 0; nr < numRec; nr++ )
 	  (void) memcpy( mbuff+nr, &rec[nr].meta, 
 			 sizeof(struct fresco_meta_rec) );
@@ -334,7 +330,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "none", "effective cloud fraction", 
 			      "cloud_area_fraction", "cloudFractionError" );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudFraction" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudFraction" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudFraction;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -344,7 +340,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "none", "error of effective cloud fraction", 
 			      "cloud_area_fraction standard_error", NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudFractionError" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudFractionError" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudFractionError;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -353,7 +349,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
      var_id = ADAGUC_DEF_VAR( ncid, NC_FLOAT, time_id, "cloudTopHeight", 
 			      "m", "cloud height", "cloud_top_altitude", NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudTopHeight" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudTopHeight" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudTopHeight;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -364,7 +360,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "air_pressure_at_cloud_top", 
 			      "cloudTopPressError" );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudTopPress" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudTopPress" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudTopPress;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -375,7 +371,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "air_pressure_at_cloud_top standard_error",
 			      NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudTopPressError" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudTopPressError" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudTopPressError;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -385,7 +381,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "none", "cloud albedo", 
 			      "cloud_albedo", "cloudAlbedoError" );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudAlbedo" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudAlbedo" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudAlbedo;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -395,7 +391,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "none", "error of cloud albedo", 
 			      "cloud_albedo standard_error", NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "cloudAlbedoError" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "cloudAlbedoError" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].cloudAlbedoError;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -405,7 +401,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "none", "wavelength averaged surface albedo", 
 			      "surface_albedo", NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "surfaceAlbedo" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "surfaceAlbedo" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].surfaceAlbedo;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -414,7 +410,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
      var_id = ADAGUC_DEF_VAR( ncid, NC_FLOAT, time_id, "surfaceHeight", 
 			      "m", "surface heigth", "surface_altitude", NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "surfaceHeight" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "surfaceHeight" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].surfaceHeight;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -424,7 +420,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 			      "Pa", "assumed surface pressure", 
 			      "surface_air_pressure", NULL );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "groundPress" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "groundPress" );
      for ( nr = 0; nr < numRec; nr++ ) rbuff[nr] = rec[nr].groundPress;
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
@@ -433,13 +429,13 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
  * write longitude and latitude of tile-corners
  */
      rbuff = (float *) realloc( rbuff, NUM_CORNERS * numRec * sizeof(float) );
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
 
      dimids[0] = time_id;
      dimids[1] = nv_id;
      retval = nc_def_var( ncid, "lon_bnds", NC_FLOAT, 2, dimids, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
      for ( ni = nr = 0; nr < numRec; nr++, ni += NUM_CORNERS )
@@ -448,7 +444,7 @@ void NADC_FRESCO_WR_NC_REC( int ncid, const char *instr, unsigned int numRec,
 
      retval = nc_def_var( ncid, "lat_bnds", NC_FLOAT, 2, dimids, &var_id );
      if ( retval != NC_NOERR )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      (void) nc_def_var_chunking( ncid, var_id, 0, chunk_size );
      (void) nc_def_var_deflate( ncid, var_id, 0, 1, 6 );
      for ( ni = nr = 0; nr < numRec; nr++, ni += NUM_CORNERS )

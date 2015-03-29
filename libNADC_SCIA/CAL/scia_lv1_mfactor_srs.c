@@ -52,8 +52,6 @@
 void SCIA_LV1_MFACTOR_SRS( const char *sensing_start, unsigned int calibFlag,
 			   unsigned int num_dsr, struct srs_scia *srs_out )
 {
-     const char prognm[] = "SCIA_LV1_MFACTOR_SRS";
-
      float mfactor[SCIENCE_PIXELS];
 
      register unsigned int n_pix = 0;
@@ -65,7 +63,7 @@ void SCIA_LV1_MFACTOR_SRS( const char *sensing_start, unsigned int calibFlag,
 /* obtain m-factor values */
     SCIA_RD_MFACTOR( M_CAL, sensing_start, calibFlag, mfactor );
     if ( IS_ERR_STAT_FATAL )
-	 NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "SCIA_LV1_MFACTOR" );
+	 NADC_RETURN_ERROR( NADC_ERR_FATAL, "SCIA_LV1_MFACTOR" );
 /* 
  * Apply mfactor to first SMR, which is the ESM-diffuser spectrum
  *  for all known products.

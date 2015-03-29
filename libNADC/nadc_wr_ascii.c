@@ -66,8 +66,6 @@ FILE *CRE_ASCII_File( const char filebase[], const char ext[] )
 {
      char   flname[MAX_STRING_LENGTH];
      FILE   *outfl = NULL;
-
-     const char  prognm[] = "CRE_ASCII_File";
 /*
  * check size of output filename
  */
@@ -75,11 +73,11 @@ FILE *CRE_ASCII_File( const char filebase[], const char ext[] )
           (void) snprintf( flname, MAX_STRING_LENGTH,
 			   "Filename too long (max: %d)\n", 
 			   (int) MAX_STRING_LENGTH );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, flname );
      }
      (void) snprintf( flname, MAX_STRING_LENGTH, "%s.%s", filebase, ext );
      if ( (outfl = fopen( flname, "w" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_CRE, flname);
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_CRE, flname);
  done:
      return outfl;
 }
@@ -100,8 +98,6 @@ FILE *CAT_ASCII_File( const char filebase[], const char ext[] )
 {
      char   flname[MAX_STRING_LENGTH];
      FILE   *outfl = NULL;
-
-     const char  prognm[] = "CAT_ASCII_File";
 /*
  * check size of output filename
  */
@@ -109,11 +105,11 @@ FILE *CAT_ASCII_File( const char filebase[], const char ext[] )
           (void) snprintf( flname, MAX_STRING_LENGTH,
 			   "Filename too long (max: %d)\n", 
 			   (int) MAX_STRING_LENGTH );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, flname );
      }
      (void) snprintf( flname, MAX_STRING_LENGTH, "%s.%s", filebase, ext );
      if ( (outfl = fopen( flname, "a")) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_CRE, flname);
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_CRE, flname);
  done:
      return outfl;
 }
@@ -140,8 +136,7 @@ void nadc_write_text( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, "%3u %s %-33s %s %s\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_text", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -170,8 +165,7 @@ void nadc_write_bool( FILE *fp, unsigned int key_num, const char key_wrd[],
      else
 	  nr_write = fprintf( fp, "%3u %s %-33s %s FALSE\n", key_num,
 			      FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_schar", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -197,8 +191,7 @@ void nadc_write_schar( FILE *fp, unsigned int key_num, const char key_wrd[],
      nr_write = fprintf( fp, "%3u %s %-33s %s % 3d\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			 (int) key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_schar", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -224,8 +217,7 @@ void nadc_write_uchar( FILE *fp, unsigned int key_num, const char key_wrd[],
      nr_write = fprintf( fp, "%3u %s %-33s %s %3u\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			 (unsigned int) key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_uchar", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -250,8 +242,7 @@ void nadc_write_short( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, "%3u %s %-33s %s %5hd\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_short", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -276,8 +267,7 @@ void nadc_write_ushort( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, "%3u %s %-33s %s %5hu\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_ushort", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -302,8 +292,7 @@ void nadc_write_int( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, "%3u %s %-33s %s %10d\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_int", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -328,8 +317,7 @@ void nadc_write_uint( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, "%3u %s %-33s %s %10u\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_uint", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -354,8 +342,7 @@ void nadc_write_long( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, "%3u %s %-33s %s %10ld\n", key_num,
 			 FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_int", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -384,8 +371,7 @@ void nadc_write_float( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, str_fmt, key_num, FIELD_SEPARATOR, key_wrd, 
 			 FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_float", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -414,8 +400,7 @@ void nadc_write_double( FILE *fp, unsigned int key_num, const char key_wrd[],
 
      nr_write = fprintf( fp, str_fmt, key_num, FIELD_SEPARATOR, key_wrd, 
 			 FIELD_SEPARATOR, key_val );
-     if ( nr_write < 0 ) 
-	  NADC_RETURN_ERROR( "nadc_write_double", NADC_ERR_FILE_WR, key_wrd );
+     if ( nr_write < 0 ) NADC_RETURN_ERROR( NADC_ERR_FILE_WR, key_wrd );
 }
 
 /*+++++++++++++++++++++++++
@@ -481,8 +466,7 @@ void nadc_write_arr_uchar( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_uchar", NADC_ERR_FILE_RD,
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -548,8 +532,7 @@ void nadc_write_arr_schar( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_schar", NADC_ERR_FILE_RD,
-			      key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -615,8 +598,7 @@ void nadc_write_arr_short( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_short", NADC_ERR_FILE_RD,
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -682,8 +664,7 @@ void nadc_write_arr_ushort( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_ushort", NADC_ERR_FILE_RD,
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -748,8 +729,7 @@ void nadc_write_arr_int( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_int", NADC_ERR_FILE_RD,
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -815,8 +795,7 @@ void nadc_write_arr_uint( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_uint", NADC_ERR_FILE_RD,
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -899,8 +878,7 @@ void nadc_write_arr_float( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_float", NADC_ERR_FILE_RD,
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 
@@ -976,8 +954,7 @@ void nadc_write_arr_double( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
-	  NADC_RETURN_ERROR( "nadc_write_arr_double", NADC_ERR_FILE_RD, 
-			     key_wrd );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, key_wrd );
      }
 }
 

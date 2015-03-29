@@ -71,8 +71,6 @@ void Sun2Intel_SPH( struct sph2_gome *sph )
 void GOME_LV2_RD_SPH( FILE *infl, const struct fsr2_gome *fsr,
 		      struct sph2_gome *sph )
 {
-     const char prognm[] = "GOME_LV2_RD_SPH";
-
      register int nr;
 
      char   *sph_char; 
@@ -83,13 +81,13 @@ void GOME_LV2_RD_SPH( FILE *infl, const struct fsr2_gome *fsr,
  * allocate memory to store data from SPH-record
  */
      if ( (sph_char = (char *) malloc( fsr->sz_sph )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sph_char" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sph_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( infl, SPH_BYTE_OFFS, SEEK_SET );
      if ( fread( sph_char, (size_t) fsr->sz_sph, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to SPH structure
  */
@@ -115,7 +113,7 @@ void GOME_LV2_RD_SPH( FILE *infl, const struct fsr2_gome *fsr,
  * now we have to read the variable portions
  */
      if ( sph->nwin > LVL2_MAX_NWIN )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "array window too small");
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "array window too small");
      if ( sph->nwin > 0 ) {
 	  (void) memcpy( sph->window, sph_pntr, 
 			   (size_t) (2 * sph->nwin * GOME_FLOAT) );
@@ -127,7 +125,7 @@ void GOME_LV2_RD_SPH( FILE *infl, const struct fsr2_gome *fsr,
      sph->nmol = byte_swap_16( sph->nmol );
 #endif
      if ( sph->nmol > LVL2_MAX_NMOL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "array nmol too small");
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "array nmol too small");
      if ( sph->nmol > 0 ) {
 	  char buff[2], mol_string[6];
 
@@ -146,7 +144,7 @@ void GOME_LV2_RD_SPH( FILE *infl, const struct fsr2_gome *fsr,
  * check if we read the whole DSR
  */
      if ( sph_pntr - sph_char != fsr->sz_sph )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
 /*
  * byte swap data to local representation
  */

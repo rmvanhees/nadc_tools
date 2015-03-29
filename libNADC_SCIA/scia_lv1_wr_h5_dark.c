@@ -57,8 +57,6 @@
 void SCIA_LV1_WR_H5_DARK( struct param_record param, unsigned int nr_dark,
 			  const struct dark_scia *dark )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_DARK";
-
      hid_t   ads_id;
      hsize_t adim;
      herr_t  stat;
@@ -92,7 +90,7 @@ void SCIA_LV1_WR_H5_DARK( struct param_record param, unsigned int nr_dark,
  * open/create group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * write DARK data sets
  */
@@ -116,7 +114,7 @@ void SCIA_LV1_WR_H5_DARK( struct param_record param, unsigned int nr_dark,
                             NFIELDS, 1, dark_size, dark_names,
                             dark_offs, dark_type, 1,
                             NULL, compress, dark );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "dark" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "dark" );
 /*
  * close interface
  */

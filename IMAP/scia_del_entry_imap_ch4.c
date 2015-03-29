@@ -62,8 +62,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_DEL_ENTRY_IMAP_CH4( PGconn *conn, const char *prodName )
 {
-     const char prognm[] = "SCIA_DEL_ENTRY_IMAP_CH4";
-
      char sql_query[SQL_STR_SIZE];
 
      PGresult *res;
@@ -74,6 +72,6 @@ void SCIA_DEL_ENTRY_IMAP_CH4( PGconn *conn, const char *prodName )
 		      "delete from meta_imap_ch4 where name=\'%s\'", prodName );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 }

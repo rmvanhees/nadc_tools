@@ -85,8 +85,6 @@ void SCIA_OL2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
 			   const struct mph_envi *mph,
 			   const struct sph_sci_ol *sph )
 {
-     const char prognm[] = "SCIA_OL2_WR_SQL_META";
-
      PGresult *res;
 
      char *pntr;
@@ -104,11 +102,11 @@ void SCIA_OL2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
           PQclear( res );
-          NADC_RETURN_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_RETURN_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) {
           PQclear( res );
-          NADC_RETURN_ERROR( prognm, NADC_ERR_SQL_TWICE, mph->product );
+          NADC_RETURN_ERROR( NADC_ERR_SQL_TWICE, mph->product );
      }
      PQclear( res );
 /*
@@ -117,7 +115,7 @@ void SCIA_OL2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      res = PQexec( conn,
                    "SELECT nextval(\'meta__2p_pk_meta_seq\')" );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      pntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );
      PQclear( res );
@@ -458,15 +456,15 @@ void SCIA_OL2_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%s)",
 			 strcpy( cbuff, sql_query ), "NULL" );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 /*
  * do the actual insert
  */
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
 }

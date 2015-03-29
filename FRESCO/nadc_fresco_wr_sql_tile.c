@@ -88,8 +88,6 @@ void NADC_FRESCO_WR_SQL_GOME_TILE( PGconn *conn, int meta_id,
 				   unsigned int num_rec, 
 				   const struct fresco_rec *rec )
 {
-     const char prognm[] = "NADC_FRESCO_WR_SQL_GOME_TILE";
-
      register unsigned int nr;
      register unsigned int insertedRows = 0u;
      register unsigned int failedRows = num_rec;
@@ -106,7 +104,7 @@ void NADC_FRESCO_WR_SQL_GOME_TILE( PGconn *conn, int meta_id,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * loop over all Fresco records
@@ -123,7 +121,7 @@ void NADC_FRESCO_WR_SQL_GOME_TILE( PGconn *conn, int meta_id,
 /*   	  (void) fprintf( stderr, "%s\n", sql_query ); */
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, 
 				PQresultErrorMessage(res) );
 	  }
 	  if ( (nrow = PQntuples( res )) < 1 ) continue;
@@ -143,14 +141,14 @@ void NADC_FRESCO_WR_SQL_GOME_TILE( PGconn *conn, int meta_id,
 
 /*  	  (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -164,14 +162,14 @@ void NADC_FRESCO_WR_SQL_GOME_TILE( PGconn *conn, int meta_id,
 			      meta_id, rec[nr].jday );
 /*  	  (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       failedRows++;
 	       goto done;
@@ -186,14 +184,14 @@ void NADC_FRESCO_WR_SQL_GOME_TILE( PGconn *conn, int meta_id,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE, "insertedRows=%-u", insertedRows );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
      if ( failedRows > 0 ) {
 	  (void) snprintf( cbuff, SQL_STR_SIZE, "failedRows=%-u", failedRows );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+	  NADC_ERROR( NADC_ERR_NONE, cbuff );
      }
 }
 
@@ -201,8 +199,6 @@ void NADC_FRESCO_WR_SQL_SCIA_TILE( PGconn *conn, const char *prodName,
 				   unsigned int num_rec, 
 				   const struct fresco_rec *rec )
 {
-     const char prognm[] = "NADC_FRESCO_WR_SQL_SCIA_TILE";
-
      register unsigned int nr;
      register unsigned int insertedRows = 0u;
      register unsigned int failedRows = num_rec;
@@ -223,10 +219,10 @@ void NADC_FRESCO_WR_SQL_SCIA_TILE( PGconn *conn, const char *prodName,
 		      META_TBL_NAME, prodName );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, prodName );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, prodName );
      }
      pntr = PQgetvalue( res, 0, 0 );
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );     
@@ -236,7 +232,7 @@ void NADC_FRESCO_WR_SQL_SCIA_TILE( PGconn *conn, const char *prodName,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * insert all tiles in products
@@ -246,7 +242,7 @@ void NADC_FRESCO_WR_SQL_SCIA_TILE( PGconn *conn, const char *prodName,
 	  res = PQexec( conn,
 			"SELECT nextval(\'tile_fresco_pk_tile_seq\')" );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, 
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, 
 				PQresultErrorMessage(res) );
 	  pntr = PQgetvalue( res, 0, 0 );
 	  tile_id = strtoll( pntr, (char **) NULL, 10 );
@@ -267,14 +263,14 @@ void NADC_FRESCO_WR_SQL_SCIA_TILE( PGconn *conn, const char *prodName,
 
  	  /* (void) fprintf( stderr, "%s [%-d]\n", sql_query, numChar ); */
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       goto done;
 	  }
@@ -288,13 +284,13 @@ void NADC_FRESCO_WR_SQL_SCIA_TILE( PGconn *conn, const char *prodName,
  */
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
  done:
      PQclear( res );
      (void) snprintf( cbuff, SQL_STR_SIZE, "insertedRows=%-u", insertedRows );
-     NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+     NADC_ERROR( NADC_ERR_NONE, cbuff );
      if ( failedRows > 0 ) {
 	  (void) snprintf( cbuff, SQL_STR_SIZE, "failedRows=%-u", failedRows );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+	  NADC_ERROR( NADC_ERR_NONE, cbuff );
      }
 }

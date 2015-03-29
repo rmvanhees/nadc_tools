@@ -61,8 +61,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_DEL_ENTRY_IMLM_CO( PGconn *conn, const char *prodName )
 {
-     const char prognm[] = "SCIA_DEL_ENTRY_IMLM_CO";
-
      char sql_query[SQL_STR_SIZE];
 
      PGresult *res;
@@ -73,6 +71,6 @@ void SCIA_DEL_ENTRY_IMLM_CO( PGconn *conn, const char *prodName )
 		      "delete from meta_imlm_co where name=\'%s\'", prodName );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 }

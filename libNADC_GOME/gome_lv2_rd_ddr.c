@@ -335,8 +335,6 @@ short GOME_LV2_RD_DDR( FILE *infl,
 		       const struct sph2_gome *sph,
 		       struct ddr_gome **ddr_out )
 {
-     const char prognm[] = "GOME_LV2_RD_DDR";
-
      register int nc;
 
      char   *ddr_pntr, *ddr_char = NULL;
@@ -350,12 +348,12 @@ short GOME_LV2_RD_DDR( FILE *infl,
      ddr = ddr_out[0] = (struct ddr_gome *)
 	  malloc( fsr->nr_ddr * sizeof( struct ddr_gome ) );
      if ( ddr == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ddr" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ddr" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (ddr_char = (char *) malloc( (size_t) fsr->sz_ddr )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ddr_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ddr_char" );
 /*
  * rewind/read input data file
  */
@@ -366,7 +364,7 @@ short GOME_LV2_RD_DDR( FILE *infl,
      do { 
 	  ddr_pntr = ddr_char;
 	  if ( fread( ddr_char, (size_t) fsr->sz_ddr, 1, infl ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  (void) memcpy( &ddr->glr.pixel_nr, ddr_pntr, GOME_INT );
 	  ddr_pntr += GOME_INT;
 	  (void) memcpy( &ddr->glr.subsetcounter, ddr_pntr, GOME_INT );
@@ -429,7 +427,7 @@ short GOME_LV2_RD_DDR( FILE *infl,
 	       char msg[64];
 	       (void) snprintf( msg, 64, "DDR size (%-d != %-d)",
 				(int) (ddr_pntr - ddr_char), fsr->sz_ddr );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, msg );
 	  }
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN

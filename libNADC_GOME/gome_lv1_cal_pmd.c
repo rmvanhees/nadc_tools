@@ -134,8 +134,6 @@ void CALIB_PCD_PMD( unsigned char write_pmd_geo, unsigned short calib_flag,
 		    const struct fcd_gome *fcd, short nr_pcd, 
 		    const short *indx_pcd, struct pcd_gome *pcd )
 {
-     const char prognm[] = "CALIB_PCD_PMD";
-
      register short  indx, nr, pg, pn;
 
      register struct pmd_gome *pmd_pntr;
@@ -147,8 +145,7 @@ void CALIB_PCD_PMD( unsigned char write_pmd_geo, unsigned short calib_flag,
  * copy PMD data to structure, includin geolocation data
  */
      GOME_LV1_PMD_GEO( write_pmd_geo, nr_pcd, indx_pcd, pcd );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "PMD" );
+     if ( IS_ERR_STAT_FATAL ) NADC_RETURN_ERROR( NADC_ERR_FATAL, "PMD" );
 /*
  * check calibration flag
  */

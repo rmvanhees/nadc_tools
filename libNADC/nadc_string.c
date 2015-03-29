@@ -99,16 +99,13 @@ size_t nadc_strlcpy( char *dest, /*@unique@*/ const char *src, size_t size )
 -------------------------*/
 size_t nadc_strlcat( char *dest, const char *src, size_t count )
 {
-     const char prognm[] = "nadc_strlcat";
-
      size_t dsize = strlen( dest );
      size_t len = strlen( src );
      size_t res = dsize + len;
 
 /* This would be a bug */
      if ( dsize >= count ) {	  
-	  NADC_GOTO_ERROR( prognm, 
-			   NADC_ERR_FATAL, "strlen( dest ) >= count" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "strlen( dest ) >= count" );
      }
      dest += dsize;
      count -= dsize;

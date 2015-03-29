@@ -56,18 +56,16 @@ static
 void Read_SCIA_H5_RSPD_key_ppg0( hid_t file_id, const char *group_nm,
 				 /*@out@*/ float *data )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_key_ppg0";
-
      hid_t grp_id;
      hsize_t adim;
 
      /* open group */
      if ( (grp_id = H5Gopen( file_id, group_nm, H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, group_nm );
      /* read data_info */
      (void) H5LTget_dataset_info( grp_id, group_nm, &adim, NULL, NULL );
      if (adim != SCIENCE_PIXELS)
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, group_nm );
      /* read data */
      (void) H5LTread_dataset_float( grp_id, group_nm, data );
  done:
@@ -79,25 +77,23 @@ void Read_SCIA_H5_RSPD_key_fix_sub( hid_t file_id, const char *group_nm,
 				    /*@out@*/ float *wl, 
 				    /*@out@*/ float *data )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_key_fix_sub";
-
      hid_t grp_id;
      hsize_t adim;
 
      /* open group */
      if ( (grp_id = H5Gopen( file_id, group_nm, H5P_DEFAULT  )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, group_nm );
      /* read WL info */
      (void) H5LTget_dataset_info( grp_id, "Axis 1  Wavelength", &adim, 
 				  NULL, NULL );
      if (adim != SCIENCE_PIXELS)
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, group_nm );
      /* read Axis */
      (void) H5LTread_dataset_float( grp_id, "Axis 1  Wavelength", wl );
      /* read data info */
      (void) H5LTget_dataset_info( grp_id, group_nm, &adim, NULL, NULL );
      if (adim != SCIENCE_PIXELS)
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, group_nm );
      /* read data */
      (void) H5LTread_dataset_float( grp_id, group_nm, data );
  done:
@@ -124,14 +120,12 @@ static
 void Read_SCIA_H5_RSPD_axis( const hid_t grp_id, const char *axis_name,
 			     /*@out@*/ size_t *dims, /*@out@*/ float **data )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_axis";
-
      hsize_t adim;
 
      (void) H5LTget_dataset_info( grp_id, axis_name, &adim, NULL, NULL );
      *dims = (size_t) adim;
      *data = (float *) malloc( (*dims) * sizeof(float) );
-     if ( (*data) == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "data" );
+     if ( (*data) == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "data" );
      (void) H5LTread_dataset_float( grp_id, axis_name, *data );
 }
 
@@ -141,8 +135,6 @@ void Read_SCIA_H5_RSPD_sensitivity( const hid_t grp_id, const char *data_name,
 				    /*@out@*/ size_t *dims, 
 				    /*@out@*/ float **data )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_sensitivity";
-
      register int nr; 
 
      size_t  n_elements = 1;
@@ -159,7 +151,7 @@ void Read_SCIA_H5_RSPD_sensitivity( const hid_t grp_id, const char *data_name,
      }
      /* reserve memory */
      *data = (float *) malloc( (size_t) n_elements * sizeof(float) );
-     if ( (*data) == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "data" );
+     if ( (*data) == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "data" );
      /* read dataset */
      (void) H5LTread_dataset_float( grp_id, data_name, *data );
 }
@@ -169,8 +161,6 @@ void Read_SCIA_H5_RSPD_el_az( hid_t file_id, const char *group_nm,
 			      /*@out@*/ size_t *n_el_az, 
 			      /*@out@*/ struct rspd_EL_AZ_scia **el_az_out )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_el_az";
-
      register size_t ni, n2, n3, offs;
 
      struct rspd_EL_AZ_scia *el_az;
@@ -187,7 +177,7 @@ void Read_SCIA_H5_RSPD_el_az( hid_t file_id, const char *group_nm,
  * open group /RSPL
  */
      if ( (grp_id = H5Gopen( file_id, group_nm, H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, group_nm );
 /*
  * read data from HDF5-file into rspl structs
  */
@@ -206,7 +196,7 @@ void Read_SCIA_H5_RSPD_el_az( hid_t file_id, const char *group_nm,
 	       malloc( dims[0] * dims[1] * sizeof( struct rspd_EL_AZ_scia ));
      }
      if ( (el_az_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "el_az" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "el_az" );
      el_az = el_az_out[0];
      
      for ( n3 = 0; n3 < dims[0]; n3++ ) {
@@ -236,8 +226,6 @@ void Read_SCIA_H5_RSPD_brdf( hid_t file_id, const char *group_nm,
 			     /*@out@*/ size_t *n_brdf, 
 			     /*@out@*/ struct rspd_BRDF_scia **brdf_out )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_brdf";
-
      register size_t ni, n2, n3, offs;
 
      struct rspd_BRDF_scia *brdf;
@@ -253,7 +241,7 @@ void Read_SCIA_H5_RSPD_brdf( hid_t file_id, const char *group_nm,
      int    rank;
 
      if ( (grp_id = H5Gopen( file_id, group_nm, H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, group_nm );
 /*
  * read data from HDF5-file into rspl structs
  */
@@ -271,7 +259,7 @@ void Read_SCIA_H5_RSPD_brdf( hid_t file_id, const char *group_nm,
 	       malloc( dims[0] * dims[1] * sizeof( struct rspd_BRDF_scia ));
      }
      if ( (brdf_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "brdf" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "brdf" );
      brdf = brdf_out[0];
      
      for ( n3 = 0; n3 < dims[0]; n3++ ) {
@@ -300,8 +288,6 @@ void Read_SCIA_H5_RSPD_elev( hid_t file_id, const char *group_nm,
 			     /*@out@*/ size_t *n_elev, 
 			     /*@out@*/ struct rspd_ELEV_scia **elev_out )
 {
-     const char prognm[] = "Read_SCIA_H5_RSPD_elev";
-
      register unsigned int ni, n2;
 
      struct rspd_ELEV_scia *elev;
@@ -315,7 +301,7 @@ void Read_SCIA_H5_RSPD_elev( hid_t file_id, const char *group_nm,
      int    rank;
 
      if ( (grp_id = H5Gopen( file_id, group_nm, H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, group_nm );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, group_nm );
 /*
  * read data from HDF5-file into rspl structs
  */
@@ -331,7 +317,7 @@ void Read_SCIA_H5_RSPD_elev( hid_t file_id, const char *group_nm,
 	       malloc( dims[0] * sizeof( struct rspd_ELEV_scia ));
      }
      if ( (elev_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "elev" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "elev" );
      elev = elev_out[0];
      
      for ( n2 = 0; n2 < dims[0]; n2++ ) {
@@ -366,8 +352,6 @@ void Read_SCIA_H5_RSPD_elev( hid_t file_id, const char *group_nm,
 -------------------------*/
 unsigned short SCIA_RD_H5_RSPN( /*@out@*/ struct rspn_scia **rspn_out )
 {
-     const char prognm[] = "SCIA_RD_H5_RSPN";
-
      unsigned short num_rsp = 0;
 
      register size_t         ni;
@@ -394,26 +378,26 @@ unsigned short SCIA_RD_H5_RSPN( /*@out@*/ struct rspn_scia **rspn_out )
                            "%s/rsp_patch.h5", DATA_DIR );
           file_id = H5Fopen( rsp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, rsp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, rsp_file );
      }
 /*
  * open group /RSPN
  */
      if ( (grp_id = H5Gopen( file_id, "/RSPN", H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/RSPN" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/RSPN" );
 /*
  * read data from HDF5-file into rspn structs
  */
      (void) H5LTget_dataset_info( grp_id, "elevation", dims, NULL, NULL );
      ang_esm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_esm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_esm");
+     if ( ang_esm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_esm");
      (void) H5LTread_dataset_float( grp_id, "elevation", ang_esm );
 
      (void) H5LTget_dataset_info( grp_id, "sensitivity", dims, NULL, NULL );
      sensitivity = (float *) 
 	  malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
      if ( sensitivity == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sensitivity" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sensitivity" );
      (void) H5LTread_dataset_float( grp_id, "sensitivity", sensitivity );
 
      if ( ! Use_Extern_Alloc ) {
@@ -421,7 +405,7 @@ unsigned short SCIA_RD_H5_RSPN( /*@out@*/ struct rspn_scia **rspn_out )
 	       malloc( (size_t) dims[0] * sizeof(struct rspn_scia));
      }
      if ( (rspn = rspn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspn" );
 
      for ( offs = 0, ni = 0; ni < (size_t) dims[0]; ni++ ) {
 	  rspn[ni].ang_esm = ang_esm[ni];
@@ -435,7 +419,7 @@ unsigned short SCIA_RD_H5_RSPN( /*@out@*/ struct rspn_scia **rspn_out )
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
                  "\n\tapplied auxiliary Radiance Sensitivity Parameters" );
  done:
      if ( grp_id >= 0 ) (void) H5Gclose( grp_id );
@@ -458,8 +442,6 @@ unsigned short SCIA_RD_H5_RSPN( /*@out@*/ struct rspn_scia **rspn_out )
 -------------------------*/
 unsigned short SCIA_RD_H5_RSPL( /*@out@*/ struct rsplo_scia **rspl_out )
 {
-     const char prognm[] = "SCIA_RD_H5_RSPL";
-
      unsigned short num_rsp = 0;
 
      register size_t         ni;
@@ -486,31 +468,31 @@ unsigned short SCIA_RD_H5_RSPL( /*@out@*/ struct rsplo_scia **rspl_out )
                            "%s/rsp_patch.h5", DATA_DIR );
           file_id = H5Fopen( rsp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, rsp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, rsp_file );
      }
 /*
  * open group /RSPL
  */
      if ( (grp_id = H5Gopen( file_id, "/RSPL", H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/RSPL" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/RSPL" );
 /*
  * read data from HDF5-file into rspl structs
  */
      (void) H5LTget_dataset_info( grp_id, "azimuth", dims, NULL, NULL );
      ang_asm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_asm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_asm");
+     if ( ang_asm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_asm");
      (void) H5LTread_dataset_float( grp_id, "azimuth", ang_asm );
 
      (void) H5LTget_dataset_info( grp_id, "elevation", dims, NULL, NULL );
      ang_esm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_esm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_esm");
+     if ( ang_esm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_esm");
      (void) H5LTread_dataset_float( grp_id, "elevation", ang_esm );
 
      (void) H5LTget_dataset_info( grp_id, "sensitivity", dims, NULL, NULL );
      sensitivity = (float *) 
 	  malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
      if ( sensitivity == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sensitivity" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sensitivity" );
      (void) H5LTread_dataset_float( grp_id, "sensitivity", sensitivity );
 
      if ( ! Use_Extern_Alloc ) {
@@ -518,7 +500,7 @@ unsigned short SCIA_RD_H5_RSPL( /*@out@*/ struct rsplo_scia **rspl_out )
 	       malloc( (size_t) dims[0] * sizeof(struct rsplo_scia));
      }
      if ( (rspl = rspl_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspl" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspl" );
      for ( offs = 0, ni = 0; ni < (size_t) dims[0]; ni++ ) {
 	  rspl[ni].ang_asm = ang_asm[ni];
 	  rspl[ni].ang_esm = ang_esm[ni];
@@ -533,7 +515,7 @@ unsigned short SCIA_RD_H5_RSPL( /*@out@*/ struct rsplo_scia **rspl_out )
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
                  "\n\tapplied auxiliary Radiance Sensitivity Parameters" );
  done:
      if ( grp_id >= 0 ) (void) H5Gclose( grp_id );
@@ -556,8 +538,6 @@ unsigned short SCIA_RD_H5_RSPL( /*@out@*/ struct rsplo_scia **rspl_out )
 -------------------------*/
 unsigned short SCIA_RD_H5_RSPO( /*@out@*/ struct rsplo_scia **rspo_out )
 {
-     const char prognm[] = "SCIA_RD_H5_RSPO";
-
      unsigned short num_rsp = 0;
 
      register size_t ni;
@@ -584,31 +564,31 @@ unsigned short SCIA_RD_H5_RSPO( /*@out@*/ struct rsplo_scia **rspo_out )
                            "%s/rsp_patch.h5", DATA_DIR );
           file_id = H5Fopen( rsp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, rsp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, rsp_file );
      }
 /*
  * open group /RSPO
  */
      if ( (grp_id = H5Gopen( file_id, "/RSPO", H5P_DEFAULT )) < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/RSPO" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/RSPO" );
 /*
  * read data from HDF5-file into rspo structs
  */
      (void) H5LTget_dataset_info( grp_id, "azimuth", dims, NULL, NULL );
      ang_asm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_asm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_asm");
+     if ( ang_asm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_asm");
      (void) H5LTread_dataset_float( grp_id, "azimuth", ang_asm );
 
      (void) H5LTget_dataset_info( grp_id, "elevation", dims, NULL, NULL );
      ang_esm = (float *) malloc( (size_t) dims[0] * sizeof(float) );
-     if ( ang_esm == NULL ) NADC_GOTO_ERROR(prognm, NADC_ERR_ALLOC, "ang_esm");
+     if ( ang_esm == NULL ) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "ang_esm");
      (void) H5LTread_dataset_float( grp_id, "elevation", ang_esm );
 
      (void) H5LTget_dataset_info( grp_id, "sensitivity", dims, NULL, NULL );
      sensitivity = (float *) 
 	  malloc( (size_t) (dims[0] * dims[1]) * sizeof(float) );
      if ( sensitivity == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sensitivity" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sensitivity" );
      (void) H5LTread_dataset_float( grp_id, "sensitivity", sensitivity );
 
      if ( ! Use_Extern_Alloc ) {
@@ -616,7 +596,7 @@ unsigned short SCIA_RD_H5_RSPO( /*@out@*/ struct rsplo_scia **rspo_out )
 	       malloc( (size_t) dims[0] * sizeof(struct rsplo_scia));
      }
      if ( (rspo = rspo_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rspo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspo" );
      for ( offs = 0, ni = 0; ni < (size_t) dims[0]; ni++ ) {
 	  rspo[ni].ang_asm = ang_asm[ni];
 	  rspo[ni].ang_esm = ang_esm[ni];
@@ -631,7 +611,7 @@ unsigned short SCIA_RD_H5_RSPO( /*@out@*/ struct rsplo_scia **rspo_out )
 /*
  * give message to user
  */
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
                  "\n\tapplied auxiliary Radiance Sensitivity Parameters" );
  done:
      if ( grp_id >= 0 ) (void) H5Gclose( grp_id );
@@ -655,8 +635,6 @@ unsigned short SCIA_RD_H5_RSPO( /*@out@*/ struct rsplo_scia **rspo_out )
 -------------------------*/
 void SCIA_RD_H5_RSPD( /*@out@*/ struct rspd_key *key )
 {
-     const char prognm[] = "SCIA_RD_H5_RSPD";
-
      char   rsp_file[MAX_STRING_LENGTH];
 
      hid_t  file_id = -1;
@@ -672,7 +650,7 @@ void SCIA_RD_H5_RSPD( /*@out@*/ struct rspd_key *key )
                            "%s/key_radsens.h5", DATA_DIR );
           file_id = H5Fopen( rsp_file, H5F_ACC_RDONLY, H5P_DEFAULT );
           if ( file_id < 0 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, rsp_file );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, rsp_file );
      }
      Read_SCIA_H5_RSPD_key_fix( file_id, &key->key_fix );
      Read_SCIA_H5_RSPD_el_az( file_id, "EL_AZ_p", 

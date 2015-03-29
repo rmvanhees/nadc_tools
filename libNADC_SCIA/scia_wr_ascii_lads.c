@@ -59,12 +59,10 @@ void SCIA_WR_ASCII_LADS( struct param_record param, unsigned int num_dsr,
      unsigned int  count[2];
      double latlon[2 * NUM_CORNERS];
 
-     const char prognm[] = "SCIA_WR_ASCII_LADS";
-
      FILE  *outfl = CRE_ASCII_File( param.outfile, "lads" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of LADS record
  */

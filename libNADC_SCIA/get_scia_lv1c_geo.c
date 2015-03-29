@@ -442,8 +442,6 @@ void GET_CNTR_CORNER( struct coord_envi corner[],
 void GET_SCIA_LV1C_GEON( unsigned int nr_geo, const struct geoN_scia *geoN,
 			 unsigned int nr_geo1c, struct geoN_scia *geoN_1c )
 {
-     const char prognm[] = "GET_SCIA_LV1C_GEON";
-
      register unsigned int   nr;
      register unsigned short ns;
 
@@ -585,16 +583,16 @@ void GET_SCIA_LV1C_GEON( unsigned int nr_geo, const struct geoN_scia *geoN,
 
 	  xval = (double *) malloc( nscale * sizeof(double) );
 	  if ( xval == NULL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "xval" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "xval" );
 	  yval = (double *) malloc( nscale * sizeof(double) );
 	  if ( yval == NULL ) {
 	       free( xval );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "yval" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "yval" );
 	  }
 	  zval = (double *) malloc( nscale * sizeof(double) );
 	  if ( zval == NULL ) {
 	       free( xval ); free( yval );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "zval" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "zval" );
 	  }
 	  for ( nr = 0; nr < nr_geo; nr++ ) {
 /* pixel_type and Sun glint/Rainbow flag */
@@ -792,8 +790,6 @@ void GET_SCIA_LV1C_GEON( unsigned int nr_geo, const struct geoN_scia *geoN,
 void GET_SCIA_LV1C_GEOL( unsigned int nr_geo, const struct geoL_scia *geoL,
 			 unsigned int nr_geo1c, struct geoL_scia *geoL_1c )
 {
-     const char prognm[] = "GET_SCIA_LV1C_GEOL";
-
      register unsigned int   nr;
      register unsigned short ns;
 
@@ -876,16 +872,16 @@ void GET_SCIA_LV1C_GEOL( unsigned int nr_geo, const struct geoL_scia *geoL,
 
           xval = (double *) malloc( nscale * sizeof(double) );
           if ( xval == NULL ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "xval" );
+               NADC_RETURN_ERROR( NADC_ERR_ALLOC, "xval" );
 	  yval = (double *) malloc( nscale * sizeof(double) );
 	  if ( yval == NULL ) {
 	       free( xval );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "yval" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "yval" );
 	  }
           zval = (double *) malloc( nscale * sizeof(double) );
           if ( zval == NULL ) {
                free( xval ); free( yval );
-               NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "zval" );
+               NADC_RETURN_ERROR( NADC_ERR_ALLOC, "zval" );
           }
 	  for ( nr = 0; nr < nr_geo; nr++ ) {
 /* pixel_type and glint_flag */
@@ -1101,8 +1097,6 @@ void GET_SCIA_LV1C_GEOL( unsigned int nr_geo, const struct geoL_scia *geoL,
 void GET_SCIA_LV1C_GEOC( unsigned int nr_geo, const struct geoC_scia *geoC,
 			 unsigned int nr_geo1c, struct geoC_scia *geoC_1c )
 {
-     const char prognm[] = "GET_SCIA_LV1C_GEOC";
-
      register unsigned int   nr;
      register unsigned short ns;
 
@@ -1146,16 +1140,16 @@ void GET_SCIA_LV1C_GEOC( unsigned int nr_geo, const struct geoC_scia *geoC,
 
           xval = (double *) malloc( nscale * sizeof(double) );
           if ( xval == NULL ) 
-               NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "xval" );
+               NADC_RETURN_ERROR( NADC_ERR_ALLOC, "xval" );
 	  yval = (double *) malloc( nscale * sizeof(double) );
 	  if ( yval == NULL ) {
 	       free( xval );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "yval" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "yval" );
 	  }
           zval = (double *) malloc( nscale * sizeof(double) );
           if ( zval == NULL ) {
                free( xval ); free( yval );
-               NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "zval" );
+               NADC_RETURN_ERROR( NADC_ERR_ALLOC, "zval" );
           }
 	  for ( nr = 0; nr < nr_geo; nr++ ) {
 /* pos_asm */

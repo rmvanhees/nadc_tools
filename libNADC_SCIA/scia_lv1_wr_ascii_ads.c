@@ -70,12 +70,10 @@ void SCIA_LV1_WR_ASCII_SQADS( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SQADS";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "sqads" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SQADS record
  */
@@ -138,12 +136,10 @@ void SCIA_LV1_WR_ASCII_STATE( struct param_record param, unsigned int num_dsr,
      unsigned int   count[2];
      float rbuff[MAX_CLUSTER];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_STATE";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "state" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of STATE record
  */
@@ -274,12 +270,10 @@ void SCIA_LV1_WR_ASCII_LCPN( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_LCPN";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "lcpn" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of LCPN record
  */
@@ -344,12 +338,10 @@ void SCIA_LV1_WR_ASCII_DARK( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_DARK";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "dark" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of DARK record
  */
@@ -413,12 +405,10 @@ void SCIA_LV1_WR_ASCII_PPGN( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PPGN";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "ppgn" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of PPGN record
  */
@@ -470,12 +460,10 @@ void SCIA_LV1_WR_ASCII_SCPN( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SCPN";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "scpn" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SCPN record
  */
@@ -532,12 +520,10 @@ void SCIA_LV1_WR_ASCII_SRSN( struct param_record param, unsigned int num_dsr,
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     const char prognm[] = "SCIA_LV1_WR_ASCII_SRSN";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "srsn" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SRSN record
  */

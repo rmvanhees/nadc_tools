@@ -372,8 +372,6 @@ void SDMF_get_stateParam( unsigned char stateID, unsigned short absOrbit,
 			  /*@null@*/ unsigned short *int_pet,
 			  /*@null@*/ int *orbit_range )
 {
-     const char prognm[] = "SDMF_get_stateParam";
-
      register unsigned short nc = 0;
 
      const struct clusConf_rec *clusConf;
@@ -429,7 +427,7 @@ void SDMF_get_stateParam( unsigned char stateID, unsigned short absOrbit,
 
 	  (void) snprintf( msg, 64, "undefined clusConf for state: %02hhu\n", 
 			   stateID );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, msg );
 	  break;
      }}
      if ( absOrbit > 0u ) {
@@ -468,8 +466,6 @@ done:
 float SDMF_get_statePET( unsigned char stateID, unsigned short absOrbit,
 			unsigned short channel )
 {
-     const char prognm[] = "SDMF_get_statePET";
-
      const struct clusConf_rec *clusConf;
 
      register unsigned short nc = 0;
@@ -525,7 +521,7 @@ float SDMF_get_statePET( unsigned char stateID, unsigned short absOrbit,
 
 	  (void) snprintf( msg, 64, "undefined clusConf for state: %02hhu\n", 
 			   stateID );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, msg );
 	  break;
      }}
      while( absOrbit >= clusConf[nc+1].absOrbit ) nc++;
@@ -554,8 +550,6 @@ unsigned char SDMF_get_stateCoadd( unsigned char stateID,
 				   unsigned short absOrbit,
 				   unsigned short clusID )
 {
-     const char prognm[] = "SDMF_get_stateCoadd";
-
      const struct clusConf_rec *clusConf;
 
      register unsigned short nc = 0;
@@ -611,7 +605,7 @@ unsigned char SDMF_get_stateCoadd( unsigned char stateID,
 
 	  (void) snprintf( msg, 64, "undefined clusConf for state: %02hhu\n", 
 			   stateID );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, msg );
 	  break;
      }}
      while( absOrbit >= clusConf[nc+1].absOrbit ) nc++;
@@ -637,8 +631,6 @@ done:
 unsigned short SDMF_get_stateCount( unsigned char stateID, 
 				    unsigned short absOrbit )
 {
-     const char prognm[] = "SDMF_get_stateCount";
-
      const struct clusConf_rec *clusConf;
 
      register unsigned short nc = 0;
@@ -694,7 +686,7 @@ unsigned short SDMF_get_stateCount( unsigned char stateID,
 
 	  (void) snprintf( msg, 64, "undefined clusConf for state: %02hhu\n", 
 			   stateID );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, msg );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, msg );
 	  break;
      }}
      while( absOrbit >= clusConf[nc+1].absOrbit ) nc++;
@@ -760,8 +752,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     /* const char prognm[] = "sdmf_clusConf"; */
-
      unsigned char  coaddf;
      unsigned char  stateID;
      unsigned short orbit;

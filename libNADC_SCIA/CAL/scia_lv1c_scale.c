@@ -60,8 +60,6 @@
 static
 void ReadCorrFactors( float *CorrFact )
 {
-     const char prognm[] = "ReadCorrFactors";
-
      const char flname[] = "SciaL1c_CorrFact.dat";
 
      register unsigned short nr;
@@ -74,10 +72,10 @@ void ReadCorrFactors( float *CorrFact )
 
      if ( env_str == NULL ) {
 	  if ( (fp_corr = fopen( flname, "r" )) == NULL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_RD, flname );
      } else {
 	  if ( (fp_corr = fopen( env_str, "r" )) == NULL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_RD, env_str );
+	       NADC_RETURN_ERROR( NADC_ERR_FILE_RD, env_str );
      }
 /*
  * read correction factors
@@ -95,8 +93,6 @@ void ReadCorrFactors( float *CorrFact )
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_LV1C_SCALE( unsigned int num_mds, struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV1_SCALE";
-
      register unsigned short num = 0;
 
      static float CorrFact[SCIENCE_PIXELS];
@@ -108,7 +104,7 @@ void SCIA_LV1C_SCALE( unsigned int num_mds, struct mds1c_scia *mds_1c )
      if ( do_init ) {
 	  ReadCorrFactors( CorrFact );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "ReadCorrFactors" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "ReadCorrFactors" );
 	  do_init = FALSE;
      }
 /*

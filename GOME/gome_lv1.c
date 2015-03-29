@@ -77,8 +77,6 @@ int main( int argc, char *argv[] )
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "gome_lv1";
-
      register short chan, subchan, nr, nr_pcd, nr_mcd, nr_scd;
 
      short  nband;
@@ -111,13 +109,12 @@ int main( int argc, char *argv[] )
  * initialization of command-line parameters
  */
      GOME_SET_PARAM( argc, argv, GOME_LEVEL_1, &param );
-     if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "" );
+     if ( IS_ERR_STAT_FATAL ) NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
 /*
  * check if we have to display version and exit
  */
      if ( param.flag_version == PARAM_SET ) {
-	  GOME_SHOW_VERSION( stdout, prognm );
+	  GOME_SHOW_VERSION( stdout, "gome_lv1" );
 	  exit( EXIT_SUCCESS );
      }
 /*
@@ -131,32 +128,32 @@ int main( int argc, char *argv[] )
  * open input-file
  */
      if ( (infl = fopen( param.infile, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
 /*
  * -------------------------
  * read/write Product Identifier Content
  */
      GOME_RD_PIR( infl, &pir );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PIR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PIR" );
      if ( strncmp( pir.product, "LVL10", 5 ) != 0 ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL,
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL,
 			   "input is not a valid GOME level 1 file" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
           param.hdf_file_id = GOME_CRE_H5_FILE( GOME_LEVEL_1, &param );
           if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
 
 	  CRE_GOME_LV1_H5_STRUCTS( param );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "STRUCTS" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "STRUCTS" );
 /*
  * create for data structures for GOME level 1b data
  */
 	  GOME_WR_H5_PIR( param, &pir );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "PIR" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "PIR" );
      }
 /*
  * -------------------------
@@ -164,36 +161,36 @@ int main( int argc, char *argv[] )
  */
      GOME_LV1_RD_FSR( infl, &fsr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "FSR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "FSR" );
      if ( param.write_ascii == PARAM_SET ) {
 	  GOME_LV1_WR_ASCII_FSR( param, &fsr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "FSR" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "FSR" );
      }
      GOME_LV1_CHK_SIZE( fsr, param.infile );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, param.infile );
 /*
  * -------------------------
  * read Specific Product Header
  */
      GOME_LV1_RD_SPH( infl, &fsr, &sph );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SPH" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
 /*
  * -------------------------
  * read Fixed Calibration Data Record
  */
      num_fcd = GOME_LV1_RD_FCD( infl, &fsr, &fcd );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "FCD" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "FCD" );
 /*
  * -------------------------
  * read Pixel Specific Calibration Data Records
  */
      num_pcd = GOME_LV1_RD_PCD( infl, &fsr, &sph, &pcd );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "PCD" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PCD" );
 /*
  * write SPH and FCD
  */
@@ -210,18 +207,18 @@ int main( int argc, char *argv[] )
      if ( param.write_ascii == PARAM_SET ) {
 	  GOME_LV1_WR_ASCII_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
 	  GOME_LV1_WR_ASCII_FCD( param, &fcd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "FCD" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "FCD" );
      }
      if ( param.write_hdf5 == PARAM_SET ) {
 	  GOME_LV1_WR_H5_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SPH" );
 	  GOME_LV1_WR_H5_FCD( param, &fcd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "FCD" );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "FCD" );
      }
 /*
  * connect to PostgreSQL database
@@ -230,20 +227,20 @@ int main( int argc, char *argv[] )
      if ( param.write_sql == PARAM_SET ) {
 	  CONNECT_NADC_DB( &conn, "gome" );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL" );
 
 	  if ( param.flag_sql_remove == PARAM_SET 
 	       || param.flag_sql_replace == PARAM_SET )
 	       GOME_LV1_DEL_ENTRY( conn, param.infile, sph.soft_version );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "PSQL(remove)" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "PSQL(remove)" );
 
 	  if ( param.flag_sql_remove == PARAM_SET ) goto done;
 
 	  meta_id = GOME_LV1_WR_SQL_META( conn, param.flag_verbose, 
 					  param.infile, &sph, &fsr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_META" );
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_META" );
      }
 #endif
 /*
@@ -256,14 +253,14 @@ int main( int argc, char *argv[] )
  */
 	  indx_pcd = (short *) malloc( num_pcd * sizeof( short ));
 	  if ( indx_pcd == NULL )
- 	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_pcd" );
+ 	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indx_pcd" );
 	  *indx_pcd = 0;
 	  if ( param.flag_pselect == PARAM_SET ) {
 	       short nr_indices, *indices;
 
 	       indices = (short *) malloc( num_pcd * sizeof(short));
 	       if ( indices == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indices" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indices" );
 	       nr_indices = NADC_USRINDX( param.pselect, num_pcd, indices );
 
 	       nr = 0;
@@ -297,7 +294,7 @@ int main( int argc, char *argv[] )
 	       GOME_LV1_WR_SQL_TILE( conn, param.flag_verbose, meta_id, 
 				     sph.soft_version, nr_pcd, indx_pcd, pcd );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, "SQL_PCD" );
+		    NADC_GOTO_ERROR( NADC_ERR_SQL, "SQL_PCD" );
 	  }
 #endif
      }
@@ -307,7 +304,7 @@ int main( int argc, char *argv[] )
  */
      num_scd = GOME_LV1_RD_SMCD( FLAG_SUN, infl, &fsr, &sph, &scd );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCD" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCD" );
 /*
  * write SCD data
  */
@@ -318,7 +315,7 @@ int main( int argc, char *argv[] )
  */
 	  indx_scd = (short *) malloc( num_scd * sizeof( short ));
 	  if ( indx_scd == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_scd" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indx_scd" );
 	  nr = 0;
 	  *indx_scd = 0;
 	  do { 
@@ -343,7 +340,7 @@ int main( int argc, char *argv[] )
  */
      num_mcd = GOME_LV1_RD_SMCD( FLAG_MOON, infl, &fsr, &sph, &mcd );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MCD" );
+          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MCD" );
 /*
  * write MCD data
  */
@@ -354,7 +351,7 @@ int main( int argc, char *argv[] )
  */
 	  indx_mcd = (short *) malloc( num_mcd * sizeof( short ));
 	  if ( indx_mcd == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "indx_mcd" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indx_mcd" );
 	  nr = 0;
 	  *indx_mcd = 0;
 	  do {
@@ -420,7 +417,7 @@ int main( int argc, char *argv[] )
  */
        (void) GOME_LV1_RD_BDR( infl, BLIND_1a, &fsr, &fcd, &rec );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "BDR[blind]" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "BDR[blind]" );
 /*
  * process/write Earth Band Data Records
  */
@@ -428,7 +425,7 @@ int main( int argc, char *argv[] )
 			   nr_pcd, indx_pcd, pcd, rec );
 	  free( rec );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "BDR[blind]" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "BDR[blind]" );
      }
 
      if ( param.write_stray == PARAM_SET ) {
@@ -438,7 +435,7 @@ int main( int argc, char *argv[] )
  */
 	    (void) GOME_LV1_RD_BDR( infl, nband, &fsr, &fcd, &rec );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "BDR[blind]" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "BDR[blind]" );
 /*
  * process/write Earth Band Data Records
  */
@@ -446,7 +443,7 @@ int main( int argc, char *argv[] )
 				nr_pcd, indx_pcd, pcd, rec );
 	       free( rec );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "BDR[blind]" );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "BDR[blind]" );
 	  }
      }
 /*
@@ -468,7 +465,7 @@ int main( int argc, char *argv[] )
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, param.hdf5_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
      }
 /*
  * free allocated memory

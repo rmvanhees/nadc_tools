@@ -685,8 +685,6 @@ void GET_SCIA_LV0_STATE_PMDtemp( unsigned short num_pmd,
 void GET_SCIA_LV0_DET_PET( struct chan_hdr hdr, float *pet, 
 			   unsigned short *vir_chan_b )
 {
-     const char prognm[] = "GET_SCIA_LV0_DET_PET";
-
      const unsigned short CHANNEL_SYNC = 0xAAAA;
 
 /* initialise return values */
@@ -695,7 +693,7 @@ void GET_SCIA_LV0_DET_PET( struct chan_hdr hdr, float *pet,
 
 /* check validity of channel header */
      if ( hdr.sync != CHANNEL_SYNC ) {
-	  NADC_RETURN_ERROR( prognm, NADC_WARN_PDS_RD, 
+	  NADC_RETURN_ERROR( NADC_WARN_PDS_RD, 
 			     "incorrect Channel Sync value(s) found" );
      }
 /* handle visual channels different from infra-red channel */

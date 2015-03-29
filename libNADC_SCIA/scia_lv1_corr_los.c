@@ -67,8 +67,6 @@
 void SCIA_LV1_CORR_LOS( const struct state1_scia *state,
 			struct mds1_scia *mds_1b )
 {
-     const char prognm[] = "SCIA_LV1_CORR_LOS";
-
      register unsigned int nc, nd, ng;
 
      if ( state->type_mds != SCIA_NADIR ) return;
@@ -86,6 +84,6 @@ void SCIA_LV1_CORR_LOS( const struct state1_scia *state,
 	  } while ( ++ng < mds_1b[nd].n_aux );
      } while ( ++nd < state->num_dsr );
 
-     NADC_ERROR( prognm, NADC_ERR_NONE, 
+     NADC_ERROR( NADC_ERR_NONE, 
                  "\n\tapplied correction to line-of-sight geolocation" );
 }

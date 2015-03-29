@@ -68,8 +68,6 @@
 bool SDMF_get_fileEntry( enum sdmf24_db sdmfDB,
 			 int orbit, char *fileEntry )
 {
-     const char prognm[] = "SDMF_get_fileEntry";
-
      register long nr = 0;
 
      bool sdmf_select_nrt = FALSE;
@@ -152,7 +150,7 @@ bool SDMF_get_fileEntry( enum sdmf24_db sdmfDB,
 	  MaxDiffOrbitNumber = 100;
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "sdmfDB" );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, "sdmfDB" );
      }
 /*
  * Default selection is to use results based on consolidated products, 
@@ -168,20 +166,20 @@ bool SDMF_get_fileEntry( enum sdmf24_db sdmfDB,
      (void) snprintf( flname, MAX_STRING_LENGTH, "%s/%s", 
 		      SDMF_PATH("2.4"), "MonitorList.dat" );
      if ( (fp = fopen( flname, "rb")) == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, flname );
+          NADC_GOTO_ERROR( NADC_ERR_FILE, flname );
      (void) fseek( fp, 0L, SEEK_END );
      total_rec = ftell( fp ) / disk_sz_monitor_rec;
      (void) fseek( fp, 0L, SEEK_SET );
      mrec = (struct monitor_rec *) 
           malloc( total_rec * sizeof(struct monitor_rec) );
-     if ( mrec == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mrec" );
+     if ( mrec == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mrec" );
 
      num = 0;
      do {
           if ( fread( &mrec[num].FileName, 70, 1, fp ) != 1 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "mrec.FileName" );
+               NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "mrec.FileName" );
           if ( fread( mrec+num, sizeof( struct monitor_rec )-72, 1, fp ) != 1 )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "mrec" );
+               NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "mrec" );
 
 	  if ( abs(mrec[num].Orbit - orbit) > MaxDiffOrbitNumber ) continue;
 	  if ( sdmf_select_nrt && mrec[num].Consolidated != 0 ) continue;
@@ -238,13 +236,13 @@ done:
 	  char msg[] = "\n\tSDMF(2.4): %s read from file: %s";
 
           (void) snprintf(str_msg, MAX_STRING_LENGTH, msg, sdmfID, fileEntry);
-          NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+          NADC_ERROR( NADC_ERR_NONE, str_msg );
           return TRUE;
      } else {
 	  char msg[] = "\n\tSDMF(2.4): %s - no applicable data for orbit %-d";
 
           (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg, sdmfID, orbit );
-          NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+          NADC_ERROR( NADC_ERR_NONE, str_msg );
           return FALSE;
      }
 }
@@ -257,8 +255,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_get_fileEntry";
-
      register int orbit;
 
      int nrval, orbit_range[2];
@@ -287,37 +283,37 @@ int main( int argc, char *argv[] )
      for ( orbit = orbit_range[0]; orbit <= orbit_range[1]; orbit++ ) {
 	  found = SDMF_get_fileEntry( SDMF24_STATE, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
 
 	  found = SDMF_get_fileEntry( SDMF24_FITTED, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
 
 	  found = SDMF_get_fileEntry( SDMF24_ORBITAL, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
 
 	  found = SDMF_get_fileEntry( SDMF24_BDPM, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
 
 	  found = SDMF_get_fileEntry( SDMF24_PPG, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
 
 	  found = SDMF_get_fileEntry( SDMF24_WLSTRANS, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
 
 	  found = SDMF_get_fileEntry( SDMF24_TRANS, orbit, fileEntry );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SDMF_get_fileEntry" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "SDMF_get_fileEntry" );
 	  if ( found ) (void) printf( "%s\n", fileEntry );
      }
 done:

@@ -133,8 +133,6 @@ hid_t NADC_OPEN_HDF5_Group( hid_t loc_id, const char *name )
 void NADC_WR_HDF5_Attribute( hid_t loc_id, const char name[], hid_t type_id,
 			     int rank, const hsize_t dims[], const void *data )
 {
-     const char prognm[] = "NADC_WR_HDF5_Attribute";
-
      hid_t   att_id;
      hid_t   space_id;
 
@@ -146,9 +144,9 @@ void NADC_WR_HDF5_Attribute( hid_t loc_id, const char name[], hid_t type_id,
 	  att_id = H5Acreate( loc_id, name, atype, space_id, 
 			      H5P_DEFAULT, H5P_DEFAULT );
 	  if ( att_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_ATTR, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_ATTR, name );
 	  if ( H5Awrite( att_id, atype, data ) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_ATTR, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_ATTR, name );
 	  (void) H5Tclose( atype );
      } else {
 	  if ( rank == 1 && dims[0] == 1 ) {
@@ -161,14 +159,14 @@ void NADC_WR_HDF5_Attribute( hid_t loc_id, const char name[], hid_t type_id,
 				   H5P_DEFAULT, H5P_DEFAULT );
 	  }
 	  if ( att_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_ATTR, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_ATTR, name );
 	  if ( H5Awrite( att_id, type_id, data ) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_ATTR, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_ATTR, name );
      }
      if ( H5Sclose( space_id ) < 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, name );
      if ( H5Aclose( att_id ) < 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_ATTR, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_ATTR, name );
 }
 
 /*+++++++++++++++++++++++++
@@ -191,8 +189,6 @@ void NADC_WR_HDF5_Attribute( hid_t loc_id, const char name[], hid_t type_id,
 void NADC_RD_HDF5_Dataset( hid_t loc_id, const char *name, hid_t type_out_id,
 			   int *rank, hsize_t *dims, void **data_out )
 {
-     const char prognm[] = "NADC_RD_HDF5_Dataset";
-
      register int ni;
 
      hid_t   data_id;
@@ -206,12 +202,12 @@ void NADC_RD_HDF5_Dataset( hid_t loc_id, const char *name, hid_t type_out_id,
  * open dataset
  */
      if ( (data_id = H5Dopen( loc_id, name, H5P_DEFAULT )) < 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 /*
  * get dataset rank and dimension(s)
  */
      if ( (space_id = H5Dget_space( data_id )) < 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, name );
      *rank = H5Sget_simple_extent_ndims( space_id );
      (void) H5Sget_simple_extent_dims( space_id, dims, NULL );
      (void) H5Sclose( space_id );
@@ -221,25 +217,25 @@ void NADC_RD_HDF5_Dataset( hid_t loc_id, const char *name, hid_t type_out_id,
  * get dataset type and size
  */
      if ( (type_id = H5Dget_type( data_id )) < 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DTYPE, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_DTYPE, name );
      nrbyte = nrpix * H5Tget_size( type_id );
      (void) H5Tclose( type_id );
 /*
  * allocate memory to store dataset
  */
      if ( (data_out[0] = data = (void *) malloc( nrbyte )) == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "data" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "data" );
 /*
  * read all elements of dataset
  */
      stat = H5Dread( data_id, type_out_id, 
 		     H5S_ALL, H5S_ALL, H5P_DEFAULT, data );
-     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 /*
  * close dataset
  */
      if ( H5Dclose( data_id ) < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 }
 
 /*+++++++++++++++++++++++++
@@ -264,8 +260,6 @@ void NADC_WR_HDF5_Dataset( hbool_t compress, hid_t loc_id, const char name[],
 			   hid_t type_id, int rank, const hsize_t dims[], 
 			   const void *data )
 {
-     const char prognm[] = "NADC_WR_HDF5_Dataset";
-
      hid_t   data_id;
      hid_t   space_id;
      hid_t   plist;
@@ -293,7 +287,7 @@ void NADC_WR_HDF5_Dataset( hbool_t compress, hid_t loc_id, const char name[],
 		    (void) H5Pset_shuffle( plist );
 		    (void) H5Pset_deflate( plist, 6 );
 	       } else {
-		    NADC_ERROR( prognm, NADC_ERR_WARN, 
+		    NADC_ERROR( NADC_ERR_WARN, 
 				"no compression available in HDF5 library" );
 	       }
 	  }
@@ -301,18 +295,18 @@ void NADC_WR_HDF5_Dataset( hbool_t compress, hid_t loc_id, const char name[],
 			       H5P_DEFAULT, plist, H5P_DEFAULT );
 	  (void) H5Pclose( plist );
      }
-     if ( data_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+     if ( data_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
      (void) H5Sclose( space_id );
 /*
  * write dataset to file
  */
      stat = H5Dwrite( data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data );
-     if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 /*
  * close dataset
  */
      if ( H5Dclose( data_id ) < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 }
 
 /*+++++++++++++++++++++++++
@@ -339,8 +333,6 @@ void NADC_WR_HDF5_Vlen_Dataset( hbool_t compress, hid_t loc_id,
 				const char name[], hid_t type_id, 
 				int rank, const hsize_t dims[], void *vdata )
 {
-     const char prognm[] = "NADC_WR_HDF5_Vlen_Dataset";
-
      hid_t   data_id;
      hid_t   vtype_id;
      hid_t   space_id;
@@ -355,18 +347,18 @@ void NADC_WR_HDF5_Vlen_Dataset( hbool_t compress, hid_t loc_id,
 	  data_id = H5Dcreate( loc_id, name, type_id, space_id, 
 			       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( data_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 /*
  * write dataset to file
  */
 	  stat = H5Dwrite( data_id, type_id, 
 			   H5S_ALL, H5S_ALL, H5P_DEFAULT, vdata );
-	  if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	  if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 	  free( vdata );
 	  if ( H5Sclose( space_id ) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, name );
 	  if ( H5Dclose( data_id ) < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
      } else {
 /*
  * create data set
@@ -382,29 +374,29 @@ void NADC_WR_HDF5_Vlen_Dataset( hbool_t compress, hid_t loc_id,
 	  data_id = H5Dcreate( loc_id, name, vtype_id, space_id, 
 			       H5P_DEFAULT, plist, H5P_DEFAULT );
 	  if ( data_id < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 	  (void) H5Pclose( plist );
 /*
  * write dataset to file
  */
 	  stat = H5Dwrite( data_id, vtype_id, 
 			   H5S_ALL, H5S_ALL, H5P_DEFAULT, vdata );
-	  if ( stat < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	  if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 /*
  * free allocated memory
  */
 	  stat = H5Dvlen_reclaim( vtype_id, space_id, H5P_DEFAULT, vdata );
 	  if ( stat < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, name );
 	  free( vdata );
 /*
  * close variable dataset and data type
  */
 	  if ( H5Sclose( space_id ) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_SPACE, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_SPACE, name );
 	  if ( H5Dclose( data_id ) < 0 ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, name );
 	  if (  H5Tclose( vtype_id ) < 0 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DTYPE, name );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_DTYPE, name );
      }
 }

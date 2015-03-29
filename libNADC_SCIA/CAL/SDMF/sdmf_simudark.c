@@ -85,8 +85,6 @@ static const size_t mtbl_offs[DIM_MTBL_SIMUDARK] = {
 void SDMF_rd_simudarkTable( hid_t locID, int *numIndx, int *metaIndx,
 			  struct mtbl_simudark_rec **mtbl_out )
 {
-     const char prognm[] = "SDMF_rd_simudarkTable";
-
      hsize_t nfields, nrecords;
      herr_t  stat;
 
@@ -116,7 +114,7 @@ void SDMF_rd_simudarkTable( hid_t locID, int *numIndx, int *metaIndx,
      mtbl = (struct mtbl_simudark_rec *) 
 	  malloc( (size_t) (*numIndx) * mtbl_size );
      if ( mtbl == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mtbl" );
 /*
  * read table
  */
@@ -125,7 +123,7 @@ void SDMF_rd_simudarkTable( hid_t locID, int *numIndx, int *metaIndx,
 				 mtbl_simudark_sizes, mtbl );
 	  if ( stat < 0 ) {
 	       free( mtbl );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+	       NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
 	  } 
      } else {
 	  register int nm;
@@ -136,7 +134,7 @@ void SDMF_rd_simudarkTable( hid_t locID, int *numIndx, int *metaIndx,
 					mtbl_simudark_sizes, mtbl+nm );
 	       if ( stat < 0 ) {
 		    free( mtbl );
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, tableName );
+		    NADC_RETURN_ERROR( NADC_ERR_HDF_RD, tableName );
 	       } 
 	  }
      }

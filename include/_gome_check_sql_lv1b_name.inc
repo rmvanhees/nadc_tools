@@ -21,8 +21,6 @@ void GOME_CHECK_SQL_LV1B_NAME( PGconn *conn, const char *l1b_product_in,
 			       const char *datetime_stop,
 			       /*@out@*/ char *l1b_product )
 {
-     const char prognm[] = "GOME_CHECK_SQL_LV1B_NAME";
-
      PGresult *res;
 
      int   nrow;
@@ -39,7 +37,7 @@ void GOME_CHECK_SQL_LV1B_NAME( PGconn *conn, const char *l1b_product_in,
 		      l1b_product );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) return;
      PQclear( res );
@@ -49,14 +47,14 @@ void GOME_CHECK_SQL_LV1B_NAME( PGconn *conn, const char *l1b_product_in,
 /*      (void) fprintf( stderr, "%s\n", sql_query ); */
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) == 0 ) goto done;
      (void) nadc_strlcpy( l1b_product, 
                           PQgetvalue( res, 0, 0 ), ERS2_FILENAME_SIZE );
      (void) snprintf( sql_query, SQL_STR_SIZE, 
 		      "changed input L1b product to: %s", l1b_product );
-     NADC_ERROR( prognm, NADC_ERR_NONE, sql_query );
+     NADC_ERROR( NADC_ERR_NONE, sql_query );
  done:
      PQclear( res );
 }

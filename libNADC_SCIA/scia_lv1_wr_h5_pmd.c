@@ -67,8 +67,6 @@ static const size_t pmd_offs[NFIELDS] = {
 void SCIA_LV1_WR_H5_PMD( struct param_record param, unsigned int nr_pmd,
 			 const struct mds1_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_PMD";
-
      hid_t   ads_id;
      hid_t   pmd_type[NFIELDS];
 
@@ -84,7 +82,7 @@ void SCIA_LV1_WR_H5_PMD( struct param_record param, unsigned int nr_pmd,
  * open/create group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * define data types of the Table-fields
  */

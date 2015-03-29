@@ -98,11 +98,8 @@ void NADC_USRINP( int type, const char *string, int maxval,
 	  double dval; 
      } *uu;
 
-     const char prognm[] = "NADC_USRINP";
-
      uu = (union u_buff *) malloc( (size_t) maxval * sizeof( union u_buff )); 
-     if ( uu == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "uu" );
+     if ( uu == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "uu" );
 /*
  * Initialisation
  */
@@ -112,7 +109,7 @@ void NADC_USRINP( int type, const char *string, int maxval,
 	  cmval[nr] = (char *) malloc( strlen( string ) );
 	  if ( cmval[nr] == NULL ) {
 	       free( uu );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cmval" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cmval" );
 	  }
      } while ( ++nr < NR_CMVAL );
 /*
@@ -122,7 +119,7 @@ void NADC_USRINP( int type, const char *string, int maxval,
      if ( (str_ptr = str_bgn) == NULL ) {
 	  free( uu );
 	  for ( nr = 0; nr < NR_CMVAL; nr++ ) free( cmval[nr] );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "str_bgn" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "str_bgn" );
      }
      (void) strcpy( str_ptr, string );
      (void) strtok( str_ptr, " " );
@@ -191,7 +188,7 @@ void NADC_USRINP( int type, const char *string, int maxval,
 			      (void) strcpy( cmval[nr], str_ptr );
 			      *str_ptr = '\0';
 			 } else {                  /*wrong syntax a:b:c:d...*/
-			      NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM,
+			      NADC_RETURN_ERROR( NADC_ERR_PARAM,
 					       "a:b:c:d..." );
 			 }
 		    } else {                                 /*set CINCR = 1*/
@@ -216,7 +213,7 @@ void NADC_USRINP( int type, const char *string, int maxval,
 			 (void) strcpy( cmval[nr], "1" );
 		    }
 		    if ( pnt2d != NULL && pnt2d < pntcm ) {
-			      NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM,
+			      NADC_RETURN_ERROR( NADC_ERR_PARAM,
 					       "a:b:c:d,.." );
 		    } else {                                     /*get CINCR*/
 			 (void) nadc_strlcpy( cmval[nr], str_ptr, 
@@ -242,8 +239,7 @@ void NADC_USRINP( int type, const char *string, int maxval,
 	       nrstep = abs( (int)((dmval[0] - dmval[1])/dmval[2]) ) + 1;
 
 	       if ( nrstep + *nrval > maxval ) {
-		    NADC_ERROR( prognm, NADC_ERR_PARAM, 
-				"exceed array (truncated)" );
+		    NADC_ERROR( NADC_ERR_PARAM, "exceed array (truncated)" );
 		    nrstep = maxval - *nrval;
 	       }
 

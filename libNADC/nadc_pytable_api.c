@@ -167,8 +167,6 @@ herr_t PYTABLE_make_array( hid_t locID, const char *dset_name,
 			   unsigned int compress, bool shuffle, 
 			   bool fletcher32, const void *buffer )
 {
-     const char prognm[] = "PYTABLE_make_array";
-
      register int ni;
 
      hid_t   dataID = -1, spaceID = -1;
@@ -180,7 +178,7 @@ herr_t PYTABLE_make_array( hid_t locID, const char *dset_name,
 
 	  hsize_t *maxdims = (hsize_t *) malloc( rank * sizeof(hsize_t) );
 	  if ( maxdims == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "maxdims" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "maxdims" );
 
 	  for ( ni = 0; ni < rank; ni++ ) {
 	       if ( ni == extdim )
@@ -191,7 +189,7 @@ herr_t PYTABLE_make_array( hid_t locID, const char *dset_name,
 	  }
 	  spaceID = H5Screate_simple( rank, dims, maxdims );
 	  free( maxdims );
-	  if ( spaceID < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_SPACE, "" );
+	  if ( spaceID < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, "" );
 
 	  /* Modify dataset creation properties, i.e. enable chunking  */
 	  plistID = H5Pcreate( H5P_DATASET_CREATE );
@@ -219,7 +217,7 @@ herr_t PYTABLE_make_array( hid_t locID, const char *dset_name,
 	  dataID = H5Dcreate( locID, dset_name, typeID, spaceID, 
 			      H5P_DEFAULT, plistID, H5P_DEFAULT );
 	  if ( dataID < 0 ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, dset_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name );
 
           /* end access to the property list */
 	  if ( H5Pclose( plistID ) < 0 ) goto done;
@@ -231,13 +229,13 @@ herr_t PYTABLE_make_array( hid_t locID, const char *dset_name,
 	  dataID = H5Dcreate( locID, dset_name, typeID, spaceID, 
 			      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	  if ( dataID < 0 ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, dset_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, dset_name );
      }
 /*
  * write the data
  */
      stat = H5Dwrite( dataID, typeID, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "" );
 
      (void) H5Dclose( dataID );
      (void) H5Sclose( spaceID );

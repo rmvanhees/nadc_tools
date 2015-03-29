@@ -94,8 +94,6 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
 			      const struct dsd_envi *dsd,
 			      struct srs_scia **srs_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_SRS";
-
      char         *srs_pntr, *srs_char = NULL;
      size_t       dsr_size, nr_byte;
      unsigned int indx_dsd;
@@ -112,7 +110,7 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -121,11 +119,11 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
 	  srs = (struct srs_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct srs_scia));
 	  if ( srs == NULL ) {
-	       NADC_ERROR( prognm, NADC_ERR_ALLOC, "srs" );
+	       NADC_ERROR( NADC_ERR_ALLOC, "srs" );
 	       return 0;
 	  }
      } else if ( (srs = srs_out[0]) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "srs_out[0]" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "srs_out[0]" );
 	  return 0;
      }
 /*
@@ -133,7 +131,7 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (srs_char = (char *) malloc( dsr_size )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "srs_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "srs_char" );
 	  return 0;
      }
 /*
@@ -145,7 +143,7 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( srs_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  srs_pntr = srs_char;
 /*
  * read data buffer to SRS structure
@@ -184,7 +182,7 @@ unsigned int SCIA_LV1_RD_SRS( FILE *fd, unsigned int num_dsd,
 	  if ( (size_t)(srs_pntr - srs_char) != dsr_size ) {
 	       free( srs_char );
 	       if ( ! Use_Extern_Alloc ) free( srs );
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	       return 0;
 	  }
 /*
@@ -221,8 +219,6 @@ done:
 void SCIA_LV1_WR_SRS( FILE *fd, unsigned int num_srs, 
 		      const struct srs_scia *srs_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_SRS";
-
      size_t nr_byte;
 
      struct srs_scia srs;
@@ -250,45 +246,45 @@ void SCIA_LV1_WR_SRS( FILE *fd, unsigned int num_srs,
  * write SRS structure to data buffer
  */
 	  if ( fwrite( srs.sun_spec_id, 2 * ENVI_CHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += 2 * ENVI_CHAR;
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( srs.wvlen_sun, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( srs.mean_sun, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( srs.precision_sun, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( srs.accuracy_sun, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( srs.etalon, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( &srs.avg_asm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &srs.avg_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &srs.avg_elev_sun, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  nr_byte = (size_t) PMD_NUMBER * ENVI_FLOAT;
 	  if ( fwrite( srs.pmd_mean, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( srs.pmd_out_nd_out, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( srs.pmd_out_nd_in, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( &srs.dopp_shift, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
 	  srs_in++;

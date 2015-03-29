@@ -119,8 +119,6 @@ void MERIS_RD_SPH( FILE *fd, const struct mph_envi mph,
 		      struct sph_meris *sph )
        /*@globals sph_items;@*/
 {
-     const char prognm[] = "MERIS_RD_SPH";
-
      int    ibuff;
 
      unsigned int nr_byte;
@@ -135,7 +133,7 @@ void MERIS_RD_SPH( FILE *fd, const struct mph_envi mph,
  */
      nr_byte = NADC_RD_PDS_HDR( fd, NUM_SPH_ITEMS, sph_items );
      if ( nr_byte != Length_SPH ) {
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
      }
 /*
  * fill sph_meris struct

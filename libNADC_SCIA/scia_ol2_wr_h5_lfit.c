@@ -84,8 +84,6 @@ static const size_t lfit_offs[NFIELDS] = {
 void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param, 
 			  unsigned int nr_lfit, const struct lfit_scia *lfit )
 {
-     const char prognm[] = "SCIA_OL2_WR_H5_LFIT";
-
      register unsigned int nr;
 
      hid_t   grp_id;
@@ -118,11 +116,11 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
  * create group /MDS/<lfit_name>
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      lfit_id = H5Gcreate( grp_id, lfit_name,
 			  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( lfit_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, lfit_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, lfit_name );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -168,7 +166,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
  * variable length arrays: tangh, tangp, tangt, corrmatrix, residuals, adddiag
  */
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].num_rlevel;
@@ -176,7 +174,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].tangh,
                               vdata[nr].len * sizeof(float) );
@@ -185,7 +183,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
      NADC_WR_HDF5_Vlen_Dataset( compress, lfit_id, "tangh",
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].num_rlevel;
@@ -193,7 +191,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].tangp,
                               vdata[nr].len * sizeof(float) );
@@ -202,7 +200,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
      NADC_WR_HDF5_Vlen_Dataset( compress, lfit_id, "tangp",
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].num_rlevel;
@@ -210,7 +208,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].tangt,
                               vdata[nr].len * sizeof(float) );
@@ -219,7 +217,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
      NADC_WR_HDF5_Vlen_Dataset( compress, lfit_id, "tangt",
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].cmatrixsize;
@@ -227,7 +225,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].corrmatrix,
                               vdata[nr].len * sizeof(float) );
@@ -236,7 +234,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
      NADC_WR_HDF5_Vlen_Dataset( compress, lfit_id, "corrmatrix",
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].ressize;
@@ -244,7 +242,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].residuals,
                               vdata[nr].len * sizeof(float) );
@@ -253,7 +251,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
      NADC_WR_HDF5_Vlen_Dataset( compress, lfit_id, "residuals",
                                H5T_NATIVE_FLOAT, 1, &adim, vdata );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].num_adddiag;
@@ -261,7 +259,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].adddiag,
                               vdata[nr].len * sizeof(float) );
@@ -274,7 +272,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
  */
      type_id = H5Topen( param.hdf_file_id, "layer_rec", H5P_DEFAULT );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t)(lfit[nr].num_rlevel * lfit[nr].num_species);
@@ -282,7 +280,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc(vdata[nr].len * sizeof(struct layer_rec));
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].mainrec,
                               vdata[nr].len * sizeof(struct layer_rec) );
@@ -291,7 +289,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
      NADC_WR_HDF5_Vlen_Dataset( compress, lfit_id, "mainrec",
                                type_id, 1, &adim, vdata );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t)(lfit[nr].num_rlevel * lfit[nr].num_scale);
@@ -299,7 +297,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc(vdata[nr].len * sizeof(struct layer_rec));
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].scaledrec,
                               vdata[nr].len * sizeof(struct layer_rec) );
@@ -311,7 +309,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
 
      type_id = H5Topen( param.hdf_file_id, "meas_grid", H5P_DEFAULT );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].num_mlevel;
@@ -319,7 +317,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc(vdata[nr].len * sizeof(struct meas_grid));
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].mgrid,
                               vdata[nr].len * sizeof(struct meas_grid) );
@@ -331,7 +329,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
 
      type_id = H5Topen( param.hdf_file_id, "state_vec", H5P_DEFAULT );
      vdata = (hvl_t *) malloc( nr_lfit * sizeof( hvl_t ) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
           vdata[nr].len = (size_t) lfit[nr].stvec_size;
@@ -339,7 +337,7 @@ void SCIA_OL2_WR_H5_LFIT( const char lfit_name[], struct param_record param,
                vdata[nr].p = malloc(vdata[nr].len * sizeof(struct state_vec));
                if ( vdata[nr].p == NULL ) {
                     free( vdata );
-                    NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+                    NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
                }
                (void) memcpy( vdata[nr].p, lfit[nr].statevec,
                               vdata[nr].len * sizeof(struct state_vec) );

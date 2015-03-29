@@ -261,8 +261,6 @@ static inline
 void WRITE_PIXEL_BLOCK( FILE *outfl, unsigned int nr, 
 			const struct chan_src pixel )
 {
-     const char prognm[] = "WRITE_PIXEL_BLOCK";
-
      unsigned int *data;
 
      const unsigned int adim = pixel.length;
@@ -274,7 +272,7 @@ void WRITE_PIXEL_BLOCK( FILE *outfl, unsigned int nr,
      nadc_write_ushort( outfl, nr, "Start Pixel Indicator", pixel.start );
      nadc_write_ushort( outfl, nr, "Cluster Block Length", pixel.length );
      data = (unsigned int *) malloc( (size_t) pixel.length * sizeof( int ));
-     if ( data == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "data" );
+     if ( data == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "data" );
      UNPACK_LV0_PIXEL_VAL( &pixel, data );
      nadc_write_arr_uint( outfl, nr, "Pixel Data", 1, &adim, data );
      free( data );
@@ -389,8 +387,6 @@ void WRITE_PMD_SRC( FILE  *outfl, unsigned short nr,
 void SCIA_LV0_WR_ASCII_AUX( struct param_record param, unsigned int stateIndx,
 			    unsigned int nr_aux, const struct mds0_aux *aux )
 {
-     const char prognm[] = "SCIA_LV0_WR_ASCII_AUX";
-
      register unsigned int na;
 
      char  ext_str[10];
@@ -400,7 +396,7 @@ void SCIA_LV0_WR_ASCII_AUX( struct param_record param, unsigned int stateIndx,
      (void) snprintf( ext_str, 10, "aux_%03u", stateIndx );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of MDS record
  */
@@ -433,8 +429,6 @@ void SCIA_LV0_WR_ASCII_AUX( struct param_record param, unsigned int stateIndx,
 void SCIA_LV0_WR_ASCII_PMD( struct param_record param, unsigned int stateIndx,
 			    unsigned int nr_pmd, const struct mds0_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV0_WR_ASCII_PMD";
-
      register unsigned int np;
 
      char  ext_str[10];
@@ -444,7 +438,7 @@ void SCIA_LV0_WR_ASCII_PMD( struct param_record param, unsigned int stateIndx,
      (void) snprintf( ext_str, 10, "pmd_%03u", stateIndx );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of MDS record
  */
@@ -476,8 +470,6 @@ void SCIA_LV0_WR_ASCII_PMD( struct param_record param, unsigned int stateIndx,
 void SCIA_LV0_WR_ASCII_DET( struct param_record param, unsigned int stateIndx,
 			    unsigned int nr_det, const struct mds0_det *det )
 {
-     const char prognm[] = "SCIA_LV0_WR_ASCII_DET";
-
      register unsigned short n_chan, n_clus;
      register unsigned int   nd, nr;
 
@@ -490,7 +482,7 @@ void SCIA_LV0_WR_ASCII_DET( struct param_record param, unsigned int stateIndx,
      (void) snprintf( ext_str, 10, "det_%03u", stateIndx );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of MDS record
  */
@@ -546,15 +538,13 @@ void SCIA_LV0_WR_ASCII_DET( struct param_record param, unsigned int stateIndx,
 void SCIA_LV1_WR_ASCII_AUX( struct param_record param,
 			    unsigned int nr_aux, const struct mds1_aux *aux )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_AUX";
-
      register unsigned int na;
 
      char date_str[UTC_STRING_LENGTH];
 
      FILE *outfl = CRE_ASCII_File( param.outfile, "aux" );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of MDS record
  */
@@ -588,15 +578,13 @@ void SCIA_LV1_WR_ASCII_AUX( struct param_record param,
 void SCIA_LV1_WR_ASCII_PMD( struct param_record param,
 			    unsigned int nr_pmd, const struct mds1_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV1_WR_ASCII_PMD";
-
      register unsigned int np;
 
      char  date_str[UTC_STRING_LENGTH];
 
      FILE *outfl = CRE_ASCII_File( param.outfile, "pmd" );
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of MDS record
  */

@@ -143,8 +143,6 @@ static
 short _FIND_MATCHES( PGconn *conn, double jday_start, double jday_end, 
 		     struct tileinfo_rec **tileRow_out )
 {
-     const char prognm[] = "_FIND_MATCHES";
-
      register int nr, nt;
      register unsigned int nii;
 
@@ -170,7 +168,7 @@ short _FIND_MATCHES( PGconn *conn, double jday_start, double jday_end,
                       jday_start, jday_end );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 
 /* return when no entries are found */
      if ( (numTiles  = PQntuples( res )) == 0 ) return 0;
@@ -179,7 +177,7 @@ short _FIND_MATCHES( PGconn *conn, double jday_start, double jday_end,
      tileRow_out[0] = (struct tileinfo_rec *)
 	  malloc( numTiles * sizeof(struct tileinfo_rec) );
      if ( (tileRow = tileRow_out[0]) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "tileRow" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "tileRow" );
 	  return 0;
      }
      i_indx  = PQfnumber( res, "pk_tileinfo" );
@@ -205,7 +203,7 @@ short _FIND_MATCHES( PGconn *conn, double jday_start, double jday_end,
                       jday_start, jday_end );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      numRows = PQntuples( res );
 
      for ( nr = 0; nr < numRows; nr++ ) {
@@ -225,7 +223,7 @@ short _FIND_MATCHES( PGconn *conn, double jday_start, double jday_end,
 /*      (void) snprintf(sql_query, MAX_STRING_LENGTH, SELECT_FROM_META, meta_id); */
 /*      res = PQexec( conn, sql_query ); */
 /*      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) */
-/*           NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) ); */
+/*           NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) ); */
 /*      numRows = PQntuples( res ); */
 
 /*      for ( nr = 0; nr < numRows; nr++ ) { */
@@ -295,8 +293,6 @@ static
 void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id, 
 			   const struct ddr_gome *ddr )
 {
-     const char prognm[] = "_INSERT_ONE_LV2_TILE";
-
      char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
 
      char         *pntr;
@@ -312,7 +308,7 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
  */
      res = PQexec( conn, "SELECT nextval(\'tileinfo_pk_tileinfo_seq\')" );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           return;
      }
@@ -359,16 +355,16 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			 lon[3], ddr->glr.lat[3], lon[2], ddr->glr.lat[2],
 			 lon[0], ddr->glr.lat[0], lon[1], ddr->glr.lat[1] );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           res = PQexec( conn, "ROLLBACK" );
           if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           return;
      }
@@ -402,16 +398,16 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			      ddr->irr2->surface_press );
      }
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           res = PQexec( conn, "ROLLBACK" );
           if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           return;
      }
@@ -423,16 +419,16 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			 "INSERT INTO tileinfo_meta__2P VALUES (%-u,%-d)", 
 			 tile_id, meta_id );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           res = PQexec( conn, "ROLLBACK" );
           if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      PQclear( res );
 }
@@ -456,8 +452,6 @@ void _UPDATE_ONE_LV2_TILE( PGconn *conn, bool be_verbose,
 			   const struct tileinfo_rec *tileRow,
 			   const struct ddr_gome *ddr )
 {
-     const char prognm[] = "_UPDATE_ONE_LV2_TILE";
-
      char     sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
      int      numChar;
      float    lon[NUM_COORDS];
@@ -490,16 +484,16 @@ void _UPDATE_ONE_LV2_TILE( PGconn *conn, bool be_verbose,
      numChar = snprintf( sql_query, SQL_STR_SIZE, "%s WHERE pk_tileinfo=%u",
 			 strcpy(cbuff,sql_query), tileRow->indxTile );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  PQclear( res );
 	  res = PQexec( conn, "ROLLBACK" );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  PQclear( res );
 	  return;
      }
@@ -562,16 +556,16 @@ void _UPDATE_ONE_LV2_TILE( PGconn *conn, bool be_verbose,
 			      strcpy(cbuff,sql_query), tileRow->indxTile );
      }
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  PQclear( res );
 	  res = PQexec( conn, "ROLLBACK" );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	       NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  PQclear( res );
 	  return;
      }
@@ -596,8 +590,6 @@ static
 void _INSERT_ONE_LV2_TILE2META( PGconn *conn, bool be_verbose, int meta_id, 
 				const struct tileinfo_rec *tileRow )
 {
-     const char prognm[] = "_INSERT_ONE_LV2_TILE2META";
-
      char sql_query[SQL_STR_SIZE];
 
      int numChar;
@@ -611,17 +603,17 @@ void _INSERT_ONE_LV2_TILE2META( PGconn *conn, bool be_verbose, int meta_id,
 			      "INSERT INTO tileinfo_meta__2P VALUES (%-u,%-d)",
 			      tileRow->indxTile, meta_id );
 	  if ( be_verbose )
-	       (void) printf( "%s() %s [%-d]\n", prognm, sql_query, numChar );
+	       (void) printf( "%s() %s [%-d]\n", __FUNCTION__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL,
+	       NADC_ERROR( NADC_ERR_SQL,
 			   PQresultErrorMessage(res) );
 	       PQclear( res );
 	       res = PQexec( conn, "ROLLBACK" );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-		    NADC_ERROR( prognm, NADC_ERR_SQL,
+		    NADC_ERROR( NADC_ERR_SQL,
 				PQresultErrorMessage(res) );
 	       PQclear( res );
 	       return;
@@ -635,8 +627,6 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			   const char *version,
 			   short num_ddr, const struct ddr_gome *ddr )
 {
-     const char prognm[] = "GOME_LV2_WR_SQL_TILE";
-
      register short  nd, nr;
      register double jday;
 
@@ -658,7 +648,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
  * check number of ddr-records
  */
      if ( num_ddr == 0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, 
+	  NADC_RETURN_ERROR( NADC_ERR_NONE, 
 			     "product does not contain any MDS records" );
 /*
  * set global variable "release"
@@ -669,7 +659,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
  */
      numRows = _FIND_MATCHES( conn, jdayStart, jdayEnd, &tileRow );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "_FIND_MATCHES" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "_FIND_MATCHES" );
 /*
  *--------------------------------------------------
  * all ddr-records are new: do a simple insert and exit
@@ -677,7 +667,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
      if ( numRows == 0 ) {
 	  res = PQexec( conn, "BEGIN" );
           if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
                PQclear( res );
                return;
           }
@@ -686,17 +676,17 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
 	  for ( nd = 0; nd < num_ddr; nd++ ) {
 	       _INSERT_ONE_LV2_TILE( conn, be_verbose, meta_id, ddr+nd );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 				       "_INSERT_ONE_LV2_TILE" );
 	       affectedRows++;
 	  }
 	  res = PQexec( conn, "COMMIT" );
           if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-               NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+               NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
 	  (void) snprintf( cbuff, SHORT_STRING_LENGTH, 
 			   "added Rows=%-u", affectedRows );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_NONE, cbuff );
+	  NADC_RETURN_ERROR( NADC_ERR_NONE, cbuff );
      }
 /*
  *--------------------------------------------------
@@ -704,7 +694,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           goto done;
      }
@@ -726,14 +716,14 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
 	  if ( ! found ) {
 	       _INSERT_ONE_LV2_TILE( conn, be_verbose, meta_id, ddr+nd );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "_INSERT_ONE_LV2_TILE" );
 	       affectedRows++;
 	  }
      }
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  PQclear( res );
           goto done;
      }
@@ -741,7 +731,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
      if ( affectedRows != 0u ) {
 	  (void) snprintf( cbuff, SHORT_STRING_LENGTH, 
 			   "added Rows=%-u", affectedRows );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+	  NADC_ERROR( NADC_ERR_NONE, cbuff );
      }
 /*
  * --------------------------------------------------
@@ -750,7 +740,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
  */
      res = PQexec( conn, "BEGIN" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
           PQclear( res );
           goto done;
      }
@@ -760,18 +750,18 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
 	  if ( tileRow[nr].release[1] <= release ) {
 	       _UPDATE_ONE_LV2_TILE( conn, be_verbose, tileRow+nr, ddr );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "_UPDATE_ONE_LV2_TILE" );
 	       affectedRows++;
 	  }
 	  _INSERT_ONE_LV2_TILE2META( conn, be_verbose, meta_id, tileRow+nr );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				"_INSERT_ONE_LV2_TILE2META" );
      }
      res = PQexec( conn, "COMMIT" );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 	  PQclear( res );
           goto done;
      }
@@ -779,7 +769,7 @@ void GOME_LV2_WR_SQL_TILE( PGconn *conn, bool be_verbose, int meta_id,
      if ( affectedRows != 0u ) {
 	  (void) snprintf( cbuff, SHORT_STRING_LENGTH, 
 			   "updated Rows=%-u", affectedRows );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, cbuff );
+	  NADC_ERROR( NADC_ERR_NONE, cbuff );
      }
  done:
      free( tileRow );

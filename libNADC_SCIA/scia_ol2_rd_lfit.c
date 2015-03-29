@@ -126,8 +126,6 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 		      unsigned int num_dsd, const struct dsd_envi *dsd, 
 		      struct lfit_scia **lfit_out )
 {
-     const char prognm[]  = "SCIA_OL2_RD_LFIT";
-
      register unsigned short nl;
 
      char         *lfit_pntr, *lfit_char = NULL;
@@ -143,7 +141,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, lfit_name );
      if ( IS_ERR_STAT_FATAL || IS_ERR_STAT_ABSENT )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, lfit_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, lfit_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
           NADC_ERR_RESTORE();
           lfit_out[0] = NULL;
@@ -158,18 +156,18 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct lfit_scia));
      }
      if ( (lfit = lfit_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lfit" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lfit" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (lfit_char = (char *) malloc( dsd_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lfit_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lfit_char" );
 /*
  * rewind/read input data file
  */
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( lfit_char, dsd_size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to LFIT structure
  */
@@ -211,21 +209,21 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->tangh = (float *) 
 		    malloc( lfit->num_rlevel * sizeof(float) );
 	       if ( lfit->tangh == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "tangh" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "tangh" );
 	       (void) memcpy( lfit->tangh, lfit_pntr, 
 			      lfit->num_rlevel * ENVI_FLOAT );
 	       lfit_pntr += lfit->num_rlevel * ENVI_FLOAT;
 	       lfit->tangp = (float *) 
 		    malloc( lfit->num_rlevel * sizeof(float) );
 	       if ( lfit->tangp == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "tangp" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "tangp" );
 	       (void) memcpy( lfit->tangp, lfit_pntr, 
 			      lfit->num_rlevel * ENVI_FLOAT );
 	       lfit_pntr += lfit->num_rlevel * ENVI_FLOAT;
 	       lfit->tangt = (float *) 
 		    malloc( lfit->num_rlevel * sizeof(float) );
 	       if ( lfit->tangt == NULL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "tangt" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "tangt" );
 	       (void) memcpy( lfit->tangt, lfit_pntr, 
 			      lfit->num_rlevel * ENVI_FLOAT );
 	       lfit_pntr += lfit->num_rlevel * ENVI_FLOAT;
@@ -235,7 +233,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->mainrec = (struct layer_rec *)
 		    malloc( n_rec * sizeof( struct layer_rec ));
 	       if ( lfit->mainrec == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mainrec" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mainrec" );
 	       (void) memcpy( lfit->mainrec, lfit_pntr, 
 			      n_rec * sizeof(struct layer_rec) );
 	       lfit_pntr += n_rec * sizeof(struct layer_rec);
@@ -245,7 +243,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->scaledrec = (struct layer_rec *)
 		    malloc( n_rec * sizeof( struct layer_rec ));
 	       if ( lfit->scaledrec == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scaledrec" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scaledrec" );
 	       (void) memcpy( lfit->scaledrec, lfit_pntr, 
 			      n_rec * sizeof(struct layer_rec) );
 	       lfit_pntr += n_rec * sizeof(struct layer_rec);
@@ -257,7 +255,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->mgrid = (struct meas_grid *)
 		    malloc( lfit->num_mlevel * sizeof( struct meas_grid ));
 	       if ( lfit->mgrid == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mgrid" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mgrid" );
 	       nl = 0;
 	       do {
 		    (void) memcpy( &lfit->mgrid[nl].mjd.days, lfit_pntr, 
@@ -295,7 +293,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->statevec = (struct state_vec *)
 		    malloc( lfit->stvec_size * sizeof(struct state_vec) );
 	       if ( lfit->statevec == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "statevec" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "statevec" );
 	       (void) memcpy( lfit->statevec, lfit_pntr, 
 			      lfit->stvec_size * sizeof( struct state_vec ));
 	       lfit_pntr += lfit->stvec_size * sizeof( struct state_vec );
@@ -309,7 +307,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->corrmatrix = (float *)
 		    malloc((size_t) lfit->cmatrixsize * ENVI_FLOAT );
 	       if ( lfit->corrmatrix == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "corrmatrix" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "corrmatrix" );
 	       (void) memcpy( lfit->corrmatrix, lfit_pntr, 
 			      lfit->cmatrixsize * ENVI_FLOAT );
 	       lfit_pntr += lfit->cmatrixsize * ENVI_FLOAT ;
@@ -335,7 +333,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->residuals = (float *)
 		    malloc((size_t) lfit->ressize * ENVI_FLOAT );
 	       if ( lfit->residuals == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "residuals" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "residuals" );
 	       (void) memcpy( lfit->residuals, lfit_pntr, 
 			      lfit->ressize * ENVI_FLOAT );
 	       lfit_pntr += lfit->ressize * ENVI_FLOAT ;
@@ -349,7 +347,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
 	       lfit->adddiag = (float *)
 		    malloc((size_t) lfit->num_adddiag * ENVI_FLOAT );
 	       if ( lfit->adddiag == NULL ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "adddiag" );
+		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "adddiag" );
 	       (void) memcpy( lfit->adddiag, lfit_pntr, 
 				lfit->num_adddiag * ENVI_FLOAT );
 	       lfit_pntr += lfit->num_adddiag * ENVI_FLOAT ;
@@ -363,7 +361,7 @@ int SCIA_OL2_RD_LFIT( FILE *fd, const char lfit_name[],
  * check if we read the whole DSR
  */
      if ( (unsigned int)(lfit_pntr - lfit_char) != dsd[indx_dsd].size )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, lfit_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, lfit_name );
      lfit_pntr = NULL;
 /*
  * set return values

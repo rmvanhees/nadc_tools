@@ -101,8 +101,6 @@ void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi mph,
 		      struct sph0_scia *sph )
        /*@globals sph0_items;@*/
 {
-     const char prognm[] = "SCIA_LV0_RD_SPH";
-
      int            ibuff;
 
      const unsigned int Length_SPH = mph.sph_size - mph.num_dsd * mph.dsd_size;
@@ -114,7 +112,7 @@ void SCIA_LV0_RD_SPH( FILE *fd, const struct mph_envi mph,
  * read PDS header
  */
      if ( NADC_RD_PDS_HDR( fd, NUM_SPH0_ITEMS, sph0_items ) != Length_SPH )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
 /*
  * fill sph0_scia struct
  */
@@ -168,8 +166,6 @@ void SCIA_LV0_WR_SPH( FILE *fd, const struct mph_envi mph,
 		      const struct sph0_scia sph )
        /*@globals sph0_items;@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_SPH";
-
      int ibuff;
 
      const unsigned int Length_SPH = mph.sph_size - mph.num_dsd * mph.dsd_size;
@@ -204,5 +200,5 @@ void SCIA_LV0_WR_SPH( FILE *fd, const struct mph_envi mph,
  * write PDS header
  */
      if ( NADC_WR_PDS_HDR( NUM_SPH0_ITEMS, sph0_items, fd ) != Length_SPH )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_SIZE, "SPH size" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_SIZE, "SPH size" );
 }

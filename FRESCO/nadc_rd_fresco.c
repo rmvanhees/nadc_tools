@@ -125,8 +125,6 @@ double DateTime2SciaJDAY( const char *date, const char *time )
 static
 void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
 {
-     const char prognm[] = "Read_Fresco_Header";
-
      char  *cpntr, line[MAX_LINE_LENGTH];
 
      gzFile fp;
@@ -134,14 +132,14 @@ void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
  * open/read Fresco product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, flname );
 
      do {
 	  *line = '\0';
 	  if ( gzgets( fp, line, MAX_LINE_LENGTH ) == Z_NULL ) {
 	       if ( gzeof ( fp ) == 1 ) break;
 	       if ( strlen( line ) )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, flname );
 	  }
 	  hdr->file_size += strlen( line );
 
@@ -155,7 +153,7 @@ void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
 		    else
 			 (void) nadc_strlcpy( hdr->source, "SCIA", 5 );
 	       } else
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "corrupted header at FRESCO+ version" );
 	  } else if ( strncmp( line+2, "Level 2 date/time", 17 ) == 0 ) {
 	       if ( (cpntr = strchr( line, ':' )) != NULL ) {
@@ -164,7 +162,7 @@ void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
 				    hdr->creation_date+8, 7 );
 		    hdr->creation_date[8] = 'T';
 	       } else
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "corrupted header at Level 2 date/time" );
 	  } else if ( strncmp( line+2, "Level 1 version", 15 ) == 0 ) {
 	       cpntr = line + strlen(line) - 1;
@@ -177,7 +175,7 @@ void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
 	       if ( (cpntr = strchr( line, ':' )) != NULL ) {
 		    NADC_STRIP_ALL( cpntr+1, hdr->l1b_product );
 	       } else
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				     "corrupted header at Level 1 filename" );
 	  } else if ( strncmp( line+2, "State id", 8 ) == 0 ) {
 	       if ( (cpntr = strrchr( line, ':' )) != NULL ) {
@@ -195,12 +193,12 @@ void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
 			 strtoul(cpntr+1, (char **) NULL, 10);
 	       }
 	       if ( hdr->numState == MAX_NUM_FRESCO_STATES ) {
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				  "increase value for max_num_fresco_states" );
 	       }
 	       hdr->numState++;
 	  } else {
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, line );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, line );
 	  }
      } while( TRUE );
      hdr->numProd = 1;            /* read a complete products without errors */
@@ -209,9 +207,9 @@ void Read_Fresco_Header( const char *flname, struct fresco_hdr *hdr )
      gzclose( fp );
 
      if ( hdr->numRec == 0u )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_WARN, "empty product" );
+	  NADC_RETURN_ERROR( NADC_ERR_WARN, "empty product" );
      if ( hdr->numState == 0u )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "outdated header" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "outdated header" );
 }
 
 static
@@ -219,8 +217,6 @@ unsigned int Read_Fresco_Records( const char *flname,
 				  const struct fresco_hdr *hdr,
 				  struct fresco_rec *fresco )
 {
-     const char prognm[] = "Read_Fresco_Records";
-
      char  tmp_date[9], tmp_time[11];
      char  line[MAX_LINE_LENGTH];
      int   numItems;
@@ -234,7 +230,7 @@ unsigned int Read_Fresco_Records( const char *flname,
  * open/read Fresco product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_ERROR( NADC_ERR_FILE, flname );
 	  return 0;
      }
 /*
@@ -245,7 +241,7 @@ unsigned int Read_Fresco_Records( const char *flname,
 	  if ( gzgets( fp, line, MAX_LINE_LENGTH ) == Z_NULL ) {
 	       if ( gzeof ( fp ) == 1 ) break;
 	       if ( strlen( line ) )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+		    NADC_GOTO_ERROR( NADC_ERR_FILE_RD, flname );
 	  }
 	  if ( *line == '#' ) continue;
 
@@ -278,7 +274,7 @@ unsigned int Read_Fresco_Records( const char *flname,
 	  if ( numItems != NUM_COLUMNS ) {
 	       char msg[80];
 	       (void) snprintf( msg, 80, "incomplete record[%-u]\n", numRec );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, msg );
 	  }
 	  if ( strncmp(hdr->source, "GOME", 4) == 0 )
 	       fresco[numRec].jday = DateTime2GomeJDAY( tmp_date, tmp_time );
@@ -322,8 +318,6 @@ done:
 unsigned int NADC_RD_FRESCO( const char *flname, struct fresco_hdr *hdr,
 			     struct fresco_rec **fresco_out )
 {
-     const char prognm[] = "NADC_RD_FRESCO";
-
      register unsigned short num;
 
      char  *cpntr, ctemp[SHORT_STRING_LENGTH];
@@ -358,21 +352,21 @@ unsigned int NADC_RD_FRESCO( const char *flname, struct fresco_hdr *hdr,
  */
      Read_Fresco_Header( flname, hdr );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "corrupted header" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "corrupted header" );
      if ( hdr->numRec == 0u ) goto done;
 /*
  * allocate enough space to store all records
  */
      fresco = (struct fresco_rec *) 
 	  malloc( hdr->numRec * sizeof( struct fresco_rec ));
-     if ( fresco == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fresco" );
+     if ( fresco == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fresco" );
 /*
  * read data records
  */
      if ( Read_Fresco_Records( flname, hdr, fresco ) != hdr->numRec ) {
 	  free ( fresco );
 	  fresco_out[0] = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, 
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, 
 			   "failed to read all records" );
      }
      if ( strncmp(hdr->source, "GOME", 4) == 0 ) {

@@ -86,8 +86,6 @@ unsigned int MERIS_RD_TIE( FILE *fd, unsigned int num_dsd,
 			   const struct dsd_envi *dsd, 
 			   struct tie_meris **tie_out )
 {
-     const char prognm[] = "MERIS_RD_TIE";
-
      register unsigned short ni;
 
      char         *tie_char, *tie_pntr;
@@ -104,7 +102,7 @@ unsigned int MERIS_RD_TIE( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_ABSENT || IS_ERR_STAT_FATAL ) {
-          NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+          NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -113,7 +111,7 @@ unsigned int MERIS_RD_TIE( FILE *fd, unsigned int num_dsd,
                malloc( dsd[indx_dsd].num_dsr * sizeof(struct tie_meris));
      }
      if ( (tie = tie_out[0]) == NULL ) {
-          NADC_ERROR( prognm, NADC_ERR_ALLOC, "tie" );
+          NADC_ERROR( NADC_ERR_ALLOC, "tie" );
 	  return 0;
      }
 /*
@@ -121,7 +119,7 @@ unsigned int MERIS_RD_TIE( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (tie_char = (char *) malloc( dsr_size )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "tie_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "tie_char" );
 	  return 0;
      }
 /*
@@ -130,7 +128,7 @@ unsigned int MERIS_RD_TIE( FILE *fd, unsigned int num_dsd,
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      do {
 	  if ( fread( tie_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to Tie point structure
  */
@@ -196,7 +194,7 @@ unsigned int MERIS_RD_TIE( FILE *fd, unsigned int num_dsd,
 	       (void) fprintf( stderr, "%d %zd\n", 
 			       (int) (tie_pntr - tie_char), 
 			       dsr_size );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  }
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_TIE( tie );

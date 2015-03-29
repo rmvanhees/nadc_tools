@@ -63,8 +63,6 @@
 void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd, 
 			 const short *indx_pcd, const struct pcd_gome *pcd )
 {
-     const char prognm[] = "GOME_LV1_WR_H5_PCD";
-
      register hsize_t ni, nr, nx, ny;
 
      unsigned short *usbuff;
@@ -93,7 +91,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
  * open or create group Earth
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/EARTH" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/EARTH" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/EARTH" );
      (void) H5Gclose( grp_id );
 /*
  * create group /EARTH/PCD
@@ -101,7 +99,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      grp_id = H5Gcreate( param.hdf_file_id, "/EARTH/PCD", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/EARTH/PCD" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/EARTH/PCD" );
 /*
  * +++++ create datasets in the /EARTH/PCD group
  */
@@ -112,7 +110,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      type_id = H5Topen( param.hdf_file_id, "glr", H5P_DEFAULT );
      glr = (struct glr1_gome *)
 	  malloc( dims[0] * sizeof( struct glr1_gome ));
-     if ( glr == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "glr" );
+     if ( glr == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "glr" );
      for ( nr = 0; nr < dims[0]; nr++ )
 	  (void) memcpy( glr+nr, &pcd[nr].glr, sizeof( struct glr1_gome ) );
      NADC_WR_HDF5_Dataset( compress, grp_id, "glr", 
@@ -120,14 +118,14 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      free( glr );
      (void) H5Tclose( type_id );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_WR, "glr" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_WR, "glr" );
 /*
  * Write geolocation information
  */
      type_id = H5Topen( param.hdf_file_id, "cld", H5P_DEFAULT );
      cld = (struct cr1_gome *)
 	  malloc( dims[0] * sizeof( struct cr1_gome ));
-     if ( cld == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "cld" );
+     if ( cld == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cld" );
      for ( nr = 0; nr < dims[0]; nr++ )
 	  (void) memcpy( cld+nr, &pcd[nr].cld, sizeof( struct cr1_gome ) );
      NADC_WR_HDF5_Dataset( compress, grp_id, "cld", 
@@ -135,12 +133,12 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      free( cld );
      (void) H5Tclose( type_id );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_WR, "cld" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_WR, "cld" );
 /*
  * Dark current and Noise Correction Factor
  */
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
 	  rbuff[ny] = pcd[indx_pcd[ny]].dark_current;
      NADC_WR_HDF5_Dataset( compress, grp_id, "DarkCurrent", 
@@ -161,7 +159,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
  * Indices
  */
      sbuff = (short *) malloc( dims[0] * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
 	  sbuff[ny] = pcd[indx_pcd[ny]].indx_spec;
      NADC_WR_HDF5_Dataset( compress, grp_id, "SpectralCalibrationIndex",
@@ -178,7 +176,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      dims[0] = nr_pcd; dims[1] = NUM_POLAR_COEFFS;
      nrpix = dims[0] * dims[1];
      rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( nr = ny = 0; ny < dims[0]; ny++ )
 	  for ( nx = 0; nx < dims[1]; nx++ )
 	       rbuff[nr++] = pcd[indx_pcd[ny]].polar.wv[nx];
@@ -202,7 +200,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
  */
      usbuff = (unsigned short *) malloc( dims[0] * sizeof( short ));
      if ( usbuff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "usbuff" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "usbuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
 	  usbuff[ny] = pcd[indx_pcd[ny]].ihr.subsetcounter;
      NADC_WR_HDF5_Dataset( compress, grp_id, "SubSetCounter",
@@ -222,7 +220,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      dims[1] = SCIENCE_CHANNELS; 
      nrpix = dims[0] * dims[1];
      sbuff = (short *) malloc( nrpix * sizeof( short ));
-     if ( sbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "sbuff" );
+     if ( sbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      for ( nr = ny = 0; ny < dims[0]; ny++)
 	  for ( nx = 0; nx < dims[1]; nx++ )
 	       sbuff[nr++] = pcd[indx_pcd[ny]].ihr.peltier[nx];
@@ -233,7 +231,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
  * Pre-disperser prism temperature
  */
      rbuff = (float *) malloc( dims[0] * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      for ( ny = 0; ny < dims[0]; ny++ )
 	  rbuff[ny] = (float) (-1.721 + 6.104e-3 * 
 			       pcd[indx_pcd[ny]].ihr.prism_temp);
@@ -247,7 +245,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      grp_id = H5Gcreate( param.hdf_file_id, "/EARTH/PMD", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( grp_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/EARTH/PMD" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/EARTH/PMD" );
 /*
  * write PMD geolocations (only for Earth observations)
  */
@@ -257,7 +255,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
           glr = (struct glr1_gome *)
                malloc( dims[0] * sizeof( struct glr1_gome ));
           if ( glr == NULL )
-               NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "glr" );
+               NADC_RETURN_ERROR( NADC_ERR_ALLOC, "glr" );
           for ( nr = ny = 0; ny < (hsize_t) nr_pcd; ny++ ) {
 	       for ( nx = 0; nx < PMD_IN_GRID; nx++ )
 		    (void) memcpy( &glr[nr++], &pcd[indx_pcd[ny]].pmd[nx].glr,
@@ -268,7 +266,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
           free( glr );
           (void) H5Tclose( type_id );
           if ( IS_ERR_STAT_FATAL )
-               NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_WR, "glr" );
+               NADC_RETURN_ERROR( NADC_ERR_HDF_WR, "glr" );
      }
 /*
  * write PMD values
@@ -276,7 +274,7 @@ void GOME_LV1_WR_H5_PCD( struct param_record param, short nr_pcd,
      dims[1] = PMD_NUMBER;
      nrpix = (size_t) (dims[0] * dims[1]);
      rbuff = (float *) malloc( nrpix * sizeof( float ));
-     if ( rbuff == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
      ni = 0; nr = 0;
      do {
 	  ny = 0;

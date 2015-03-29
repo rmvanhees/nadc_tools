@@ -97,8 +97,6 @@ unsigned int SCIA_LV1_RD_VLCP( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct vlcp_scia **vlcp_out )
 {
-     const char prognm[]   = "SCIA_LV1_RD_VLCP";
-
      char         *vlcp_pntr, *vlcp_char = NULL;
      size_t       dsr_size, nr_byte;
      unsigned int indx_dsd;
@@ -115,7 +113,7 @@ unsigned int SCIA_LV1_RD_VLCP( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -126,11 +124,11 @@ unsigned int SCIA_LV1_RD_VLCP( FILE *fd, unsigned int num_dsd,
 	  vlcp = (struct vlcp_scia *) 
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct vlcp_scia));
 	  if ( vlcp == NULL ) {
-	       NADC_ERROR( prognm, NADC_ERR_ALLOC, "vlcp" );
+	       NADC_ERROR( NADC_ERR_ALLOC, "vlcp" );
 	       return 0;
 	  }
      } else if ( (vlcp = vlcp_out[0]) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "vlcp_out[0]" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "vlcp_out[0]" );
 	  return 0;
      }
 /*
@@ -139,7 +137,7 @@ unsigned int SCIA_LV1_RD_VLCP( FILE *fd, unsigned int num_dsd,
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (vlcp_char = (char *) malloc( dsr_size )) == NULL ) {
 	  if ( ! Use_Extern_Alloc ) free( vlcp );
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "vlcp_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "vlcp_char" );
 	  return 0;
      }
 /*
@@ -151,7 +149,7 @@ unsigned int SCIA_LV1_RD_VLCP( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( vlcp_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to VLCP structure
  */
@@ -191,7 +189,7 @@ unsigned int SCIA_LV1_RD_VLCP( FILE *fd, unsigned int num_dsd,
 	  if ( (size_t)(vlcp_pntr - vlcp_char) != dsr_size ) {
 	       free( vlcp_char );
 	       if ( ! Use_Extern_Alloc ) free( vlcp );
-	       NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	       return 0;
 	  }
 /*
@@ -228,8 +226,6 @@ done:
 void SCIA_LV1_WR_VLCP( FILE *fd, unsigned int num_vlcp, 
 		       const struct vlcp_scia *vlcp_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_VLCP";
-
      size_t nr_byte;
 
      struct vlcp_scia  vlcp;
@@ -257,43 +253,43 @@ void SCIA_LV1_WR_VLCP( FILE *fd, unsigned int num_vlcp,
  * write VLCP structure to file
  */
 	  if ( fwrite( &vlcp.orbit_phase, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  nr_byte = (IR_CHANNELS + PMD_NUMBER) * ENVI_FLOAT;
 	  if ( fwrite( vlcp.obm_pmd, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) (IR_CHANNELS * CHANNEL_SIZE) * ENVI_FLOAT;
 	  if ( fwrite( vlcp.var_lc, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( vlcp.var_lc_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( vlcp.solar_stray, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( vlcp.solar_stray_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) PMD_NUMBER * ENVI_FLOAT;
 	  if ( fwrite( vlcp.pmd_stray, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( vlcp.pmd_stray_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) IR_PMD_NUMBER * ENVI_FLOAT;
 	  if ( fwrite( vlcp.pmd_dark, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( vlcp.pmd_dark_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  vlcp_in++;

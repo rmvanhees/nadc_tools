@@ -187,8 +187,6 @@ void Sun2Intel_FCD( struct fcd_gome *fcd )
 short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr, 
 		       struct fcd_gome *fcd )
 {
-     const char prognm[] = "GOME_LV1_RD_FCD";
-
      register short ng;
      register int   nr;
 
@@ -202,14 +200,14 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
  * allocate memory to store data from FCD-record up to Nleak
  */
      if ( (fcd_char = (char *) malloc( LVL1_FCD_NLEAK )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fcd_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fcd_char" );
 /*
  * rewind/read input data file
  */
      byte_offs = (long) (LVL1_PIR_LENGTH + LVL1_FSR_LENGTH + fsr->sz_sph);
      (void) fseek( infl, byte_offs, SEEK_SET );
      if ( fread( fcd_char, LVL1_FCD_NLEAK, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to FCD structure
  */
@@ -327,33 +325,33 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
      if ( fcd->nleak > 0 ) {
 	  nr_read = (size_t) (fcd->nleak) * sizeof( struct lv1_leak );
 	  if ( (fcd->leak = (struct lv1_leak *) malloc( nr_read )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fcd->leak" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fcd->leak" );
 	  nr = 0;
 	  do {
 	       if ( fread( &fcd->leak[nr].noise, GOME_FLOAT, 1, infl ) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_FLOAT;
 	       num = fread( fcd->leak[nr].pmd_offs, GOME_FLOAT,
 			    PMD_NUMBER, infl );
 	       if ( num != PMD_NUMBER ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_FLOAT * PMD_NUMBER;
 	       if ( fread(&fcd->leak[nr].pmd_noise, GOME_FLOAT, 1, infl) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_FLOAT;
 	       num = fread( fcd->leak[nr].dark, GOME_FLOAT,
 			    SCIENCE_PIXELS, infl );
 	       if ( num != SCIENCE_PIXELS ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_FLOAT * SCIENCE_PIXELS;
 	  } while ( ++nr < fcd->nleak );
      }
      num = fread( fcd->pixel_gain, GOME_FLOAT, SCIENCE_PIXELS, infl );
      if ( num != SCIENCE_PIXELS ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
      nbytes += GOME_FLOAT * SCIENCE_PIXELS;
      if ( fread( &fcd->nhot, GOME_SHORT, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
      nbytes += GOME_SHORT;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      fcd->nhot = byte_swap_16( fcd->nhot );
@@ -362,22 +360,22 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
      if ( fcd->nhot > 0 ) {
 	  nr_read = (size_t) (fcd->nhot) * sizeof( struct lv1_hot );
 	  if ( (fcd->hot = (struct lv1_hot *) malloc( nr_read )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fcd->hot" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fcd->hot" );
 	  nr = 0;
 	  do {
 	       if ( fread( &fcd->hot[nr].record, GOME_SHORT, 1, infl ) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_SHORT;
 	       if ( fread( &fcd->hot[nr].array, GOME_SHORT, 1, infl ) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_SHORT;
 	       if ( fread( &fcd->hot[nr].pixel, GOME_SHORT, 1, infl ) != 1 )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_SHORT;
 	  } while ( ++nr < fcd->nhot );
      }
      if ( fread( &fcd->nspec, GOME_SHORT, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
      nbytes += GOME_SHORT;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
      fcd->nspec = byte_swap_16( fcd->nspec );
@@ -386,18 +384,18 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
      if ( fcd->nspec > 0 ) {
 	  nr_read = (size_t) (fcd->nspec * sizeof( struct lv1_spec ));
 	  if ( (fcd->spec = (struct lv1_spec *) malloc( nr_read )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fcd->spec" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fcd->spec" );
 	  nr = 0;
 	  do {
 	       num = fread( fcd->spec[nr].coeffs, GOME_DBLE,
 			    NUM_SPEC_COEFFS * SCIENCE_CHANNELS, infl );
 	       if ( num != NUM_SPEC_COEFFS * SCIENCE_CHANNELS ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_DBLE * NUM_SPEC_COEFFS * SCIENCE_CHANNELS;
 	       num = fread( fcd->spec[nr].error, GOME_DBLE,
 			    SCIENCE_CHANNELS, infl );
 	       if ( num != SCIENCE_CHANNELS ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_DBLE * SCIENCE_CHANNELS;
 	  } while ( ++nr < fcd->nspec );
      }
@@ -405,12 +403,12 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
  * allocate memory to store data from FCD-record up to Nleak
  */
      if ( (fcd_char = (char *) malloc( LVL1_FCD_NANG )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fcd_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fcd_char" );
 /*
  * read a next chunck of data until the next variable portion
  */
      if ( fread( fcd_char, LVL1_FCD_NANG, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
      (void) memcpy( &fcd->indx_spec, fcd_char, GOME_SHORT );
      fcd_pntr = fcd_char + GOME_SHORT;
      (void) memcpy( fcd->intensity, fcd_pntr, SCIENCE_PIXELS * GOME_FLOAT );
@@ -446,18 +444,18 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
      if ( fcd->nang > 0 ) {
 	  nr_read = (size_t) (fcd->nang * sizeof( struct lv1_calib ));
 	  if ( (fcd->calib = (struct lv1_calib *) malloc( nr_read )) == NULL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fcd->calib" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fcd->calib" );
 	  nr = 0;
 	  do {
 	       num = fread( fcd->calib[nr].eta_omega, GOME_FLOAT,
 			     CHANNEL_SIZE, infl );
 	       if ( num != CHANNEL_SIZE ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_FLOAT * CHANNEL_SIZE;
 	       num = fread( fcd->calib[nr].response, GOME_FLOAT,
 			    CHANNEL_SIZE, infl );
 	       if ( num != CHANNEL_SIZE ) 
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	       nbytes += GOME_FLOAT * CHANNEL_SIZE;
 	  } while ( ++nr < fcd->nang );
      }
@@ -466,7 +464,7 @@ short GOME_LV1_RD_FCD( FILE *infl, const struct fsr1_gome *fsr,
  */
      if ( nbytes != (size_t) fsr->sz_fcd ) {
 	  (void) printf( "%d %d\n", (int) nbytes, fsr->sz_fcd );
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "FCD size" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "FCD size" );
      } else
 	  num_fcd = 1;
 

@@ -64,8 +64,6 @@ int main( int argc, char *argv[] )
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "meris_rr1";
-
      unsigned int num_dsd;
 
      FILE  *fp = NULL;
@@ -79,12 +77,12 @@ int main( int argc, char *argv[] )
  */
      MERIS_SET_PARAM( argc, argv, MERIS_LEVEL_1, &param );
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "" );
+          NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
 /*
  * check if we have to display version and exit
  */
      if ( param.flag_version == PARAM_SET ) {
-	  MERIS_SHOW_VERSION( stdout, prognm );
+	  MERIS_SHOW_VERSION( stdout, "meris_rr1" );
 	  exit( EXIT_SUCCESS );
      }
 /*
@@ -98,14 +96,14 @@ int main( int argc, char *argv[] )
  * open input-file
  */
      if ( (fp = fopen( param.infile, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, param.infile );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
 /*
  * create output file
  */
      if ( param.write_hdf5 == PARAM_SET ) {
           param.hdf_file_id = MERIS_CRE_H5_FILE( MERIS_LEVEL_1, &param );
           if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, "HDF5 base" );
+               NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
           MERIS_WR_H5_VERSION( param.hdf_file_id );
      }
 /*
@@ -114,16 +112,16 @@ int main( int argc, char *argv[] )
  */
      ENVI_RD_MPH( fp, &mph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MPH" );
      if ( param.write_ascii == PARAM_SET ) {
 	  ENVI_WR_ASCII_MPH( param, &mph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "MPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "MPH" );
      }
 /*      if ( param.write_hdf5 == PARAM_SET ) { */
 /* 	  SCIA_WR_H5_MPH( param, &mph ); */
 /* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "MPH" ); */
+/* 	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "MPH" ); */
 /*      } */
 /*
  * -------------------------
@@ -131,16 +129,16 @@ int main( int argc, char *argv[] )
  */
      MERIS_RD_SPH( fp, mph, &sph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SPH" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
      if ( param.write_ascii == PARAM_SET ) {
 	  MERIS_WR_ASCII_SPH( param, &sph );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "SPH" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
      }
 /*      if ( param.write_hdf5 == PARAM_SET ) { */
 /* 	  SCIA_OL2_WR_H5_SPH( param, &sph ); */
 /* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_WR, "SPH" ); */
+/* 	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SPH" ); */
 /*      } */
 /*
  * -------------------------
@@ -148,14 +146,14 @@ int main( int argc, char *argv[] )
  */
      dsd = (struct dsd_envi *)
 	  malloc( (mph.num_dsd-1) * sizeof( struct dsd_envi ) );
-     if ( dsd == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dsd" );
+     if ( dsd == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dsd" );
      num_dsd = ENVI_RD_DSD( fp, mph, dsd );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "DSD" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DSD" );
      if ( param.write_ascii == PARAM_SET ) {
 	  ENVI_WR_ASCII_DSD( param, num_dsd, dsd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_WR, "DSD" );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DSD" );
      }
 /*
  * when an error has occurred we jump to here:
@@ -170,7 +168,7 @@ int main( int argc, char *argv[] )
  */
      if ( param.write_hdf5 == PARAM_SET ) {
 	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, param.hdf5_name );
+	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
      }
 /*
  * free allocated memory

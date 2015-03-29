@@ -79,8 +79,6 @@ void Sun2Intel_FSR( struct fsr1_gome *fsr )
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void GOME_LV1_RD_FSR( FILE *infl, struct fsr1_gome *fsr )
 {
-     const char prognm[] = "GOME_LV1_RD_FSR";
-
      register char *fsr_pntr;
      register short ni, nr;
 
@@ -94,16 +92,16 @@ void GOME_LV1_RD_FSR( FILE *infl, struct fsr1_gome *fsr )
  */
      fsr_short = (short *) malloc( (LVL1_FSR_LENGTH/6) * sizeof(short) );
      if ( fsr_short == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "fsr_short" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "fsr_short" );
      fsr_int   = (int *) malloc( (LVL1_FSR_LENGTH/6) * sizeof(int) );
      if ( fsr_int == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "fsr_int" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "fsr_int" );
 /*
  * rewind/read input data file
  */
      (void) fseek( infl, FSR_BYTE_OFFS, SEEK_SET );
      if ( fread( fsr_char, LVL1_FSR_LENGTH, 1, infl ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 
      ni = 0;
      fsr_pntr = fsr_char;

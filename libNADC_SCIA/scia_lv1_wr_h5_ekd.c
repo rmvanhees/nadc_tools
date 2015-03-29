@@ -55,8 +55,6 @@
 void SCIA_LV1_WR_H5_EKD( struct param_record param,
 			 const struct ekd_scia *ekd )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_EKD";
-
      hid_t   gads_id;
      hsize_t adim;
      herr_t  stat;
@@ -84,7 +82,7 @@ void SCIA_LV1_WR_H5_EKD( struct param_record param,
  * open/create group /GADS
  */
      gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/GADS" );
+     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
 /*
  * write EKD data sets
  */
@@ -103,7 +101,7 @@ void SCIA_LV1_WR_H5_EKD( struct param_record param,
                             9, 1, ekd_size, ekd_names,
                             ekd_offs, ekd_type, 1,
                             NULL, compress, ekd );
-     if ( stat < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_DATA, "ekd" );
+     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "ekd" );
 /*
  * close interface
  */

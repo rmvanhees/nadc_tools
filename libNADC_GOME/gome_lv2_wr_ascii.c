@@ -66,14 +66,12 @@
 void GOME_LV2_WR_ASCII_FSR( struct param_record param, 
 			    const struct fsr2_gome *fsr )
 {
-     const char prognm[] = "GOME_LV2_WR_ASCII_FSR";
-
      register unsigned int nr = 0;
 
      FILE *outfl = CRE_ASCII_File( param.outfile, "fsr" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of FSR record
  */
@@ -100,8 +98,6 @@ void GOME_LV2_WR_ASCII_FSR( struct param_record param,
 void GOME_LV2_WR_ASCII_SPH( struct param_record param, 
 			    const struct sph2_gome *sph )
 {
-     const char prognm[] = "GOME_LV2_WR_ASCII_SPH";
-
      register int ni;
      register unsigned nr = 0;
 
@@ -112,7 +108,7 @@ void GOME_LV2_WR_ASCII_SPH( struct param_record param,
      FILE *outfl = CRE_ASCII_File( param.outfile, "sph" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of SPH record
  */
@@ -164,8 +160,6 @@ void GOME_LV2_WR_ASCII_SPH( struct param_record param,
 void GOME_LV2_WR_ASCII_DDR( struct param_record param, struct sph2_gome sph,
 			    short nr_ddr, const struct ddr_gome *ddr )
 {
-     const char prognm[] = "GOME_LV2_WR_ASCII_DDR";
-
      register short nd;
      register unsigned int nr = 0;
 
@@ -178,7 +172,7 @@ void GOME_LV2_WR_ASCII_DDR( struct param_record param, struct sph2_gome sph,
      FILE *outfl = CRE_ASCII_File( param.outfile, "ddr" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of DDR record
  */

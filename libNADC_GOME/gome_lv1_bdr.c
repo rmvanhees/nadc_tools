@@ -129,8 +129,6 @@ void PROCESS_PCD_BDR( short nband, struct param_record param,
 		      const struct pcd_gome *pcd,
 		      const struct rec_gome *rec )
 {
-     const char  prognm[] = "PROCESS_PCD_BDR";
-
      register short nr;
 
      short  nr_rec = 0;
@@ -150,7 +148,7 @@ void PROCESS_PCD_BDR( short nband, struct param_record param,
      rec_out = (struct rec_gome *) 
           malloc( (size_t) nr_pcd * sizeof( struct rec_gome ));
      if ( rec_out == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rec_out" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rec_out" );
 
      nr_rec = SELECT_PCD_REC( nr_pcd, indx_pcd, nr_rec, rec, rec_out );
      if ( nr_rec == 0 ) {
@@ -236,8 +234,6 @@ void PROCESS_SMCD_BDR( unsigned char flag_origin, short nband,
 		       const struct smcd_gome *smcd,
 		       const struct rec_gome *rec )
 {
-     const char   prognm[] = "PROCESS_SMCD_BDR";
-
      register short nr, num;
 
      short  nr_rec, wv_start, wv_count;
@@ -254,8 +250,7 @@ void PROCESS_SMCD_BDR( unsigned char flag_origin, short nband,
  * 
  */
      rec_out = (struct rec_gome *) malloc( (size_t) nr_smcd * size_rec );
-     if ( rec_out == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "rec_out" );
+     if ( rec_out == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rec_out" );
 /*
  * select requested data records
  */

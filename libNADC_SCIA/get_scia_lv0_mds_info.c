@@ -76,8 +76,6 @@
 unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd, 
 				    struct mds0_info *info )
 {
-     const char prognm[] = "GET_SCIA_LV0_MDS_INFO";
-
      register char *cpntr;
      register struct mds0_info *info_pntr = info;
 
@@ -86,12 +84,12 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 
      /* allocate memory to buffer source packages */
      if ( (mds_char = (char *) malloc( (size_t) dsd->size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds_char" );
 
      /* read all Sciamachy source packages in product */
      (void) fseek( fd, (long) dsd->offset, SEEK_SET );
      if ( fread( mds_char, (size_t) dsd->size, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd->name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd->name );
 
      /* examine whole source data section */
      cpntr = mds_char;

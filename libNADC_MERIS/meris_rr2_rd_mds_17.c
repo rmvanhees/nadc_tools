@@ -67,8 +67,6 @@ unsigned int MERIS_RR2_RD_MDS_17( FILE *fd, unsigned int num_dsd,
 				  const struct dsd_envi *dsd, 
 				  struct mds_rr2_17_meris **mds_17_out )
 {
-     const char prognm[] = "MERIS_RR2_RD_MDS_17";
-
      char         *mds_17_char, *mds_17_pntr;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -84,7 +82,7 @@ unsigned int MERIS_RR2_RD_MDS_17( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_ABSENT || IS_ERR_STAT_FATAL ) {
-          NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+          NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -93,7 +91,7 @@ unsigned int MERIS_RR2_RD_MDS_17( FILE *fd, unsigned int num_dsd,
 	       malloc(dsd[indx_dsd].num_dsr * sizeof(struct mds_rr2_17_meris));
      }
      if ( (mds_17 = mds_17_out[0]) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds_17" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "mds_17" );
 	  return 0;
      }
 /*
@@ -101,7 +99,7 @@ unsigned int MERIS_RR2_RD_MDS_17( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (mds_17_char = (char *) malloc( dsr_size )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "mds_17_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "mds_17_char" );
 	  return 0;
      }
 /*
@@ -113,7 +111,7 @@ unsigned int MERIS_RR2_RD_MDS_17( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( mds_17_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to MDS_17 structure
  */
@@ -131,7 +129,7 @@ unsigned int MERIS_RR2_RD_MDS_17( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(mds_17_pntr - mds_17_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  Sun2Intel_MDS_17( mds_17 );

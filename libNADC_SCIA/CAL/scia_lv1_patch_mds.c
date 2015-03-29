@@ -347,8 +347,6 @@ void SCIA_APPLY_DARK( FILE *fp, unsigned int calib_flag,
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, 
 	 scia_cal->dark_signal, scia_cal->spectra@*/
 {
-     const char prognm[] = "SCIA_APPLY_DARK";
-
      register unsigned short np = 0;
      register unsigned short nch;
 
@@ -358,13 +356,13 @@ void SCIA_APPLY_DARK( FILE *fp, unsigned int calib_flag,
 	  SCIA_get_AtbdDark( fp, calib_flag, scia_cal->orbit_phase,
 			     analogOffs, darkCurrent, NULL, NULL, NULL );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "SCIA_get_AtbdDark" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "SCIA_get_AtbdDark" );
      } else {
 	  (void) SDMF_get_FittedDark( scia_cal->abs_orbit, 0, 
 				      analogOffs, darkCurrent, 
 				      NULL, NULL, NULL, NULL, NULL );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_FittedDark");
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "SDMF_get_FittedDark");
      }
 /*
  * calculate dark signal
@@ -590,8 +588,6 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, scia_cal->correction@*/
 {
-     const char prognm[] = "SCIA_CALC_MEM_CORR";
-
      register short nchan;
 
      register unsigned short np = 0;
@@ -606,7 +602,7 @@ void SCIA_CALC_MEM_CORR( struct scia_cal_rec *scia_cal )
      /* read memory correction values */
      SCIA_RD_H5_MEM( &memcorr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
 
      if ( scia_cal->limb_scans == 0 ) {
 
@@ -728,8 +724,6 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, scia_cal->correction@*/
 {
-     const char prognm[] = "SCIA_CALC_NLIN_CORR";
-
      register unsigned short np = (VIS_CHANNELS * CHANNEL_SIZE);
 
      register unsigned short signNorm;
@@ -739,7 +733,7 @@ void SCIA_CALC_NLIN_CORR( struct scia_cal_rec *scia_cal )
 
      SCIA_RD_H5_NLIN( &nlcorr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
 
      do {
 	  register unsigned short nobs = 0;
@@ -1036,8 +1030,6 @@ static
 void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray, 
 			     const double *spec_f, /*@out@*/ float *stray_f )
 {
-     const char prognm[] = "SCIA_CALC_STRAY_GHOSTS";
-
      register size_t ng, np, ns;
      register float  intensity;
 
@@ -1106,7 +1098,7 @@ void SCIA_CALC_STRAY_GHOSTS( const struct scia_straycorr *stray,
 	  FIT_GRID_AKIMA( FLT32_T, FLT32_T, dim_pos, positions, ghoststray,
 			  FLT32_T, FLT32_T, dim_pix, pixels, tmp_stray );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "AKIMA" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "AKIMA" );
 
 	  /* store stray light for this ghost */
 	  ns = 0;
@@ -1131,8 +1123,6 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, scia_cal->correction@*/
 {
-     const char prognm[] = "SCIA_CALC_STRAY_CORR";
-
      register unsigned short nch, ng, nr, np;
      register size_t ni;
 
@@ -1166,7 +1156,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      /* read straylight correction matrix */
      SCIA_RD_H5_STRAY( &stray );
      if ( IS_ERR_STAT_FATAL )
-     	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_STRAY" );
+     	  NADC_RETURN_ERROR( NADC_ERR_HDF_RD, "SCIA_RD_H5_STRAY" );
 
      /* set each element of the array equal to its subscript */
      for ( nr = 0; nr < SCIENCE_PIXELS; nr++ ) grid_f[nr] = (float) nr;
@@ -1174,17 +1164,17 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      /* calculate derivative of stray.grid_out */
      grid_deriv = (float *) malloc( stray.dims[0] * sizeof(float) );
      if ( grid_deriv == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "grid_deriv" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "grid_deriv" );
      for ( nr = 0; nr < stray.dims[0]; nr++ )
 	  grid_deriv[nr] = DERIV( nr, stray.dims[0], stray.grid_out );
 
      /* obtain lower and upper indices for regridding, per channel */
      grid_in_ll = (unsigned short *) malloc( stray.dims[1] * sizeof(short) );
      if ( grid_in_ll == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "grid_in_ll" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "grid_in_ll" );
      grid_in_ul = (unsigned short *) malloc( stray.dims[1] * sizeof(short) );
      if ( grid_in_ul == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "grid_in_ul" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "grid_in_ul" );
 
      for ( nch = 0; nch < SCIENCE_CHANNELS; nch++ ) {
 	  unsigned short ipix_ch_mn = nch * CHANNEL_SIZE;
@@ -1230,9 +1220,9 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
      fp_corr_grid = fopen( "tmp_correction_grid.dat", "w" );
 #endif
      spec_r = (double *) malloc( stray.dims[1] * sizeof(double) );
-     if ( spec_r == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "spec_r" );
+     if ( spec_r == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "spec_r" );
      stray_r = (float *) malloc( stray.dims[0] * sizeof(float) );
-     if ( stray_r == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "stray_r");
+     if ( stray_r == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "stray_r");
 
      /* loop over spectra*/
      nobs = 0;
@@ -1321,7 +1311,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 			       FLT32_T, FLT32_T, CHANNEL_SIZE, 
 			       &grid_f[ipix_ch_mn], &stray_f[ipix_ch_mn] );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "AKIMA" );
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "AKIMA" );
 	  }
 #ifdef DEBUG
 	  (void) fwrite( stray_f, sizeof(float), SCIENCE_PIXELS, fp_corr_full );
@@ -1348,7 +1338,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 
 #ifdef DEBUG
 	  if ( fillings <= 1 ) {
-	       (void) fprintf( stderr, "\n%s %4d %15.6f", prognm, np, 
+	       (void) fprintf( stderr, "\n%s %4d %15.6f", np, 
 			       scia_cal->correction[np][scia_cal->num_obs/2] );
 	       continue;
 	  }
@@ -1368,7 +1358,7 @@ void SCIA_CALC_STRAY_CORR( struct scia_cal_rec *scia_cal )
 	       scia_cal->correction[np][no] = corrval;
 	  } while ( ++no < scia_cal->chan_obs[vchan] );
 #ifdef DEBUG
-	  (void) fprintf( stderr, "\n%s %4d %15.6f", prognm, np, 
+	  (void) fprintf( stderr, "\n%s %4d %15.6f", np, 
 			  scia_cal->correction[np][scia_cal->num_obs/2] );
 #endif
      } while ( ++np < SCIENCE_PIXELS );
@@ -1394,8 +1384,6 @@ void SCIA_CALC_STRAY_SCALE( const struct scia_cal_rec *scia_cal,
 			    struct mds1_scia *mds_1b )
        /*@modifies mds_1b->scale_factor@*/
 {
-     /*  const char prognm[] = "SCIA_CALC_STRAY_SCALE"; */
-
      register unsigned short ncl = 0;
      register unsigned short nd, nr;
 
@@ -1565,8 +1553,6 @@ static
 void SCIA_WR_CAL_REC( unsigned short patch_flag,
 		      const struct scia_cal_rec *scia_cal )
 {
-     const char prognm[] = "SCIA_WR_CAL_REC";
-
      hid_t   fileID = 0;
      hsize_t dims[2];
 
@@ -1583,7 +1569,7 @@ void SCIA_WR_CAL_REC( unsigned short patch_flag,
 		      scia_cal->state_index );
      fileID = H5Fcreate( flname, H5F_ACC_TRUNC, 
 			 H5P_DEFAULT, H5P_DEFAULT );
-     if ( fileID < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_CRE, flname );
+     if ( fileID < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, flname );
 
      (void) H5LTset_attribute_ushort( fileID, "/", "PatchFlag", 
 				      &patch_flag, 1 );
@@ -1648,8 +1634,6 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 			 const struct state1_scia *state, 
 			 struct mds1_scia *mds_1b )
 {
-     const char prognm[] = "SCIA_LV1_PATCH_MDS";
-
      register unsigned short nch, ncl, np;
 
      char *write_h5_scia_cal = getenv( "SCIA_WR_PATCH_INTERIM" );
@@ -1670,7 +1654,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
  * always read MPH
  */
      if ( verbose )
-	  (void) fprintf( stderr, "\n--- Start of module: %s\n", prognm );
+	  (void) fprintf( stderr, "\n--- Start of module: %s\n", __FUNCTION__ );
      ENVI_RD_MPH( fp, &mph );
 /*
  * initialize structure with SCIA calibration parameters and data
@@ -1699,44 +1683,44 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      scia_cal.chan_pet = (unsigned short *)
 	  calloc( sizeof( short ), scia_cal.num_channels );
      if ( scia_cal.chan_pet == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_pet" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_pet" );
      scia_cal.chan_obs = (unsigned short *)
 	  calloc( sizeof( short ), scia_cal.num_channels );
      if ( scia_cal.chan_obs == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_obs" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_obs" );
      scia_cal.coaddf = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.coaddf == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.coaddf" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.coaddf" );
      scia_cal.chan_id = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.chan_id == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_id" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_id" );
      scia_cal.clus_id = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.clus_id == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.clus_id" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.clus_id" );
      scia_cal.quality_flag = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.quality_flag == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.quality_flag" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.quality_flag" );
      scia_cal.dark_signal = (float *) 
 	  calloc( sizeof( float ), scia_cal.num_pixels );
      if ( scia_cal.dark_signal == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.dark_signal" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.dark_signal" );
      scia_cal.pet = (float *) calloc( sizeof( float ), scia_cal.num_pixels );
      if ( scia_cal.pet == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.pet" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.pet" );
      scia_cal.chan_mean = 
 	  ALLOC_D2D( scia_cal.num_channels, scia_cal.num_obs );
      if ( scia_cal.chan_mean == NULL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_mean" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_mean" );
      scia_cal.spectra = ALLOC_D2D( scia_cal.num_pixels, scia_cal.num_obs );
      if ( scia_cal.spectra == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.spectra" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.spectra" );
      scia_cal.correction = ALLOC_R2D( scia_cal.num_pixels, scia_cal.num_obs );
      if ( scia_cal.correction == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.correction" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.correction" );
      if ( verbose )
 	  (void) fprintf(stderr,"Allocated memory for calibration structure\n");
      (void) memset( scia_cal.correction[0], 0,
@@ -1817,7 +1801,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      /* calib_flag = (DO_CORR_AO); */
      SCIA_APPLY_DARK( fp, calib_flag, &scia_cal );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "SCIA_CAL_GET_DARK" );
      if ( verbose )
 	  (void) fprintf( stderr, "Read Dark current parameters\n" );
      /*
@@ -1839,7 +1823,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      if ( (patch_flag & SCIA_PATCH_MEM) != USHRT_ZERO ) {
 	  SCIA_CALC_MEM_CORR( &scia_cal );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "MEM" );
 	  SCIA_PATCH_MEM_CORR( &scia_cal, state, mds_1b );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Performed memory correction\n" );
@@ -1850,7 +1834,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
      if ( (patch_flag & SCIA_PATCH_NLIN) != USHRT_ZERO ) {
 	  SCIA_CALC_NLIN_CORR( &scia_cal );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "NLIN" );
 	  SCIA_PATCH_NL_CORR( &scia_cal, state, mds_1b );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Performed non-linearity correction\n" );
@@ -1864,7 +1848,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
 	       (void) fprintf( stderr, "Applied Memory/Non-linearity correction\n" );
 	  SCIA_CALC_STRAY_CORR( &scia_cal );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "STRAY" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "STRAY" );
 	  if ( verbose )
 	       (void) fprintf( stderr, "Calculated Straylight correction\n" );
 	  SCIA_PATCH_STRAY_CORR( &scia_cal, state, mds_1b );
@@ -1895,7 +1879,7 @@ done:
      if ( scia_cal.spectra != NULL ) FREE_2D( (void **) scia_cal.spectra );
      if ( scia_cal.correction != NULL ) FREE_2D((void **) scia_cal.correction);
      if ( verbose )
-	  (void) fprintf( stderr, "--- Finished module: %s\n", prognm );
+	  (void) fprintf( stderr, "--- Finished module: %s\n", __FUNCTION__ );
 }
 
 #ifdef TEST_PROG
@@ -1903,8 +1887,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( void )
 {
-     const char prognm[] = "scia_lv1_patch_mds";
-
      register unsigned short nch, np;
 
      hid_t  file_id = -1;
@@ -1924,17 +1906,17 @@ int main( void )
  */
      file_id = H5Fopen( stray_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
      if ( file_id < 0 ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, stray_fl );
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, stray_fl );
 
      (void) H5LTget_dataset_info( file_id, "SPEC_NOCOR", dims, NULL, NULL );
      spec_nocorr = ALLOC_R2D( (size_t) dims[0], (size_t) dims[1] );
      if ( spec_nocorr == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "spec_nocorr" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "spec_nocorr" );
      (void) H5LTread_dataset_float( file_id, "SPEC_NOCOR", spec_nocorr[0] );
 
      spec_corr = ALLOC_R2D( (size_t) dims[0], (size_t) dims[1] );
      if ( spec_corr == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "spec_corr" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "spec_corr" );
      (void) H5LTread_dataset_float( file_id, "SPEC_COR", spec_corr[0] );
 
 /*
@@ -1955,44 +1937,44 @@ int main( void )
      scia_cal.chan_pet = (unsigned short *)
 	  calloc( sizeof( short ), scia_cal.num_channels );
      if ( scia_cal.chan_pet == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_pet" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_pet" );
      scia_cal.chan_obs = (unsigned short *)
 	  calloc( sizeof( short ), scia_cal.num_channels );
      if ( scia_cal.chan_obs == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_obs" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_obs" );
      scia_cal.coaddf = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.coaddf == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.coaddf" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.coaddf" );
      scia_cal.chan_id = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.chan_id == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_id" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_id" );
      scia_cal.clus_id = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.clus_id == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.clus_id" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.clus_id" );
      scia_cal.quality_flag = (unsigned char *) 
 	  calloc( sizeof( char ), scia_cal.num_pixels );
      if ( scia_cal.quality_flag == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.quality_flag" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.quality_flag" );
      scia_cal.dark_signal = (float *) 
 	  calloc( sizeof( float ), scia_cal.num_pixels );
      if ( scia_cal.dark_signal == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.dark_signal" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.dark_signal" );
      scia_cal.pet = (float *) calloc( sizeof( float ), scia_cal.num_pixels );
      if ( scia_cal.pet == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.pet" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.pet" );
      scia_cal.chan_mean = 
 	  ALLOC_D2D( scia_cal.num_channels, scia_cal.num_obs );
      if ( scia_cal.chan_mean == NULL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.chan_mean" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.chan_mean" );
      scia_cal.spectra = ALLOC_D2D( scia_cal.num_pixels, scia_cal.num_obs );
      if ( scia_cal.spectra == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.spectra" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.spectra" );
      scia_cal.correction = ALLOC_R2D( scia_cal.num_pixels, scia_cal.num_obs );
      if ( scia_cal.correction == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scia_cal.correction" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scia_cal.correction" );
 
      for ( nch = 0; nch < VIRTUAL_CHANNELS; nch++ ) {
 	  scia_cal.chan_pet[nch] = 1.f;
@@ -2019,7 +2001,7 @@ int main( void )
      }
      SCIA_CALC_STRAY_CORR( &scia_cal );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "SCIA_CALC_STRAY_CORR" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "SCIA_CALC_STRAY_CORR" );
 done:
      if ( file_id >= 0 ) (void) H5Fclose( file_id );
      if ( spec_corr != NULL ) FREE_2D( (void **) spec_corr );

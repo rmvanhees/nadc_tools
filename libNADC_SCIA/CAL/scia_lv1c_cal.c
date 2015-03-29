@@ -106,7 +106,6 @@ void SCIA_LV1C_CAL_NORM( unsigned short num_mds, struct mds1c_scia *mds_1c )
 void SCIA_LV1C_CAL( int absOrbit, unsigned int calib_flag, 
 		    unsigned short num_mds, struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV1C_CAL";
 /*
  * return directly if nothing has to be done
  */
@@ -117,7 +116,7 @@ void SCIA_LV1C_CAL( int absOrbit, unsigned int calib_flag,
      if ( (calib_flag & DO_CORR_VIS_MEM) != UINT_ZERO ) {
 	  SCIA_SRON_CAL_MEM( num_mds, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "MEM" );
      }
 /*
  * apply non-Linearity correction (chan 6-8)
@@ -125,7 +124,7 @@ void SCIA_LV1C_CAL( int absOrbit, unsigned int calib_flag,
      if ( (calib_flag & DO_CORR_IR_NLIN) != UINT_ZERO ) {
 	  SCIA_SRON_CAL_NLIN( num_mds, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "NLIN" );
      }
 /*
  * apply Dark current correction
@@ -137,7 +136,7 @@ void SCIA_LV1C_CAL( int absOrbit, unsigned int calib_flag,
      if ( (calib_flag & DO_MASK_BDPM) != UINT_ZERO ) {
 	  SCIA_LV1C_FLAG_BDPM( absOrbit, num_mds, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-               NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "BDPM" );
+               NADC_RETURN_ERROR( NADC_ERR_FATAL, "BDPM" );
      }
 /*
  * apply correction for coadding

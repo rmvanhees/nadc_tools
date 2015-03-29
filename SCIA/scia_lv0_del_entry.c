@@ -79,8 +79,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
 {
-     const char prognm[] = "SCIA_LV0_DEL_ENTRY";
-
      register int nr;
 
      unsigned int indx;
@@ -105,12 +103,12 @@ void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
      numChar = snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_STATEINFO,
 			 sciafl );
      if ( be_verbose )
-          (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+          (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+          NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_RETURN_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
 /* return when no entries are found */
      if ( (nrow = PQntuples( res )) == 0 ) goto done;
@@ -124,12 +122,12 @@ void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, 
 			      UPDATE_STATEINFO, indx, procStage );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res_update = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res_update ) != PGRES_COMMAND_OK ) {
-	       NADC_ERROR( prognm, NADC_ERR_SQL, 
+	       NADC_ERROR( NADC_ERR_SQL, 
 			   PQresultErrorMessage(res_update) );
 	       PQclear( res_update );
 	       goto done;
@@ -144,11 +142,11 @@ void SCIA_LV0_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
  */
      numChar = snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_META, sciafl );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", prognm, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_STRLEN, "sql_query" );
+	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-          NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+          NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 }

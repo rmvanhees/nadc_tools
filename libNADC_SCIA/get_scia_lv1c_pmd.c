@@ -67,8 +67,6 @@ unsigned int GET_SCIA_LV1C_PMD( const struct state1_scia *state,
 				const struct mds1_scia *mds_1b, 
 				struct mds1c_pmd *mds_pmd )
 {
-     const char prognm[] = "GET_SCIA_LV1C_PMD";
-
      register unsigned short ng, nr;
      register unsigned short n_pmd_geo;
 
@@ -105,7 +103,7 @@ unsigned int GET_SCIA_LV1C_PMD( const struct state1_scia *state,
 	  mds_pmd->geoN = (struct geoN_scia *)
 	       malloc(mds_pmd->num_geo * sizeof(struct geoN_scia));
 	  if ( mds_pmd->geoN == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoN" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoN" );
 
 	  for ( ng = nr = 0; nr < state->num_dsr; nr++ ) {
 	       n_pmd_geo = mds_1b[nr].n_pmd / PMD_NUMBER;
@@ -121,7 +119,7 @@ unsigned int GET_SCIA_LV1C_PMD( const struct state1_scia *state,
 	  mds_pmd->geoL = (struct geoL_scia *)
 	       malloc(mds_pmd->num_geo * sizeof(struct geoL_scia));
 	  if ( mds_pmd->geoL == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "geoL" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "geoL" );
 	  for ( ng = nr = 0; nr < state->num_dsr; nr++ ) {
 	       n_pmd_geo = mds_1b[nr].n_pmd / PMD_NUMBER;
 
@@ -134,7 +132,7 @@ unsigned int GET_SCIA_LV1C_PMD( const struct state1_scia *state,
      mds_pmd->int_pmd = (float *)
 	  malloc( mds_pmd->num_pmd * sizeof( float ));
      if ( mds_pmd->int_pmd == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "int_pmd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "int_pmd" );
      for ( ng = nr = 0; nr < state->num_dsr; nr++ ) {
 	  (void) memcpy( mds_pmd->int_pmd+ng, mds_1b[nr].int_pmd,
 			 mds_1b[nr].n_pmd * sizeof( float ) );

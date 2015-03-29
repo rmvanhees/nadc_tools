@@ -85,8 +85,6 @@
 void SDMF_get_pt_orbitIndex( hid_t locID, int absOrbit, 
 			     size_t *numIndx, size_t *metaIndx )
 {
-     const char prognm[] = "SDMF_get_pt_orbitIndex";
-
      const size_t dimArray = *numIndx;
 
      register size_t nr;
@@ -104,7 +102,7 @@ void SDMF_get_pt_orbitIndex( hid_t locID, int absOrbit,
  * check if orbitList exists
  */
      if ( (ptable = H5PTopen( locID, "orbitList" )) == H5I_BADID )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, "orbitList" );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, "orbitList" );
 
      (void) H5PTget_num_packets( ptable, &nrecords );
      if ( nrecords == 0 ) {
@@ -116,7 +114,7 @@ void SDMF_get_pt_orbitIndex( hid_t locID, int absOrbit,
  */
      orbitList = (int *) malloc( (size_t) nrecords * sizeof(int) );
      if ( orbitList == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "orbitList" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "orbitList" );
      (void) H5PTread_packets( ptable, 0, (size_t) nrecords, orbitList );
 /*
  * find all matches
@@ -152,8 +150,6 @@ done:
 void SDMF_get_pt_jdayIndex( hid_t locID, const double jdayRange[],
 			    size_t *numIndx, size_t *metaIndx )
 {
-     const char prognm[] = "SDMF_get_pt_jdayIndex";
-
      const size_t dimArray = *numIndx;
 
      register size_t nr;
@@ -171,7 +167,7 @@ void SDMF_get_pt_jdayIndex( hid_t locID, const double jdayRange[],
  * check if jdayList exists
  */
      if ( (ptable = H5PTopen( locID, "jdayList" )) == H5I_BADID )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_DATA, "jdayList" );
+          NADC_RETURN_ERROR( NADC_ERR_HDF_DATA, "jdayList" );
 
      (void) H5PTget_num_packets( ptable, &nrecords );
      if ( nrecords == 0 ) {
@@ -183,7 +179,7 @@ void SDMF_get_pt_jdayIndex( hid_t locID, const double jdayRange[],
  */
      jdayList = (double *) malloc( (size_t) nrecords * sizeof(double) );
      if ( jdayList == NULL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "jdayList" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "jdayList" );
      (void) H5PTread_packets( ptable, 0, (size_t) nrecords, jdayList );
 /*
  * find all matches
@@ -219,8 +215,6 @@ done:
 void SDMF_rd_pt_metaTable( hid_t locID, size_t *numIndx, size_t *metaIndx,
 			     struct mtbl_pt_rec **mtbl_out )
 {
-     const char prognm[] = "SDMF_rd_pt_metaTable";
-
      register size_t nr;
 
      hid_t   ptable;
@@ -254,9 +248,9 @@ void SDMF_rd_pt_metaTable( hid_t locID, size_t *numIndx, size_t *metaIndx,
 	  mtbl = (struct mtbl_pt_rec *) 
 	       malloc( (size_t) nrecords * sizeof(struct mtbl_pt_rec));
 	  if ( mtbl == NULL )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mtbl" );
      } else if ( (mtbl = mtbl_out[0]) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "mtbl_out[0]" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "mtbl_out[0]" );
 /*
  * read table records
  */
@@ -292,8 +286,6 @@ void SDMF_rd_pt_metaTable( hid_t locID, size_t *numIndx, size_t *metaIndx,
 void SDMF_rd_pt_pointing( hid_t locID, size_t *numIndx, size_t *metaIndx,
 			    struct geo_pt_rec *pointing )
 {
-/*      const char prognm[] = "SDMF_rd_pt_pointing"; */
-
      register size_t  nr;
 
      unsigned short num_obs;
@@ -351,8 +343,6 @@ void SDMF_rd_pt_cluster( hid_t locID, unsigned char clus_id,
 			   size_t *numIndx, size_t *metaIndx,
 			   float *pixel_val )
 {
-/*      const char prognm[] = "SDMF_rd_pt_cluster"; */
-
      register size_t  nr, np;
 
      char           clusName[11];

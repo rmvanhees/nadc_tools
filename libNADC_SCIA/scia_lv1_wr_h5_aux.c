@@ -68,8 +68,6 @@ static const size_t aux_offs[NFIELDS] = {
 void SCIA_LV1_WR_H5_AUX( struct param_record param, unsigned int nr_aux,
 			 const struct mds1_aux *aux )
 {
-     const char prognm[] = "SCIA_LV1_WR_H5_AUX";
-
      hid_t   ads_id, tid_pmtc;
      hid_t   aux_type[NFIELDS];
 
@@ -88,7 +86,7 @@ void SCIA_LV1_WR_H5_AUX( struct param_record param, unsigned int nr_aux,
  * open/create group /ADS
  */
      ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/ADS" );
+     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
 /*
  * define user-defined data types of the Table-fields
  */

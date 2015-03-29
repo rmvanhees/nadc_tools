@@ -68,44 +68,42 @@
 -------------------------*/
 void NADC_TOSOMI_RD_NC_META( int ncid, struct tosomi_hdr *hdr )
 {
-     const char prognm[] = "NADC_TOSOMI_RD_NC_META";
-
      int  retval;
      int  var_id;
 /*
  * Product meta-data
  */
      if ( (retval = nc_inq_varid( ncid, "product", &var_id )) != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_att_text( ncid, var_id, "input_products",
                                hdr->l1b_product );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_att_text( ncid, var_id, "creation_date",
                                hdr->creation_date );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_att_text( ncid, var_id, "validity_start",
                                hdr->validity_start );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_att_text( ncid, var_id, "validity_stop",
                                hdr->validity_stop );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_att_text( ncid, var_id, "software_version",
                                hdr->software_version );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 /*
  * Custom meta-data
  */
      if ( (retval = nc_inq_varid( ncid, "custom", &var_id )) != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_att_ushort( ncid, var_id, "number_input_products",
                                  &hdr->numProd );
      if ( retval != NC_NOERR )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_RETURN_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
 }
 
 /*+++++++++++++++++++++++++
@@ -123,8 +121,6 @@ void NADC_TOSOMI_RD_NC_META( int ncid, struct tosomi_hdr *hdr )
 -------------------------*/
 unsigned int NADC_TOSOMI_RD_NC_REC( int ncid, struct tosomi_rec **rec_out )
 {
-     const char prognm[] = "NADC_TOSOMI_RD_NC_REC";
-
      register unsigned int ni, nr;
 
      unsigned int numRec = 0u;
@@ -147,21 +143,21 @@ unsigned int NADC_TOSOMI_RD_NC_REC( int ncid, struct tosomi_rec **rec_out )
  * read dimension scale "time"
  */
      if ( (retval = nc_inq_dimid( ncid, "time", &time_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      if ( (retval = nc_inq_dimlen( ncid, time_id, &length )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      numRec = (unsigned int) length;
 
      rec = (struct tosomi_rec *) malloc( numRec * sizeof(struct tosomi_rec) );
-     if ( rec == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rec" );
+     if ( rec == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rec" );
 /*
  * read Julian date of measurements
  */
      dbuff = (double *) malloc( numRec * sizeof(double) );
-     if ( dbuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "dbuff" );
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
 
      if ( (retval = nc_inq_varid( ncid, "time", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_double( ncid, var_id, dbuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].jday = dbuff[nr];
      free( dbuff );
@@ -169,31 +165,31 @@ unsigned int NADC_TOSOMI_RD_NC_REC( int ncid, struct tosomi_rec **rec_out )
  * read longitude and latitude of measurements
  */
      ibuff = (int *) malloc( numRec * sizeof(int) );
-     if ( ibuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ibuff" );
+     if ( ibuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ibuff" );
 
      if ( (retval = nc_inq_varid( ncid, "lon", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_int( ncid, var_id, ibuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].lon_center = ibuff[nr];
 
      if ( (retval = nc_inq_varid( ncid, "lat", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_int( ncid, var_id, ibuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].lat_center = ibuff[nr];
 /*
  * read longitude and latitude of tile-corners
  */
      ibuff = (int *) realloc( ibuff, NUM_CORNERS * numRec * sizeof(int) );
-     if ( ibuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ibuff" );
+     if ( ibuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ibuff" );
 
      if ( (retval = nc_inq_varid( ncid, "lon_bnds", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_int( ncid, var_id, ibuff );
      for ( ni = nr = 0; nr < numRec; nr++, ni += NUM_CORNERS )
           (void) memcpy( rec[nr].lon_corner, ibuff+ni, nr_byte );
 
      if ( (retval = nc_inq_varid( ncid, "lat_bnds", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_int( ncid, var_id, ibuff );
      for ( ni = nr = 0; nr < numRec; nr++, ni += NUM_CORNERS )
           (void) memcpy( rec[nr].lat_corner, ibuff+ni, nr_byte );
@@ -202,25 +198,25 @@ unsigned int NADC_TOSOMI_RD_NC_REC( int ncid, struct tosomi_rec **rec_out )
  * read datasets (scd, vcd, vcdError, vcdRaw)
  */
      ubuff = (unsigned short *) malloc( numRec * sizeof(short) );
-     if ( ubuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "ubuff" );
+     if ( ubuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ubuff" );
 
      if ( (retval = nc_inq_varid( ncid, "scd", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_ushort( ncid, var_id, ubuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].scd = ubuff[nr];
      /*+++++++++++++++++++++++++*/
      if ( (retval = nc_inq_varid( ncid, "vcd", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_ushort( ncid, var_id, ubuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].vcd = ubuff[nr];
      /*+++++++++++++++++++++++++*/
      if ( (retval = nc_inq_varid( ncid, "vcdError", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_ushort( ncid, var_id, ubuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].vcdError = ubuff[nr];
      /*+++++++++++++++++++++++++*/
      if ( (retval = nc_inq_varid( ncid, "vcdRaw", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      retval = nc_get_var_ushort( ncid, var_id, ubuff );
      for ( nr = 0; nr < numRec; nr++ ) rec[nr].vcdRaw = ubuff[nr];
      free( ubuff );
@@ -228,7 +224,7 @@ unsigned int NADC_TOSOMI_RD_NC_REC( int ncid, struct tosomi_rec **rec_out )
  * read pixel meta-data as compound dataset
  */
      if ( (retval = nc_inq_varid( ncid, "tile", &var_id )) != NC_NOERR )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, nc_strerror(retval) );
+          NADC_GOTO_ERROR( NADC_ERR_FATAL, nc_strerror(retval) );
      for ( indx = 0; indx < (size_t) numRec; indx++ ) {
           retval = nc_get_var1( ncid, var_id, &indx, &rec[indx].meta );
      }

@@ -96,8 +96,6 @@ unsigned int SCIA_LV1_RD_SCPN( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct scpn_scia **scpn_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_SCPN";
-
      char         *scpn_pntr, *scpn_char = NULL;
      size_t       dsr_size, nr_byte;
      unsigned int indx_dsd;
@@ -113,7 +111,7 @@ unsigned int SCIA_LV1_RD_SCPN( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
 	  NADC_ERR_RESTORE();
           scpn_out[0] = NULL;
@@ -128,12 +126,12 @@ unsigned int SCIA_LV1_RD_SCPN( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct scpn_scia));
      }
      if ( (scpn = scpn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scpn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scpn" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (scpn_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "scpn_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scpn_char" );
 /*
  * rewind/read input data file
  */
@@ -143,7 +141,7 @@ unsigned int SCIA_LV1_RD_SCPN( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( scpn_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to SCPN structure
  */
@@ -180,7 +178,7 @@ unsigned int SCIA_LV1_RD_SCPN( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(scpn_pntr - scpn_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -215,8 +213,6 @@ unsigned int SCIA_LV1_RD_SCPN( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_SCPN( FILE *fd, unsigned int num_scpn,
 		       const struct scpn_scia *scpn_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_SCPN";
-
      size_t nr_byte;
 
      struct scpn_scia scpn;
@@ -244,44 +240,44 @@ void SCIA_LV1_WR_SCPN( FILE *fd, unsigned int num_scpn,
  * write SCPN structures to file
  */
 	  if ( fwrite( &scpn.mjd.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 	  if ( fwrite( &scpn.mjd.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &scpn.mjd.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &scpn.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &scpn.orbit_phase, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
 	  nr_byte = (size_t) (5 * SCIENCE_CHANNELS) * ENVI_DBLE;
 	  if ( fwrite( scpn.coeffs, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) SCIENCE_CHANNELS * ENVI_UCHAR;
 	  if ( fwrite( scpn.srs_param, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) SCIENCE_CHANNELS * ENVI_USHRT;
 	  if ( fwrite( scpn.num_lines, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) SCIENCE_CHANNELS * ENVI_FLOAT;
 	  if ( fwrite( scpn.wv_error_calib, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( scpn.sol_spec, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  nr_byte = (size_t) (3 * SCIENCE_CHANNELS) * ENVI_FLOAT;
 	  if ( fwrite( scpn.line_pos, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  scpn_in++;

@@ -64,14 +64,12 @@ void GOME_LV1_WR_H5_SPH( struct param_record param,
 
      hid_t   grp_id;
      hsize_t adim;
-
-     const char prognm[] = "GOME_LV1_WR_H5_SPH";
 /*
  * create group SPH
  */
      grp_id = H5Gcreate( param.hdf_file_id, "/SPH", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/SPH" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/SPH" );
 /*
  * +++++ create/write attributes in the /SPH group
  */

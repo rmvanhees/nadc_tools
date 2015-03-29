@@ -76,8 +76,6 @@ bool SDMF_get_OrbitalDark_24( unsigned short absOrbit, float orbitPhase,
 			      float *analogOffs, float *darkCurrent, 
 			      float *analogOffsError, float *darkCurrentError )
 {
-     const char prognm[] = "SDMF_get_OrbitalDark_24";
-
      const int  orbit = (int) absOrbit;
      const unsigned short numOrbitDark = 72;
      const long sz_chan_byte = CHANNEL_SIZE * ENVI_FLOAT;
@@ -100,7 +98,7 @@ bool SDMF_get_OrbitalDark_24( unsigned short absOrbit, float orbitPhase,
      fnd = SDMF_get_FittedDark_24( 8, absOrbit, analogOffs, darkCurrent,
 				   analogOffsError, darkCurrentError, NULL );
      if ( ! fnd ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 			   "No dark entry found in SDMF (v2.4)" );
 /*
  * convert orbit phase to SDMF definition:
@@ -117,10 +115,10 @@ bool SDMF_get_OrbitalDark_24( unsigned short absOrbit, float orbitPhase,
  * read dark parameters
  */
      if ( (dark_fp = fopen( dark_fl, "r" )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE, dark_fl );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE, dark_fl );
 
      if ( fread( orbitDark, sz_ds_byte, 1, dark_fp ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "orbitDark" );
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "orbitDark" );
      (void) fclose( dark_fp );
      found = TRUE;
 /*
@@ -170,8 +168,6 @@ bool SDMF_get_OrbitalDark_30( unsigned short absOrbit, float orbitPhase,
 			      float *analogOffs, float *darkCurrent, 
 			      float *analogOffsError, float *darkCurrentError )
 {
-     const char prognm[] = "SDMF_get_OrbitalDark_30";
-
      register unsigned short np;
 
      hid_t  fid = -1;
@@ -207,10 +203,10 @@ bool SDMF_get_OrbitalDark_30( unsigned short absOrbit, float orbitPhase,
      H5E_BEGIN_TRY {
 	  fid = H5Fopen( sdmf_db, H5F_ACC_RDONLY, H5P_DEFAULT );
      } H5E_END_TRY;
-     if ( fid < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, sdmf_db );
+     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, sdmf_db );
 
      if ( (gid = H5Gopen( fid, "ch8", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_GRP, "/ch8" );
+          NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/ch8" );
 /*
  * obtain indices relevant entries
  */
@@ -245,7 +241,7 @@ bool SDMF_get_OrbitalDark_30( unsigned short absOrbit, float orbitPhase,
 	   darkCurrentError[np] += orbsig * sig_amp1[np];
      }
      (void) snprintf( str_msg, SHORT_STRING_LENGTH, msg_found, mtbl->absOrbit );
-     NADC_ERROR( prognm, NADC_ERR_NONE, str_msg );
+     NADC_ERROR( NADC_ERR_NONE, str_msg );
 done:
      if ( mtbl != NULL ) free( mtbl );
      if ( gid > 0 ) H5Gclose( gid );
@@ -279,8 +275,6 @@ bool SDMF_get_OrbitalDark( unsigned short absOrbit __attribute ((unused)),
 			   float *analogOffs, float *darkCurrent, 
 			   float *analogOffsError, float *darkCurrentError )
 {
-     /* const char prognm[] = "SDMF_get_OrbitalDark"; */
-
      bool   found = FALSE;
 
      const long sz_chan_byte = CHANNEL_SIZE * ENVI_FLOAT;
@@ -303,8 +297,6 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_get_orbitaldark";
-
      register unsigned short np = 0;
 
      unsigned short orbit;
@@ -329,12 +321,12 @@ int main( int argc, char *argv[] )
      fnd_24 = SDMF_get_OrbitalDark_24( orbit, orbitPhase, ao_24, lc_24,
 				       ao_err_24, lc_err_24 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_OrbitalDark_24");
+          NADC_GOTO_ERROR(NADC_ERR_FATAL, "SDMF_get_OrbitalDark_24");
 
      fnd_30 = SDMF_get_OrbitalDark_30( orbit, orbitPhase, ao_30, lc_30,
 				       ao_err_30, lc_err_30 );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR(prognm, NADC_ERR_FATAL, "SDMF_get_OrbitalDark_30");
+          NADC_GOTO_ERROR(NADC_ERR_FATAL, "SDMF_get_OrbitalDark_30");
 /*
  * 
  */

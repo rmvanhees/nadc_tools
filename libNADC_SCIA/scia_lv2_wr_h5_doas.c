@@ -81,8 +81,6 @@ static const size_t doas_offs[NFIELDS] = {
 void SCIA_LV2_WR_H5_DOAS( const char doas_name[], struct param_record param, 
 			  unsigned int nr_doas, const struct doas_scia *doas )
 {
-     const char prognm[] = "SCIA_LV2_WR_H5_DOAS";
-
      register unsigned int nr;
 
      hid_t   grp_id;
@@ -114,11 +112,11 @@ void SCIA_LV2_WR_H5_DOAS( const char doas_name[], struct param_record param,
  * create group /MDS/<doas_name>
  */
      grp_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/MDS" );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/MDS" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      doas_id = H5Gcreate( grp_id, doas_name,
 			  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
      if ( doas_id < 0 ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, doas_name );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, doas_name );
 /*
  * define user-defined data types of the Table-fields
  */
@@ -160,7 +158,7 @@ void SCIA_LV2_WR_H5_DOAS( const char doas_name[], struct param_record param,
  * cross correlation parameters
  */
      vdata = (hvl_t *) malloc( nr_doas * sizeof(hvl_t) );
-     if ( vdata == NULL ) NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata" );
+     if ( vdata == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata" );
      nr = 0;
      do {
 	  vdata[nr].len = 
@@ -168,7 +166,7 @@ void SCIA_LV2_WR_H5_DOAS( const char doas_name[], struct param_record param,
 	  vdata[nr].p = malloc( vdata[nr].len * sizeof(float) );
 	  if ( vdata[nr].p == NULL ) {
 	       free( vdata );
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "vdata.p" );
+	       NADC_RETURN_ERROR( NADC_ERR_ALLOC, "vdata.p" );
 	  }
 	  (void) memcpy( vdata[nr].p , doas[nr].corrpar,
 			 vdata[nr].len * sizeof(float) );

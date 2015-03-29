@@ -70,16 +70,13 @@ void NADC_FLIPc( enum nadc_flip flip, const unsigned int npix[],
      signed char  *buff;
      unsigned int nrpix;
    
-     const char prognm[] = "NADC_FLIPc";
-
      if ( flip == NADC_FLIP_NO ) return;
 /*
  * make a copy of the input buffer
  */
      nrpix = npix[0] * npix[1];
      buff = (signed char *) malloc( (size_t) nrpix );
-     if ( buff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "buff" );
+     if ( buff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "buff" );
      (void) memcpy( buff, matrix, (size_t) nrpix );
 
      switch ( flip ) {
@@ -112,7 +109,7 @@ void NADC_FLIPc( enum nadc_flip flip, const unsigned int npix[],
 	  pntr = NULL;
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "flip" );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, "flip" );
      }
  done:
      free( buff );
@@ -128,16 +125,13 @@ void NADC_FLIPu( enum nadc_flip flip, const unsigned int npix[],
      unsigned char *buff;
      unsigned int  nrpix;
    
-     const char prognm[] = "NADC_FLIPu";
-
      if ( flip == NADC_FLIP_NO ) return;
 /*
  * make a copy of the input buffer
  */
      nrpix = npix[0] * npix[1];
      buff = (unsigned char *) malloc( (size_t) nrpix );
-     if ( buff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "buff" );
+     if ( buff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "buff" );
      (void) memcpy( buff, matrix, (size_t) nrpix );
 
      switch ( flip ) {
@@ -170,7 +164,7 @@ void NADC_FLIPu( enum nadc_flip flip, const unsigned int npix[],
 	  pntr = NULL;
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "flip" );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, "flip" );
      }
  done:
      free( buff );
@@ -185,16 +179,13 @@ void NADC_FLIPs( enum nadc_flip flip, const unsigned int npix[], short *matrix )
      short        *buff;
      unsigned int nrpix;
 
-     const char prognm[] = "NADC_FLIPs";
-
      if ( flip == NADC_FLIP_NO ) return;
 /*
  * make a copy of the input buffer
  */
      nrpix = npix[0] * npix[1];
      buff = (short *) malloc( (size_t) nrpix * sizeof( short ));
-     if ( buff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "buff" );
+     if ( buff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "buff" );
      (void) memcpy( buff, matrix, (size_t) nrpix * sizeof( short ) );
 
      switch ( flip ) {
@@ -227,7 +218,7 @@ void NADC_FLIPs( enum nadc_flip flip, const unsigned int npix[], short *matrix )
 	  pntr = NULL;
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "flip" );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, "flip" );
      }
  done:
      free( buff );
@@ -242,16 +233,13 @@ void NADC_FLIPr( enum nadc_flip flip, const unsigned int npix[], float *matrix )
      unsigned int nrpix;
      float        *buff;
 
-     const char prognm[] = "NADC_FLIPr";
-
      if ( flip == NADC_FLIP_NO ) return;
 /*
  * make a copy of the input buffer
  */
      nrpix = npix[0] * npix[1];
      buff = (float *) malloc( (size_t) nrpix * sizeof( float ));
-     if ( buff == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "buff" );
+     if ( buff == NULL ) NADC_RETURN_ERROR( NADC_ERR_ALLOC, "buff" );
      (void) memcpy( buff, matrix, (size_t) nrpix * sizeof( float ) );
 
      switch ( flip ) {
@@ -284,7 +272,7 @@ void NADC_FLIPr( enum nadc_flip flip, const unsigned int npix[], float *matrix )
 	  pntr = NULL;
 	  break;
      default:
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, "flip" );
+	  NADC_GOTO_ERROR( NADC_ERR_PARAM, "flip" );
      }
  done:
      free( buff );

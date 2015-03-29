@@ -55,8 +55,6 @@
 void GOME_LV2_WR_H5_SPH( struct param_record param, 
 			 const struct sph2_gome *sph )
 {
-     const char prognm[] = "GOME_LV2_WR_H5_SPH";
-
      char    cbuff[6 * LVL2_MAX_NMOL];
      short   nr;
 
@@ -67,7 +65,7 @@ void GOME_LV2_WR_H5_SPH( struct param_record param,
  */
      grp_id = H5Gcreate( param.hdf_file_id, "/SPH", 
 			 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
-     if ( grp_id < 0 ) NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_GRP, "/SPH" );
+     if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/SPH" );
 /*
  * +++++ create/write attributes in the /SPH group
  */

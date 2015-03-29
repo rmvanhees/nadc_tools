@@ -60,12 +60,10 @@ void ENVI_WR_ASCII_MPH( struct param_record param,
 {
      register unsigned int  nr = 0;
 
-     const char prognm[] = "ENVI_WR_ASCII_MPH";
-
      FILE *outfl = CRE_ASCII_File( param.outfile, "mph" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of MPH record
  */

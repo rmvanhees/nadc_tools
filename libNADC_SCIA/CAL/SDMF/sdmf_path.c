@@ -94,17 +94,17 @@ bool Use_Extern_Alloc = FALSE;
 
 int main( int argc, char *argv[] )
 {
-     const char prognm[] = "sdmf_path";
+     (void) printf( "%s\n", SDMF_PATH("1.0") );
+     (void) printf( "%s\n", SDMF_PATH("2.4") );
+     (void) printf( "%s\n", SDMF_PATH("3.0") );
+     (void) printf( "%s\n", SDMF_PATH("3.1") );
+     (void) printf( "%s\n", SDMF_PATH("3.2") );
 
      (void) printf( "%s\n", SDMF_PATH("1.0") );
      (void) printf( "%s\n", SDMF_PATH("2.4") );
      (void) printf( "%s\n", SDMF_PATH("3.0") );
      (void) printf( "%s\n", SDMF_PATH("3.1") );
-
-     (void) printf( "%s\n", SDMF_PATH("1.0") );
-     (void) printf( "%s\n", SDMF_PATH("2.4") );
-     (void) printf( "%s\n", SDMF_PATH("3.0") );
-     (void) printf( "%s\n", SDMF_PATH("3.1") );
+     (void) printf( "%s\n", SDMF_PATH("3.2") );
 
      exit( EXIT_SUCCESS );
 }

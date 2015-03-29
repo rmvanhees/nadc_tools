@@ -213,8 +213,6 @@ void SET_LV1C_STATE_OFFS( FILE *fd, unsigned int num_dsd,
                    state->flag_mds, state->num_clus, state->Clcon, 
                    state->offset@*/
 {
-     const char prognm[] = "SET_LV1C_STATE_OFFS";
-
      register unsigned int nc;
 
      unsigned char nadc_stat_save = nadc_stat;
@@ -284,7 +282,7 @@ void SET_LV1C_STATE_OFFS( FILE *fd, unsigned int num_dsd,
 	       else {
 		    (void) fseek( fd, (long) nadir_offs, SEEK_SET );
 		    if ( fread( &mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-			 NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+			 NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 		    mjd.days = byte_swap_32( mjd.days );
 		    mjd.secnd = byte_swap_u32( mjd.secnd );
@@ -305,7 +303,7 @@ void SET_LV1C_STATE_OFFS( FILE *fd, unsigned int num_dsd,
 	       else {
 		    (void) fseek( fd, (long) limb_offs, SEEK_SET );
 		    if ( fread( &mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-			 NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+			 NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 		    mjd.days = byte_swap_32( mjd.days );
 		    mjd.secnd = byte_swap_u32( mjd.secnd );
@@ -326,7 +324,7 @@ void SET_LV1C_STATE_OFFS( FILE *fd, unsigned int num_dsd,
 	       else {
 		    (void) fseek( fd, (long) occul_offs, SEEK_SET );
 		    if ( fread( &mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-			 NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+			 NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 		    mjd.days = byte_swap_32( mjd.days );
 		    mjd.secnd = byte_swap_u32( mjd.secnd );
@@ -347,7 +345,7 @@ void SET_LV1C_STATE_OFFS( FILE *fd, unsigned int num_dsd,
 	       else {
 		    (void) fseek( fd, (long) moni_offs, SEEK_SET );
 		    if ( fread( &mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-			 NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+			 NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 		    mjd.days = byte_swap_32( mjd.days );
 		    mjd.secnd = byte_swap_u32( mjd.secnd );
@@ -468,8 +466,6 @@ void SET_LV1C_STATE_PMD_OFFS( FILE *fd, unsigned int num_dsd,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, do_init, fd, state->offs_pmd@*/
 {
-     const char prognm[] = "SET_LV1C_STATE_PMD_OFFS";
-
      unsigned char nadc_stat_save = nadc_stat;
      unsigned int  indx_dsd;
 /*
@@ -522,7 +518,7 @@ void SET_LV1C_STATE_PMD_OFFS( FILE *fd, unsigned int num_dsd,
 
 	       (void) fseek( fd, (long) dsd[indx_dsd].offset + 29l, SEEK_SET );
 	       if ( fread( &num_geo, ENVI_USHRT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       num_geo = byte_swap_u16( num_geo );
 #endif
@@ -605,8 +601,6 @@ void SET_LV1C_STATE_POLV_OFFS( FILE *fd, unsigned int num_dsd,
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, do_init, fd, state->offs_polV@*/
 {
-     const char prognm[] = "SET_LV1C_STATE_POLV_OFFS";
-
      unsigned char nadc_stat_save = nadc_stat;
      unsigned int  indx_dsd;
 /*
@@ -659,7 +653,7 @@ void SET_LV1C_STATE_POLV_OFFS( FILE *fd, unsigned int num_dsd,
 
 	       (void) fseek( fd, (long) dsd[indx_dsd].offset + 27l, SEEK_SET );
 	       if ( fread( &num_geo, ENVI_USHRT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       num_geo = byte_swap_u16( num_geo );
 #endif
@@ -741,8 +735,6 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
 				const struct dsd_envi *dsd,
 				struct state1_scia **state_out )
 {
-     const char prognm[]   = "SCIA_LV1_RD_STATE";
-
      register unsigned short ni;
      register unsigned int   nr_dsr = 0;
 
@@ -762,7 +754,7 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           state_out[0] = NULL;
           return 0u;
@@ -772,13 +764,13 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
 	       calloc((size_t)dsd[indx_dsd].num_dsr,sizeof(struct state1_scia));
      }
      if ( (state = state_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "state" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "state" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (state_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "state_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "state_char" );
 /*
  * rewind/read input data file
  */
@@ -789,7 +781,7 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
      do {
 	  state->indx = nr_dsr;
 	  if ( fread( state_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to STATE structure
  */
@@ -872,7 +864,7 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(state_pntr - state_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -896,7 +888,7 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
 
 	  (void) SCIA_LV1C_RD_CALOPT( fd, num_dsd, dsd, &calopt );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "CALOPT" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "CALOPT" );
 	  
 	  do {
 	       SET_LV1C_STATE_OFFS( fd, num_dsd, dsd, calopt, 
@@ -934,8 +926,6 @@ unsigned int SCIA_LV1_RD_STATE( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_STATE( FILE *fd, unsigned int num_state,
 			const struct state1_scia *state_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_STATE";
-
      register unsigned short ni;
 
      const size_t nr_byte = MAX_CLUSTER * ENVI_USHRT;
@@ -967,87 +957,87 @@ void SCIA_LV1_WR_STATE( FILE *fd, unsigned int num_state,
  * write STATE structure file
  */
 	  if ( fwrite( &state.mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += sizeof( struct mjd_envi );
 	  if ( fwrite( &state.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &state.flag_reason, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &state.orbit_phase, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &state.category, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.state_id, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.dur_scan, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.longest_intg_time, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.num_clus, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  for ( ni = 0; ni < MAX_CLUSTER; ni++ ) {
 	       if ( fwrite( &state.Clcon[ni].id, ENVI_UCHAR, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_UCHAR;
 	       if ( fwrite( &state.Clcon[ni].channel, ENVI_UCHAR, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_UCHAR;
 	       if ( fwrite( &state.Clcon[ni].pixel_nr, ENVI_USHRT, 1, fd) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_USHRT;
 	       if ( fwrite( &state.Clcon[ni].length, ENVI_USHRT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_USHRT;
 	       if ( fwrite( &state.Clcon[ni].pet, ENVI_FLOAT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_FLOAT;
 	       if ( fwrite(&state.Clcon[ni].intg_time, ENVI_USHRT, 1, fd) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_USHRT;
 	       if ( fwrite( &state.Clcon[ni].coaddf, ENVI_USHRT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_USHRT;
 	       if ( fwrite( &state.Clcon[ni].n_read, ENVI_USHRT, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_USHRT;
 	       if ( fwrite( &state.Clcon[ni].type, ENVI_UCHAR, 1, fd ) != 1 )
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+		    NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	       dsd.size += ENVI_UCHAR;
 	  }
 	  if ( fwrite( &state.type_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &state.num_aux, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.num_pmd, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.num_intg, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( state.intg_times, nr_byte ,1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( state.num_polar, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( &state.total_polar, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.num_dsr, ENVI_USHRT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
 	  if ( fwrite( &state.length_dsr, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 
 	  state_in++;

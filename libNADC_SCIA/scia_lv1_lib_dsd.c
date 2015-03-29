@@ -91,8 +91,6 @@ void SCIA_LV1_INIT_DSD( unsigned char write_lv1c, unsigned int num_dsd_in,
        num_monitor_states, num_dsd_wr, num_dsd_out, dsd_out,
        nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "SCIA_LV1_INIT_DSD";
-
      register unsigned int nr_in, nr_out;
 /*
  * initialize number of DSD in output-file equal to input-file
@@ -133,7 +131,7 @@ void SCIA_LV1_INIT_DSD( unsigned char write_lv1c, unsigned int num_dsd_in,
 
 	  (void) snprintf( msg, SHORT_STRING_LENGTH, "%s: %-u",
 			   "invalid number of DSD records", num_dsd_out );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, msg );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, msg );
      }
      if ( write_lv1c == PARAM_UNSET ) {
 	  (void) memcpy(dsd_out, dsd_in, num_dsd_in * sizeof(struct dsd_envi));
@@ -369,8 +367,6 @@ void SCIA_LV1_SET_NUM_ATTACH( const struct param_record param, FILE *fp_in,
        /*@modifies errno, nadc_stat, nadc_err_stack, 
                   num_attach_states, indx_attach_states, fp_in@*/
 {
-     const char prognm[] = "SCIA_LV1_SET_NUM_ATTACH";
-
      register unsigned int ni;
 
      unsigned int num_dsr;
@@ -382,7 +378,7 @@ void SCIA_LV1_SET_NUM_ATTACH( const struct param_record param, FILE *fp_in,
  */
      num_dsr = SCIA_LV1_RD_STATE( fp_in, num_dsd_in, dsd_in, &state );
      if ( IS_ERR_STAT_FATAL || num_dsr  ==  0 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "STATE" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "STATE" );
      
      num_attach_states = 0u;
      for ( ni = 0; ni < num_dsr; ni++ ) {
@@ -435,8 +431,6 @@ void SCIA_LV1_WR_DSD_UPDATE( FILE *fp_in, FILE *fp_out )
        /*@modifies errno, stderr, nadc_stat, nadc_err_stack, fp_in, fp_out,
                    dsd_out[].offset@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_DSD_UPDATE";
-
      register unsigned int nr;
      register unsigned int offset;
 
@@ -449,10 +443,10 @@ void SCIA_LV1_WR_DSD_UPDATE( FILE *fp_in, FILE *fp_out )
 /* Note: MPH maybe modified, therefore, read MPH from output file */
      ENVI_RD_MPH( fp_out, &mph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "MPH" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MPH" );
      SCIA_LV1_RD_SPH( fp_in, mph, &sph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SPH" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SPH" );
 /*
  * update DSD records (recalculate all dsd records "ds_offset")
  */
@@ -484,7 +478,7 @@ void SCIA_LV1_WR_DSD_UPDATE( FILE *fp_in, FILE *fp_out )
      mph.num_data_sets = num_data_sets;
      ENVI_WR_MPH( fp_out, mph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_WR, "MPH" );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_WR, "MPH" );
 /*
  * update SPH records
  */
@@ -494,13 +488,13 @@ void SCIA_LV1_WR_DSD_UPDATE( FILE *fp_in, FILE *fp_out )
      sph.no_monitor = num_monitor_states;
      SCIA_LV1_WR_SPH( fp_out, mph, sph );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_WR, "SPH" );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_WR, "SPH" );
 /*
  * update DSD records
  */
      ENVI_WR_DSD( fp_out, num_dsd_out, dsd_out );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_WR, "DSD" );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_WR, "DSD" );
 /*
  * close output file
  */

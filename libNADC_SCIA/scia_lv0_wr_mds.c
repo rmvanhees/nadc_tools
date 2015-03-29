@@ -76,8 +76,6 @@ void SCIA_LV0_WR_MDS_ANNOTATION( FILE *fd,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_MDS_ANNOTATION";
-
      register char *hdr_pntr;
 
      char hdr_char[LV0_ANNOTATION_LENGTH];
@@ -122,7 +120,7 @@ void SCIA_LV0_WR_MDS_ANNOTATION( FILE *fd,
  * write header data
  */
      if ( fwrite( hdr_char, LV0_ANNOTATION_LENGTH, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      return;
 }
 
@@ -144,8 +142,6 @@ unsigned int SCIA_LV0_WR_MDS_PACKET_HDR( FILE *fd,
        /*@globals  errno;@*/
        /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_MDS_PACKET_HDR";
-
      struct packet_hdr packet_hdr;
 
      (void) memcpy( &packet_hdr, &packet_hdr_in, sizeof( struct packet_hdr ));
@@ -153,11 +149,11 @@ unsigned int SCIA_LV0_WR_MDS_PACKET_HDR( FILE *fd,
      Sun2Intel_MDS_PACKET_HDR( &packet_hdr );
 #endif
      if ( fwrite( &packet_hdr.api.two_byte, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      if ( fwrite( &packet_hdr.seq_cntrl, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      if ( fwrite( &packet_hdr.length, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
  done:
      return (unsigned int) (3 * ENVI_USHRT);
 }
@@ -182,8 +178,6 @@ unsigned int SCIA_LV0_WR_MDS_DATA_HDR( FILE *fd,
        /*@globals  errno;@*/
        /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_MDS_DATA_HDR";
-
      unsigned int nr_byte = 0u;
 
      struct data_hdr data_hdr;
@@ -193,22 +187,22 @@ unsigned int SCIA_LV0_WR_MDS_DATA_HDR( FILE *fd,
      Sun2Intel_MDS_DATA_HDR( &data_hdr );
 #endif
      if ( fwrite( &data_hdr.length, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_USHRT;
      if ( fwrite( &data_hdr.category, ENVI_UCHAR, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_UCHAR;
      if ( fwrite( &data_hdr.state_id, ENVI_UCHAR, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_UCHAR;
      if ( fwrite( &data_hdr.on_board_time, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_UINT;
      if ( fwrite( &data_hdr.rdv.two_byte, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_USHRT;
      if ( fwrite( &data_hdr.id.two_byte, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_USHRT;
  done:
      return nr_byte;
@@ -233,8 +227,6 @@ unsigned int SCIA_LV0_WR_MDS_PMTC_HDR( FILE *fd,
        /*@globals  errno;@*/
        /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_MDS_PMTC_HDR";
-
      unsigned int nr_byte = 0u;
 
      struct pmtc_hdr pmtc_hdr;
@@ -244,19 +236,19 @@ unsigned int SCIA_LV0_WR_MDS_PMTC_HDR( FILE *fd,
      Sun2Intel_MDS_PMTC_HDR( &pmtc_hdr );
 #endif
      if ( fwrite( &pmtc_hdr.pmtc_1.two_byte, ENVI_USHRT, 1, fd  ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_USHRT;
      if ( fwrite( &pmtc_hdr.scanner_mode, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_USHRT;
      if ( fwrite( &pmtc_hdr.az_param.four_byte, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_UINT;
      if ( fwrite( &pmtc_hdr.elv_param.four_byte, ENVI_UINT, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += ENVI_UINT;
      if ( fwrite( &pmtc_hdr.factor, 6, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
      nr_byte += 6;
  done:
      return nr_byte;
@@ -365,8 +357,6 @@ void SCIA_LV0_WR_MDS_DET_SRC( FILE *fd, long det_length,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     const char prognm[]  = "SCIA_LV0_WR_MDS_DET_SRC";
-
      register size_t n_cl;
      register unsigned short n_ch;
 
@@ -380,7 +370,7 @@ void SCIA_LV0_WR_MDS_DET_SRC( FILE *fd, long det_length,
      struct det_src data_src;
 
      if ( (src_char = (char *) malloc( (size_t) det_length )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "src_char" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "src_char" );
 /*
  * write data of the different channels
  */
@@ -416,7 +406,7 @@ void SCIA_LV0_WR_MDS_DET_SRC( FILE *fd, long det_length,
 	  data_src.pixel = (struct chan_src *)
 	       malloc ( num_clus * sizeof( struct chan_src ) );
 	  if ( data_src.pixel == NULL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixel" );
+	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel" );
 	  (void) memcpy( data_src.pixel, data_src_in->pixel,
 			 num_clus * sizeof( struct chan_src ) );
 /*
@@ -482,12 +472,12 @@ void SCIA_LV0_WR_MDS_DET_SRC( FILE *fd, long det_length,
  * check number of bytes write
  */
      if ( (long)(src_pntr - src_char) != det_length )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "Detector MDS size" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "Detector MDS size" );
 /*
  * write packet data packet
  */
      if ( fwrite( src_char, (size_t) det_length, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "" );
 /*
  * release allocated memory
  */
@@ -568,8 +558,6 @@ void SCIA_LV0_WR_ONE_AUX( FILE *fd, const struct mds0_info *info,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_ONE_AUX";
-
      register unsigned short nf = 0;
 /*
  * rewind data file
@@ -580,35 +568,35 @@ void SCIA_LV0_WR_ONE_AUX( FILE *fd, const struct mds0_info *info,
  */
      SCIA_LV0_WR_MDS_ANNOTATION( fd, aux.isp, aux.fep_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "Annotation" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "Annotation" );
 /*
  * write ISP Packet Header
  */
      (void) SCIA_LV0_WR_MDS_PACKET_HDR( fd, aux.packet_hdr);
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "PACKET_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "PACKET_HDR" );
 /*
  * write ISP Data Field Header
  */
      (void) SCIA_LV0_WR_MDS_DATA_HDR( fd, aux.data_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
 /*
  * check packet ID
  */
      if ( (int) aux.data_hdr.id.field.packet != SCIA_AUX_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 			     "not an Auxiliary data packet" );
      (void) SCIA_LV0_WR_MDS_PMTC_HDR( fd, aux.pmtc_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_PMTC_HDR" );
 /*
  * write ISP Auxiliary data source packet
  */
      do {
 	  (void) SCIA_LV0_WR_MDS_PMTC_FRAME( fd, aux.data_src[nf] );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_FRAME" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_PMTC_FRAME" );
      } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
 }
 
@@ -631,8 +619,6 @@ void SCIA_LV0_WR_ONE_DET( FILE *fd, const struct mds0_info *info,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_ONE_DET";
-
      register unsigned short nr;
 
      unsigned short ubuff;
@@ -647,24 +633,24 @@ void SCIA_LV0_WR_ONE_DET( FILE *fd, const struct mds0_info *info,
  */
      SCIA_LV0_WR_MDS_ANNOTATION( fd, det.isp, det.fep_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "Annotation" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "Annotation" );
 /*
  * write Packet Header
  */
      (void) SCIA_LV0_WR_MDS_PACKET_HDR( fd, det.packet_hdr);
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "PACKET_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "PACKET_HDR" );
 /*
  * write ISP Data Field Header
  */
      (void) SCIA_LV0_WR_MDS_DATA_HDR( fd, det.data_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
 /*
  * check packet ID
  */
      if ( (int) det.data_hdr.id.field.packet != SCIA_DET_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 			     "not a detector data packet" );
 /*
  * write Broadcast counter (MDI)
@@ -675,13 +661,13 @@ void SCIA_LV0_WR_ONE_DET( FILE *fd, const struct mds0_info *info,
      ubuff = det.bcps;
 #endif
      if ( fwrite( &ubuff, ENVI_SHORT, 1, fd )!= 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 /*
  * write PMTC settings
  */
      (void) SCIA_LV0_WR_MDS_PMTC_HDR( fd, det.pmtc_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_PMTC_HDR" );
 /*
  * write remaining variables from Data Field Header for Detector Data Packet
  */
@@ -701,16 +687,16 @@ void SCIA_LV0_WR_ONE_DET( FILE *fd, const struct mds0_info *info,
      ubuff = det.num_chan;
 #endif
      if ( fwrite( ibuff, ENVI_INT, 8, fd ) != 8 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      if ( fwrite( &ubuff, ENVI_USHRT, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 /*
  * write ISP Detector Data Source Packet
  */
      nr_byte = (long) (det.packet_hdr.length - det.data_hdr.length) + 1l;
      SCIA_LV0_WR_MDS_DET_SRC( fd, nr_byte, det.num_chan, det.data_src );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DATA_SRC" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_DATA_SRC" );
 }
 
 /*+++++++++++++++++++++++++
@@ -732,7 +718,6 @@ void SCIA_LV0_WR_ONE_PMD( FILE *fd, const struct mds0_info *info,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd@*/
 {
-     const char prognm[] = "SCIA_LV0_WR_ONE_PMD";
 /*
  * rewind data file
  */
@@ -742,31 +727,31 @@ void SCIA_LV0_WR_ONE_PMD( FILE *fd, const struct mds0_info *info,
  */
      SCIA_LV0_WR_MDS_ANNOTATION( fd, pmd.isp, pmd.fep_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "Annotation" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "Annotation" );
 /*
  * write Packet Header
  */
      (void) SCIA_LV0_WR_MDS_PACKET_HDR( fd, pmd.packet_hdr);
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "PACKET_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "PACKET_HDR" );
 /*
  * write ISP Data Field Header
  */
      (void) SCIA_LV0_WR_MDS_DATA_HDR( fd, pmd.data_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
 /*
  * check packet ID
  */
      if ( (int) pmd.data_hdr.id.field.packet != SCIA_PMD_PACKET )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 			     "not a PMD data packet" );
 /*
  * write ISP PMD data source packet
  */
      (void) SCIA_LV0_WR_MDS_PMD_SRC( fd, pmd.data_src );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMD_SRC" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "MDS_PMD_SRC" );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
@@ -789,8 +774,6 @@ unsigned int SCIA_LV0_WR_AUX( FILE *fd, const struct mds0_info *info,
 			      unsigned int num_info, 
 			      const struct mds0_aux *aux )
 {
-     const char prognm[] = "SCIA_LV0_WR_AUX";
-
      register unsigned int nr_aux = 0;
 
      if ( num_info == 0 ) return 0u;
@@ -800,7 +783,7 @@ unsigned int SCIA_LV0_WR_AUX( FILE *fd, const struct mds0_info *info,
      do {
 	  SCIA_LV0_WR_ONE_AUX( fd, info, *aux );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_AUX" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_AUX" );
 /*
  * go to next MDS info data set
  */
@@ -833,8 +816,6 @@ unsigned int SCIA_LV0_WR_DET( FILE *fd, const struct mds0_info *info,
 			      unsigned int num_info, 
 			      const struct mds0_det *det )
 {
-     const char prognm[] = "SCIA_LV0_WR_DET";
-
      register unsigned int nr_det = 0;
 
 
@@ -845,7 +826,7 @@ unsigned int SCIA_LV0_WR_DET( FILE *fd, const struct mds0_info *info,
      do {
 	  SCIA_LV0_WR_ONE_DET( fd, info, *det );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DET" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_DET" );
 /*
  * go to next MDS info data set
  */
@@ -878,8 +859,6 @@ unsigned int SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *info,
 			      unsigned int num_info, 
 			      const struct mds0_pmd *pmd )
 {
-     const char prognm[] = "SCIA_LV0_WR_PMD";
-
      register unsigned int nr_pmd = 0;
 
      if ( num_info == 0 ) return 0u;
@@ -889,7 +868,7 @@ unsigned int SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *info,
      do {
 	  SCIA_LV0_WR_ONE_PMD( fd, info, *pmd );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMD" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_PMD" );
 /*
  * go to next MDS info data set
  */
@@ -919,44 +898,42 @@ unsigned int SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *info,
 -------------------------*/
 unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds1_aux aux )
 {
-     const char prognm[] = "SCIA_LV0_WR_LV1_AUX";
-
      register unsigned short nf = 0;
 
      unsigned int nr, nr_byte = 0u;
 
      if ( fwrite( &aux.mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "mjd" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "mjd" );
      nr_byte += sizeof( struct mjd_envi );
      if ( fwrite( &aux.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "flags_mds" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "flags_mds" );
      nr_byte += ENVI_UCHAR;
 /*
  * write Packet Header
  */
      nr = SCIA_LV0_WR_MDS_PACKET_HDR( fd, aux.packet_hdr);
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "PACKET_HDR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "PACKET_HDR" );
      nr_byte += nr;
 /*
  * write ISP data field header
  */
      nr = SCIA_LV0_WR_MDS_DATA_HDR( fd, aux.data_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
      nr_byte += nr;
 /*
  * check packet ID
  */
      if ( (int) aux.data_hdr.id.field.packet != SCIA_AUX_PACKET )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 			   "not an Auxiliary data packet" );
 /*
  * write PMTC settings
  */
      nr = SCIA_LV0_WR_MDS_PMTC_HDR( fd, aux.pmtc_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_HDR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_PMTC_HDR" );
      nr_byte += nr;
 /*
  * write ISP AUX data source packet
@@ -964,7 +941,7 @@ unsigned int SCIA_LV0_WR_LV1_AUX( FILE *fd, const struct mds1_aux aux )
      do {
 	  nr = SCIA_LV0_WR_MDS_PMTC_FRAME( fd, aux.data_src[nf] );
 	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMTC_FRAME" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_PMTC_FRAME" );
 	  nr_byte += nr;
      } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
  done:
@@ -988,39 +965,37 @@ unsigned int SCIA_LV0_WR_LV1_PMD( FILE *fd, const struct mds1_pmd pmd )
 {
      unsigned int nr, nr_byte = 0u;
 
-     const char prognm[] = "SCIA_LV0_WR_LV1_PMD";
-
      if ( fwrite( &pmd.mjd, sizeof( struct mjd_envi ), 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "mjd" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "mjd" );
      nr_byte += sizeof( struct mjd_envi );
      if ( fwrite( &pmd.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "flag_mds" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "flag_mds" );
      nr_byte += ENVI_UCHAR;
 /*
  * write Packet Header
  */
      nr = SCIA_LV0_WR_MDS_PACKET_HDR( fd, pmd.packet_hdr);
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "PACKET_HDR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "PACKET_HDR" );
      nr_byte += nr;
 /*
  * write ISP data field header
  */
      nr = SCIA_LV0_WR_MDS_DATA_HDR( fd, pmd.data_hdr );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_DATA_HDR" );
      nr_byte += nr;
 /*
  * check packet ID
  */
      if ( (int) pmd.data_hdr.id.field.packet != SCIA_PMD_PACKET )
- 	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "not a PMD data packet" );
+ 	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "not a PMD data packet" );
 /*
  * write ISP PMD data source packet
  */
      nr = SCIA_LV0_WR_MDS_PMD_SRC( fd, pmd.data_src );
      if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_WR, "MDS_PMD_SRC" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_WR, "MDS_PMD_SRC" );
      nr_byte += nr;
  done:
      return nr_byte;

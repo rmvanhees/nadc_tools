@@ -52,15 +52,13 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void GOME_RD_PIR( FILE *infl, struct pir_gome *pir )
 {
-     const char prognm[] = "GOME_RD_PIR";
-
      char   pir_char[LVL1_PIR_LENGTH];
 /*
  * rewind/read input data file
  */
      (void) fseek( infl, 0L, SEEK_SET );
      if ( fread( pir_char, LVL1_PIR_LENGTH, 1, infl ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "" );
 
      (void) memcpy( pir->mission, pir_char, 2 );
      pir->mission[2] = '\0';

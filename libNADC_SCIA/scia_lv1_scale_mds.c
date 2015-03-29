@@ -94,8 +94,6 @@ void RESAMPLE_1B_PmdVal( unsigned short numDsr,
 			 /*@out@*/ float *pixelPmd )
        /*@modifies pixelPmd@*/
 {
-/*      const char prognm[] = "RESAMPLE_1B_PmdVal"; */
-
      register unsigned short n_dsr, n_pet, n_pmd, n_pmd_out;
 
 /* Number of Pixel Exposure Times per Dataset record */
@@ -151,8 +149,6 @@ void RESAMPLE_1C_PmdVal( const struct mds1c_pmd *pmd_1c,
 			 /*@out@*/ float *pixelPmd )
        /*@modifies pixelPmd@*/
 {
-/*      const char prognm[] = "RESAMPLE_1C_PmdVal"; */
-
      register unsigned short n_pmd_out = 0;
 
      const float *int_pmd = &pmd_1c->int_pmd[indxPmd];
@@ -197,8 +193,6 @@ void get_weight_Factors( unsigned short sampling, unsigned short numVal,
 			 const float *Val, /*@out@*/ float *wghtFactor )
        /*@modifies wghtFactor@*/
 {
-/*      const char prognm[] = "get_weight_Factors"; */
-
      register unsigned short n_val = 0;
 
      const float Val_CutOff = sampling * 10.f;
@@ -233,8 +227,6 @@ unsigned short SCIA_LV1_SCALE_MDS( bool PmdScaling, unsigned char chanID,
 				   const struct mds1c_scia *mds_1c, 
 				   float **sign_out )
 {
-     const char prognm[] = "SCIA_LV1_SCALE_MDS";
-
      register unsigned short nm, ns;
 
      unsigned short dim_Y = 0;
@@ -256,7 +248,7 @@ unsigned short SCIA_LV1_SCALE_MDS( bool PmdScaling, unsigned char chanID,
      if ( ! Use_Extern_Alloc )
        sign_out[0] = (float *) malloc((size_t) dim_X * dim_Y * sizeof(float) );
      if ( sign_out[0] == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "sign_out" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sign_out" );
 /*
  * check for Monitor MDS, these have no PMD measurements attached
  */
@@ -303,9 +295,9 @@ unsigned short SCIA_LV1_SCALE_MDS( bool PmdScaling, unsigned char chanID,
  * allocate memory for re-sampled PMD readouts
  */
      if ( (pixelPmd = (float *) malloc( dim_Y * sizeof(float) )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pixelPmd" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixelPmd" );
      if ( (wghtFactor = (float *) malloc( dim_Y * sizeof(float) )) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "wghtFactor" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "wghtFactor" );
 /*
  * re-sample PMD readouts to pixel integration time
  */

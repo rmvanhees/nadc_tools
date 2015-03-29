@@ -70,18 +70,16 @@ unsigned char **ALLOC_UC2D( size_t ypix, size_t xpix )
 
      unsigned char  **plane;
 
-     const char prognm[] = "ALLOC_UC2D";
-
      plane = (unsigned char **) malloc( ypix * sizeof( unsigned char * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (unsigned char *) 
 	  malloc( (xpix * ypix) * sizeof( unsigned char ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -108,17 +106,15 @@ char **ALLOC_C2D( size_t ypix, size_t xpix )
 
      char  **plane;
 
-     const char prognm[] = "ALLOC_C2D";
-
      plane = (char **) malloc( ypix * sizeof( char * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (char *) malloc( (xpix * ypix) * sizeof( char ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -147,17 +143,15 @@ short **ALLOC_US2D( size_t ypix, size_t xpix )
 
      unsigned short  **plane;
 
-     const char prognm[] = "ALLOC_US2D";
-
      plane = (unsigned short **) malloc( ypix * sizeof( short * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (unsigned short *) malloc( (xpix * ypix) * sizeof( short ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -184,17 +178,15 @@ short **ALLOC_S2D( size_t ypix, size_t xpix )
 
      short  **plane;
 
-     const char prognm[] = "ALLOC_S2D";
-
      plane = (short **) malloc( ypix * sizeof( short * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (short *) malloc( (xpix * ypix) * sizeof( short ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -221,17 +213,15 @@ int **ALLOC_I2D( size_t ypix, size_t xpix )
 
      int  **plane;
 
-     const char prognm[] = "ALLOC_I2D";
-
      plane = (int **) malloc( ypix * sizeof( int * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (int *) malloc( (xpix * ypix) * sizeof( int ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -258,17 +248,15 @@ float **ALLOC_R2D( size_t ypix, size_t xpix )
 
      float **plane;
  
-     const char prognm[] = "ALLOC_R2D";
-
      plane = (float **) malloc( ypix * sizeof( float * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (float *) malloc( (xpix * ypix) * sizeof( float ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -295,17 +283,15 @@ double **ALLOC_D2D( size_t ypix, size_t xpix )
 
      double **plane;
  
-     const char prognm[] = "ALLOC_D2D";
-
      plane = (double **) malloc( ypix * sizeof( double * ));
      if ( plane == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane" );
 
      plane[0] = (double *) malloc( (xpix * ypix) * sizeof( double ));
      if ( plane[0] == NULL ) {
 	  free( plane );
 	  plane = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "plane[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "plane[0]" );
      }
      for ( ny = 1; ny < ypix; ny++ )
 	  plane[ny] = plane[ny-1] + xpix;
@@ -334,25 +320,24 @@ short ***ALLOC_S3D( size_t zpix, size_t ypix, size_t xpix )
 
      short    ***cube;
 
-     const char   prognm[] = "ALLOC_S3D";
-     const size_t xypix    = xpix * ypix;
+     const size_t xypix = xpix * ypix;
 
      cube = (short ***) malloc( zpix * sizeof( short ** ));
      if ( cube == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube" );
 
      cube[0] = (short **) malloc( (zpix * ypix) * sizeof( short * ));
      if ( cube[0] == NULL ) {
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0]" );
      }
      cube[0][0] = (short *) malloc( (zpix * xypix) * sizeof( short ));
      if ( cube[0][0] == NULL ) {
 	  free( cube[0] );
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0][0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0][0]" );
      }
      for ( nz = 1; nz < zpix; nz++ ) { 
 	  cube[nz] = cube[nz-1] + ypix;
@@ -388,25 +373,24 @@ int ***ALLOC_I3D( size_t zpix, size_t ypix, size_t xpix )
 
      int    ***cube;
 
-     const char   prognm[] = "ALLOC_I3D";
-     const size_t xypix    = xpix * ypix;
+     const size_t xypix = xpix * ypix;
 
      cube = (int ***) malloc( zpix * sizeof( int ** ));
      if ( cube == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube" );
 
      cube[0] = (int **) malloc( (zpix * ypix) * sizeof( int * ));
      if ( cube[0] == NULL ) {
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0]" );
      }
      cube[0][0] = (int *) malloc( (zpix * xypix) * sizeof( int ));
      if ( cube[0][0] == NULL ) {
 	  free( cube[0] );
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0][0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0][0]" );
      }
      for ( nz = 1; nz < zpix; nz++ ) { 
 	  cube[nz] = cube[nz-1] + ypix;
@@ -448,27 +432,26 @@ int ****ALLOC_I4D( size_t zpix, size_t ypix, size_t xpix, size_t wpix )
 
      int  ****cube;
 
-     const char   prognm[] = "ALLOC_I4D";
-     const size_t wxpix    = wpix * xpix,
-	  xypix    = xpix * ypix,
-	  wxypix   = wpix * xypix;
+     const size_t wxpix  = wpix * xpix;
+     const size_t xypix  = xpix * ypix;
+     const size_t wxypix = wpix * xypix;
 
      cube = (int ****) malloc( zpix * sizeof( int *** ));
      if ( cube == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube" );
 
      cube[0] = (int ***) malloc( (zpix * ypix) * sizeof( int ** ));
      if ( cube[0] == NULL ) {
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0]" );
      }
      cube[0][0] = (int **) malloc( (zpix * xypix) * sizeof( int * ));
      if ( cube[0][0] == NULL ) {
 	  free( cube[0] );
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0][0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0][0]" );
      }
      cube[0][0][0] = (int *) malloc( (zpix * wxypix) * sizeof( int ));
      if ( cube[0][0][0] == NULL )  {
@@ -476,7 +459,7 @@ int ****ALLOC_I4D( size_t zpix, size_t ypix, size_t xpix, size_t wpix )
 	  free( cube[0] );
 	  free( cube );
 	  cube = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "cube[0][0][0]" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cube[0][0][0]" );
      }
      nz = 1;
      do { 

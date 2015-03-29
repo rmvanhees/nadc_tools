@@ -62,8 +62,6 @@ unsigned int SCIA_LV1_RD_PSPLO( FILE *fd, const struct dsd_envi dsd,
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, *psplo@*/
 {
-     const char prognm[] = "SCIA_LV1_RD_PSPLO";
-
      register unsigned short ni;
 
      char         *psplo_pntr, *psplo_char = NULL;
@@ -76,7 +74,7 @@ unsigned int SCIA_LV1_RD_PSPLO( FILE *fd, const struct dsd_envi dsd,
  * allocate memory to temporary store data for output structure
  */
      if ( (psplo_char = (char *) malloc( (size_t) dsd.dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "psplo_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "psplo_char" );
 /*
  * rewind/read input data file
  */
@@ -86,7 +84,7 @@ unsigned int SCIA_LV1_RD_PSPLO( FILE *fd, const struct dsd_envi dsd,
  */
      do {
 	  if ( fread( psplo_char, (size_t) dsd.dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  psplo_pntr = psplo_char;
 /*
  * read data buffer to PSPLO structure
@@ -103,7 +101,7 @@ unsigned int SCIA_LV1_RD_PSPLO( FILE *fd, const struct dsd_envi dsd,
  * check if we read the whole DSR
  */
 	  if ( (psplo_pntr - psplo_char) != dsd.dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd.name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd.name );
 /*
  * byte swap data to local representation
  */
@@ -139,8 +137,6 @@ void SCIA_LV1_WR_PSPLO( FILE *fd, struct dsd_envi dsd, unsigned int num_psplo,
        /*@globals  errno;@*/
        /*@modifies errno, fd@*/
 {
-     const char prognm[] = "SCIA_LV1_WR_PSPLO";
-
      register unsigned short ni;
 
      float mu2_buff[SCIENCE_PIXELS], mu3_buff[SCIENCE_PIXELS];
@@ -173,16 +169,16 @@ void SCIA_LV1_WR_PSPLO( FILE *fd, struct dsd_envi dsd, unsigned int num_psplo,
  * write PSPLO structure to data buffer
  */
 	  if ( fwrite( &psplo.ang_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( &psplo.ang_asm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( mu2_buff, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( mu3_buff, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  psplo_in++;
@@ -215,8 +211,6 @@ unsigned int SCIA_LV1_RD_PSPN( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct pspn_scia **pspn_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_PSPN";
-
      register unsigned short ni;
 
      char         *pspn_pntr, *pspn_char = NULL;
@@ -235,7 +229,7 @@ unsigned int SCIA_LV1_RD_PSPN( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           pspn_out[0] = NULL;
           return 0u;
@@ -245,13 +239,13 @@ unsigned int SCIA_LV1_RD_PSPN( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct pspn_scia));
      } 
      if ( (pspn = pspn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspn" );
 /*
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (pspn_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspn_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspn_char" );
 /*
  * rewind/read input data file
  */
@@ -261,7 +255,7 @@ unsigned int SCIA_LV1_RD_PSPN( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( pspn_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  pspn_pntr = pspn_char;
 /*
  * read data buffer to PSPN structure
@@ -276,7 +270,7 @@ unsigned int SCIA_LV1_RD_PSPN( FILE *fd, unsigned int num_dsd,
  * check if we read the whole DSR
  */
 	  if ( (size_t)(pspn_pntr - pspn_char) != dsr_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 /*
  * byte swap data to local representation
  */
@@ -326,8 +320,6 @@ unsigned int SCIA_LV1_RD_PSPL( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct psplo_scia **pspl_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_PSPL";
-
      unsigned int indx_dsd;
 
      unsigned int nr_dsr = 0;
@@ -338,7 +330,7 @@ unsigned int SCIA_LV1_RD_PSPL( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           pspl_out[0] = NULL;
           return 0u;
@@ -348,13 +340,13 @@ unsigned int SCIA_LV1_RD_PSPL( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct psplo_scia));
      }
      if ( pspl_out[0] == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspl" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspl" );
 /*
  * read polarisation sensitivity parameters Limb/Occultation
  */
      nr_dsr = SCIA_LV1_RD_PSPLO( fd, dsd[indx_dsd], pspl_out[0] );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCIA_LV1_RD_PSPLO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCIA_LV1_RD_PSPLO" );
 /*
  * set return values
  */
@@ -382,8 +374,6 @@ unsigned int SCIA_LV1_RD_PSPO( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct psplo_scia **pspo_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_PSPO";
-
      unsigned int indx_dsd;
 
      unsigned int nr_dsr = 0;
@@ -394,7 +384,7 @@ unsigned int SCIA_LV1_RD_PSPO( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( dsd[indx_dsd].num_dsr == 0 ) {
           pspo_out[0] = NULL;
           return 0u;
@@ -404,13 +394,13 @@ unsigned int SCIA_LV1_RD_PSPO( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct psplo_scia));
      }
      if ( pspo_out[0] == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "pspo" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspo" );
 /*
  * read polarisation sensitivity parameters Limb/Occultation
  */
      nr_dsr = SCIA_LV1_RD_PSPLO( fd, dsd[indx_dsd], pspo_out[0] );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "SCIA_LV1_RD_PSPLO" );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SCIA_LV1_RD_PSPLO" );
 /*
  * set return values
  */
@@ -435,8 +425,6 @@ unsigned int SCIA_LV1_RD_PSPO( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_PSPN( FILE *fd, unsigned int num_pspn, 
 		       const struct pspn_scia *pspn_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_PSPN";
-
      register unsigned short ni;
 
      float  mu2_buff[SCIENCE_PIXELS], mu3_buff[SCIENCE_PIXELS];
@@ -480,13 +468,13 @@ void SCIA_LV1_WR_PSPN( FILE *fd, unsigned int num_pspn,
  * write PSPN structure to data buffer
  */
 	  if ( fwrite( &pspn.ang_esm, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 	  if ( fwrite( mu2_buff, nr_byte,1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( mu3_buff, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  pspn_in++;

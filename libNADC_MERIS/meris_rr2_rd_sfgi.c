@@ -104,8 +104,6 @@ unsigned int MERIS_RR2_RD_SFGI( FILE *fd, unsigned int num_dsd,
 				const struct dsd_envi *dsd, 
 				struct sfgi_meris *sfgi )
 {
-     const char prognm[] = "MERIS_RR2_RD_SFGI";
-
      char         *sfgi_char, *sfgi_pntr;
      size_t       dsr_size;
      unsigned int indx_dsd;
@@ -116,7 +114,7 @@ unsigned int MERIS_RR2_RD_SFGI( FILE *fd, unsigned int num_dsd,
  */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_ABSENT || IS_ERR_STAT_FATAL ) {
-          NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+          NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0;
      }
      if ( dsd[indx_dsd].num_dsr == 0 ) return 0;
@@ -125,7 +123,7 @@ unsigned int MERIS_RR2_RD_SFGI( FILE *fd, unsigned int num_dsd,
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
      if ( (sfgi_char = (char *) malloc( dsr_size )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_ALLOC, "sfgi_char" );
+	  NADC_ERROR( NADC_ERR_ALLOC, "sfgi_char" );
 	  return 0;
      }
 /*
@@ -134,7 +132,7 @@ unsigned int MERIS_RR2_RD_SFGI( FILE *fd, unsigned int num_dsd,
      (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
      if ( fread( sfgi_char, dsr_size, 1, fd ) != 1 ) {
 	  free( sfgi_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	  NADC_ERROR( NADC_ERR_PDS_RD, "" );
 	  return 0;
      }
 /*
@@ -232,7 +230,7 @@ unsigned int MERIS_RR2_RD_SFGI( FILE *fd, unsigned int num_dsd,
 	  (void) fprintf( stderr, "%d %zd\n", (int) (sfgi_pntr - sfgi_char), 
 			  dsr_size );
 	  free( sfgi_char );
-	  NADC_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  return 0;
      }
 #ifdef _SWAP_TO_LITTLE_ENDIAN

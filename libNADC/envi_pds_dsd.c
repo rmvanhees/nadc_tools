@@ -78,8 +78,6 @@ static NADC_pds_hdr_t dsd_items[NUM_DSD_ITEMS] = {
 static
 void ENVI_WR_DSD_SPARE( FILE *fd )
 {
-     const char prognm[] = "ENVI_WR_DSD_SPARE";
-
      register unsigned short ni = 0u;
 
      const char str_space[] = " ";
@@ -87,10 +85,10 @@ void ENVI_WR_DSD_SPARE( FILE *fd )
 
      do {
 	  if ( fwrite( str_space, sizeof(char), 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
      } while ( ++ni < LENGTH_DSD_SP );
      if ( fwrite( str_newl, sizeof(char), 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -112,8 +110,6 @@ void ENVI_WR_DSD_SPARE( FILE *fd )
 unsigned int ENVI_RD_DSD( FILE *fd, const struct mph_envi mph, 
 			  struct dsd_envi *dsd )
 {
-     const char prognm[] = "ENVI_RD_DSD";
-
      register size_t nr_char;
 
      unsigned int nr_dsd = 0u;
@@ -132,7 +128,7 @@ unsigned int ENVI_RD_DSD( FILE *fd, const struct mph_envi mph,
  */
      do {
 	  if ( NADC_RD_PDS_HDR(fd, NUM_DSD_ITEMS, dsd_items) != mph.dsd_size )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, "DSD size" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, "DSD size" );
 /*
  * fill dsd_envi struct
  */

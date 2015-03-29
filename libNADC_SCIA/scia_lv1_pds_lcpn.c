@@ -102,8 +102,6 @@ unsigned int SCIA_LV1_RD_LCPN( FILE *fd, unsigned int num_dsd,
 			       const struct dsd_envi *dsd,
 			       struct lcpn_scia **lcpn_out )
 {
-     const char prognm[] = "SCIA_LV1_RD_LCPN";
-
      char         *lcpn_pntr, *lcpn_char = NULL;
      size_t       dsr_size, nr_byte;
      unsigned int indx_dsd;
@@ -119,7 +117,7 @@ unsigned int SCIA_LV1_RD_LCPN( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
 	  NADC_ERR_RESTORE();
           lcpn_out[0] = NULL;
@@ -134,12 +132,12 @@ unsigned int SCIA_LV1_RD_LCPN( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct lcpn_scia));
      }
      if ( (lcpn = lcpn_out[0]) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lcpn" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lcpn" );
 /*
  * allocate memory to temporary store data for output structure
  */
      if ( (lcpn_char = (char *) malloc( dsr_size )) == NULL ) 
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "lcpn_char" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lcpn_char" );
 /*
  * rewind/read input data file
  */
@@ -149,7 +147,7 @@ unsigned int SCIA_LV1_RD_LCPN( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( lcpn_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 /*
  * read data buffer to LCPN structure
  */
@@ -202,7 +200,7 @@ unsigned int SCIA_LV1_RD_LCPN( FILE *fd, unsigned int num_dsd,
  */
 	  if ( (size_t)(lcpn_pntr - lcpn_char) != dsr_size ) {
 	       free( lcpn_char );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_SIZE, dsd_name );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  }
 /*
  * byte swap data to local representation
@@ -238,7 +236,6 @@ unsigned int SCIA_LV1_RD_LCPN( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_LCPN( FILE *fd, unsigned int num_lcpn,
 		       const struct lcpn_scia *lcpn_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_LCPN";
      size_t nr_byte;
 
      struct lcpn_scia lcpn;
@@ -266,63 +263,63 @@ void SCIA_LV1_WR_LCPN( FILE *fd, unsigned int num_lcpn,
  * read LCPN structures to file
  */
 	  if ( fwrite( &lcpn.mjd.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 	  if ( fwrite( &lcpn.mjd.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &lcpn.mjd.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &lcpn.flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
 	  if ( fwrite( &lcpn.mjd_last.days, ENVI_INT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_INT;
 /*
  * BUG in the test dataset version 1.0
  */
 	  if ( fwrite( &lcpn.mjd_last.secnd, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &lcpn.mjd_last.musec, ENVI_UINT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UINT;
 	  if ( fwrite( &lcpn.orbit_phase, ENVI_FLOAT, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
 	  nr_byte = (IR_CHANNELS + PMD_NUMBER) * ENVI_FLOAT;
 	  if ( fwrite( lcpn.obm_pmd, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) (SCIENCE_PIXELS) * ENVI_FLOAT;
 	  if ( fwrite( lcpn.fpn, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( lcpn.fpn_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  if ( fwrite( lcpn.lc, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( lcpn.lc_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  if ( fwrite( lcpn.mean_noise, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  nr_byte = (size_t) (2 * PMD_NUMBER) * ENVI_FLOAT;
 	  if ( fwrite( lcpn.pmd_off, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 	  if ( fwrite( lcpn.pmd_off_error, nr_byte, 1, fd ) != 1 )
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_WR, "" );
+	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += nr_byte;
 
 	  lcpn_in++;

@@ -155,12 +155,11 @@ void Triangle( short trianglehalfwidth, short bcr_start, short bcr_end,
 
      float *kernel;
 
-     const char   prognm[] = "Triangle";
      const size_t TriangleWidth = (size_t) (2 * trianglehalfwidth + 1);
 
      kernel = (float *) malloc( TriangleWidth * sizeof( float ));
      if ( kernel == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "kernel" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "kernel" );
      ni = -trianglehalfwidth;
      do {
 	  kernel[trianglehalfwidth+ni] = 
@@ -264,19 +263,17 @@ void Apply_FPAnoise( const struct fcd_gome *fcd,
      short groundpixel, nr_intg, num, valid_indx;
      float avg_noise, scalefactor, sum;
      float *FPA_noise, *peltier;
-
-     const char prognm[] = "Apply_FPAnoise";
 /*
  * calucate FPA noise, which is an offset to the detector signals generated 
  * by switching the peltier cooler
  */
      FPA_noise = (float *) malloc( (size_t) nr_pcd * sizeof( float ));
      if ( FPA_noise == NULL ) 
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "FPA_noise" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "FPA_noise" );
      peltier = (float *) malloc( (size_t) nr_pcd * sizeof( float ));
      if ( peltier == NULL ) {
 	  free( FPA_noise );
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "peltier" );
+	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "peltier" );
      }
      nr = 0;
      do { 
@@ -328,8 +325,7 @@ void Apply_FPAnoise( const struct fcd_gome *fcd,
 	       scalefactor = fcd->scale_peltier[4];
 	       break;
 	  default:
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
-				"invalid integration time" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "invalid integration time" );
 	  }
 	  nr_intg = (short) (rec[nr].integration[0] / 1.5);
 	  sum = 0.f;
@@ -400,8 +396,6 @@ void Apply_StrayLightCorrection( short channel, const struct fcd_gome *fcd,
      /*@globals  nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack, rec@*/
 {
-     const char prognm[] = "Apply_StrayLightCorrection";
-
      register short nb, nc, ng, to_left, to_rght;
      register float *pntr, *pntr_data;
 
@@ -481,7 +475,7 @@ void Apply_StrayLightCorrection( short channel, const struct fcd_gome *fcd,
 	       Triangle( fcd->width_conv, bcr_start, 
 			 fcd->bcr[nband].end, ghost, conv_ghost );
 	       if ( IS_ERR_STAT_FATAL )
-	       	    NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL,
+	       	    NADC_RETURN_ERROR( NADC_ERR_FATAL,
 	       			       "Triangle returned fatal error" );
 /*
  * and subtract from detector data

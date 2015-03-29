@@ -48,8 +48,6 @@ static const char err_msg[] = "invalid number of function arguments";
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
 int IDL_STDCALL _SCIA_WR_H5_MEMCORR( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_WR_H5_MEMCORR";
-
      int     dimX, dimY;
      float   *memcorr;
 
@@ -60,7 +58,7 @@ int IDL_STDCALL _SCIA_WR_H5_MEMCORR( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 3 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      dimX = *(int *) argv[0];
      dimY = *(int *) argv[1];
      memcorr = (float *) argv[2];
@@ -68,7 +66,7 @@ int IDL_STDCALL _SCIA_WR_H5_MEMCORR( int argc, void *argv[] )
  * open output HDF5-file
  */
      file_id = H5Fcreate( mem_file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, mem_file );
+     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, mem_file );
 /*
  * write datasets
  */
@@ -93,8 +91,6 @@ int IDL_STDCALL _SCIA_WR_H5_MEMCORR( int argc, void *argv[] )
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_WR_H5_NLCORR";
-
      int     dimX, dimY;
      char    *CurveIndex;
      float   *nlcorr;
@@ -106,7 +102,7 @@ int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 4 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 4 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      dimX = *(int *) argv[0];
      dimY = *(int *) argv[1];
      CurveIndex = (char *) argv[2];
@@ -115,7 +111,7 @@ int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
  * open output HDF5-file
  */
      file_id = H5Fcreate( nl_file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, nl_file );
+     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, nl_file );
 /*
  * write datasets
  */
@@ -148,8 +144,6 @@ int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
 int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT( int argc, void *argv[] )
 {
-     const char prognm[] = "_SCIA_WR_H5_STRAYLIGHT";
-
      int     dimX, dimY;
      float   *grid_out, *grid_in, *strayCorr;
 
@@ -160,7 +154,7 @@ int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 5 ) NADC_GOTO_ERROR( prognm, NADC_ERR_PARAM, err_msg );
+     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
      dimX = *(int *) argv[0];
      dimY = *(int *) argv[1];
      grid_in  = (float *) argv[2];
@@ -170,7 +164,7 @@ int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT( int argc, void *argv[] )
  * open output HDF5-file
  */
      file_id = H5Fcreate( stray_fl, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( prognm, NADC_ERR_HDF_FILE, stray_fl );
+     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, stray_fl );
 /*
  * write datasets
  */

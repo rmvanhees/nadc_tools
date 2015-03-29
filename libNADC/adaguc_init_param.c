@@ -157,8 +157,6 @@ void Check_User_Option( FILE *stream, /*@notnull@*/ const char prognm[],
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
 {
-     const char prognm[] = "ADAGUC_INIT_PARAM";
-
      char   *cpntr;
      char   prog_master[SHORT_STRING_LENGTH];
      int    narg;
@@ -166,7 +164,7 @@ void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
  * check number of options
  */
      if ( argc == 0 || argv[0] == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, "none found!?!" );
+	  NADC_RETURN_ERROR( NADC_ERR_PARAM, "none found!?!" );
 /*
  * strip path to program
  */
@@ -210,7 +208,7 @@ void ADAGUC_INIT_PARAM( int argc, char *argv[], struct param_adaguc *param )
 	       if ( param->num_infiles < MAX_ADAGUC_INFILES ) {
 		    param->name_infiles[param->num_infiles++] = argv[narg];
 	       } else {
-		    NADC_RETURN_ERROR( prognm, NADC_ERR_PARAM, argv[narg] );
+		    NADC_RETURN_ERROR( NADC_ERR_PARAM, argv[narg] );
 	       }
 /*
  * process command-line options starting with one "-" (= standalone options)

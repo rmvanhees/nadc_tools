@@ -73,15 +73,22 @@ static unsigned short absOrbit;
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 /*++++++++++ function to display info-record information ++++++++++*/
 static
-void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
+void _SHOW_INFO_RECORDS( const char product[],
+			 unsigned int num_info, const struct mds0_info *info )
 {
      unsigned int ni = 0;
+
+     FILE *outfl;
+     char flname[SHORT_STRING_LENGTH];
 
      /* handle special cases gracefully */
      if ( num_info == 0 ) return;
 
+     (void) snprintf( flname, SHORT_STRING_LENGTH, "%s.info", product );
+     if ( (outfl = fopen( flname, "w" )) == NULL )
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, flname );
      do {
-	  (void) fprintf( stdout,
+	  (void) fprintf( outfl,
 			  "%9u %02hhu %02hhu %10u %4hu %5hu %5hu %3hhu %4hu %4hu\n",
 			  info->offset, info->packet_id, info->state_id,
 			  info->on_board_time, info->bcps,
@@ -89,17 +96,25 @@ void _SHOW_INFO_RECORDS( unsigned int num_info, const struct mds0_info *info )
 			  info->q.value,
 			  info->crc_errors, info->rs_errors );
      } while ( info++, ++ni < num_info );
+     (void) fclose( outfl );
 }
 
 /*++++++++++ function to display states-record information ++++++++++*/
 static
-void _SHOW_STATE_RECORDS( size_t num_state, const struct mds0_states *states )
+void _SHOW_STATE_RECORDS( const char product[],
+			  size_t num_state, const struct mds0_states *states )
 {
      size_t ns = 0;
+
+     FILE *outfl;
+     char flname[SHORT_STRING_LENGTH];
 
      /* handle special cases gracefully */
      if ( num_state == 0 ) return;
 
+     (void) snprintf( flname, SHORT_STRING_LENGTH, "%s.states", product );
+     if ( (outfl = fopen( flname, "w" )) == NULL )
+          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, flname );
      do {
 	  (void) fprintf( stdout,
 			  "%9u %02hhu %10u %5u %03hhu %5u %03hhu %5u %03hhu\n",
@@ -109,6 +124,7 @@ void _SHOW_STATE_RECORDS( size_t num_state, const struct mds0_states *states )
 			  states->num_det, states->q_det.value,
 			  states->num_pmd, states->q_pmd.value );
      } while ( states++, ++ns < num_state );
+     (void) fclose( outfl );
 }
 
 /*+++++++++++++++++++++++++
@@ -132,8 +148,6 @@ void _SHOW_STATE_RECORDS( size_t num_state, const struct mds0_states *states )
 static inline
 void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
 {
-    const char prognm[] = "_INFO_QSORT";
-
     register int  ii, ir, jj, kk, ll;
 
     int     *i_stack;
@@ -149,7 +163,7 @@ void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
     j_stack = 0;
     i_stack = (int *) malloc( PIX_STACK_SIZE * sizeof(int) );
     if ( i_stack == NULL )
-	 NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "i_stack" );
+	 NADC_RETURN_ERROR( NADC_ERR_ALLOC, "i_stack" );
     for (;;) {
         if ( ir-ll < 7 ) {
             for ( jj = ll+1; jj <= ir; jj++ ) {
@@ -200,7 +214,7 @@ void _INFO_QSORT( unsigned int dim, double *ref_arr, struct mds0_info *info )
 	    (void) memcpy( &info[jj-1], &info_tmp, type_size );
             j_stack += 2;
             if ( j_stack > PIX_STACK_SIZE )
-		 NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL,
+		 NADC_GOTO_ERROR( NADC_ERR_FATAL,
 				  "stack too small in pixel_qsort: aborting" );
 
             if ( (ir - ii + 1) >= (jj - ll) ) {
@@ -292,8 +306,6 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
      /*@modifies nadc_stat, nadc_err_stack, *states; @*/
      /*@globals  nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "_ASSIGN_INFO_STATES";
-
      register unsigned int ni  = 0;
 
      register size_t ns  = 0;
@@ -327,7 +339,7 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
      /* allocate output array */
      states = (struct mds0_states *) malloc( num * sizeof(struct mds0_states) );
      if ( (states_out[0] = states) == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_states" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_states" );
      
      /* fill output array */
      ni = 0u;
@@ -398,8 +410,6 @@ void _QCHECK_INFO_PARAMS( bool correct_info_rec,
 			  unsigned int num_info, struct mds0_info *info )
      /*@modifies info->q.value, info->packet_id; @*/
 {
-     //const char prognm[] = "_QCHECK_INFO_PARAMS";
-
      register unsigned int ni = 0;
 
      unsigned char state_id;
@@ -461,8 +471,6 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 				unsigned int num_info, struct mds0_info *info )
      /*@modifies info->q.value, info->state_id, info->on_board_time; @*/
 {
-     //const char prognm[] = "_CHECK_INFO_ON_BOARD_TIME";
-
      register int nb;
      
      register unsigned int ii, ni, nk;
@@ -590,8 +598,6 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 		       unsigned int num_info, struct mds0_info *info )
      /*@modifies info->q.value, info->bcps; @*/
 {
-     //const char prognm[] = "_CHECK_INFO_BCPS";
-
      register unsigned int ni = 0;
 
      register unsigned int nj, on_board_time;
@@ -664,8 +670,6 @@ void _CHECK_INFO_BCPS( bool correct_info_rec, unsigned char packet_id,
 static inline
 void _REPAIR_INFO_SORTED( unsigned int num_info, struct mds0_info *info )
 {
-     const char prognm[] = "_REPAIR_INFO_SORTED";
-
      register unsigned int ni = 0;
      
      double *on_board_time;
@@ -673,7 +677,7 @@ void _REPAIR_INFO_SORTED( unsigned int num_info, struct mds0_info *info )
      /* allocate memory */
      on_board_time = (double *) malloc( num_info * sizeof(double) );
      if ( on_board_time == NULL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "on_board_time" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "on_board_time" );
 
      /* initialize array on_board_time */
      do { 
@@ -703,8 +707,6 @@ static
 void _CHECK_INFO_SORTED( bool correct_info_rec,
 			 unsigned int num_info, struct mds0_info *info )
 {
-//     const char prognm[] = "_CHECK_INFO_SORTED";
-     
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
@@ -731,8 +733,6 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
 			 size_t num_state, struct mds0_states *states )
      /*@modifies states->q.value, states->info->q.value; @*/
 {
-     // const char prognm[] = "_CHECK_INFO_UNIQUE";
-
      const size_t sz_mds0_info = sizeof( struct mds0_info );
 
      register size_t       ns = 0;
@@ -860,8 +860,6 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      /*@modifies nadc_stat, nadc_err_stack, info->quality; @*/
      /*@globals  nadc_stat, nadc_err_stack@*/
 {
-     // const char prognm[] = "_SET_DET_DSR_QUALITY";
-
      register unsigned short nr;
 
      register struct mds0_info *info_pntr = info;
@@ -951,8 +949,6 @@ static
 void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 			 size_t num_state, struct mds0_states *states )
 {
-     const char prognm[] = "_MDS_INFO_WARNINGS";
-
      register size_t       ns = 0;
      register unsigned int ni;
 
@@ -994,7 +990,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_packet, "auxiliary", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].packet_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of state_id
@@ -1003,7 +999,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_state, "auxiliary", ns, ni, 
 				     info[ni].on_board_time,
 				     info[ni].state_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of_board_time
@@ -1012,7 +1008,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_time, "auxiliary", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].on_board_time );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of bcps
@@ -1021,7 +1017,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_bcps, "auxiliary", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].bcps );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // identified duplicated DSR
@@ -1029,7 +1025,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_duplicate, "auxiliary", ns, ni, 
 				     info[ni].state_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 	  }
 	  if ( states[ns].q_aux.flag.duplicates == 1 ) {
@@ -1037,14 +1033,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				msg_unique, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"auxiliary" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_aux.flag.sorted == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
 				msg_sorted, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"auxiliary" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 
 	  /* check Detector DSRs */
@@ -1056,7 +1052,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_packet, "detector", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].packet_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of state_id
@@ -1065,7 +1061,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_state, "detector", ns, ni, 
 				     info[ni].on_board_time,
 				     info[ni].state_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of_board_time
@@ -1074,7 +1070,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_time, "detector", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].on_board_time );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of bcps
@@ -1083,7 +1079,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_bcps, "detector", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].bcps );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // identified duplicated DSR
@@ -1091,7 +1087,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_duplicate, "detector", ns, ni, 
 				     info[ni].state_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // invalid DSR size
@@ -1100,7 +1096,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_dsr_sz, "detector", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].packet_length );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 	  }
 	  if ( states[ns].q_det.flag.too_short == 1 ) {
@@ -1110,7 +1106,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				states[ns].info_det[states[ns].num_det-1].bcps,
 				CLUSDEF_DURATION(states[ns].state_id, absOrbit),
 				"detector" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_det.flag.dsr_missing == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
@@ -1119,21 +1115,21 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				states[ns].num_det,
 				CLUSDEF_NUM_DET(states[ns].state_id, absOrbit),
 				"detector" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_det.flag.duplicates == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
 				msg_unique, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"detector" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_det.flag.sorted == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
 				msg_sorted, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"detector" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 
 	  /* check PMD DSRs */
@@ -1145,7 +1141,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_packet, "PMD", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].packet_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of state_id
@@ -1154,7 +1150,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_state, "PMD", ns, ni, 
 				     info[ni].on_board_time,
 				     info[ni].state_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of_board_time
@@ -1163,7 +1159,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_time, "PMD", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].on_board_time );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // fixed value(s) of bcps
@@ -1172,7 +1168,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_bcps, "PMD", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].bcps );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
 	       // identified duplicated DSR
@@ -1180,7 +1176,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
 				     msg_duplicate, "PMD", ns, ni, 
 				     info[ni].state_id );
-		    NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 	  }
 	  if ( states[ns].q_pmd.flag.duplicates == 1 ) {
@@ -1188,14 +1184,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				msg_unique, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"PMD" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_pmd.flag.sorted == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
 				msg_sorted, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				"PMD" );
-	       NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
      } while ( ++ns < num_state );
 }
@@ -1205,8 +1201,6 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 			     const struct dsd_envi *dsd, 
 			     struct mds0_states **states_out )
 {
-     const char prognm[] = "SCIA_LV0_RD_MDS_INFO";
-
      unsigned int   indx_dsd;
      unsigned int   num_info;
 
@@ -1239,7 +1233,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      /* get index to data set descriptor */
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_ABSENT ) {
-	  NADC_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_ERROR( NADC_ERR_PDS_RD, dsd_name );
 	  return 0u;
      }
 
@@ -1248,20 +1242,20 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      info = (struct mds0_info *) 
 	  malloc( (size_t) num_info * sizeof(struct mds0_info) );
      if ( info == NULL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "mds0_info" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_info" );
 
      /* extract info-records from input file */
      num_info = GET_SCIA_LV0_MDS_INFO( fd, &dsd[indx_dsd], info );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "GET_SCIA_LV0_MDS_INFO" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "GET_SCIA_LV0_MDS_INFO" );
      if ( num_info != dsd[indx_dsd].num_dsr ) {
 	  char msg[SHORT_STRING_LENGTH];
 	  (void) snprintf( msg, SHORT_STRING_LENGTH,
 			   "read error at DSR %u/%u",
 			   num_info+1, dsd[indx_dsd].num_dsr );
-	  NADC_ERROR( prognm, NADC_ERR_NONE, msg );
+	  NADC_ERROR( NADC_ERR_NONE, msg );
      }
-     if ( show_info_rec ) _SHOW_INFO_RECORDS( num_info, info );
+     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
 
      /*
       * - There is no need to check the size of DSRs, because the read should
@@ -1312,7 +1306,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "_ASSIGN_INFO_STATES(" );
+	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "_ASSIGN_INFO_STATES(" );
      states_out[0] = states;
      
      /* check for repeated DSR records in product */
@@ -1326,11 +1320,10 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 	       _SET_DET_DSR_QUALITY( absOrbit, &states[ns].q_det,
 				     states[ns].num_det, states[ns].info_det );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL,
-				     "_SET_DET_DSR_QUALITY" );
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "_DET_DSR_QUALITY" );
 	  } while ( ++ns < num_state );
      }
-     if ( show_info_rec ) _SHOW_STATE_RECORDS( num_state, states );
+     if ( show_info_rec ) _SHOW_STATE_RECORDS( mph.product, num_state, states );
      _MDS_INFO_WARNINGS( absOrbit, num_state, states );
 done:
      if ( info != NULL ) free( info );

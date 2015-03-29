@@ -64,8 +64,6 @@
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void NADC_FRESCO_DEL_GOME_ENTRY( PGconn *conn, const char *prodName )
 {
-     const char prognm[] = "NADC_FRESCO_DEL_GOME_ENTRY";
-
      char sql_query[SQL_STR_SIZE];
 
      PGresult *res;
@@ -80,7 +78,7 @@ void NADC_FRESCO_DEL_GOME_ENTRY( PGconn *conn, const char *prodName )
 /*      (void) fprintf( stderr, "%s\n", sql_query ); */
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 /*
  * remove entry from table "meta_fresco" and "tile_meta_fresco" (by cascade)
@@ -89,14 +87,12 @@ void NADC_FRESCO_DEL_GOME_ENTRY( PGconn *conn, const char *prodName )
 		      "delete from meta_fresco where name=\'%s\'", prodName );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 }
 
 void NADC_FRESCO_DEL_SCIA_ENTRY( PGconn *conn, const char *prodName )
 {
-     const char prognm[] = "NADC_FRESCO_DEL_SCIA_ENTRY";
-
      char sql_query[SQL_STR_SIZE];
 
      PGresult *res;
@@ -107,6 +103,6 @@ void NADC_FRESCO_DEL_SCIA_ENTRY( PGconn *conn, const char *prodName )
 		      "delete from meta_fresco where name=\'%s\'", prodName );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      PQclear( res );
 }

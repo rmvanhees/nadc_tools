@@ -143,8 +143,6 @@ static
 void initFileParam( const unsigned int calib_flag, FILE *fp, 
 		    struct file_rec *fileParam )
 {
-     const char prognm[] = "initFileParam";
-
      struct mph_envi   mph;
      struct sph1_scia  sph;
      struct sip_scia   sip;
@@ -159,7 +157,7 @@ void initFileParam( const unsigned int calib_flag, FILE *fp,
      fileParam->dsd = (struct dsd_envi *)
 	  malloc( (mph.num_dsd-1) * sizeof( struct dsd_envi ) );
      if ( fileParam->dsd == NULL )
-          NADC_RETURN_ERROR( prognm, NADC_ERR_ALLOC, "fileParam->dsd" );
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "fileParam->dsd" );
      fileParam->num_dsd = ENVI_RD_DSD( fp, mph, fileParam->dsd );
 /*
  * get scale factor for memory/non-linearity correction
@@ -179,12 +177,12 @@ void initFileParam( const unsigned int calib_flag, FILE *fp,
      } else if ( strcmp( mph.proc_stage, "B" ) == 0 ) {
 	  fileParam->memScale  = SCIA_MEM_SCALE_PATCH;
 	  fileParam->nlinScale = SCIA_NLIN_SCALE_PATCH;
-          NADC_ERROR( prognm, NADC_ERR_NONE,
+          NADC_ERROR( NADC_ERR_NONE,
                       "\n\tassume this is a SRON patched Sciamachy product" );
      } else {
 	  fileParam->memScale  = SCIA_MEM_SCALE_OLD;
 	  fileParam->nlinScale = SCIA_NLIN_SCALE_OLD;
-	  NADC_ERROR( prognm, NADC_ERR_NONE,
+	  NADC_ERROR( NADC_ERR_NONE,
 		    "\n\tassume this is a Sciamachy product (version <= 5.x)" );
      }
 /*
@@ -201,7 +199,7 @@ void initFileParam( const unsigned int calib_flag, FILE *fp,
 	       fileParam->sdmf_version = 24;
 	  else {
 	       fileParam->sdmf_version = 30;
-	       NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, 
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, 
 				  "Valid values for USE_SDMF_VERSION:"
 				  " 2.4, 3.0 or 3.1" );
 	  }
@@ -239,7 +237,7 @@ void initFileParam( const unsigned int calib_flag, FILE *fp,
  */
      (void) SCIA_LV1_RD_SIP( fp, fileParam->num_dsd, fileParam->dsd, &sip );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_PDS_RD, "SIP" );
+	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "SIP" );
      if ( (fileParam->calibFlag & DO_CALC_ERROR) != UINT_ZERO ) {
 	  fileParam->ppgError   = sip.ppg_error;
 	  fileParam->strayError = sip.stray_error;
@@ -271,8 +269,6 @@ void SCIA_LV1_CAL( FILE *fp,
 		   unsigned int calib_flag, const struct state1_scia state[],
 		   const struct mds1_scia *mds_1b, struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV1_CAL";
-
      register unsigned short num = 0;
 
      static struct wvlen_rec wvlen;
@@ -322,7 +318,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CORR_VIS_MEM) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_MEM( fileParam.memScale, state, mds_1b, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "MEM" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "MEM" );
      }
 /*
  * apply non-Linearity correction (chan 6-8)
@@ -330,7 +326,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CORR_IR_NLIN) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_NLIN( fileParam.nlinScale, state, mds_1b, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NLIN" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "NLIN" );
      }
 /*
  * apply Dark correction
@@ -343,7 +339,7 @@ void SCIA_LV1_CAL( FILE *fp,
 	  else
 	       SCIA_ATBD_CAL_DARK( &fileParam, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "DARK" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "DARK" );
      }
 /*
  * estimate measurement noise (channel 8)
@@ -351,7 +347,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_SRON_NOISE) != UINT_ZERO ) {
 	  SCIA_SRON_CAL_NOISE( &fileParam, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "NOISE" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "NOISE" );
      }
 /*
  * apply PPG Correction
@@ -362,7 +358,7 @@ void SCIA_LV1_CAL( FILE *fp,
 	  else
 	       SCIA_ATBD_CAL_PPG( &fileParam, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "PPG" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "PPG" );
      }
 /*
  * apply Etalon Correction
@@ -370,7 +366,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CORR_ETALON) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_ETALON( &fileParam, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "Etalon" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "Etalon" );
      }
 /*
  * apply Straylight Correction
@@ -378,7 +374,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CORR_STRAY) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_STRAY( fileParam.strayError, state, mds_1b, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "StrayLight" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "StrayLight" );
      }
 /*
  * calculate Precision Error on spectra
@@ -392,7 +388,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CALIB_WAVE) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_WAVE( wvlen, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "WAVE" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "WAVE" );
      }
 /*
  * apply Polarisation Correction
@@ -400,7 +396,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CORR_POL) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_POL( &fileParam, wvlen, state, mds_1b, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "POL" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "POL" );
      }
 /*
  * apply Radiance Sensitivity Correction
@@ -408,7 +404,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_CORR_RAD) != UINT_ZERO ) {
 	  SCIA_ATBD_CAL_RAD( &fileParam, wvlen, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "RAD" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "RAD" );
      }
 /*
  * covert Radiances to Reflectances
@@ -420,7 +416,7 @@ void SCIA_LV1_CAL( FILE *fp,
                SCIA_ATBD_CAL_REFL( &fileParam, state, mds_1c );
           }
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "REFL" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "REFL" );
      }
 /*
  * apply Bad Pixel Mask
@@ -431,7 +427,7 @@ void SCIA_LV1_CAL( FILE *fp,
 	  else
 	       SCIA_ATBD_FLAG_BDPM( &fileParam, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "BDPM" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "BDPM" );
      }
 /*
  * apply Transmission correction
@@ -439,7 +435,7 @@ void SCIA_LV1_CAL( FILE *fp,
      if ( (calib_flag & DO_SRON_TRANS) != UINT_ZERO ) {
 	  SCIA_SRON_CAL_TRANS( &fileParam, state, mds_1c );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, "TRANSMISSION" );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, "TRANSMISSION" );
      }
 done:
      fileParam.flagInitFile = FALSE;

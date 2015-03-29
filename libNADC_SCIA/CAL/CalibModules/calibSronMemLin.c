@@ -260,8 +260,6 @@ void Apply_nLinCorrSRON( const struct scia_nlincorr *nlcorr,
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 void SCIA_SRON_CAL_MEM( unsigned short num_mds, struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV0_CAL_MEM";
-
      register unsigned short num = 0u;     /* counter for number of clusters */
 
      struct scia_memcorr memcorr = {{0, 0}, NULL};
@@ -270,7 +268,7 @@ void SCIA_SRON_CAL_MEM( unsigned short num_mds, struct mds1c_scia *mds_1c )
  */
      SCIA_RD_H5_MEM( &memcorr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_RD, "SCIA_RD_H5_MEM" );
 /*
  * do actual memory correction
  */
@@ -284,8 +282,6 @@ void SCIA_SRON_CAL_MEM( unsigned short num_mds, struct mds1c_scia *mds_1c )
 /*--------------------------------------------------*/
 void SCIA_SRON_CAL_NLIN( unsigned short num_mds, struct mds1c_scia *mds_1c )
 {
-     const char prognm[] = "SCIA_LV0_CAL_NLIN";
-
      register unsigned short num = 0u;     /* counter for number of clusters */
      
      struct scia_nlincorr nlcorr = {{0, 0}, NULL, NULL};
@@ -294,7 +290,7 @@ void SCIA_SRON_CAL_NLIN( unsigned short num_mds, struct mds1c_scia *mds_1c )
  */
      SCIA_RD_H5_NLIN( &nlcorr );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
+	  NADC_RETURN_ERROR( NADC_ERR_HDF_RD, "SCIA_RD_H5_NLIN" );
 /*
  * do actual non-Linearity correction
  */

@@ -51,8 +51,6 @@
 void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
 			     const struct mds0_states *states )
 {
-     const char prognm[] = "SCIA_LV0_WR_ASCII_INFO";
-
      register unsigned int ni;
      register size_t       ns;
 
@@ -61,7 +59,7 @@ void SCIA_LV0_WR_ASCII_INFO( struct param_record param, size_t num_states,
      FILE *outfl = CRE_ASCII_File( param.outfile, "info" );
 
      if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE_CRE, param.outfile );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
 /*
  * write ASCII dump of INFO records
  */

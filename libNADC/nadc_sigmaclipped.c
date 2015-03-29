@@ -135,8 +135,6 @@ float _getMEDIAN( const size_t dim, const float *arr )
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/
 {
-     const char prognm[] = "_getMEDIAN";
-
      float med = 0.f;
      float *rbuff;
 
@@ -145,7 +143,7 @@ float _getMEDIAN( const size_t dim, const float *arr )
 
      /* initialize working buffer */
      rbuff = (float *) malloc( (dim+1) * sizeof(float) );
-     if ( rbuff == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "rbuff" );
+     if ( rbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
      rbuff[0] = 0;
      (void) memcpy( rbuff+1, arr, dim * sizeof(float) );
 
@@ -236,8 +234,6 @@ void _getMoment( size_t dim, const float *buff,
 size_t NADC_SIGMACLIPPED( const size_t dim, const float *arr, 
 			  /*@out@*/ float *mean, /*@out@*/ float *sdev )
 {
-     const char prognm[] = "NADC_SIGMACLIPPED";
-     
      register size_t ni;
 
      const float tmp_median = _getMEDIAN( dim, arr );
@@ -253,7 +249,7 @@ size_t NADC_SIGMACLIPPED( const size_t dim, const float *arr,
      if ( dim <= 1 || tmp_adev < FLT_EPSILON ) return 0;
 
      if ( (buff = (float *) malloc( dim * sizeof(float) )) == NULL ) 
-          NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "buff" );
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "buff" );
      
      /* calculate sigma-clipped mean and standard deviation */
      ni = 0;

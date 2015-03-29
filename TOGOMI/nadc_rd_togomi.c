@@ -131,8 +131,6 @@ void Read_TOGOMI_Header( const char *flname, struct togomi_hdr *hdr )
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, hdr@*/
 {
-     const char prognm[] = "Read_TOGOMI_Header";
-
      char  *cpntr, line[MAX_LINE_LENGTH];
 
      gzFile fp;
@@ -141,14 +139,14 @@ void Read_TOGOMI_Header( const char *flname, struct togomi_hdr *hdr )
  * open/read TOGOMI product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_RETURN_ERROR( NADC_ERR_FILE, flname );
      gzDirect = (gzdirect(fp) == 1) ? TRUE : FALSE;
 
      do {
 	  if ( gzeof ( fp ) == 1 ) break;
 	  if ( gzgets( fp, line, MAX_LINE_LENGTH ) == Z_NULL ) {
 	       if ( gzDirect ) break;
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, flname );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, flname );
 	  }
 	  hdr->file_size += strlen( line );
 
@@ -192,12 +190,12 @@ void Read_TOGOMI_Header( const char *flname, struct togomi_hdr *hdr )
 			 strtoul(cpntr+1, (char **) NULL, 10);
 	       }
 	       if ( hdr->numState == MAX_NUM_TOGOMI_STATES ) {
-		    NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, 
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, 
 				  "increase value for max_num_togomi_states" );
 	       }
 	       hdr->numState++;
 	  } else {
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FATAL, line );
+	       NADC_GOTO_ERROR( NADC_ERR_FATAL, line );
 	  }
      } while( TRUE );
      hdr->numProd = 1;            /* read a complete products without errors */
@@ -205,9 +203,9 @@ void Read_TOGOMI_Header( const char *flname, struct togomi_hdr *hdr )
      gzclose( fp );
 
      if ( hdr->numRec == 0u )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_WARN, "empty product" );
+	  NADC_RETURN_ERROR( NADC_ERR_WARN, "empty product" );
      if ( hdr->numState == 0u )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_FATAL, "outdated header" );
+	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "outdated header" );
 }
 
 /*+++++++++++++++++++++++++
@@ -229,8 +227,6 @@ unsigned int Read_TOGOMI_Records( const char *flname,
    /*@globals  errno, nadc_stat, nadc_err_stack;@*/
    /*@modifies errno, nadc_stat, nadc_err_stack, rec@*/
 {
-     const char prognm[] = "Read_TOGOMI_Records";
-
      char tmp_date[12], tmp_time[13], dateTime[DATE_STRING_LENGTH], 
 	  line[MAX_LINE_LENGTH];
 
@@ -246,7 +242,7 @@ unsigned int Read_TOGOMI_Records( const char *flname,
  * open/read TOGOMI product
  */
      if ( (fp = gzopen( flname, "r" )) == NULL ) {
-	  NADC_ERROR( prognm, NADC_ERR_FILE, flname );
+	  NADC_ERROR( NADC_ERR_FILE, flname );
 	  return 0;
      }
 /*
@@ -276,7 +272,7 @@ unsigned int Read_TOGOMI_Records( const char *flname,
 	  if ( numItems != NUM_COLUMNS ) {
 	       char msg[80];
 	       (void) snprintf( msg, 80, "incomplete record[%-u]\n", numRec );
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, msg );
+	       NADC_GOTO_ERROR( NADC_ERR_FILE_RD, msg );
 	  }
 	  (void) snprintf( dateTime, DATE_STRING_LENGTH,
 			   "%s %s", tmp_date, tmp_time );
@@ -305,8 +301,6 @@ done:
 unsigned int NADC_RD_TOGOMI( const char *flname, struct togomi_hdr *hdr,
 			     struct togomi_rec **togomi_out )
 {
-     const char prognm[] = "NADC_RD_TOGOMI";
-
      register unsigned short num;
 
      char  *cpntr, ctemp[SHORT_STRING_LENGTH];
@@ -341,21 +335,21 @@ unsigned int NADC_RD_TOGOMI( const char *flname, struct togomi_hdr *hdr,
  */
      Read_TOGOMI_Header( flname, hdr );
      if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, "corrupted header" );
+          NADC_GOTO_ERROR( NADC_ERR_FILE_RD, "corrupted header" );
      if ( hdr->numRec == 0 ) goto done;
 /*
  * allocate enough space to store all records
  */
      togomi = (struct togomi_rec *) 
 	  malloc( hdr->numRec * sizeof( struct togomi_rec ));
-     if ( togomi == NULL ) NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "togomi" );
+     if ( togomi == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "togomi" );
 /*
  * read data records
  */
      if ( Read_TOGOMI_Records( flname, togomi ) != hdr->numRec ) {
 	  free ( togomi );
 	  togomi_out[0] = NULL;
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_FILE_RD, 
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_RD, 
 			   "failed to read all records" );
      }
      Fill_TOGOMI_Rec_Meta( hdr, togomi );

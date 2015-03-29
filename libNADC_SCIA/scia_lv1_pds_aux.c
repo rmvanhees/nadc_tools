@@ -85,7 +85,6 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 
      struct mds1_aux *aux;
 
-     const char prognm[]   = "SCIA_LV1_RD_AUX";
      const char dsd_name[] = "AUXILIARY_PACKETS";
 /*
  * get index to data set descriptor
@@ -93,7 +92,7 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
      NADC_ERR_SAVE();
      indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, dsd_name );
+	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
      if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
           NADC_ERR_RESTORE();
           aux_out[0] = NULL;
@@ -104,7 +103,7 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct mds1_aux));
      }
      if ( (aux = aux_out[0]) == NULL )  
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_ALLOC, "aux" );
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "aux" );
 /*
  * rewind/read input data file
  */
@@ -114,12 +113,12 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( &aux->mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  if ( fread( &aux->flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
 	  SCIA_LV0_RD_LV1_AUX( fd, aux );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( prognm, NADC_ERR_PDS_RD, "MDS_AUX" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_AUX" );
 /*
  * byte swap data to local representation
  */
@@ -151,8 +150,6 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 void SCIA_LV1_WR_AUX( FILE *fd, unsigned int num_aux,
 		      const struct mds1_aux *aux_in )
 {
-     const char prognm[] = "SCIA_LV1_WR_AUX";
-
      struct mds1_aux aux;
 
      struct dsd_envi dsd = {
@@ -176,7 +173,7 @@ void SCIA_LV1_WR_AUX( FILE *fd, unsigned int num_aux,
 #endif
 	  dsd.size += SCIA_LV0_WR_LV1_AUX( fd, aux );
 	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR(prognm,NADC_ERR_FATAL,"SCIA_LV0_WR_LV1_AUX");
+	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "SCIA_LV0_WR_LV1_AUX" );
      } while ( aux_in++, ++dsd.num_dsr < num_aux );
 /*
  * update list of written DSD records

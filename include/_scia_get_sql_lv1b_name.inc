@@ -30,8 +30,6 @@ static
 void SCIA_GET_SQL_LV1B_NAME( unsigned int absOrbit, unsigned short fileCounter,
 			    /*@out@*/ char *l1b_product )
 {
-     const char prognm[] = "SCIA_GET_SQL_LV1B_NAME";
-
      PGconn *conn;
      PGresult *res;
 
@@ -45,13 +43,13 @@ void SCIA_GET_SQL_LV1B_NAME( unsigned int absOrbit, unsigned short fileCounter,
  */
      CONNECT_NADC_DB( &conn, "scia" );
      if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( prognm, NADC_ERR_SQL, "failed to connect" );
+	  NADC_RETURN_ERROR( NADC_ERR_SQL, "failed to connect" );
 
      (void) snprintf( sql_query, SQL_STR_SIZE, SQL_GET_L1B_NAME,
 		      absOrbit, fileCounter );
      res = PQexec( conn, sql_query );
      if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	  NADC_GOTO_ERROR( prognm, NADC_ERR_SQL, PQresultErrorMessage(res) );
+	  NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
      }
      if ( (nrow = PQntuples( res )) != 0 ) {
 	  (void) nadc_strlcpy( l1b_product, PQgetvalue(res,0,0), 
@@ -62,7 +60,7 @@ void SCIA_GET_SQL_LV1B_NAME( unsigned int absOrbit, unsigned short fileCounter,
 			   SQL_GET_L1B_NAME2, absOrbit );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-	       NADC_GOTO_ERROR(prognm, NADC_ERR_SQL, PQresultErrorMessage(res));
+	       NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
 
 	  if ( (nrow = PQntuples( res )) != 0 )
 	       (void) nadc_strlcpy( l1b_product, PQgetvalue(res,0,0), 
