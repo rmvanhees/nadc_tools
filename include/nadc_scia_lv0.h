@@ -55,18 +55,41 @@ extern "C" {
 enum scia_packet { SCIA_DET_PACKET = 1, SCIA_AUX_PACKET, SCIA_PMD_PACKET };
 
 /*
- * cluster definitions (hard-coded!), valid after orbit 4150 (??)
+ * Auxiliary Data Packet
+ * - ISP sensing time: struct mjd_envi                               [12 bytes]
+ * - Front End Processor (FEP): struct fep_hdr                       [20 bytes]
+ * - packet header: struct packet_hdr             [LV0_PACKET_HDR_LENGTH bytes]
+ * - data field header: struct data_hdr             [LV0_DATA_HDR_LENGTH bytes]
+ * - PMTC field header: struct pmtc_hdr             [LV0_PMTC_HDR_LENGTH bytes]
+ * - PMTC auxiliary frames         [NUM_LV0_AUX_PMTC_FRAME * struct pmtc_frame]
+ * |--- struct pmtc_frame                           [AUX_DATA_SRC_LENGTH bytes]
+ *
+ *
+ *
+ * Detector Data Packet
+ * - ISP sensing time: struct mjd_envi                               [12 bytes]
+ * - Front End Processor (FEP): struct fep_hdr                       [20 bytes]
+ * - packet header: struct packet_hdr             [LV0_PACKET_HDR_LENGTH bytes]
+ * - data field header: struct data_hdr             [LV0_DATA_HDR_LENGTH bytes]
+ * - channel data blocks                                             [variable]
+ * |--- channel data header: struct chan_hdr                         [16 bytes]
+ * |--- pixel data blocks: struct chan_src                           [variable]
+ *    |--- channel field header:                                     [20 bytes]
+ *    |--- pixel data                                                [variable]
+ *
+ *
+ *
+ * PMD Data Packet
+ * - ISP sensing time: struct mjd_envi                               [12 bytes]
+ * - Front End Processor (FEP): struct fep_hdr                       [20 bytes]
+ * - packet header: struct packet_hdr             [LV0_PACKET_HDR_LENGTH bytes]
+ * - data field header: struct data_hdr             [LV0_DATA_HDR_LENGTH bytes]
+ * - PMD data block                                 [PMD_DATA_SRC_LENGTH bytes]
+ * |--- unsigned short temp                                           [2 bytes]
+ * |--- PMD data packets                 [NUM_LV0_PMD_PACKET * struct pmd_data]
+ *      |--- struct pmd_data                                         [34 bytes]
  */
-struct clusdef_rec {
-     unsigned char  chanID;
-     unsigned char  clusID;
-     unsigned short start;
-     unsigned short length;
-};
 
-/*
- * used in "mds0_aux", "mds0_det" and "mds0_pmd"
- */
 struct fep_hdr
 {
      struct mjd_envi  gsrt;
@@ -75,9 +98,6 @@ struct fep_hdr
      unsigned short   rs_errs;
 };
 
-/*
- * used in "mds0_aux", "mds0_det" and "mds0_pmd"
- */
 struct packet_hdr
 {
      union {
@@ -94,9 +114,6 @@ struct packet_hdr
      unsigned short length;     
 };
 
-/*
- * used in "mds0_aux", "mds0_det" and "mds0_pmd"
- */
 struct data_hdr
 {
      unsigned char  category;
@@ -125,9 +142,6 @@ struct data_hdr
      unsigned int on_board_time;
 };
 
-/*
- * used in "mds0_aux" and "mds0_det"
- */
 struct pmtc_hdr
 {
      union {
@@ -333,19 +347,6 @@ struct chan_src
      unsigned char  *data;
 };
 
-#ifdef _HDF5_H
-struct h5_chan_src 
-{
-     unsigned char   cluster_id;
-     unsigned char   co_adding;
-     unsigned short  sync;
-     unsigned short  block_nr;
-     unsigned short  start;
-     unsigned short  length;
-     unsigned short  indx_data;
-};
-#endif
-
 struct det_src
 {
      struct chan_hdr hdr;
@@ -377,6 +378,16 @@ struct pmd_src
 {
      unsigned short temp;
      struct pmd_data packet[NUM_LV0_PMD_PACKET];
+};
+
+/*
+ * cluster definitions
+ */
+struct clusdef_rec {
+     unsigned char  chanID;
+     unsigned char  clusID;
+     unsigned short start;
+     unsigned short length;
 };
 
 /* +++++ SCIA level 0 PDS data structures +++++ */
@@ -423,7 +434,7 @@ struct mds0_info
 	       unsigned char bcps      : 1;
 	       unsigned char duplicate : 1;
 	       unsigned char dsr_size  : 1;
-	       unsigned char dumy7     : 1;
+	       unsigned char sync      : 1;
 	       unsigned char dumy8     : 1;
 	  } flag;
 	  unsigned char value;
@@ -434,7 +445,6 @@ struct mds0_info
      unsigned short  crc_errors;
      unsigned short  rs_errors;
      unsigned short  bcps;
-     unsigned short  isp_length;
      unsigned short  packet_length;
      unsigned int    on_board_time;
 };
@@ -446,8 +456,8 @@ union qstate_rec {
 	  unsigned char too_short   : 1;
 	  unsigned char dsr_missing : 1;
 	  unsigned char sorted      : 1;
+	  unsigned char sync        : 1;
 	  unsigned char crc         : 1;
-	  unsigned char dumy6 : 1;
 	  unsigned char dumy7 : 1;
 	  unsigned char dumy8 : 1;
      } flag;

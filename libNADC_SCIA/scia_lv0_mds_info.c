@@ -89,11 +89,10 @@ void _SHOW_INFO_RECORDS( const char product[],
           NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, flname );
      do {
 	  (void) fprintf( outfl,
-			  "%9u %02hhu %02hhu %10u %4hu %5hu %5hu %3hhu %4hu %4hu\n",
+			  "%9u %02hhu %02hhu %10u %4hu %5hu %3hhu %4hu %4hu\n",
 			  info->offset, info->packet_id, info->state_id,
 			  info->on_board_time, info->bcps,
-			  info->isp_length, info->packet_length,
-			  info->q.value,
+			  info->packet_length, info->q.value,
 			  info->crc_errors, info->rs_errors );
      } while ( info++, ++ni < num_info );
      (void) fclose( outfl );
@@ -116,7 +115,7 @@ void _SHOW_STATE_RECORDS( const char product[],
      if ( (outfl = fopen( flname, "w" )) == NULL )
           NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, flname );
      do {
-	  (void) fprintf( stdout,
+	  (void) fprintf( outfl,
 			  "%9u %02hhu %10u %5u %03hhu %5u %03hhu %5u %03hhu\n",
 			  states->offset, states->state_id, 
 			  states->on_board_time,
@@ -360,18 +359,24 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	  switch ( (int) info->packet_id ) {
 	  case ( SCIA_DET_PACKET ):
 	       states[ns].num_det++;
+	       if ( info->q.flag.sync == 1 )
+		    states[ns].q_det.flag.sync = 1;
 	       if ( offs_det > info->offset )
 		    states[ns].q_det.flag.sorted = 1;
 	       offs_det = info->offset;
 	       break;
 	  case ( SCIA_AUX_PACKET ):
 	       states[ns].num_aux++;
+	       if ( info->q.flag.sync == 1 )
+		    states[ns].q_aux.flag.sync = 1;
 	       if ( offs_aux > info->offset )
 		    states[ns].q_aux.flag.sorted = 1;
 	       offs_aux = info->offset;
 	       break;
 	  case ( SCIA_PMD_PACKET ):
 	       states[ns].num_pmd++;
+	       if ( info->q.flag.sync == 1 )
+		    states[ns].q_pmd.flag.sync = 1;
 	       if ( offs_pmd > info->offset )
 		    states[ns].q_pmd.flag.sorted = 1;
 	       offs_pmd = info->offset;
@@ -393,7 +398,7 @@ done:
 
 /*+++++++++++++++++++++++++
 .IDENTifer   _QCHECK_INFO_PARAMS
-.PURPOSE     quick  check of packet_id, state_id values
+.PURPOSE     quick check of state_id values
 .INPUT/OUTPUT
   call as   _QCHECK_INFO_PARAMS( correct_info_rec, num_info, info );
      input:  
@@ -408,7 +413,7 @@ done:
 static
 void _QCHECK_INFO_PARAMS( bool correct_info_rec,
 			  unsigned int num_info, struct mds0_info *info )
-     /*@modifies info->q.value, info->packet_id; @*/
+     /*@modifies info->q.value, info->state_id; @*/
 {
      register unsigned int ni = 0;
 
@@ -418,24 +423,6 @@ void _QCHECK_INFO_PARAMS( bool correct_info_rec,
      if ( num_info < 2 ) return;
 
      do {
-	  if ( info->packet_id > (unsigned char) 3 ) {
-	       info->q.flag.packet_id = 1;
-	       if ( correct_info_rec ) 
-		    info->packet_id &= (unsigned char) 3;
-	  }
-	  if ( info->packet_id == (unsigned char) 0 ) {
-	       info->q.flag.packet_id = 1;
-	       if ( correct_info_rec ) {
-		    if ( info->packet_length == 1659 ) {
-			 info->packet_id = SCIA_AUX_PACKET;
-		    } else if ( info->packet_length == 6813 ) {
-			 info->packet_id = SCIA_PMD_PACKET;
-		    } else {
-			 info->packet_id = SCIA_DET_PACKET;
-		    }
-	       }
-	  }
-
 	  if ( (state_id = info->state_id) > MAX_NUM_STATE ) {
 	       unsigned short ii = 7;
 
@@ -964,6 +951,8 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 	  = "\n#\tfixed %s DSR [%zd,%u] (state_id=%02hhu) - on_board_time to %u";
      const char msg_bcps[]
 	  = "\n#\tfixed %s DSR [%zd,%u] (state_id=%02hhu) - bcps to %hu";
+     const char msg_sync[]
+	  = "\n#\tcorrupted sync values in %s DSR [%zd,%u] (state_id=%02hhu)";
      const char msg_duplicate[]
 	  = "\n#\tduplicate %s DSR [%zd,%u] (state_id=%02hhu)";
      const char msg_dsr_sz[]
@@ -1017,6 +1006,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_bcps, "auxiliary", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].bcps );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
+	       }
+
+	       // corrupted sync value(s) found
+	       if ( info[ni].q.flag.sync == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_sync, "auxiliary", ns, ni, 
+				     info[ni].state_id );
 		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
@@ -1079,6 +1076,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     msg_bcps, "detector", ns, ni, 
 				     info[ni].state_id, 
 				     info[ni].bcps );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
+	       }
+
+	       // corrupted sync value(s) found
+	       if ( info[ni].q.flag.sync == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_sync, "detector", ns, ni, 
+				     info[ni].state_id );
 		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
@@ -1171,6 +1176,14 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
 
+	       // corrupted sync value(s) found
+	       if ( info[ni].q.flag.sync == 1 ) {
+		    (void) snprintf( msg, MAX_STRING_LENGTH,
+				     msg_sync, "PMD", ns, ni, 
+				     info[ni].state_id );
+		    NADC_ERROR( NADC_ERR_NONE, msg );
+	       }
+
 	       // identified duplicated DSR
 	       if ( info[ni].q.flag.duplicate == 1 ) {
 		    (void) snprintf( msg, MAX_STRING_LENGTH,
@@ -1259,8 +1272,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 
      /*
       * - There is no need to check the size of DSRs, because the read should
-      *   fail in GET_SCIA_LV0_MDS_INFO when the packet_length or isp_length 
-      *   is corrupted
+      *   fail in GET_SCIA_LV0_MDS_INFO when the packet_length is corrupted
       * - Complicating factor is that DSR's are not always sorted correctly
       *
       * - ToDo: 

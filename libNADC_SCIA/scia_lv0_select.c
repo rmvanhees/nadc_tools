@@ -191,19 +191,22 @@ size_t SCIA_LV0_SELECT_MDS_COMPLETE( const struct param_record *param,
 
 	  // if write_aux then check q_aux
 	  if ( param->write_aux == PARAM_SET ) {
-	       if ( states[indx[ni]].q_aux.flag.too_short == 1
+	       if ( states[indx[ni]].q_aux.flag.sync == 1
+		    || states[indx[ni]].q_aux.flag.too_short == 1
 		    || states[indx[ni]].q_aux.flag.dsr_missing == 1 )
 		    good_aux = FALSE;
 	  }
 	  // if write_det then check q_det
 	  if ( param->write_det == PARAM_SET ) {
-	       if ( states[indx[ni]].q_det.flag.too_short == 1
+	       if ( states[indx[ni]].q_det.flag.sync == 1
+		    || states[indx[ni]].q_det.flag.too_short == 1
 		    || states[indx[ni]].q_det.flag.dsr_missing == 1 )
 		    good_det = FALSE;
 	  }
 	  // if write_pmd then check q_pmd
 	  if ( param->write_pmd == PARAM_SET ) {
-	       if ( states[indx[ni]].q_pmd.flag.too_short == 1
+	       if ( states[indx[ni]].q_pmd.flag.sync == 1
+		    || states[indx[ni]].q_pmd.flag.too_short == 1
 		    || states[indx[ni]].q_pmd.flag.dsr_missing == 1 )
 		    good_pmd = FALSE;
 	  }

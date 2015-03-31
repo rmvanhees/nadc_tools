@@ -76,11 +76,18 @@
 unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd, 
 				    struct mds0_info *info )
 {
+     register unsigned int num_info = 0;
+
      register char *cpntr;
+
+     register unsigned short ii, jj;
+
      register struct mds0_info *info_pntr = info;
 
-     char          *mds_start, *mds_char = NULL;
-     unsigned int  num_info = 0;
+     char           *mds_char;
+     size_t         offs;
+     unsigned short pdh_length, isp_length;
+     unsigned short aux_sync, det_sync, pmd_sync;
 
      /* allocate memory to buffer source packages */
      if ( (mds_char = (char *) malloc( (size_t) dsd->size )) == NULL ) 
@@ -95,15 +102,14 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
      cpntr = mds_char;
      do {
 	  /* store byte offset w.r.t. begin of file */
-	  mds_start = cpntr;
 	  info_pntr->offset = (unsigned int) 
-	       (dsd->offset + (mds_start - mds_char));
+	       (dsd->offset + (cpntr - mds_char));
 	  info_pntr->q.value = 0;
 
 	  (void) memcpy( &info_pntr->mjd, cpntr, sizeof(struct mjd_envi) );
 	  cpntr += (3 * ENVI_UINT);
 	  cpntr += (3 * ENVI_UINT);  /* skip FEP mjd */
-	  (void) memcpy( &info_pntr->isp_length, cpntr, ENVI_USHRT );
+	  (void) memcpy( &isp_length, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;       /* skip DSR size */
 	  (void) memcpy( &info_pntr->crc_errors, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
@@ -114,7 +120,8 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 	  cpntr += ENVI_USHRT;       /* skip Packet sequence control */
 	  (void) memcpy( &info_pntr->packet_length, cpntr, ENVI_USHRT );
 	  cpntr += ENVI_USHRT;
-	  cpntr += ENVI_USHRT;       /* skip Packet Data header length */
+	  (void) memcpy( &pdh_length, cpntr, ENVI_USHRT );
+	  cpntr += ENVI_USHRT;       /* skip Packet data header length */
 	  (void) memcpy( &info_pntr->category, cpntr, ENVI_UCHAR );
 	  cpntr += ENVI_UCHAR;
 	  (void) memcpy( &info_pntr->state_id, cpntr, ENVI_UCHAR );
@@ -127,21 +134,60 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 	  cpntr += ENVI_UCHAR;
 	  cpntr += ENVI_UCHAR;       /* skip overfow flag */
 
+	  /* check package corruption */
+	  if ( info_pntr->packet_length != isp_length )
+	       break;
+
+	  /* check correctness of packet_id */
+	  if ( info_pntr->packet_id == 0 || info_pntr->packet_id > 3 ) {
+	       pdh_length = byte_swap_u16( pdh_length );
+	       isp_length = byte_swap_u16( isp_length );
+	       
+	       if ( pdh_length == 30 || isp_length == 1659 )
+		    info_pntr->packet_id = SCIA_AUX_PACKET;
+	       else if ( pdh_length == 12 || isp_length == 6813 ) {
+		    info_pntr->packet_id = SCIA_PMD_PACKET;
+	       } else {
+		    info_pntr->packet_id = SCIA_DET_PACKET;
+	       }
+	       info_pntr->q.flag.packet_id = 1;
+	  }
+	  
 	  /* read BCPS, different for AUX, DET and PMD */
 	  info_pntr->bcps = 0;
-	  if ( info_pntr->packet_id == SCIA_AUX_PACKET ) {
-	       size_t offs = LV0_PMTC_HDR_LENGTH + ENVI_USHRT;
+          if ( info_pntr->packet_id == SCIA_DET_PACKET ) {
+	       offs = DET_DATA_HDR_LENGTH - LV0_DATA_HDR_LENGTH;
+	       (void) memcpy( &det_sync, cpntr+offs, sizeof(short) );
+	       if ( det_sync != 0xAAAA && det_sync != 0 )
+		    info_pntr->q.flag.sync = 1;
+	       offs += 2 * ENVI_USHRT;
 	       (void) memcpy( &info_pntr->bcps, cpntr+offs, sizeof(short) );
-          } else if ( info_pntr->packet_id == SCIA_DET_PACKET ) {
-	       size_t offs = DET_DATA_HDR_LENGTH - LV0_DATA_HDR_LENGTH 
-		    + 2 * ENVI_USHRT;
+	  } else if ( info_pntr->packet_id == SCIA_AUX_PACKET ) {
+	       offs = LV0_PMTC_HDR_LENGTH + ENVI_USHRT;
 	       (void) memcpy( &info_pntr->bcps, cpntr+offs, sizeof(short) );
-	  } else if ( info_pntr->packet_id == SCIA_PMD_PACKET ) {
-	       size_t offs = 2 * (PMD_NUMBER + 1) * ENVI_USHRT;
+
+	       offs = LV0_PMTC_HDR_LENGTH;
+	       for ( ii = 0; ii < NUM_LV0_AUX_PMTC_FRAME; ii++ ) {
+		    for ( jj = 0; jj < NUM_LV0_AUX_BCP; jj++ ) {
+			 (void) memcpy( &aux_sync, cpntr+offs, sizeof(short) );
+			 if ( aux_sync != 0xDDDD && aux_sync != 0 )
+			      info_pntr->q.flag.sync = 1;
+			 offs += 20;
+		    }
+		    offs += 6;
+	       }
+	  } else {
+	       offs = 2 * (PMD_NUMBER + 1) * ENVI_USHRT;
 	       (void) memcpy( &info_pntr->bcps, cpntr+offs, sizeof(short) );
+	       offs = ENVI_USHRT;  // skip PMD temperature
+	       for ( ii = 0; ii < NUM_LV0_PMD_PACKET; ii++ ) {
+		    (void) memcpy( &pmd_sync, cpntr+offs, sizeof(short) );
+		    if ( pmd_sync != 0xEEEE && pmd_sync != 0 ) {
+			 info_pntr->q.flag.sync = 1;
+		    }
+		    offs += 34;
+	       }
           }
-	  if ( info_pntr->isp_length != info_pntr->packet_length )
-	       break;
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	  info_pntr->mjd.days      = byte_swap_32(  info_pntr->mjd.days );
@@ -151,7 +197,6 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 	  info_pntr->rs_errors     = byte_swap_u16( info_pntr->rs_errors );
 	  info_pntr->on_board_time = byte_swap_u32( info_pntr->on_board_time );
 	  info_pntr->bcps          = byte_swap_u16( info_pntr->bcps );
-	  info_pntr->isp_length    = byte_swap_u16( info_pntr->isp_length );
 	  info_pntr->packet_length = byte_swap_u16( info_pntr->packet_length );
 #endif
 	  /* move to the next MDS */
