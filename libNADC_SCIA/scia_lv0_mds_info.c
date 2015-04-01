@@ -280,11 +280,6 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
      }
      do {
 	  switch ( (int) info[ni].packet_id ) {
-	  case SCIA_DET_PACKET: 
-	       (void) memcpy( states->info_det+nd, info+ni, 
-			      sizeof(struct mds0_info) );
-	       nd++;
-	       break;
 	  case SCIA_AUX_PACKET:
 	       (void) memcpy( states->info_aux+na, info+ni, 
 			      sizeof(struct mds0_info) );
@@ -294,6 +289,11 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
 	       (void) memcpy( states->info_pmd+np, info+ni, 
 			      sizeof(struct mds0_info) );
 	       np++;
+	       break;
+	  default:               // SCIA_DET_PACKET
+	       (void) memcpy( states->info_det+nd, info+ni, 
+			      sizeof(struct mds0_info) );
+	       nd++;
 	       break;
 	  }
      } while ( ++ni < num_info );
@@ -357,14 +357,6 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	       (void) memset( states+ns, 0, sizeof(struct mds0_states) );
 	  }
 	  switch ( (int) info->packet_id ) {
-	  case ( SCIA_DET_PACKET ):
-	       states[ns].num_det++;
-	       if ( info->q.flag.sync == 1 )
-		    states[ns].q_det.flag.sync = 1;
-	       if ( offs_det > info->offset )
-		    states[ns].q_det.flag.sorted = 1;
-	       offs_det = info->offset;
-	       break;
 	  case ( SCIA_AUX_PACKET ):
 	       states[ns].num_aux++;
 	       if ( info->q.flag.sync == 1 )
@@ -381,9 +373,14 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 		    states[ns].q_pmd.flag.sorted = 1;
 	       offs_pmd = info->offset;
 	       break;
-	  default:
-	       (void) fprintf( stdout, "no valid packet ID[%u]: %hhu\n",
-			       ni, info->packet_id );
+	  default:                    // SCIA_DET_PACKET
+	       states[ns].num_det++;
+	       if ( info->q.flag.sync == 1 )
+		    states[ns].q_det.flag.sync = 1;
+	       if ( offs_det > info->offset )
+		    states[ns].q_det.flag.sorted = 1;
+	       offs_det = info->offset;
+	       break;
 	  }
      } while ( info++, num++, ++ni < num_info );
      
@@ -470,7 +467,8 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 	  unsigned short num;
 	  unsigned short num_det;
 	  unsigned int   on_board_time;
-	  unsigned int   range[2];
+	  unsigned int   i_mn;
+	  unsigned int   i_mx;
      } *key;
      
      /* handle special cases gracefully */
@@ -486,7 +484,7 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 	       if ( info[ni].state_id == key[nk].state_id
 		    && info[ni].on_board_time == key[nk].on_board_time ) {
 		    key[nk].num++;
-		    key[nk].range[1] = ni;
+		    key[nk].i_mx = ni;
 		    fnd_key = TRUE;
 		    break;
 	       }
@@ -495,23 +493,28 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 	       key[num_key].state_id = info[ni].state_id;
 	       key[num_key].on_board_time = info[ni].on_board_time;
 	       key[num_key].num = 1;
-	       key[num_key].num_det =
-		    CLUSDEF_NUM_DET( info[ni].state_id, absOrbit );
-	       key[num_key].range[0] = key[num_key].range[1] = ni;
+	       if ( info[ni].state_id > 0 )
+		    key[num_key].num_det =
+			 CLUSDEF_NUM_DET( info[ni].state_id, absOrbit );
+	       else
+		    key[num_key].num_det = 1;
+	       key[num_key].i_mn = key[num_key].i_mx = ni;
 	       num_key++;
 	  }
      }
 
      for ( nk = 0; nk < num_key; nk++ ) {
 	  /* skip small sub-sets */
-	  if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) continue;
+	  if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) 
+	       continue;
 	  
 	  for ( ni = 0; ni < num_key; ni++ ) {
 	       /* skip large or empty sub-sets */
-	       if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 ) continue;
+	       if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 ) 
+		    continue;
 	       
 	       if ( key[ni].on_board_time == key[nk].on_board_time ) {
-		    for ( ii = key[ni].range[0]; ii <= key[ni].range[1]; ii++ ) {
+		    for ( ii = key[ni].i_mn; ii <= key[ni].i_mx; ii++ ) {
 			 if ( info[ii].state_id == key[ni].state_id
 			      && info[ii].on_board_time == key[ni].on_board_time ) {
 			      info[ii].q.flag.state_id = 1;
@@ -519,10 +522,10 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 			      info[ii].state_id = key[nk].state_id;
 			 }
 		    }
-		    if ( key[ni].range[0] < key[nk].range[0] )
-			 key[nk].range[0] = key[ni].range[0];
-		    if ( key[ni].range[1] > key[nk].range[1] )
-			 key[nk].range[1] = key[ni].range[1];
+		    if ( key[ni].i_mn < key[nk].i_mn )
+			 key[nk].i_mn = key[ni].i_mn;
+		    if ( key[ni].i_mx > key[nk].i_mx )
+			 key[nk].i_mx = key[ni].i_mx;
 		    key[nk].num += key[ni].num;
 		    key[ni].num = 0;
 	       }
@@ -532,7 +535,8 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
      for ( nb = 1; nb <= 3; nb++ ) {
 	  for ( nk = 0; nk < num_key; nk++ ) {
 	       /* skip small sub-sets */
-	       if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) continue;
+	       if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) 
+		    continue;
 	       
 	       for ( ni = 0; ni < num_key; ni++ ) {
 		    unsigned int diff =
@@ -541,21 +545,22 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 			 key[nk].on_board_time - key[ni].on_board_time;
 
 		    /* skip large or empty sub-sets */
-		    if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 ) continue;
+		    if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 )
+			 continue;
 
 		    if ( key[ni].state_id == key[nk].state_id
 			 && __builtin_popcount(diff) == nb ) {
-			 for ( ii = key[ni].range[0]; ii <= key[ni].range[1]; ii++ ) {
+			 for ( ii = key[ni].i_mn; ii <= key[ni].i_mx; ii++ ) {
 			      if ( info[ii].on_board_time == key[ni].on_board_time ) {
 				   info[ii].q.flag.on_board_time = 1;
 				   if ( correct_info_rec )
 					info[ii].on_board_time = key[nk].on_board_time;
 			      }
 			 }
-			 if ( key[ni].range[0] < key[nk].range[0] )
-			      key[nk].range[0] = key[ni].range[0];
-			 if ( key[ni].range[1] > key[nk].range[1] )
-			      key[nk].range[1] = key[ni].range[1];
+			 if ( key[ni].i_mn < key[nk].i_mn )
+			      key[nk].i_mn = key[ni].i_mn;
+			 if ( key[ni].i_mx > key[nk].i_mx )
+			      key[nk].i_mx = key[ni].i_mx;
 			 key[nk].num += key[ni].num;
 			 key[ni].num = 0;
 		    }
