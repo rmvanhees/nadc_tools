@@ -422,6 +422,7 @@ void _QCHECK_INFO_PARAMS( bool correct_info_rec,
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
 
+     /* check value of State ID [1..70] */
      do {
 	  if ( (state_id = info->state_id) > MAX_NUM_STATE ) {
 	       unsigned short ii = 7;
@@ -1268,7 +1269,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 			   num_info+1, dsd[indx_dsd].num_dsr );
 	  NADC_ERROR( NADC_ERR_NONE, msg );
      }
-     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
+//     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
 
      /*
       * - There is no need to check the size of DSRs, because the read should
@@ -1314,6 +1315,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 
      /* sort info-records */
      _CHECK_INFO_SORTED( TRUE, num_info, info );
+     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
      
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );

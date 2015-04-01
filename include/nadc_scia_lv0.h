@@ -427,7 +427,7 @@ struct mds0_info
      struct mjd_envi mjd;
      unsigned int    offset;
      union {
-	  struct qinfo_bitfield {
+	  struct qinfo_bitfield {                 // increasing severity
 	       unsigned char packet_id : 1;
 	       unsigned char state_id  : 1;
 	       unsigned char on_board_time : 1;
@@ -451,11 +451,11 @@ struct mds0_info
 
 
 union qstate_rec {
-     struct qstate_bitfield {
+     struct qstate_bitfield {                     // increasing severity
 	  unsigned char duplicates  : 1;
+	  unsigned char sorted      : 1;
 	  unsigned char too_short   : 1;
 	  unsigned char dsr_missing : 1;
-	  unsigned char sorted      : 1;
 	  unsigned char sync        : 1;
 	  unsigned char crc         : 1;
 	  unsigned char dumy7 : 1;

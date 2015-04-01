@@ -134,9 +134,23 @@ unsigned int GET_SCIA_LV0_MDS_INFO( FILE *fd, const struct dsd_envi *dsd,
 	  cpntr += ENVI_UCHAR;
 	  cpntr += ENVI_UCHAR;       /* skip overfow flag */
 
+	  /* (void) fprintf( stderr, "%8u %2hhu %02hhu %4u %6u %6u %9ld %9u\n",  */
+	  /* 		  num_info, */
+	  /* 		  info_pntr->packet_id, info_pntr->state_id,		 */
+	  /* 		  byte_swap_u16(info_pntr->crc_errors), */
+	  /* 		  byte_swap_u16(info_pntr->packet_length), */
+	  /* 		  byte_swap_u16(isp_length), */
+	  /* 		  (cpntr - mds_char), dsd->size ); */
+	  
 	  /* check package corruption */
-	  if ( info_pntr->packet_length != isp_length )
+	  if ( info_pntr->packet_length == 0 ) {
+	       if ( isp_length != 0 )
+		    info_pntr->packet_length = isp_length;
+	       else
+		    break;
+	  } else if ( info_pntr->packet_length != isp_length ) {
 	       break;
+	  }
 
 	  /* check correctness of packet_id */
 	  if ( info_pntr->packet_id == 0 || info_pntr->packet_id > 3 ) {
