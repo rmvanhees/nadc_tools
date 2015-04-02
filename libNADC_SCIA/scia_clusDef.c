@@ -60,7 +60,7 @@ static struct scia_mtbl_rec {
      unsigned char  num_clus;
      unsigned char  indx_Clcon;
      unsigned short duration;
-     unsigned short num_info;
+     unsigned short num_det;
 } metaTable;
 
 #define NFIELDS_CLUS  9
@@ -178,14 +178,14 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
 	  HOFFSET(struct scia_mtbl_rec, num_clus),
 	  HOFFSET(struct scia_mtbl_rec, indx_Clcon),
 	  HOFFSET(struct scia_mtbl_rec, duration),
-	  HOFFSET(struct scia_mtbl_rec, num_info)
+	  HOFFSET(struct scia_mtbl_rec, num_det)
      };
      const size_t mtbl_sizes[NFIELDS_MTBL] = {
 	  sizeof( metaTable.orbit ),
 	  sizeof( metaTable.num_clus ),
 	  sizeof( metaTable.indx_Clcon ),
 	  sizeof( metaTable.duration ),
-	  sizeof( metaTable.num_info )
+	  sizeof( metaTable.num_det )
      };
 
      int     res = 0;
@@ -440,6 +440,28 @@ unsigned short CLUSDEF_DURATION( unsigned char stateID,
 
 /*+++++++++++++++++++++++++
 .IDENTifer   CLUSDEF_NUM_DET
+.PURPOSE     obtain number of detector DSR in state
+.INPUT/OUTPUT
+  call as   num_dsr = CLUSDEF_NUM_DET( stateID, absOrbit );
+     input:
+             unsigned char stateID       :  State ID
+	     unsigned short absOrbit     :  orbit number
+
+.RETURNS     number of detector DSR in state (unsigned short)
+.COMMENTS    none
+-------------------------*/
+unsigned short CLUSDEF_NUM_DET( unsigned char stateID, 
+				unsigned short absOrbit )
+       /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
+{
+     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
+	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     }
+     return metaTable.num_det;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   CLUSDEF_NUM_DET
 .PURPOSE     obtain number of DSR in state
 .INPUT/OUTPUT
   call as   num_dsr = CLUSDEF_NUM_DET( stateID, absOrbit );
@@ -450,14 +472,19 @@ unsigned short CLUSDEF_DURATION( unsigned char stateID,
 .RETURNS     number of DSR in state (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_NUM_DET( unsigned char stateID, 
+unsigned short CLUSDEF_NUM_DSR( unsigned char stateID, 
 				unsigned short absOrbit )
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
+     unsigned num_other;
+
      if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
 	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
      }
-     return metaTable.num_info;
+     num_other = metaTable.duration / (16 * 5)
+	  + ((metaTable.duration % (16 * 5)) == 0 ? 0 : 1);
+ 
+     return metaTable.num_det + 2 * num_other;
 }
 
 /*+++++++++++++++++++++++++

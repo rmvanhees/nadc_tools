@@ -465,7 +465,7 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
      struct key_rec {
 	  unsigned char  state_id;
 	  unsigned short num;
-	  unsigned short num_det;
+	  unsigned short num_dsr;
 	  unsigned int   on_board_time;
 	  unsigned int   i_mn;
 	  unsigned int   i_mx;
@@ -476,6 +476,13 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 
      key = (struct key_rec *) malloc( num_info * sizeof(struct key_rec) );
      
+     /*
+      * create a list of unique combinations of on_board_time and state_id
+      * - key->num:      number of DSR occurrences found
+      * - key->num_dsr:  number of DSR expected
+      * - key->i_mn:     smallest index to array info
+      * - key->i_mx:     largest index to array info
+      */
      num_key = 0;
      for ( ni = 0; ni < num_info; ni++ ) {
 	  bool fnd_key = FALSE;
@@ -494,48 +501,58 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 	       key[num_key].on_board_time = info[ni].on_board_time;
 	       key[num_key].num = 1;
 	       if ( info[ni].state_id > 0 )
-		    key[num_key].num_det =
-			 CLUSDEF_NUM_DET( info[ni].state_id, absOrbit );
+		    key[num_key].num_dsr =
+			 CLUSDEF_NUM_DSR( info[ni].state_id, absOrbit );
 	       else
-		    key[num_key].num_det = 1;
+		    key[num_key].num_dsr = 1;
 	       key[num_key].i_mn = key[num_key].i_mx = ni;
 	       num_key++;
 	  }
      }
 
+     /*
+      * try to correct state_id values
+      */
      for ( nk = 0; nk < num_key; nk++ ) {
-	  /* skip small sub-sets */
-	  if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) 
+	  unsigned short num_thres = 
+	       key[nk].num_dsr > 20 ? key[nk].num_dsr / 10 : 2;
+
+	  /* skip small sub-sets or complete sets */
+	  if ( key[nk].num >= key[nk].num_dsr || key[nk].num <= num_thres ) 
 	       continue;
 	  
 	  for ( ni = 0; ni < num_key; ni++ ) {
-	       /* skip large or empty sub-sets */
-	       if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 ) 
+	       if ( ni == nk || key[ni].num == 0
+		    || key[ni].on_board_time != key[nk].on_board_time )
 		    continue;
 	       
-	       if ( key[ni].on_board_time == key[nk].on_board_time ) {
-		    for ( ii = key[ni].i_mn; ii <= key[ni].i_mx; ii++ ) {
-			 if ( info[ii].state_id == key[ni].state_id
-			      && info[ii].on_board_time == key[ni].on_board_time ) {
-			      info[ii].q.flag.state_id = 1;
-			      if ( correct_info_rec )
+	       for ( ii = key[ni].i_mn; ii <= key[ni].i_mx; ii++ ) {
+		    if ( info[ii].state_id == key[ni].state_id
+			 && info[ii].on_board_time == key[ni].on_board_time ) {
+			 info[ii].q.flag.state_id = 1;
+			 if ( correct_info_rec )
 			      info[ii].state_id = key[nk].state_id;
-			 }
 		    }
-		    if ( key[ni].i_mn < key[nk].i_mn )
-			 key[nk].i_mn = key[ni].i_mn;
-		    if ( key[ni].i_mx > key[nk].i_mx )
-			 key[nk].i_mx = key[ni].i_mx;
-		    key[nk].num += key[ni].num;
-		    key[ni].num = 0;
 	       }
+	       if ( key[ni].i_mn < key[nk].i_mn )
+		    key[nk].i_mn = key[ni].i_mn;
+	       if ( key[ni].i_mx > key[nk].i_mx )
+		    key[nk].i_mx = key[ni].i_mx;
+	       key[nk].num += key[ni].num;
+	       key[ni].num = 0;
 	  }
      }
 
+     /*
+      * try to correct on_board_time values
+      */
      for ( nb = 1; nb <= 3; nb++ ) {
 	  for ( nk = 0; nk < num_key; nk++ ) {
-	       /* skip small sub-sets */
-	       if ( key[nk].num == 0 || key[nk].num <= key[nk].num_det/10 ) 
+	       unsigned short num_thres = 
+		    key[nk].num_dsr > 20 ? key[nk].num_dsr / 10 : 2;
+
+	       /* skip small sub-sets or complete sets */
+	       if ( key[nk].num >= key[nk].num_dsr || key[nk].num <= num_thres )
 		    continue;
 	       
 	       for ( ni = 0; ni < num_key; ni++ ) {
@@ -544,26 +561,24 @@ void _CHECK_INFO_ON_BOARD_TIME( bool correct_info_rec,
 			 key[ni].on_board_time - key[nk].on_board_time :
 			 key[nk].on_board_time - key[ni].on_board_time;
 
-		    /* skip large or empty sub-sets */
-		    if ( key[ni].num > 10 && key[ni].num > key[nk].num_det/10 )
+		    if ( ni == nk || key[ni].num == 0
+			 || key[ni].state_id != key[nk].state_id
+			 || __builtin_popcount(diff) > nb )
 			 continue;
 
-		    if ( key[ni].state_id == key[nk].state_id
-			 && __builtin_popcount(diff) == nb ) {
-			 for ( ii = key[ni].i_mn; ii <= key[ni].i_mx; ii++ ) {
-			      if ( info[ii].on_board_time == key[ni].on_board_time ) {
-				   info[ii].q.flag.on_board_time = 1;
-				   if ( correct_info_rec )
-					info[ii].on_board_time = key[nk].on_board_time;
-			      }
+		    for ( ii = key[ni].i_mn; ii <= key[ni].i_mx; ii++ ) {
+			 if ( info[ii].on_board_time == key[ni].on_board_time ) {
+			      info[ii].q.flag.on_board_time = 1;
+			      if ( correct_info_rec )
+				   info[ii].on_board_time = key[nk].on_board_time;
 			 }
-			 if ( key[ni].i_mn < key[nk].i_mn )
-			      key[nk].i_mn = key[ni].i_mn;
-			 if ( key[ni].i_mx > key[nk].i_mx )
-			      key[nk].i_mx = key[ni].i_mx;
-			 key[nk].num += key[ni].num;
-			 key[ni].num = 0;
 		    }
+		    if ( key[ni].i_mn < key[nk].i_mn )
+			 key[nk].i_mn = key[ni].i_mn;
+		    if ( key[ni].i_mx > key[nk].i_mx )
+			 key[nk].i_mx = key[ni].i_mx;
+		    key[nk].num += key[ni].num;
+		    key[ni].num = 0;
 	       }
 	  }
      }
@@ -865,9 +880,9 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      unsigned short duration = 0;
      unsigned short bcps_effective = 0;
      unsigned short size_ref;
-     unsigned short num_dsr_ref;
+     unsigned short num_det_ref;
 
-     const unsigned short num_dsr = (unsigned short) num_info;
+     const unsigned short num_det = (unsigned short) num_info;
 
      /* handle special cases gracefully */
      if ( num_info < 2 ) return;
@@ -900,9 +915,9 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 	  limb_scan = (((duration + 1) % 27) == 0) ? 27 : 67;
      } else
 	  limb_scan = 0;
-     num_dsr_ref = CLUSDEF_NUM_DET( state_id, absOrbit );
+     num_det_ref = CLUSDEF_NUM_DET( state_id, absOrbit );
      
-     for ( nr = 0; nr < num_dsr; nr++, info_pntr++ ) {
+     for ( nr = 0; nr < num_det; nr++, info_pntr++ ) {
 	  bcps_effective = info_pntr->bcps;
 	  if ( limb_flag ) {
 	       bcps_effective -= 
@@ -917,9 +932,9 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
      }
 
      /* check state */
-     if ( info[num_dsr-1].bcps != duration ) {
+     if ( info[num_det-1].bcps != duration ) {
 	  q_det->flag.too_short = 1;
-     } else if ( num_dsr != num_dsr_ref ) {
+     } else if ( num_det != num_det_ref ) {
 	  q_det->flag.dsr_missing = 1;
      } 
 }
@@ -1274,7 +1289,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 			   num_info+1, dsd[indx_dsd].num_dsr );
 	  NADC_ERROR( NADC_ERR_NONE, msg );
      }
-//     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
+     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
 
      /*
       * - There is no need to check the size of DSRs, because the read should
@@ -1320,7 +1335,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 
      /* sort info-records */
      _CHECK_INFO_SORTED( TRUE, num_info, info );
-     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
+//     if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
      
      /* combine info-records to states  */
      num_state = _ASSIGN_INFO_STATES( num_info, info, &states );

@@ -545,6 +545,7 @@ extern bool CLUSDEF_DB_EXISTS( void );
 extern bool CLUSDEF_MTBL_VALID( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_DURATION( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_NUM_DET( unsigned char, unsigned short );
+extern unsigned short CLUSDEF_NUM_DSR( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_INTG_MIN( unsigned char, unsigned short );
 extern unsigned short CLUSDEF_DSR_SIZE( unsigned char, 
 					unsigned short,
