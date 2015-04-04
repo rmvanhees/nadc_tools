@@ -1045,15 +1045,15 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
     output:  
             struct mds0_aux **aux  : Auxiliary MDS records
 
-.RETURNS     number of Auxiliary MDS read (unsigned int), 
+.RETURNS     number of Auxiliary MDS read (unsigned short), 
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
-			      unsigned int num_info, 
-			      struct mds0_aux **aux_out )
+unsigned short SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
+				unsigned short num_info, 
+				struct mds0_aux **aux_out )
 {
-     register unsigned int nr_aux = 0;
+     register unsigned short nr_aux = 0;
 
      struct mds0_aux *aux;
 
@@ -1105,16 +1105,16 @@ unsigned int SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
     output:  
             struct mds0_det **det   : Detector MDS records
 
-.RETURNS     number of Detector MDS read (unsigned int), 
+.RETURNS     number of Detector MDS read (unsigned short), 
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
-			      unsigned int num_info, 
-			      unsigned char chan_mask,
-			      struct mds0_det **det_out )
+unsigned short SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
+				unsigned short num_info, 
+				unsigned char chan_mask,
+				struct mds0_det **det_out )
 {
-     register unsigned int nr_det = 0;
+     register unsigned short nr_det = 0;
 
      struct mds0_det *det;
 
@@ -1187,15 +1187,15 @@ unsigned int SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
     output:  
             struct mds0_pmd **pmd  : PMD MDS records
 
-.RETURNS     number of PMD MDS read (unsigned int), 
+.RETURNS     number of PMD MDS read (unsigned short), 
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
-			      unsigned int num_info, 
-			      struct mds0_pmd **pmd_out )
+unsigned short SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
+				unsigned short num_info, 
+				struct mds0_pmd **pmd_out )
 {
-     register unsigned int nr_pmd = 0;
+     register unsigned short nr_pmd = 0;
 
      struct mds0_pmd *pmd;
 
@@ -1247,9 +1247,9 @@ unsigned int SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 .RETURNS     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV0_FREE_MDS_DET( unsigned int num_det, struct mds0_det *det )
+void SCIA_LV0_FREE_MDS_DET( unsigned short num_det, struct mds0_det *det )
 {
-     register unsigned int nd = 0;
+     register unsigned short nd = 0;
 
      if ( num_det == 0 ) return;
 

@@ -91,7 +91,8 @@ int main( int argc, char *argv[] )
      size_t num_state_all = 0;
      size_t num_state = 0;
 
-     unsigned int num, num_dsd;
+     unsigned short num;
+     unsigned int   num_dsd;
 
      FILE  *fd = NULL;
 #ifdef _WITH_SQL

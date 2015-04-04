@@ -116,9 +116,9 @@ void _SHOW_STATE_RECORDS( const char product[],
           NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, flname );
      do {
 	  (void) fprintf( outfl,
-			  "%9u %02hhu %10u %5u %03hhu %5u %03hhu %5u %03hhu\n",
+		       "%9u %02hhu %9u %5hu %5hu %3hhu %5hu %3hhu %5hu %3hhu\n",
 			  states->offset, states->state_id, 
-			  states->on_board_time,
+			  states->on_board_time, states->orbit,
 			  states->num_aux, states->q_aux.value,
 			  states->num_det, states->q_det.value,
 			  states->num_pmd, states->q_pmd.value );
@@ -257,13 +257,14 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
 {
      register unsigned int ni = 0;
      
-     unsigned int na = 0;
-     unsigned int nd = 0;
-     unsigned int np = 0;
+     unsigned short na = 0;
+     unsigned short nd = 0;
+     unsigned short np = 0;
 
      (void) memcpy( &states->mjd, &info->mjd, sizeof(struct mjd_envi) );
      states->category = info->category;
      states->state_id = info->state_id;
+     states->orbit    = absOrbit;
      states->on_board_time = info->on_board_time;
      states->offset   = info->offset;
      if ( states->num_aux > 0 ) {
@@ -280,6 +281,11 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
      }
      do {
 	  switch ( (int) info[ni].packet_id ) {
+	  case SCIA_DET_PACKET:
+	       (void) memcpy( states->info_det+nd, info+ni, 
+			      sizeof(struct mds0_info) );
+	       nd++;
+	       break;
 	  case SCIA_AUX_PACKET:
 	       (void) memcpy( states->info_aux+na, info+ni, 
 			      sizeof(struct mds0_info) );
@@ -290,13 +296,21 @@ void _FILL_STATES( unsigned int num_info, struct mds0_info *info,
 			      sizeof(struct mds0_info) );
 	       np++;
 	       break;
-	  default:               // SCIA_DET_PACKET
-	       (void) memcpy( states->info_det+nd, info+ni, 
-			      sizeof(struct mds0_info) );
-	       nd++;
-	       break;
 	  }
      } while ( ++ni < num_info );
+
+     if ( states->num_det > 0 ) {
+	  bool  flag;
+	  int   ibuff;
+	  float rbuff;
+
+	  size_t indx = states->num_det / 2;
+	  double jday = states->info_det[indx].mjd.days
+	       + states->info_det[indx].mjd.secnd / 86400.;
+
+	  GET_SCIA_ROE_INFO( FALSE, jday, &ibuff, &flag, &rbuff );
+	  if ( ibuff > 0 ) states->orbit = (unsigned short) ibuff;
+     }
 }
 
 static
@@ -307,19 +321,19 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 {
      register unsigned int ni  = 0;
 
-     register size_t ns  = 0;
+     register size_t ns;
      register size_t num = 0;
 
      size_t num_state = 0;
      unsigned int offs_aux = 0;
      unsigned int offs_det = 0;
      unsigned int offs_pmd = 0;
-     unsigned int on_board_time = info->on_board_time;
+     unsigned int on_board_time = 0;
 
      struct mds0_states *states = NULL;
      
      /* handle special cases gracefully */
-     if ( num_info == 0u ) goto done;
+     if ( num_info == 0 ) goto done;
 
      /* find number of states in product */
      for ( ni = 0; ni < num_info; ni++ ) {
@@ -329,66 +343,66 @@ size_t _ASSIGN_INFO_STATES( unsigned int num_info, struct mds0_info *info,
 	       num++;
 	  }
      }
-     num++;
-
-     /* handle special cases gracefully */
-     if ( num == 0 ) return 0;
      num_state = num;
 
      /* allocate output array */
-     states = (struct mds0_states *) malloc( num * sizeof(struct mds0_states) );
+     states = (struct mds0_states *) 
+	  malloc( num_state * sizeof(struct mds0_states) );
      if ( (states_out[0] = states) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_states" );
      
      /* fill output array */
-     ni = 0u;
+     ns = 0;
      num = 0;
      on_board_time = info->on_board_time;
      (void) memset( states, 0, sizeof(struct mds0_states) );
 
-     do {
-	  if ( on_board_time != info->on_board_time ) {
-	       if ( num > 3 ) {
-		    _FILL_STATES( num, info-num, states+ns );
-		    ns++;
+     for ( ni = 0; ni < num_info; ni++, info++ ) {
+	  if ( info->on_board_time > 0 ) {
+	       if ( on_board_time != info->on_board_time ) {
+		    if ( num > 2 ) {
+			 _FILL_STATES( num, info-num, states+ns );
+			 ns++;
+		    }
+		    num = 0;
+		    on_board_time = info->on_board_time;
+		    (void) memset( states+ns, 0, sizeof(struct mds0_states) );
 	       }
-	       num = 0;
-	       on_board_time = info->on_board_time;
-	       (void) memset( states+ns, 0, sizeof(struct mds0_states) );
+	       switch ( (int) info->packet_id ) {
+	       case SCIA_DET_PACKET:
+		    states[ns].num_det++;
+		    if ( info->q.flag.sync == 1 )
+			 states[ns].q_det.flag.sync = 1;
+		    if ( offs_det > info->offset )
+			 states[ns].q_det.flag.sorted = 1;
+		    offs_det = info->offset;
+		    break;
+	       case SCIA_AUX_PACKET:
+		    states[ns].num_aux++;
+		    if ( info->q.flag.sync == 1 )
+			 states[ns].q_aux.flag.sync = 1;
+		    if ( offs_aux > info->offset )
+			 states[ns].q_aux.flag.sorted = 1;
+		    offs_aux = info->offset;
+		    break;
+	       case SCIA_PMD_PACKET:
+		    states[ns].num_pmd++;
+		    if ( info->q.flag.sync == 1 )
+			 states[ns].q_pmd.flag.sync = 1;
+		    if ( offs_pmd > info->offset )
+			 states[ns].q_pmd.flag.sorted = 1;
+		    offs_pmd = info->offset;
+		    break;
+	       }
+	       num++;
 	  }
-	  switch ( (int) info->packet_id ) {
-	  case ( SCIA_AUX_PACKET ):
-	       states[ns].num_aux++;
-	       if ( info->q.flag.sync == 1 )
-		    states[ns].q_aux.flag.sync = 1;
-	       if ( offs_aux > info->offset )
-		    states[ns].q_aux.flag.sorted = 1;
-	       offs_aux = info->offset;
-	       break;
-	  case ( SCIA_PMD_PACKET ):
-	       states[ns].num_pmd++;
-	       if ( info->q.flag.sync == 1 )
-		    states[ns].q_pmd.flag.sync = 1;
-	       if ( offs_pmd > info->offset )
-		    states[ns].q_pmd.flag.sorted = 1;
-	       offs_pmd = info->offset;
-	       break;
-	  default:                    // SCIA_DET_PACKET
-	       states[ns].num_det++;
-	       if ( info->q.flag.sync == 1 )
-		    states[ns].q_det.flag.sync = 1;
-	       if ( offs_det > info->offset )
-		    states[ns].q_det.flag.sorted = 1;
-	       offs_det = info->offset;
-	       break;
-	  }
-     } while ( info++, num++, ++ni < num_info );
+     }
      
-     if ( num > 0 ) {
+     if ( num > 2 && on_board_time != 0 ) {
 	  _FILL_STATES( num, info-num, &states[ns] );
 	  ns++;
      }
-     num_state = ns;
+     return ns;
 done:
      return num_state;
 }
@@ -743,8 +757,8 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
 {
      const size_t sz_mds0_info = sizeof( struct mds0_info );
 
-     register size_t       ns = 0;
-     register unsigned int ni;
+     register size_t         ns = 0;
+     register unsigned short ni, num;
 
      struct mds0_info *info;
 
@@ -756,19 +770,11 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
 	  info = states[ns].info_aux;
 	  for ( ni = 1; ni < states[ns].num_aux; ni++ ) {
 	       if ( info[ni].bcps == info[ni-1].bcps ) {
-		    if ( info[ni-1].crc_errors > info[ni].crc_errors
-			 || info[ni-1].rs_errors > info[ni].rs_errors
-			 || info[ni-1].q.value > info[ni].q.value ) {
-			 info[ni-1].q.flag.duplicate = 1;
-		    } else {
-			 info[ni].q.flag.duplicate = 1;
-		    }
+		    info[ni].q.flag.duplicate = 1;
 	       }
 	  }
 	  if ( correct_info_rec ) {
-	       register unsigned int num = 0;
-
-	       for ( ni = 0; ni < states[ns].num_aux; ni++ ) {
+	       for ( num = ni = 0; ni < states[ns].num_aux; ni++ ) {
 		    if ( info[ni].q.flag.duplicate == 0 ) {
 			 if ( ni > num )
 			      (void) memcpy( info+num, info+ni, sz_mds0_info );
@@ -785,19 +791,11 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
 	  info = states[ns].info_det;
 	  for ( ni = 1; ni < states[ns].num_det; ni++ ) {
 	       if ( info[ni].bcps == info[ni-1].bcps ) {
-		    if ( info[ni-1].crc_errors > info[ni].crc_errors
-			 || info[ni-1].rs_errors > info[ni].rs_errors
-			 || info[ni-1].q.value > info[ni].q.value ) {
-			 info[ni-1].q.flag.duplicate = 1;
-		    } else {
-			 info[ni].q.flag.duplicate = 1;
-		    }
+		    info[ni].q.flag.duplicate = 1;
 	       }
 	  }
 	  if ( correct_info_rec ) {
-	       register unsigned int num = 0;
-	  
-	       for ( ni = 0; ni < states[ns].num_det; ni++ ) {
+	       for ( num = ni = 0; ni < states[ns].num_det; ni++ ) {
 	  	    if ( info[ni].q.flag.duplicate == 0 ) {
 	  		 if ( ni > num )
 	  		      (void) memcpy( info+num, info+ni, sz_mds0_info );
@@ -814,19 +812,11 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
 	  info = states[ns].info_pmd;
 	  for ( ni = 1; ni < states[ns].num_pmd; ni++ ) {
 	       if ( info[ni].bcps == info[ni-1].bcps ) {
-		    if ( info[ni-1].crc_errors > info[ni].crc_errors
-			 || info[ni-1].rs_errors > info[ni].rs_errors
-			 || info[ni-1].q.value > info[ni].q.value ) {
-			 info[ni-1].q.flag.duplicate = 1;
-		    } else {
-			 info[ni].q.flag.duplicate = 1;
-		    }
+		    info[ni].q.flag.duplicate = 1;
 	       }
 	  }
 	  if ( correct_info_rec ) {
-	       register unsigned int num = 0;
-	  
-	       for ( ni = 0; ni < states[ns].num_pmd; ni++ ) {
+	       for ( num = ni = 0; ni < states[ns].num_pmd; ni++ ) {
 		    if ( info[ni].q.flag.duplicate == 0 ) {
 			 if ( ni > num )
 			      (void) memcpy( info+num, info+ni, sz_mds0_info );
@@ -841,57 +831,46 @@ void _CHECK_INFO_UNIQUE( bool correct_info_rec,
      } while ( ++ns < num_state );
 }
 
-//
-// ToDo
-// * Checks voor AUX en PMD toevoegen (completeness, DSR size)
-// * mds0_states uitbreiden met CLcon informatie per state voor gebruik by lezen DET DSR
-//
-
 /*+++++++++++++++++++++++++
-.IDENTifer   _SET_INFO_QUALITY
+.IDENTifer   _SET_DET_INFO_QUALITY
 .PURPOSE     check quality of info-records using state definition database
 .INPUT/OUTPUT
-  call as   _SET_DET_DSR_QUALITY( absOrbit, q_det, num_info, info );
-     input:  
-            unsigned short absOrbit : orbit number
-	    union qstate_rec  d_det : DET quality
-            unsigned int   num_info : number of info records
+  call as   _SET_DET_DSR_QUALITY( states );
  in/output:  
-	    struct mds0_info *info  : structure holding info about MDS records
+	    struct mds0_states *states : info-records organized per states
 
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    static function
 -------------------------*/
 static
-void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
-			   unsigned int num_info, struct mds0_info *info )
-     /*@modifies nadc_stat, nadc_err_stack, info->quality; @*/
+void _SET_DET_DSR_QUALITY( struct mds0_states *states )
+     /*@modifies nadc_stat, nadc_err_stack, states->q_det, 
+       states->info_det.quality; @*/
      /*@globals  nadc_stat, nadc_err_stack@*/
 {
      register unsigned short nr;
 
-     register struct mds0_info *info_pntr = info;
-
      bool limb_flag = FALSE;
-
-     unsigned char  state_id = 0;
 
      unsigned short limb_scan = 0;
      unsigned short duration = 0;
      unsigned short bcps_effective = 0;
-     unsigned short size_ref;
+     unsigned short num_duplicate = 0;
      unsigned short num_det_ref;
+     unsigned short size_ref;
 
-     const unsigned short num_det = (unsigned short) num_info;
+     unsigned short num_det = states->num_det;
+     struct mds0_info *info_pntr = states->info_det;
 
      /* handle special cases gracefully */
-     if ( num_info < 2 ) return;
+     if ( num_det < 2 ) return;
 
-     /* check if entry in nadc_clusDef database is valid */
-     state_id = info_pntr->state_id;
-     if ( ! CLUSDEF_MTBL_VALID( state_id, absOrbit ) ) return;
+     /* use nadc_clusDef database as reference */
+     if ( ! CLUSDEF_MTBL_VALID( states->state_id, states->orbit ) ) return;
+     duration = CLUSDEF_DURATION( states->state_id, states->orbit );
+     num_det_ref = CLUSDEF_NUM_DET( states->state_id, states->orbit );
 
-     duration = CLUSDEF_DURATION( state_id, absOrbit );
+     /* limb profiles */
      limb_flag = ( info_pntr->category == 2
 		   || info_pntr->category == 26 
 		   || info_pntr->category == 27
@@ -915,7 +894,6 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 	  limb_scan = (((duration + 1) % 27) == 0) ? 27 : 67;
      } else
 	  limb_scan = 0;
-     num_det_ref = CLUSDEF_NUM_DET( state_id, absOrbit );
      
      for ( nr = 0; nr < num_det; nr++, info_pntr++ ) {
 	  bcps_effective = info_pntr->bcps;
@@ -923,29 +901,86 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 	       bcps_effective -= 
 		    (3 * (info_pntr->bcps / limb_scan) + 2);
 	  }
-
+	  
 	  /* perform check on size of data-package */
-	  size_ref = CLUSDEF_DSR_SIZE( state_id, absOrbit, bcps_effective );
-	  if ( size_ref > 0 && info_pntr->packet_length != size_ref ) {
+	  size_ref = CLUSDEF_DSR_SIZE( states->state_id, states->orbit,
+				       bcps_effective );
+	  if ( size_ref > 0 && info_pntr->packet_length != size_ref )
 	       info_pntr->q.flag.dsr_size = 1;
-	  }
+
+	  if ( info_pntr->q.flag.duplicate == 1 ) num_duplicate++;
      }
 
      /* check state */
-     if ( info[num_det-1].bcps != duration ) {
-	  q_det->flag.too_short = 1;
-     } else if ( num_det != num_det_ref ) {
-	  q_det->flag.dsr_missing = 1;
-     } 
+     if ( states->info_det[num_det-1].bcps != duration ) {
+	  states->q_det.flag.too_short = 1;
+     } else if ( (num_det - num_duplicate) != num_det_ref ) {
+	  states->q_det.flag.dsr_missing = 1;
+     }
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   _SET_AUX_INFO_QUALITY
+.PURPOSE     check quality of info-records using state definition database
+.INPUT/OUTPUT
+  call as   _SET_AUX_DSR_QUALITY( states );
+ in/output:  
+	    struct mds0_states *states : info-records organized per states
+
+.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    static function
+-------------------------*/
+static
+void _SET_AUX_DSR_QUALITY( struct mds0_states *states )
+     /*@modifies nadc_stat, nadc_err_stack, states->q_aux; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
+{
+     /* handle special cases gracefully */
+     if ( states->num_aux == 0 ) return;
+
+     /* use nadc_clusDef database as reference */
+     if ( ! CLUSDEF_MTBL_VALID( states->state_id, states->orbit ) ) return;
+
+     /* check state */
+     if ( states->num_aux < CLUSDEF_NUM_AUX(states->state_id, states->orbit) ) {
+	  states->q_aux.flag.dsr_missing = 1;
+     }
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   _SET_PMD_INFO_QUALITY
+.PURPOSE     check quality of info-records using state definition database
+.INPUT/OUTPUT
+  call as   _SET_PMD_DSR_QUALITY( states );
+ in/output:  
+	    struct mds0_states *states : info-records organized per states
+
+.RETURNS     nothing, error status passed by global variable ``nadc_stat''
+.COMMENTS    static function
+-------------------------*/
+static
+void _SET_PMD_DSR_QUALITY( struct mds0_states *states )
+     /*@modifies nadc_stat, nadc_err_stack, states->q_pmd; @*/
+     /*@globals  nadc_stat, nadc_err_stack@*/
+{
+     /* handle special cases gracefully */
+     if ( states->num_pmd == 0 ) return;
+
+     /* use nadc_clusDef database as reference */
+     if ( ! CLUSDEF_MTBL_VALID( states->state_id, states->orbit ) ) return;
+
+     /* check state */
+     if ( states->num_pmd < CLUSDEF_NUM_PMD(states->state_id, states->orbit) ) {
+	  states->q_pmd.flag.dsr_missing = 1;
+     }
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   _MDS_INFO_WARNINGS
 .PURPOSE     add warning to message error stack
 .INPUT/OUTPUT
-  call as   _MDS_INFO_WARNINGS( absOrbit, num_state, states );
+  call as   _MDS_INFO_WARNINGS( num_state, states );
      input:  
-            unsigned short absOrbit : orbit number
             size_t        num_state : number of info records
  in/output:  
 	    struct mds0_states *states : info-records organized per state
@@ -954,13 +989,12 @@ void _SET_DET_DSR_QUALITY( unsigned short absOrbit, union qstate_rec *q_det,
 .COMMENTS    static function
 -------------------------*/
 static
-void _MDS_INFO_WARNINGS( unsigned short absOrbit,
-			 size_t num_state, struct mds0_states *states )
+void _MDS_INFO_WARNINGS( size_t num_state, struct mds0_states *states )
 {
-     register size_t       ns = 0;
-     register unsigned int ni;
+     register size_t         ns = 0;
+     register unsigned short ni;
 
-     struct mds0_info *info = states[ns].info_det;
+     struct mds0_info *info;
 
      char msg[MAX_STRING_LENGTH];
 
@@ -981,7 +1015,7 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
      const char msg_duration[]
 	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - too short duration (%hu != %hu) in %s DSRs";
      const char msg_missing[]
-	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - incorrect number (%u != %u) of %s DSRs";
+	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - incorrect number (%hu != %hu) of %s DSRs";
      const char msg_unique[]
 	  = "\n#\tstate [%zd,%02hhu] (on_board_time=%u) - removed duplicated %s DSRs";
      const char msg_sorted[]
@@ -1045,6 +1079,16 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     info[ni].state_id );
 		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
+	  }
+	  if ( states[ns].q_aux.flag.dsr_missing == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_missing, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				states[ns].num_aux,
+				CLUSDEF_NUM_AUX(states[ns].state_id,
+						states[ns].orbit),
+				"Auxiliary" );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_aux.flag.duplicates == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
@@ -1130,7 +1174,8 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				msg_duration, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				states[ns].info_det[states[ns].num_det-1].bcps,
-				CLUSDEF_DURATION(states[ns].state_id, absOrbit),
+				CLUSDEF_DURATION( states[ns].state_id,
+						  states[ns].orbit ),
 				"detector" );
 	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
@@ -1139,7 +1184,8 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				msg_missing, ns, 
 				states[ns].state_id, states[ns].on_board_time,
 				states[ns].num_det,
-				CLUSDEF_NUM_DET(states[ns].state_id, absOrbit),
+				CLUSDEF_NUM_DET( states[ns].state_id,
+						 states[ns].orbit ),
 				"detector" );
 	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
@@ -1212,6 +1258,16 @@ void _MDS_INFO_WARNINGS( unsigned short absOrbit,
 				     info[ni].state_id );
 		    NADC_ERROR( NADC_ERR_NONE, msg );
 	       }
+	  }
+	  if ( states[ns].q_pmd.flag.dsr_missing == 1 ) {
+	       (void) snprintf( msg, MAX_STRING_LENGTH,
+				msg_missing, ns, 
+				states[ns].state_id, states[ns].on_board_time,
+				states[ns].num_pmd,
+				CLUSDEF_NUM_PMD( states[ns].state_id,
+						 states[ns].orbit),
+				"PMD" );
+	       NADC_ERROR( NADC_ERR_NONE, msg );
 	  }
 	  if ( states[ns].q_pmd.flag.duplicates == 1 ) {
 	       (void) snprintf( msg, MAX_STRING_LENGTH,
@@ -1342,7 +1398,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "_ASSIGN_INFO_STATES(" );
      states_out[0] = states;
-     
+
      /* check for repeated DSR records in product */
      _CHECK_INFO_UNIQUE( correct_info_rec, num_state, states );
 
@@ -1351,14 +1407,19 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 	  register size_t ns = 0;
 
 	  do {
-	       _SET_DET_DSR_QUALITY( absOrbit, &states[ns].q_det,
-				     states[ns].num_det, states[ns].info_det );
+	       _SET_AUX_DSR_QUALITY( states+ns );
 	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "_DET_DSR_QUALITY" );
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "_SET_AUX_DSR_QUALITY" );
+	       _SET_DET_DSR_QUALITY( states+ns );
+	       if ( IS_ERR_STAT_FATAL )
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "_SET_DET_DSR_QUALITY" );
+	       _SET_PMD_DSR_QUALITY( states+ns );
+	       if ( IS_ERR_STAT_FATAL )
+		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "_SET_PMD_DSR_QUALITY" );
 	  } while ( ++ns < num_state );
      }
      if ( show_info_rec ) _SHOW_STATE_RECORDS( mph.product, num_state, states );
-     _MDS_INFO_WARNINGS( absOrbit, num_state, states );
+     _MDS_INFO_WARNINGS( num_state, states );
 done:
      if ( info != NULL ) free( info );
      return num_state;

@@ -761,20 +761,20 @@ void SCIA_LV0_WR_ONE_PMD( FILE *fd, const struct mds0_info *info,
 .INPUT/OUTPUT
   call as   nr_aux = SCIA_LV0_WR_AUX( fd, info, num_info, aux );
      input:  
-            FILE   *fd             : (open) stream pointer
-	    struct mds0_info *info : structure holding info about MDS records
-	    unsigned int num_info  : number of indices to struct info
-            struct mds0_aux *aux   : Auxiliary MDS records
+            FILE   *fd              : (open) stream pointer
+	    struct mds0_info *info  : structure holding info about MDS records
+	    unsigned short num_info : number of indices to struct info
+            struct mds0_aux *aux    : Auxiliary MDS records
 
-.RETURNS     number of Auxiliary MDS write (unsigned int), 
+.RETURNS     number of Auxiliary MDS write (unsigned short), 
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_WR_AUX( FILE *fd, const struct mds0_info *info,
-			      unsigned int num_info, 
+unsigned short SCIA_LV0_WR_AUX( FILE *fd, const struct mds0_info *info,
+			      unsigned short num_info, 
 			      const struct mds0_aux *aux )
 {
-     register unsigned int nr_aux = 0;
+     register unsigned short nr_aux = 0;
 
      if ( num_info == 0 ) return 0u;
 /*
@@ -805,18 +805,18 @@ unsigned int SCIA_LV0_WR_AUX( FILE *fd, const struct mds0_info *info,
      input:  
             FILE   *fd              : (open) stream pointer
 	    struct mds0_info *info  : structure holding info about MDS records
-	    unsigned int num_info   : number of indices to struct info
+	    unsigned short num_info : number of indices to struct info
             struct mds0_det *det    : Detector MDS records
 
-.RETURNS     number of Detector MDS write (unsigned int), 
+.RETURNS     number of Detector MDS write (unsigned short), 
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_WR_DET( FILE *fd, const struct mds0_info *info,
-			      unsigned int num_info, 
+unsigned short SCIA_LV0_WR_DET( FILE *fd, const struct mds0_info *info,
+			      unsigned short num_info, 
 			      const struct mds0_det *det )
 {
-     register unsigned int nr_det = 0;
+     register unsigned short nr_det = 0;
 
 
      if ( num_info == 0 ) return 0u;
@@ -846,20 +846,20 @@ unsigned int SCIA_LV0_WR_DET( FILE *fd, const struct mds0_info *info,
 .INPUT/OUTPUT
   call as   nr_pmd = SCIA_LV0_WR_PMD( fd, info, num_info, &pmd );
      input:  
-            FILE   *fd             : (open) stream pointer
-	    struct mds0_info *info : structure holding info about MDS records
-	    unsigned int num_info  : number of indices to struct info
-            struct mds0_pmd *pmd   : PMD MDS records
+            FILE   *fd              : (open) stream pointer
+	    struct mds0_info *info  : structure holding info about MDS records
+	    unsigned short num_info : number of indices to struct info
+            struct mds0_pmd *pmd    : PMD MDS records
 
-.RETURNS     number of PMD MDS write (unsigned int), 
+.RETURNS     number of PMD MDS write (unsigned short), 
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *info,
-			      unsigned int num_info, 
+unsigned short SCIA_LV0_WR_PMD( FILE *fd, const struct mds0_info *info,
+			      unsigned short num_info, 
 			      const struct mds0_pmd *pmd )
 {
-     register unsigned int nr_pmd = 0;
+     register unsigned short nr_pmd = 0;
 
      if ( num_info == 0 ) return 0u;
 /*

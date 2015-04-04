@@ -378,16 +378,16 @@ void WRITE_PMD_SRC( FILE  *outfl, unsigned short nr,
      input:
              struct param_record param : struct holding user-defined settings
 	     unsigned int stateIndx    : Index of State in product
-	     unsigned int nr_aux       : number of Auxiliary MDS structures
+	     unsigned short nr_aux     : number of Auxiliary MDS structures
              struct mds0_aux *aux      : Level 0 Auxiliary MDS records
 
 .RETURNS     nothing (check global error status)
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV0_WR_ASCII_AUX( struct param_record param, unsigned int stateIndx,
-			    unsigned int nr_aux, const struct mds0_aux *aux )
+			    unsigned short nr_aux, const struct mds0_aux *aux )
 {
-     register unsigned int na;
+     register unsigned short na;
 
      char  ext_str[10];
 
@@ -420,16 +420,16 @@ void SCIA_LV0_WR_ASCII_AUX( struct param_record param, unsigned int stateIndx,
      input:
              struct param_record param : struct holding user-defined settings
 	     unsigned int stateIndx    : Index of State in product
-	     unsigned int nr_pmd       : number of PMD MDS structures
+	     unsigned short nr_pmd     : number of PMD MDS structures
              struct mds0_pmd *pmd      : Level 0 PMD MDS records
 
 .RETURNS     nothing (check global error status)
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV0_WR_ASCII_PMD( struct param_record param, unsigned int stateIndx,
-			    unsigned int nr_pmd, const struct mds0_pmd *pmd )
+			    unsigned short nr_pmd, const struct mds0_pmd *pmd )
 {
-     register unsigned int np;
+     register unsigned short np;
 
      char  ext_str[10];
 
@@ -461,17 +461,17 @@ void SCIA_LV0_WR_ASCII_PMD( struct param_record param, unsigned int stateIndx,
      input:
              struct param_record param : struct holding user-defined settings
 	     unsigned int stateIndx    : Index of State in product
-	     unsigned int nr_det       : number of Detector MDS structures
+	     unsigned short nr_det     : number of Detector MDS structures
              struct mds0_det *det      : Level 0 Detector MDS records
 
 .RETURNS     nothing (check global error status)
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV0_WR_ASCII_DET( struct param_record param, unsigned int stateIndx,
-			    unsigned int nr_det, const struct mds0_det *det )
+			    unsigned short nr_det, const struct mds0_det *det )
 {
-     register unsigned short n_chan, n_clus;
-     register unsigned int   nd, nr;
+     register unsigned short nd, n_chan, n_clus;
+     register unsigned int   nr;
 
      const unsigned int num_orbit = 8;
 

@@ -242,7 +242,7 @@ size_t SCIA_LV0_SELECT_MDS_CRC( const struct param_record *param,
      register size_t ns;
      register size_t nr = 0u;
 
-     register unsigned int ni;
+     register unsigned short ni;
 
      for ( ns = 0; ns < nr_indx; ns++ ) {
 	  register unsigned short crc_flag = 0;

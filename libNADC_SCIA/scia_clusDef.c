@@ -22,7 +22,8 @@
 .PURPOSE     Perform L0 detector DSR checks
 .COMMENTS    contains CLUSDEF_DB_EXISTS
                       CLUSDEF_INVALID, CLUSDEF_DSR_SIZE, CLUSDEF_INTG_MIN, 
-                      CLUSDEF_DURATION, CLUSDEF_NUM_DET, CLUSDEF_CLCON
+                      CLUSDEF_DURATION, CLUSDEF_NUM_DET, CLUSDEF_NUM_AUX, 
+		      CLUSDEF_NUM_PMD, CLUSDEF_CLCON
 
              Uses state/cluster configuration database nadc_clusDef.h5
 .ENVIRONment None
@@ -458,6 +459,58 @@ unsigned short CLUSDEF_NUM_DET( unsigned char stateID,
 	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
      }
      return metaTable.num_det;
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   CLUSDEF_NUM_AUX
+.PURPOSE     obtain number of auxiliary DSR in state
+.INPUT/OUTPUT
+  call as   num_dsr = CLUSDEF_NUM_AUX( stateID, absOrbit );
+     input:
+             unsigned char stateID       :  State ID
+	     unsigned short absOrbit     :  orbit number
+
+.RETURNS     number of auxiliary DSR in state (unsigned short)
+.COMMENTS    none
+-------------------------*/
+unsigned short CLUSDEF_NUM_AUX( unsigned char stateID, 
+				unsigned short absOrbit )
+       /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
+{
+     unsigned short extra = 0;
+     
+     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
+	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     }
+     if ( (metaTable.duration % (16 * 5)) > 0 ) extra = 1;
+
+     return (metaTable.duration / (16 * 5) + extra);
+}
+
+/*+++++++++++++++++++++++++
+.IDENTifer   CLUSDEF_NUM_PMD
+.PURPOSE     obtain number of PMD DSR in state
+.INPUT/OUTPUT
+  call as   num_dsr = CLUSDEF_NUM_PMD( stateID, absOrbit );
+     input:
+             unsigned char stateID       :  State ID
+	     unsigned short absOrbit     :  orbit number
+
+.RETURNS     number of PMD DSR in state (unsigned short)
+.COMMENTS    none
+-------------------------*/
+unsigned short CLUSDEF_NUM_PMD( unsigned char stateID, 
+				unsigned short absOrbit )
+       /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
+{
+     unsigned short extra = 0;
+     
+     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
+	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     }
+     if ( (metaTable.duration % (16 * 5)) > 0 ) extra = 1;
+
+     return (metaTable.duration / (16 * 5) + extra);
 }
 
 /*+++++++++++++++++++++++++

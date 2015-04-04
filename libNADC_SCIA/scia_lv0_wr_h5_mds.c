@@ -69,14 +69,14 @@
      input:  
              struct param_record param  : struct holding user-defined settings
 	     unsigned short state_index : index of State in product
-	     unsigned int nr_mds        : number of MDS structures	
+	     unsigned short nr_mds      : number of MDS structures	
              struct mds0_aux *aux       : Auxiliary MDS records
 
 .RETURNS     nothing
 .COMMENTS    nothing
 -------------------------*/
 void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index, 
-                         unsigned int nr_aux, const struct mds0_aux *aux )
+                         unsigned short nr_aux, const struct mds0_aux *aux )
 {
      hid_t   grpID = -1;
      hid_t   ptable;
@@ -280,7 +280,7 @@ void SCIA_LV0_WR_H5_AUX( struct param_record param, unsigned short state_index,
  	  if ( ptable == H5I_BADID )
 	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      }
-     if ( H5PTappend( ptable, nr_aux, aux ) < 0 )
+     if ( H5PTappend( ptable, (size_t) nr_aux, aux ) < 0 )
           NADC_ERROR( NADC_ERR_HDF_WR, tblName );
      (void) H5PTclose( ptable );
 /*
@@ -295,18 +295,18 @@ done:
 .IDENTifer   SCIA_LV0_WR_H5_PMD
 .PURPOSE     define and write PMD MDS records in HDF5 format
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_H5_PMD( param, state_index, nr_mds, pmd );
+  call as   SCIA_LV0_WR_H5_PMD( param, state_index, nr_pmd, pmd );
      input:  
              struct param_record param  : struct holding user-defined settings
 	     unsigned short state_index : index of State in product
-	     unsigned int nr_mds        : number of MDS structures	
+	     unsigned short nr_pmd      : number of MDS structures	
              struct mds0_pmd *pmd       : PMD MDS records
 
 .RETURNS     nothing
 .COMMENTS    nothing
 -------------------------*/
 void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index, 
-                         unsigned int nr_pmd, const struct mds0_pmd *pmd )
+                         unsigned short nr_pmd, const struct mds0_pmd *pmd )
 {
      char    grpName[11];
 
@@ -464,7 +464,7 @@ void SCIA_LV0_WR_H5_PMD( struct param_record param, unsigned short state_index,
  	  if ( ptable == H5I_BADID )
 	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      }
-     if ( H5PTappend( ptable, nr_pmd, pmd ) < 0 )
+     if ( H5PTappend( ptable, (size_t) nr_pmd, pmd ) < 0 )
           NADC_ERROR( NADC_ERR_HDF_WR, tblName );
      (void) H5PTclose( ptable );
 /*
@@ -479,18 +479,18 @@ done:
 .IDENTifer   SCIA_LV0_WR_H5_DET
 .PURPOSE     define and write Detector MDS records in HDF5 format
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_H5_DET( param, state_index, nr_mds, det );
+  call as   SCIA_LV0_WR_H5_DET( param, state_index, nr_det, det );
      input:  
              struct param_record param  : struct holding user-defined settings
 	     unsigned short state_index : index of State in product
-	     unsigned int nr_mds        : number of MDS structures	
+	     unsigned short nr_det      : number of MDS structures	
              struct mds0_det *det       : Detector MDS records
 
 .RETURNS     nothing
 .COMMENTS    nothing
 -------------------------*/
 void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
-                         unsigned int nr_det, const struct mds0_det *det )
+                         unsigned short nr_det, const struct mds0_det *det )
 {
      register unsigned short nc;
 
@@ -504,7 +504,7 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
      hid_t   subgrpID;
      hid_t   ptable;
 
-     register unsigned int   nd;
+     register unsigned short nd;
 
      struct clusdef_rec clusDef[MAX_CLUSTER];
 
@@ -664,7 +664,7 @@ void SCIA_LV0_WR_H5_DET( struct param_record param, unsigned short state_index,
  	  if ( ptable == H5I_BADID )
 	       NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, tblName );
      }
-     if ( H5PTappend( ptable, nr_det, det ) < 0 )
+     if ( H5PTappend( ptable, (size_t) nr_det, det ) < 0 )
           NADC_ERROR( NADC_ERR_HDF_WR, tblName );
      (void) H5PTclose( ptable );
 /*
