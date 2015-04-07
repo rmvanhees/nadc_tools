@@ -1346,6 +1346,7 @@ size_t SCIA_LV0_RD_MDS_INFO( FILE *fd, unsigned int num_dsd,
 	  NADC_ERROR( NADC_ERR_NONE, msg );
      }
      if ( show_info_rec ) _SHOW_INFO_RECORDS( mph.product, num_info, info );
+     if ( num_info < 3 ) goto done;
 
      /*
       * - There is no need to check the size of DSRs, because the read should
