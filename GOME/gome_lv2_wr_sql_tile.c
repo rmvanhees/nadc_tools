@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2007 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2007 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -263,7 +263,7 @@ void CorrectLongitudes( const float *lon_in, /*@out@*/ float *lon_out )
 
      do {
 	  lon_out[nc] = LON_IN_RANGE( lon_in[nc] );
-	  if ( abs(lon_out[0] - lon_out[nc]) > 270.f ) {
+	  if ( fabsf(lon_out[0] - lon_out[nc]) > 270.f ) {
 	       if ( lon_out[0] > 0.f )
 		    lon_out[nc] += 360.f;
 	       else
