@@ -47,6 +47,11 @@ extern "C" {
 #define MDS_ATTACHED   ((unsigned char) 0)
 
 /* general Sciamachy Instrument definitions */
+#define SCIA_LEVEL_0        1
+#define SCIA_LEVEL_1        2
+#define SCIA_LEVEL_2        4
+#define SCIA_PATCH_1        8
+
 #define SCIENCE_CHANNELS    8
 #define VIS_CHANNELS        5
 #define IR_CHANNELS         3

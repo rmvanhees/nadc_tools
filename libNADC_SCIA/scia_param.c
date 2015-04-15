@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -95,40 +95,39 @@ struct nadc_env {
      /*@null@*/ const char *opt_key;
      /*@null@*/ const char *opt_def_val;
      const char     *opt_desc;
-     unsigned short num_instr;
-     int            id_instr[3];
+     int            id_instr;
 } nadc_envs[] = {
      { "NO_INFO_CORRECTION", "=0/1", 
        "\t[expert] do not perform validity checks on L0 info-records", 
-       1, {SCIA_LEVEL_0, 0, 0} },
+       SCIA_LEVEL_0 },
      { "NO_CLUSTER_CORRECTION", "=0/1", 
        "\t[expert] do not perform validity checks on L0 detector DSRs", 
-       1, {SCIA_LEVEL_0, 0, 0} },
+       SCIA_LEVEL_0 },
      { "SCIA_CORR_PET", "=0/1", "\tcorrect PET of SCIA Epitaxx detectors",
-       1, {SCIA_LEVEL_1, 0, 0} },
+       SCIA_LEVEL_1 },
      { "SCIA_CORR_LOS", "=0/1", "\tremove jumps in azi/zen angles (geoN)",
-       1, {SCIA_LEVEL_1, 0, 0} },
+       SCIA_LEVEL_1 },
      { "SCIA_NLCORR_NEW", "=0/1", 
        "\tapply experimental non-linearity correction",
-       2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1) },
      { "SCIA_MFACTOR_DIR", "=<dirname>", 
        "give path to directory with auxiliary files for m-factor correction",
-       1, {SCIA_LEVEL_1, 0, 0} },
+       SCIA_LEVEL_1 },
      { "USE_SDMF_VERSION", "=<2.4|3.0|3.1|3.2>", 
        "use SDMF version, default 3.0",
-       1, {SCIA_LEVEL_1, 0} },
+       SCIA_LEVEL_1 },
      {"SCIA_TRANS_RANGE", "=min,max",
       "transmission average window, given as first and last pixel of channel 8",
-      1, {SCIA_LEVEL_1, 0, 0} },
+      SCIA_LEVEL_1 },
      {"SDMF24_SELECT", "=<NRT|CONS|HANS>",
       "SDMF2.4 select NRT or CONS based results or mimic approach Hans Schrijver",
-      1, {SCIA_LEVEL_1, 0, 0} },
-     { "SCIA_CORR_L1C", "=<filename>", "correct radiances in L1c product.\n"\
+      SCIA_LEVEL_1 },
+     { "SCIA_CORR_L1C", "=<filename>", "correct radiances in L1c product.\n" \
        "\t\tThe multiplication factors are read from an auxiliary file.\n"\
        "\t\tThis option only works in combination with option \"--cal=p\".",
-       1, {SCIA_LEVEL_1, 0, 0} },
+       SCIA_LEVEL_1 },
 /* last and empty entry */
-     { NULL, NULL, "", 0, {0, 0, 0} }
+     { NULL, NULL, "", 0 }
 };
 
 static const
@@ -136,136 +135,135 @@ struct nadc_opt {
      /*@null@*/ const char *opt_key;
      /*@null@*/ const char *opt_def_val;
      const char     *opt_desc;
-     unsigned short num_instr;
-     int            id_instr[4];
+     int            id_instr;
 } nadc_opts[] = {
 /* general options */
      { "-h", NULL, "\tdisplay this help and exit [default]",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-help", NULL, "display this help and exit",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-V", NULL, "\tdisplay version & copyright information and exit",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-show_param", NULL, 
        "display setting of command-line parameters; no output generated",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-version", NULL, "display version & copyright information and exit",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-verbose", NULL, "verbose mode",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-silent", NULL, "do not display any error messages",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-check", NULL, "check inputfile by reading it; no output generated",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-meta", NULL, 
        "write (in ASCII format) NL-SCIA-DC meta-Database information",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-pds_1b", NULL, "write output in Payload Data Segment 1B format",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-pds_1c", NULL, "write output in Payload Data Segment 1C format",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-ascii", NULL, "write output in ASCII format",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-hdf5", NULL, "write output in HDF5 format",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-compress", NULL, "compress data sets in HDF5-file",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
 #if defined(_WITH_SQL)
      { "-sql", NULL, "\twrite to PostgreSQL database",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-remove", NULL, "removes current entry of product from SQL database",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-replace", NULL, "replace current entry of product in SQL database",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
 #endif
 /* (G)ADS selection */
      { "-no_gads", NULL, "do not extract Global Annotation Data Sets (GDS)",
-       2, {SCIA_LEVEL_1, SCIA_LEVEL_2, 0, 0} },
+       (SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-no_ads", NULL, "do not extract Annotation Data Sets (ADS)",
-       2, {SCIA_LEVEL_1, SCIA_LEVEL_2, 0, 0} },
+       (SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-no_aux0", NULL, "do not extract Auxiliary ADS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-no_pmd0", NULL, "do not extract PMD ADS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
 /* MDS selection */
      { "-no_mds", NULL, "do not extract Measurement Data Sets (MDS)",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
      { "-aux", NULL, "\textract Auxiliary MDS records",
-       1, {SCIA_LEVEL_0, 0, 0, 0} },
+       SCIA_LEVEL_0 },
      { "-no_aux", NULL, "do not extract Auxiliary MDS records",
-       1, {SCIA_LEVEL_0, 0, 0, 0} },
+       SCIA_LEVEL_0 },
      { "-det", NULL, "\textract Detector MDS records",
-       1, {SCIA_LEVEL_0, 0, 0, 0} },
+       SCIA_LEVEL_0 },
      { "-no_det", NULL, "do not extract Detector MDS records",
-       1, {SCIA_LEVEL_0, 0, 0, 0} },
+       SCIA_LEVEL_0 },
      { "-pmd", NULL, "\textract PMD MDS records",
-       2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1) },
      { "-no_pmd", NULL, "do not extract PMD MDS records",
-       2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1) },
      { "-no_polV", NULL, "do not extract fractional polarisation MDS",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-limb", NULL, "extract Limb MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-no_limb", NULL, "do not extract Limb MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-moni", NULL, "extract Monitoring MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-no_moni", NULL, "do not extract Monitoring MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-nadir", NULL, "extract Nadir MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-no_nadir", NULL, "do not extract Nadir MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-occ", NULL, "\textract Occultation MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-no_occ", NULL, "do not extract Occultation MDS records",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "-cld", NULL, "\textract Cloud and Aerosol MDS records",
-       1, {SCIA_LEVEL_2, 0, 0, 0} },
+       SCIA_LEVEL_2 },
      { "-no_cld", NULL, "do not extract Cloud and Aerosol MDS records",
-       1, {SCIA_LEVEL_2, 0, 0, 0} },
+       SCIA_LEVEL_2 },
      { "-bias", NULL, "extract BIAS MDS records extracted (NRT)",
-       1, {SCIA_LEVEL_2, 0, 0, 0} },
+       SCIA_LEVEL_2 },
      { "-no_bias", NULL, "do not extract BIAS MDS records extracted (NRT)",
-       1, {SCIA_LEVEL_2, 0, 0, 0} },
+       SCIA_LEVEL_2 },
      { "-doas", NULL, "extract DOAS MDS records (NRT)",
-       1, {SCIA_LEVEL_2, 0, 0, 0} },
+       SCIA_LEVEL_2 },
      { "-no_doas", NULL, "do not extract DOAS MDS records extracted (NRT)",
-       1, {SCIA_LEVEL_2, 0, 0, 0} },
+       SCIA_LEVEL_2 },
 /* time selection */
      { "--time", " start_date start_time [end_date] end_time", 
        "apply time-window",
-       2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1) },
 /* geolocation selection */
      { "--region", "=lat_min,lat_max,lon_min,lon_max",
        "apply selection on geolocation", 
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
 /* category/state selection */
      { "--cat", "=[1,2,...,26]", "write MDS data of selected categories",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "--state", "=[1,2,...,70]", "write MDS data of selected states",
-       2, {SCIA_LEVEL_0, SCIA_LEVEL_1, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1) },
 /* spectral band/channel selection */
      { "--chan", "[=1,2,...,8]", "write data of selected spectral bands",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
      { "--clus", "=[1,2,...,64]", "write data of selected clusters",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
 /* MDS quality check */
      { "-no_qcheck", NULL, "no check on incomplete and/or corrupted states",
-       1, {SCIA_LEVEL_0, 0, 0, 0} },
+       SCIA_LEVEL_0 },
 /* MDS calibration */
      { "--cal", "[=0,1,...,9]", "apply spectral calibration, impies L1c format",
-       1, {SCIA_LEVEL_1, 0, 0, 0} },
+       SCIA_LEVEL_1 },
 /* keydata patch */
      { "-no_patch", NULL, "do not apply any patches on annotation datasets",
-       1, {SCIA_PATCH_1, 0, 0, 0} },
+       SCIA_PATCH_1 },
      { "--patch", "=[0,1,..,9]", "apply corrections on annotation datasets",
-       1, {SCIA_PATCH_1, 0, 0, 0} },
+       SCIA_PATCH_1 },
 /* name of output file */
      { "--output", "=<outfile>", "(default: <infile> + appropriate extension)",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (SCIA_LEVEL_0|SCIA_LEVEL_1|SCIA_LEVEL_2) },
 /* last and empty entry */
-     { NULL, NULL, "", 0, {0, 0, 0, 0} }
+     { NULL, NULL, "", 0 }
 };
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
@@ -287,11 +285,7 @@ void Show_All_Options( FILE *stream, int instrument,
 		       /*@notnull@*/ const char prognm[] )
      /*@modifies stream@*/
 {
-     register unsigned short ni;
-
      register short nr;
-
-     register bool  found;
 /*
  * intro of message
  */
@@ -301,14 +295,7 @@ void Show_All_Options( FILE *stream, int instrument,
  */
      nr = -1;
      while ( nadc_opts[++nr].opt_key != NULL ) {
-	  found = FALSE;
-	  for ( ni = 0; ni < nadc_opts[nr].num_instr; ni++ ) {
-	       if ( instrument == nadc_opts[nr].id_instr[ni] ) {
-		    found = TRUE;
-		    break;
-	       }
-	  }
-	  if ( found || nadc_opts[nr].num_instr == 0 ) {
+	  if ( (instrument & nadc_opts[nr].id_instr) != 0 ) {
 	       (void) fprintf( stream, "   %s", nadc_opts[nr].opt_key );
 	       if ( nadc_opts[nr].opt_def_val != NULL )
 		    (void) fprintf( stream, "%s", nadc_opts[nr].opt_def_val );
@@ -330,14 +317,7 @@ void Show_All_Options( FILE *stream, int instrument,
  */
      nr = -1;
      while ( nadc_envs[++nr].opt_key != NULL ) {
-	  found = FALSE;
-	  for ( ni = 0; ni < nadc_envs[nr].num_instr; ni++ ) {
-	       if ( instrument == nadc_envs[nr].id_instr[ni] ) {
-		    found = TRUE;
-		    break;
-	       }
-	  }
-	  if ( found || nadc_envs[nr].num_instr == 0 ) {
+	  if ( (instrument & nadc_envs[nr].id_instr) != 0 ) {
 	       if ( nr == 0 ) 
 		    (void) fprintf( stream, "\nEnvironment variables:\n" );
 	       (void) fprintf( stream, "   %s", nadc_envs[nr].opt_key );
@@ -370,8 +350,6 @@ void Check_User_Option( FILE *stream, int instrument,
 			/*@notnull@*/ const char argv[] )
      /*@modifies stream@*/
 {
-     register unsigned short ni;
-
      register short nr = -1;
 /*
  * catch the string with the name of the input file
@@ -384,12 +362,8 @@ void Check_User_Option( FILE *stream, int instrument,
 	  size_t opt_len = strlen( nadc_opts[nr].opt_key );
 
 	  if ( strncmp( argv, nadc_opts[nr].opt_key, opt_len ) == 0 ) {
-	       if ( nadc_opts[nr].num_instr == 0 ) return;
-
-	       for ( ni = 0; ni < nadc_opts[nr].num_instr; ni++ ) {
-		    if ( instrument == nadc_opts[nr].id_instr[ni] )
-			 return;
-	       }
+	       if ( (instrument & nadc_opts[nr].id_instr) != 0 )
+		    return;
 	  }
      }
      (void) fprintf( stream, 

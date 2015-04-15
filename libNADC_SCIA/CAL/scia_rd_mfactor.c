@@ -646,7 +646,7 @@ static int aux_dir_selector( const struct dirent *entry )
 }
 
 /* sorting for scandir */
-#if (__GNUC__ > 3 && __GNUC_MINOR__ > 3) || __clang__
+#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) || __clang__
 static int aux_dir_date_sort( const struct dirent **A, 
 			      const struct dirent **B )
 #else
@@ -654,7 +654,7 @@ static int aux_dir_date_sort( const void *A, const void *B )
 #endif
 {
      int cmp;
-#if (__GNUC__ > 3 && __GNUC_MINOR__ > 3) || __clang__
+#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) || __clang__
      const struct dirent *dirA = *A;
      const struct dirent *dirB = *B;
 #else

@@ -47,6 +47,9 @@ extern "C" {
 #define GOME_FLOAT  ((size_t) 4)
 #define GOME_DBLE   ((size_t) 8)
 
+#define GOME_LEVEL_1               1
+#define GOME_LEVEL_2               2
+
 #define LVL1_PIR_LENGTH           38
 #define LVL2_FSR_LENGTH           12
 #define LVL1_FSR_LENGTH           96

@@ -157,19 +157,6 @@ enum ctypes_def {
      FLT64_T 
 };
 
-/* definition of instruments and data levels */
-enum nadc_instr { 
-     ALL_INSTR = 0,
-     GOME_LEVEL_1,
-     GOME_LEVEL_2,
-     SCIA_LEVEL_0,
-     SCIA_LEVEL_1,
-     SCIA_LEVEL_2,
-     SCIA_PATCH_1,
-     MERIS_LEVEL_1,
-     MERIS_LEVEL_2
-};
-
 /* constants used by nadc_flip.c */
 enum nadc_flip {
      NADC_FLIP_NO = 0,

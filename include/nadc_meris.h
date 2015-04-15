@@ -38,6 +38,10 @@ extern "C" {
  */
 extern bool Use_Extern_Alloc;
 
+/* general Meris Instrument definitions */
+#define MERIS_LEVEL_1        1
+#define MERIS_LEVEL_2        2
+
 /*+++++ Macros +++++*/
 /*
  * MERIS PDS definitions

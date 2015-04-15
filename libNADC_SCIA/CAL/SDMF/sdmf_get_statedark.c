@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2010 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2010 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -286,7 +286,7 @@ bool SDMF_get_StateDark_24( unsigned char stateID, unsigned short channel,
 			 continue;
 		    /* avoid double entries */
 		    nj = 0;
-		    while ( nj < num && mrec[nj].Phase != mrec[num].Phase ) 
+		    while ( nj < (num+1) && mrec[nj].Phase != mrec[num].Phase ) 
 			 nj++;
 		    if ( nj == num ) num++;
 	       } else

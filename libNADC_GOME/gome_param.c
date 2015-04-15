@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2015 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -94,103 +94,102 @@ static const
 struct nadc_opt {
      /*@null@*/ const char *opt_key;
      /*@null@*/ const char *opt_def_val;
-     const char     *opt_desc;
-     unsigned short num_instr;
-     int            id_instr[4];
+     const char *opt_desc;
+     int        id_instr;
 } nadc_opts[] = {
 /* general options */
      { "-h", NULL, "\tdisplay this help and exit [default]",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-help", NULL, "display this help and exit",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-V", NULL, "\tdisplay version & copyright information and exit",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-version", NULL, "display version & copyright information and exit",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-show_param", NULL, 
        "display setting of command-line parameters; no output generated",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-verbose", NULL, "verbose mode",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-silent", NULL, "do not display any error messages",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-check", NULL, "check inputfile by reading it; no output generated",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-meta", NULL, 
        "write (in ASCII format) NL-SCIA-DC meta-Database information",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-ascii", NULL, "write output in ASCII format",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
 #if defined(_WITH_SQL)
      { "-sql", NULL, "\twrite to PostgreSQL database",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-remove", NULL, "removes current entry of product from SQL database",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-replace", NULL, "replace current entry of product in SQL database",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
 #endif
      { "-hdf5", NULL, "generate a HDF5 file",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "-compress", NULL, "compress data sets in HDF5-file",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
 /* MDS selection */
      { "-no_mds", NULL, "do not extract Measurement Data Sets (MDS)",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-no_pmd", NULL, "do not extract PMD MDS records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-no_pmd_geo", NULL, "do not extract PMD geolocations produced",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-moon", NULL, "extract Moon MDS records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-no_moon", NULL, "do not extract Moon MDS records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-sun", NULL, "\textract Sun MDS records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-no_sun", NULL, "do not extract Sun MDS records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
 /* spectral band/channel selection */
      { "-blind", NULL, "\twrite Blind pixel data records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "-stray", NULL, "\twrite Straylight data records",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "--band", "[=1a,1b,...,4]", "write data of selected spectral bands",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
 /* pixel selection */
      { "--ipixel", "=min:max:step,...", "pixel number (default: all)",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "--xpixel", "=[ECWB]", "select ground pixels (default: all)",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "--wave", "=min,max", "apply selection on wavelength range",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
 /* time selection */
      { "--time", " start_date start_time [end_date] end_time", 
        "apply time-window",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
 /* geolocation selection */
      { "--region", "=lat_min,lat_max,lon_min,lon_max",
        "apply selection on geolocation", 
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
 /* MDS calibration */
      { "--cal_nadir", "[=LAFSNPI]", "apply spectral calibration on Nadir MDS",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "--cal_moon", "[=LFSNI]", "\tapply spectral calibration on Moon MDS",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "--cal_sun", "[=LFSNBI]", "\tapply spectral calibration on Sun MDS",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
      { "--cal_pmd", "[=LPI]", "\tapply spectral calibration on PMD MDS",
-       1, {GOME_LEVEL_1, 0, 0, 0} },
+       GOME_LEVEL_1 },
 /* observation selection */
      { "--cloud", "=min,max", "apply selection on cloud cover",
-       1, {GOME_LEVEL_2, 0, 0, 0} },
+       GOME_LEVEL_2 },
      { "--sunz", "=min,max", "apply selection on Solar zenith angle",
-       1, {GOME_LEVEL_2, 0, 0, 0} },
+       GOME_LEVEL_2 },
 /* output filename */
      { "-o", " <outfile>", "(default: <infile> + appropriate extension)",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
      { "--output", "=<outfile>", "(default: <infile> + appropriate extension)",
-       0, {ALL_INSTR, 0, 0, 0} },
+       (GOME_LEVEL_1|GOME_LEVEL_2) },
 /* last and empty entry */
-     { NULL, NULL, "", 0, {0, 0, 0, 0} }
+     { NULL, NULL, "", 0 }
 };
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
@@ -212,11 +211,7 @@ void Show_All_Options( FILE *stream, int instrument,
 		       /*@notnull@*/ const char prognm[] )
      /*@modifies stream@*/
 {
-     register unsigned short ni;
-
      register short nr;
-
-     register bool  found;
 /*
  * intro of message
  */
@@ -226,14 +221,7 @@ void Show_All_Options( FILE *stream, int instrument,
  */
      nr = -1;
      while ( nadc_opts[++nr].opt_key != NULL ) {
-	  found = FALSE;
-	  for ( ni = 0; ni < nadc_opts[nr].num_instr; ni++ ) {
-	       if ( instrument == nadc_opts[nr].id_instr[ni] ) {
-		    found = TRUE;
-		    break;
-	       }
-	  }
-	  if ( found || nadc_opts[nr].num_instr == 0 ) {
+	  if ( (instrument & nadc_opts[nr].id_instr) != 0 ) {
 	       (void) fprintf( stream, "   %s", nadc_opts[nr].opt_key );
 	       if ( nadc_opts[nr].opt_def_val != NULL )
 		    (void) fprintf( stream, "%s", nadc_opts[nr].opt_def_val );
@@ -271,8 +259,6 @@ void Check_User_Option( FILE *stream, int instrument,
 			/*@notnull@*/ const char argv[] )
      /*@modifies stream@*/
 {
-     register unsigned short ni;
-
      register short nr = -1;
 /*
  * catch the string with the name of the input file
@@ -285,12 +271,8 @@ void Check_User_Option( FILE *stream, int instrument,
 	  size_t opt_len = strlen( nadc_opts[nr].opt_key );
 
 	  if ( strncmp( argv, nadc_opts[nr].opt_key, opt_len ) == 0 ) {
-	       if ( nadc_opts[nr].num_instr == 0 ) return;
-
-	       for ( ni = 0; ni < nadc_opts[nr].num_instr; ni++ ) {
-		    if ( instrument == nadc_opts[nr].id_instr[ni] )
-			 return;
-	       }
+	       if ( ((unsigned char) instrument & nadc_opts[nr].id_instr) != 0 )
+		    return;
 	  }
      }
      (void) fprintf( stream, 
