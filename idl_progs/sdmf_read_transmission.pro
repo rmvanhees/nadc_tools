@@ -41,7 +41,7 @@
 ;       pixelID:           pixel ID, named scalar, range [1...8192]
 ;
 ;       SDMF_H5_DB:        path to the SDMF Dark database
-;                            default: /SCIA/SDMF30/sdmf_transmission.h5
+;                            default: /SCIA/SDMF/3.0/sdmf_transmission.h5
 ;       SDMF_VERSION:      SDMF version <3.0>, default 3.0
 ;       status :           returns named variable with error flag (0 = ok)
 ;

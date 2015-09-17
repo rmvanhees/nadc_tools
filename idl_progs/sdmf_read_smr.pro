@@ -48,7 +48,7 @@
 ;                       Note: pixelID ignored when channel is set
 ;
 ;     SDMF_H5_DB:       path to the SDMF SMR database
-;                         default: /SCIA/SDMF30/sdmf_smr.h5
+;                         default: /SCIA/SDMF/3.0/sdmf_smr.h5
 ;     SDMF_VERSION:     SDMF version <3.0|3.1>, default 3.0
 ;     status :          returns named variable with error flag (0 = ok)
 ;

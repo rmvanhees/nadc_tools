@@ -41,7 +41,7 @@
 ;       pmdAdev:        adev of PMD darks (7 PMD's, high/low gain)
 ;
 ;       SDMF_H5_DB:     full path to sdmf_extract_dark database (>= v3.1)
-;                         default: /SCIA/SDMF31/sdmf_extract_dark.h5
+;                         default: /SCIA/SDMF/3.1/sdmf_extract_dark.h5
 ;
 ; PROCEDURE:
 ;	ToDo
