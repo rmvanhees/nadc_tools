@@ -264,11 +264,13 @@ void SCIA_LV0_MATCH_STATE( PGconn *conn, bool be_verbose,
 	  numMatch++;
 	  delayedBy += (stateRow[nr].dtMatch *= SecPerDay);
      }
-     if ( numChar >= (sql_long_sz-3) ) {
+     nc = numChar;
+     numChar += snprintf( sql_long_query+nc, sql_long_sz-nc, 
+			  "}\',\'%1s\')", mph->proc_stage );
+     if ( numChar >= sql_long_sz ) {
 	  free( sql_long_query ); free( stateRow );
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_long_query" );
      }
-     (void) strcat( sql_long_query, "}\')" );
      if ( be_verbose )
 	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_long_query, numChar );
      res = PQexec( conn, sql_long_query );
