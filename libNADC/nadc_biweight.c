@@ -266,7 +266,7 @@ size_t NADC_BIWEIGHT( const size_t dim, const float *arr,
 	       sum3 += dist * dist * wght * wght * wght * wght;
 	       sum4 += wght * (1 - 5 * uu);
 	  } while( ++ni < dim );
-	  *scale = (float)(sqrt((dim * sum3) / (sum4 * sum4)));
+	  *scale = (float)(sqrt(dim * sum3) / sum4);
      }
      return rejected;
 }
