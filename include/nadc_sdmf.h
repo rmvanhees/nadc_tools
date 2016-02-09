@@ -65,7 +65,7 @@ struct monitor_rec {
      char FileName[70];
 };
 
-/* structure definition of histograms (SDMF30)*/
+/* structure definition of histograms (SDMF v3.0)*/
 #define DIM_SDMF_HIST1    5
 #define MAX_NUM_HIST1     120
 struct sdmf_hist1_rec 
@@ -82,7 +82,7 @@ static const size_t sdmf_hist1_sizes[DIM_SDMF_HIST1] = {
      MAX_NUM_HIST1 * sizeof(short), MAX_NUM_HIST1 * sizeof(short)
 };
 
-/* structure definition of histograms (SDMF31)*/
+/* structure definition of histograms (SDMF v3.1)*/
 #define DIM_SDMF_HIST2   6
 #define MAX_NUM_HIST2    80
 struct sdmf_hist2_rec 
@@ -102,7 +102,7 @@ static const size_t sdmf_hist2_sizes[DIM_SDMF_HIST2] = {
      MAX_NUM_HIST2 * sizeof(short)
 };
 
-/* structure calibration-state database (SDMF30) */
+/* structure calibration-state database (SDMF v3.0) */
 #define DIM_MTBL_CALIB   20
 struct mtbl_calib_rec 
 {
@@ -137,7 +137,7 @@ static const size_t mtbl_calib_sizes[DIM_MTBL_CALIB] = {
      SCIENCE_CHANNELS * sizeof(float)
 };
 
-/* structure calibration-state database (SDMF31) */
+/* structure calibration-state database (SDMF v3.1) */
 #define DIM_MTBL_CALIB2   19
 struct mtbl_calib2_rec 
 {
@@ -200,7 +200,7 @@ struct geo_pt_rec {
      float  sunElev;
 };
 
-/* structure State-Dark database (SDMF30) */
+/* structure State-Dark database (SDMF v3.0) */
 #define DIM_MTBL_DARK   8
 struct mtbl_dark_rec 
 {
@@ -220,7 +220,7 @@ static const size_t mtbl_dark_sizes[DIM_MTBL_DARK] = {
      SCIENCE_CHANNELS * sizeof(float)
 };
 
-/* structure definitions Dark database (SDMF31) */
+/* structure definitions Dark database (SDMF 3.1) */
 #define DIM_MTBL_DARK2    9
 struct mtbl_dark2_rec 
 {
@@ -244,7 +244,7 @@ static const size_t mtbl_dark2_sizes[DIM_MTBL_DARK2] = {
      sizeof(float), SCIENCE_CHANNELS * sizeof(float)
 };
 
-/* structure definitions Simu-Dark database (SDMF30) */
+/* structure definitions Simu-Dark database (SDMF v3.0) */
 #define DIM_MTBL_SIMUDARK 13
 struct mtbl_simudark_rec
 {
@@ -270,7 +270,7 @@ static const size_t mtbl_simudark_sizes[DIM_MTBL_SIMUDARK] = {
      sizeof(float), sizeof(float)
 };
 
-/* structure definitions SMR database (SDMF31) */
+/* structure definitions SMR database (SDMF v3.1) */
 #define DIM_MTBL_SMR2    13
 struct mtbl_smr2_rec 
 {

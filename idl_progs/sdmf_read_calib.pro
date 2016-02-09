@@ -46,7 +46,7 @@
 ;       channelNoiseAdev: SDMF(v3.1)
 ;       channelTempAdev:  SDMF(v3.1)
 ;       SDMF_H5_DB:       path to the SDMF calibration states database
-;                           default: /SCIA/SDMF30/sdmf_extract_calib.h5
+;                           default: /SCIA/SDMF/3.0/sdmf_extract_calib.h5
 ;       SDMF_VERSION:     SDMF version <2.4.1|3.0|3.1>, default 3.0 
 ;       status :          returns named variable with error flag (0 = ok)
 ;

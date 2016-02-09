@@ -41,7 +41,7 @@
 ;
 ; KEYWORD PARAMETERS:
 ;       SDMF_H5_DB:     path to SDMF Sun measurements database
-;                         default: /SCIA/SDMF30/sdmf_extract_sun.h5
+;                         default: /SCIA/SDMF/3.0/sdmf_extract_sun.h5
 ;       status :        returns named variable with error flag (0 = ok)
 ;
 ; PROCEDURE:

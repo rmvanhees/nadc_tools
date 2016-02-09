@@ -40,7 +40,7 @@
 ; KEYWORD PARAMETERS:
 ;       use_neighbours: flag to enable looking for neighboring valid entries
 ;       SDMF_H5_DB:     path to the SDMF Dark database
-;                          default: /SCIA/SDMF30/sdmf_ppg.h5
+;                          default: /SCIA/SDMF/3.0/sdmf_ppg.h5
 ;       SDMF_VERSION:   SDMF version <3.0>, default 3.0
 ;       status :        returns named variable with error flag (0 = ok)
 ;

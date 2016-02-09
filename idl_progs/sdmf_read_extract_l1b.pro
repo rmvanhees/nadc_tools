@@ -55,7 +55,7 @@
 ;       pixelID:        pixel ID, named scalar, range [1...]
 ;
 ;       SDMF_H5_DB:     path to the SDMF calibration states database
-;                         default: /SCIA/SDMF31/sdmf_extract_l1b.h5
+;                         default: /SCIA/SDMF/3.1/sdmf_extract_l1b.h5
 ;       SDMF_VERSION:   SDMF version <3.1>, default 3.1
 ;       status :        returns named variable with error flag (0 = ok)
 ;

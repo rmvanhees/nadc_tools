@@ -41,7 +41,7 @@
 ;
 ; KEYWORD PARAMETERS:
 ;       SDMF_H5_DB:     path to the SDMF last-limb database
-;                         default: /SCIA/SDMF30/sdmf_extract_ll.h5
+;                         default: /SCIA/SDMF/3.0/sdmf_extract_ll.h5
 ;       status :        returns named variable with error flag (0 = ok)
 ;       nonlin :        flag to request non-linearity correction
 ;
