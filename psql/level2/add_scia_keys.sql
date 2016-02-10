@@ -1,0 +1,22 @@
+CREATE INDEX meta_fresco_absOrbit        ON meta_fresco (absOrbit);
+CREATE INDEX meta_fresco_dateTimeStart   ON meta_fresco (dateTimeStart);
+CREATE INDEX meta_imap_ch4_absOrbit      ON meta_imap_ch4 (absOrbit);
+CREATE INDEX meta_imap_ch4_dateTimeStart ON meta_imap_ch4 (dateTimeStart);
+CREATE INDEX meta_imap_hdo_absOrbit      ON meta_imap_hdo (absOrbit);
+CREATE INDEX meta_imap_hdo_dateTimeStart ON meta_imap_hdo (dateTimeStart);
+CREATE INDEX meta_imlm_co_absOrbit       ON meta_imlm_co (absOrbit);
+CREATE INDEX meta_imlm_co_dateTimeStart  ON meta_imlm_co (dateTimeStart);
+CREATE INDEX meta_imlm_h2o_absOrbit      ON meta_imlm_h2o (absOrbit);
+CREATE INDEX meta_imlm_h2o_dateTimeStart ON meta_imlm_h2o (dateTimeStart);
+CREATE INDEX meta_tosomi_absOrbit        ON meta_tosomi (absOrbit);
+CREATE INDEX meta_tosomi_dateTimeStart   ON meta_tosomi (dateTimeStart);
+
+CREATE INDEX tile_fresco_meta   ON tile_fresco (fk_meta);
+CREATE INDEX tile_imap_ch4_meta ON tile_imap_ch4 (fk_meta);
+CREATE INDEX tile_imap_hdo_meta ON tile_imap_hdo (fk_meta);
+CREATE INDEX tile_imlm_co_meta  ON tile_imlm_co (fk_meta);
+CREATE INDEX tile_imlm_h2o_meta ON tile_imlm_h2o (fk_meta);
+CREATE INDEX tile_tosomi_meta   ON tile_tosomi (fk_meta);
+CREATE INDEX tile_cld_ol_meta   ON tile_cld_ol (fk_meta);
+CREATE INDEX tile_no2_ol_meta   ON tile_no2_ol (fk_meta);
+CREATE INDEX tile_o3_ol_meta    ON tile_o3_ol (fk_meta);
