@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS auxiliary;
+
+DROP TABLE IF EXISTS stateinfo_meta__2P;
+DROP TABLE IF EXISTS stateinfo_meta__1P;
+DROP TABLE IF EXISTS stateinfo_meta__0P;
+
+DROP TABLE IF EXISTS meta__2P;
+DROP TABLE IF EXISTS meta__1P;
+DROP TABLE IF EXISTS meta__0P;
+
+DROP TABLE IF EXISTS stateinfo;
