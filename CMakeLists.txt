@@ -215,6 +215,7 @@ add_subdirectory (GOME)
 add_subdirectory (MERIS)
 add_subdirectory (SCIA)
 add_subdirectory (include)
+add_subdirectory (psql)
 ## only build when netCDF is available
 if (NETCDF_FOUND)
    add_subdirectory (IMAP)

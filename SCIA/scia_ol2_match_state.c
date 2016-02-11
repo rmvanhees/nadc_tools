@@ -211,8 +211,8 @@ void SCIA_OL2_MATCH_STATE( PGconn *conn, bool be_verbose,
  * insert all matches in table "stateinfo_meta__2P"
  */
      numChar = snprintf( sql_long_query, sql_long_sz, 
-			 "INSERT INTO stateinfo_meta__2P VALUES(%-d,%-d,\'{",
-			 meta_id, mph->proc_stage[0] );
+			 "INSERT INTO stateinfo_meta__2P VALUES(%-d,\'{",
+			 meta_id );
      numMatch = 0;
      delayedBy = 0.;
      for ( nr = 0; nr < numRows; nr++ ) {
