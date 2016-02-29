@@ -7,7 +7,7 @@
 #* Function   : inquire_scia_db
 #* Instrument : Sciamachy NRT/Offline products of level 0, 1b and 2
 #* Purpose    : perform a number of predefined database queries
-#* Usage      : inquire_scia_db [-h] [--dump] [--debug] {name,type} ...
+#* Usage      : inquire_scia_db [-h] [--debug] {name,type} ...
 #*
 #*   Subcommand "name" : selection on product name:
 #*     optional arguments:
@@ -259,9 +259,10 @@ def get_product_by_type( args ):
     if where_state == []:
         state_where = ''
     else:
-        state_where = ''
+        state_where = 'WHERE '
         for mystr in where_state:
-            state_where += ' AND '
+            if len( state_where ) > 6:
+                state_where += ' AND '
             state_where += mystr
 
     # compose query string
@@ -269,13 +270,8 @@ def get_product_by_type( args ):
         row_lst = 'stateID,absOrbit,dateTimeStart,muSecStart,dateTimeStop,' \
                   'muSecStop,timeLine,orbitPhase,softVersion,obmTemp,' \
                   'detTemp,pmdTemp,ST_asText(tile)'
-        query_str = 'SELECT {} FROM stateinfo WHERE pk_stateinfo IN' \
-                    + ' (SELECT unnest(fk_stateinfo) FROM {} LEFT JOIN' \
-                    + ' stateinfo_{} ON {}.pk_meta=stateinfo_{}.fk_meta' \
-                    + ' {}) {} ORDER BY dateTimeStart'
-        query_str = query_str.format( row_lst, 
-                                      metaTBL, metaTBL, metaTBL, metaTBL,
-                                      meta_where, state_where )
+        query_str = 'SELECT {} FROM stateinfo {} ORDER BY dateTimeStart'
+        query_str = query_str.format( row_lst, state_where )
     else:
         if args.output == 'meta':
             row_lst = 'name,fileSize,procStage,softVersion,absOrbit,' \
@@ -284,8 +280,20 @@ def get_product_by_type( args ):
         else:             # product
             row_lst = 'name'
 
-        query_str = 'SELECT {} FROM {} {}'.format( row_lst, metaTBL,
-                                                   meta_where )
+        if state_where == '':
+            query_str = 'SELECT {} FROM {} {}'.format( row_lst, metaTBL,
+                                                       meta_where )
+        else:
+            query_str = 'WITH sm AS (SELECT fk_meta,procStage,unnest(fk_stateinfo)' \
+                        + ' AS fk_stateinfo FROM stateinfo_{} WHERE fk_meta' \
+                        + ' IN (SELECT pk_meta FROM {} {})), ss' \
+                        + ' AS (SELECT pk_stateinfo,softVersion FROM stateinfo {})' \
+                        + ' SELECT {} FROM {} WHERE pk_meta IN' \
+                        + ' (SELECT DISTINCT fk_meta FROM sm JOIN ss ON' \
+                        + ' sm.fk_stateinfo=pk_stateinfo)'
+            query_str = query_str.format( metaTBL, metaTBL, meta_where,
+                                          state_where, row_lst, metaTBL )
+
         query_str += ' ORDER BY absOrbit,procStage,softVersion'
 
     return query_str
@@ -365,7 +373,7 @@ def get_best_products( args ):
                 meta_where += ' AND '
             meta_where += mystr
 
-    if where_state == None:
+    if where_state == []:
         state_where = ''
     else:
         state_where = 'WHERE '
@@ -516,8 +524,6 @@ if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser()
-    parser.add_argument( '--dump', action='store_true', default=False,
-                         help='return database dump instead pathFilename' )
     parser.add_argument( '--debug', action='store_true', default=False,
                          help='show SQL query, but do nothing' )
 
