@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# (c) SRON - Netherlands Institute for Space Research (2014).
+# (c) SRON - Netherlands Institute for Space Research (2016).
 # All Rights Reserved.
 # This software is distributed under the BSD 2-clause license.
 #
@@ -16,7 +16,7 @@
 #*       --lat LAT             selection on latitude [-90,90]
 #*       --lon LON             selection on longitude <-180,180]
 #*       -o {meta,state}, --output {meta,state}
-#*                             select information to be returned
+#*                             select information to be returned, default: state
 #*
 #*   Subcommand "type" : selection on product type {0,1,2}
 #*     optional arguments:
@@ -44,7 +44,7 @@
 #*       --lat LAT             selection on latitude [-90,90]
 #*       --lon LON             selection on longitude <-180,180]
 #*       -o {product,meta,state}, --output {product,meta,state}
-#*                             select information to be returned
+#*                             select information to be returned, default: product
 #
 #
 from __future__ import print_function
@@ -58,17 +58,15 @@ from datetime import datetime, timedelta
 #+++++++++++++++++++++++++
 def get_product_by_name( args ):
     if args.product[0:10] == 'SCI_NL__0P':
-        meta_where = 'meta__0P.' + 'name=\'' + args.product + '\''
         metaTBL = 'meta__0P'
     elif args.product[0:10] == 'SCI_NL__1P':
-        meta_where = 'meta__1P.' + 'name=\'' + args.product + '\''
         metaTBL = 'meta__1P'
     else:
-        meta_where = 'meta__2P.' + 'name=\'' + args.product + '\''
         metaTBL = 'meta__2P'
+    meta_where = "{}.name=\'{}\'".format( metaTBL, args.product )
     stateTBL = 'stateinfo'
 
-    # selection on stateTable
+    # Selection (only) on stateTable
     where_state = []
     if args.stateID is not None:
         if len( args.stateID.split(',') ) == 1:
@@ -88,13 +86,28 @@ def get_product_by_name( args ):
                               args.lon[1], args.lat[0] )
         where_state.append( mystr )
  
-    # combine where-statements for State-table
-    state_where = ''
-    for mystr in where_state:
-        state_where += ' AND '
-        state_where += mystr
+    # Combine where-statements for stateTable
+    if where_state == []:
+        state_where = ''
+    else:
+        state_where = ''
+        for mystr in where_state:
+            if len(state_where) > 1:
+                state_where += ' AND '
+            state_where += mystr
+            
+        if args.output == 'state':
+            state_where = 'AND ' + state_where
+        else:
+            state_where = 'WHERE ' + state_where
 
-    # compose query string
+    # Show debug info
+    if args.debug:
+        print( 'meta_where: ', meta_where )
+        print( 'where_state: ', where_state )
+        print( 'state_where: "{}"'.format(state_where) )
+
+    # Compose query string
     if args.output == 'state':
         row_lst = 'stateID,absOrbit,dateTimeStart,muSecStart,dateTimeStop,' \
                   'muSecStop,timeLine,orbitPhase,softVersion,obmTemp,' \
@@ -107,13 +120,26 @@ def get_product_by_name( args ):
                                       metaTBL, metaTBL, metaTBL, metaTBL, 
                                       meta_where, state_where )
     else:
-        row_lst = 'name,fileSize,procStage,softVersion,absOrbit,' \
-                  'receiveDate,dateTimeStart,dateTimeStop,numDataSets,' \
-                  'nadirStates,limbStates,OccultStates,monitorStates'
+        if args.output == 'meta':
+            row_lst = 'name,fileSize,procStage,softVersion,absOrbit,' \
+                      'receiveDate,dateTimeStart,dateTimeStop,numDataSets,' \
+                      'nadirStates,limbStates,OccultStates,monitorStates'
+        else:             # product
+            row_lst = 'name'
 
-        query_str = 'SELECT {} FROM {} WHERE {}'.format( row_lst, metaTBL,
-                                                         meta_where ) 
-
+        if state_where == '':
+            query_str = 'SELECT {} FROM {} WHERE {}'.format( row_lst, metaTBL,
+                                                             meta_where )
+        else:
+            query_str = 'WITH sm AS (SELECT fk_meta,procStage,unnest(fk_stateinfo)' \
+                        + ' AS fk_stateinfo FROM stateinfo_{} WHERE fk_meta' \
+                        + ' IN (SELECT pk_meta FROM {} WHERE {})), ss' \
+                        + ' AS (SELECT pk_stateinfo,softVersion FROM stateinfo {})' \
+                        + ' SELECT {} FROM {} WHERE pk_meta IN' \
+                        + ' (SELECT DISTINCT fk_meta FROM sm JOIN ss ON' \
+                        + ' sm.fk_stateinfo=pk_stateinfo)'
+            query_str = query_str.format( metaTBL, metaTBL, meta_where,
+                                          state_where, row_lst, metaTBL )
     return query_str
     
 #+++++++++++++++++++++++++
@@ -128,7 +154,7 @@ def get_product_by_type( args ):
         metaTBL = 'meta__2P'
     stateTBL = 'stateinfo'
 
-    # selections on metaTable
+    # Selections (only) on metaTable
     if args.rtime is not None:
         mystr = '{}.receiveDate>=\'{}\''.format(metaTBL, args.rtime)
         where_meta.append( mystr )
@@ -137,9 +163,6 @@ def get_product_by_type( args ):
         mystr = '{}.softVersion like \'{}%\''.format(metaTBL, args.softVersion)
         where_meta.append( mystr )
 
-    # selection on stateTable
-    where_state.append( "substr(softVersion,{},1) <> \'0\'".format(args.type) )
-    
     if args.stateID is not None:
         if len( args.stateID.split(',') ) == 1:
             mystr = '{}.stateID={}'.format(stateTBL, args.stateID)
@@ -170,7 +193,7 @@ def get_product_by_type( args ):
                               args.lon[1], args.lat[0] )
         where_state.append( mystr )
 
-    # selection on metaTable or stateTable
+    # Selection on metaTable or stateTable
     if args.procStage is not None:
         res = args.procStage.split(',')
         if len( res ) == 1:
@@ -246,26 +269,48 @@ def get_product_by_type( args ):
                                                             d2.isoformat(' ') )
         where_meta.append( mystr )
 
-    # combine where-statements for Meta and State table
+    # Combine where-statements for metaTable
     if where_meta == []:
         meta_where = ''
     else:
-        meta_where = 'WHERE '
+        meta_where = "WHERE "
         for mystr in where_meta:
             if len( meta_where ) > 6:
                 meta_where += ' AND '
             meta_where += mystr
 
+    # Combine where-statements for stateTable
+    # * reject rows for which we do not have any data (column "softVersion")
+    # * do not perform previous check when a selection of "softVersion" is requested
+    # * perform no selection on "softVersion" when it is the only selection-key
     if where_state == []:
         state_where = ''
     else:
-        state_where = 'WHERE '
+        found_proc = False
         for mystr in where_state:
-            if len( state_where ) > 6:
-                state_where += ' AND '
-            state_where += mystr
+            if mystr.find('softVersion') > 0:
+                found_proc = True
+                
+        if len(where_state) == 1 and found_proc:
+            state_where = ''
+        else:
+            state_where = "WHERE "
+            for mystr in where_state:
+                if len( state_where ) > 6:
+                    state_where += ' AND '
+                state_where += mystr
 
-    # compose query string
+            if not found_proc:
+                state_where += " AND substr({}.softVersion,{},1) != \'0\'".format(stateTBL,
+                                                                                  args.type+1)
+    # Show debug info
+    if args.debug:
+        print( 'where_meta: ', where_meta )
+        print( 'meta_where : "{}"'.format(meta_where) )
+        print( 'where_state: ', where_state )
+        print( 'state_where: "{}"'.format(state_where) )
+
+    # Compose query string
     if args.output == 'state':
         row_lst = 'stateID,absOrbit,dateTimeStart,muSecStart,dateTimeStop,' \
                   'muSecStop,timeLine,orbitPhase,softVersion,obmTemp,' \
@@ -301,7 +346,6 @@ def get_product_by_type( args ):
 #+++++++++++++++++++++++++
 def get_best_products( args ):
     where_meta = []
-    where_state = []
     if args.type == 0:
         metaTBL = 'meta__0P'
     elif args.type == 1:
@@ -310,9 +354,10 @@ def get_best_products( args ):
         metaTBL = 'meta__2P'
     stateTBL = 'stateinfo'
 
-    # selection on metaTable or stateTable
-    where_state.append( "substr(softVersion,{},1) <> \'0\'".format(args.type) )
+    # selection (only) on stateTable
+    where_state = ["substr({}.softVersion,{},1) <> \'0\'".format(stateTBL, args.type+1)]
     
+    # selection on metaTable or stateTable
     if args.orbit is not None:
         if len(args.orbit) == 1:
             mystr = '{}.absOrbit={}'.format(stateTBL, args.orbit[0])
@@ -542,7 +587,7 @@ if __name__ == '__main__':
     parser_name.add_argument( '--lon', default=[-180., 180.],
                               type=scia_lon_range,
                               help='selection on longitude <-180,180]' )
-    parser_name.add_argument( '-o', '--output', type=str, default='meta',
+    parser_name.add_argument( '-o', '--output', type=str, default='state',
                               choices=['meta', 'state'],
                               help='select information to be returned' )
     
