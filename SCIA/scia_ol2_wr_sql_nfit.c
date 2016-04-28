@@ -304,7 +304,7 @@ void SCIA_OL2_WR_SQL_NFIT( PGconn *conn, bool be_verbose, const char *flname,
 					   tile_id, jday, ngeo+nf, nfit+nf );
           }
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE ) {
                NADC_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	       res = PQexec( conn, "ROLLBACK" );

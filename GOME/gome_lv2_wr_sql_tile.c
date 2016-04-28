@@ -355,7 +355,7 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			 lon[3], ddr->glr.lat[3], lon[2], ddr->glr.lat[2],
 			 lon[0], ddr->glr.lat[0], lon[1], ddr->glr.lat[1] );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -398,7 +398,7 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			      ddr->irr2->surface_press );
      }
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -419,7 +419,7 @@ void _INSERT_ONE_LV2_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			 "INSERT INTO tileinfo_meta__2P VALUES (%-u,%-d)", 
 			 tile_id, meta_id );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -484,7 +484,7 @@ void _UPDATE_ONE_LV2_TILE( PGconn *conn, bool be_verbose,
      numChar = snprintf( sql_query, SQL_STR_SIZE, "%s WHERE pk_tileinfo=%u",
 			 strcpy(cbuff,sql_query), tileRow->indxTile );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -556,7 +556,7 @@ void _UPDATE_ONE_LV2_TILE( PGconn *conn, bool be_verbose,
 			      strcpy(cbuff,sql_query), tileRow->indxTile );
      }
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -603,7 +603,7 @@ void _INSERT_ONE_LV2_TILE2META( PGconn *conn, bool be_verbose, int meta_id,
 			      "INSERT INTO tileinfo_meta__2P VALUES (%-u,%-d)",
 			      tileRow->indxTile, meta_id );
 	  if ( be_verbose )
-	       (void) printf( "%s() %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s() %s [%-d]\n", __func__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
 	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );

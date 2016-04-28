@@ -137,7 +137,7 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 				   strcpy(cbuff,sql_query), dsd[nd].flname );
 	       if ( be_verbose )
 		    (void) printf( "%s(): %s [%-d]\n", 
-				   __FUNCTION__, sql_query, numChar );
+				   __func__, sql_query, numChar );
 	       res = PQexec( conn, sql_query );
 	       if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
 		    NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
@@ -159,7 +159,7 @@ void SCIA_LV1_WR_SQL_AUX( PGconn *conn, bool be_verbose,
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s WHERE name=\'%s\'",
 			      strcpy(cbuff,sql_query), mph->product );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
 	       NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );

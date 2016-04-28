@@ -120,7 +120,7 @@ void ENVI_RD_MPH( FILE *fd, struct mph_envi *mph )
 /*
  * always rewind the file
  */
-     if ( fseek( fd, 0L, SEEK_SET ) != 0 ) perror( __FUNCTION__ );
+     if ( fseek( fd, 0L, SEEK_SET ) != 0 ) perror( __func__ );
 /*
  * read PDS header
  */

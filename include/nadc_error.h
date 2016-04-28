@@ -49,7 +49,7 @@ extern "C" {
 #define IS_ERR_STAT_FATAL   ((nadc_stat & NADC_STAT_FATAL) != UCHAR_ZERO)
 
 #define NADC_ERROR( num, str ) \
-   NADC_Err_Push( num, __FILE__, __FUNCTION__, __LINE__, str )
+   NADC_Err_Push( num, __FILE__, __func__, __LINE__, str )
 
 #define NADC_RETURN_ERROR( num, str ) \
    { NADC_ERROR( num, str ); return; }

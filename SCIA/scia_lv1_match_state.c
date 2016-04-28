@@ -142,7 +142,7 @@ void SCIA_LV1_MATCH_STATE( PGconn *conn, bool be_verbose,
      numChar = snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_STATEINFO,
 			 date_str1, date_str2 );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
           NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -211,7 +211,7 @@ void SCIA_LV1_MATCH_STATE( PGconn *conn, bool be_verbose,
 			 "SELECT pk_meta FROM meta__1P WHERE name=\'%s\'",
 			 mph->product );
      if ( be_verbose )
-          (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
+          (void) printf( "%s(): %s [%-zd]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
           NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
       res = PQexec( conn, sql_query );
@@ -269,7 +269,7 @@ void SCIA_LV1_MATCH_STATE( PGconn *conn, bool be_verbose,
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_long_query" );
      }
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_long_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __func__, sql_long_query, numChar );
      res = PQexec( conn, sql_long_query );
      free( sql_long_query );
      if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
@@ -295,7 +295,7 @@ void SCIA_LV1_MATCH_STATE( PGconn *conn, bool be_verbose,
      numChar = snprintf( sql_query, SQL_STR_SIZE, "%s WHERE pk_meta=%d",
 			 strcpy(cbuff,sql_query), meta_id );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-zd]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
           NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -352,7 +352,7 @@ void SCIA_LV1_MATCH_STATE( PGconn *conn, bool be_verbose,
 			      "%s WHERE pk_stateinfo=%u",
 			      strcpy(cbuff,sql_query), stateRow[nr].indxDMOP );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-zd]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-zd]\n", __func__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE ) {
 	       NADC_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	       PQclear( res );

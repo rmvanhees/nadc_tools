@@ -182,7 +182,7 @@ int GOME_LV1_WR_SQL_META( PGconn *conn, bool be_verbose, const char *flname,
      numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%d)",
 			 strcpy(cbuff,sql_query), fsr->nr_mcd );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
        NADC_GOTO_ERROR( NADC_ERR_STRLEN, "sql_query" );
 /*

@@ -116,7 +116,7 @@ hid_t PYTABLE_open_group( hid_t locID, const char *name )
  * check if the group exists, if not create it
  */
      H5E_BEGIN_TRY {
-	  if ( (grpID = H5Gopen( locID, name, H5P_DEFAULT )) < 0 )
+	  if ( (grpID = H5Gopen( locID, name, H5P_DEFAULT )) < 0 ) {
 	       grpID = H5Gcreate( locID, name, 
 				  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 	       (void) H5LTset_attribute_string( locID, name, "CLASS", 
@@ -128,6 +128,7 @@ hid_t PYTABLE_open_group( hid_t locID, const char *name )
 						name );
 	       (void) H5LTset_attribute_string( locID, name, "VERSION", 
 						PY_GROUP_VERSION );
+	  }
      } H5E_END_TRY;
 /*
  * return id of the group

@@ -1654,7 +1654,7 @@ void SCIA_LV1_PATCH_MDS( FILE *fp, unsigned short patch_flag,
  * always read MPH
  */
      if ( verbose )
-	  (void) fprintf( stderr, "\n--- Start of module: %s\n", __FUNCTION__ );
+	  (void) fprintf( stderr, "\n--- Start of module: %s\n", __func__ );
      ENVI_RD_MPH( fp, &mph );
 /*
  * initialize structure with SCIA calibration parameters and data
@@ -1879,7 +1879,7 @@ done:
      if ( scia_cal.spectra != NULL ) FREE_2D( (void **) scia_cal.spectra );
      if ( scia_cal.correction != NULL ) FREE_2D((void **) scia_cal.correction);
      if ( verbose )
-	  (void) fprintf( stderr, "--- Finished module: %s\n", __FUNCTION__ );
+	  (void) fprintf( stderr, "--- Finished module: %s\n", __func__ );
 }
 
 #ifdef TEST_PROG

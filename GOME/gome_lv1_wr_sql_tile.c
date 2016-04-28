@@ -206,7 +206,7 @@ short _FIND_MATCHES( PGconn *conn, bool be_verbose, double jday_start,
      numChar = snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_PMD,
 			 jday_start, jday_end );
      if ( be_verbose )
-	  (void) printf( "%s(): %s[%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s[%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE ) {
 	  NADC_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  return 0;
@@ -373,7 +373,7 @@ void _INSERT_ONE_LV1_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			      lon[0], pcd->glr.lat[0], 
 			      lon[1], pcd->glr.lat[1] );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -410,7 +410,7 @@ void _INSERT_ONE_LV1_TILE( PGconn *conn, bool be_verbose, int meta_id,
      }
      numChar = nadc_strlcat( sql_query, ")", SQL_STR_SIZE );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -431,7 +431,7 @@ void _INSERT_ONE_LV1_TILE( PGconn *conn, bool be_verbose, int meta_id,
 			 "INSERT INTO tileinfo_meta__1P VALUES (%-u,%-d",
 			 tile_id, meta_id );
      if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
      if ( numChar >= SQL_STR_SIZE )
 	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      res = PQexec( conn, sql_query );
@@ -496,7 +496,7 @@ void _UPDATE_ONE_LV1_TILE( PGconn *conn, bool be_verbose,
 			      "%s WHERE pk_tileinfo=%u",
 			      strcpy(cbuff,sql_query), tileRow->indxTile );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
 	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
 	  res = PQexec( conn, sql_query );
@@ -542,7 +542,7 @@ void _UPDATE_ONE_LV1_TILE( PGconn *conn, bool be_verbose,
 	  }
 	  numChar = nadc_strlcat( sql_query, ")", SQL_STR_SIZE );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
 	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      } else { /* update */
@@ -576,7 +576,7 @@ void _UPDATE_ONE_LV1_TILE( PGconn *conn, bool be_verbose,
 			      "%s) WHERE fk_tileinfo=%u",
 			      strcpy(cbuff,sql_query), tileRow->indxTile );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
 	  if ( numChar >= SQL_STR_SIZE )
 	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
      }
@@ -625,7 +625,7 @@ void _INSERT_ONE_LV1_TILE2META( PGconn *conn, bool be_verbose, int meta_id,
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%-d)",
 			   strcpy(cbuff,sql_query), meta_id );
 	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __FUNCTION__, sql_query, numChar );
+	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
 	  res = PQexec( conn, sql_query );
 	  if ( PQresultStatus( res ) != PGRES_COMMAND_OK ) {
 	       NADC_ERROR( NADC_ERR_SQL,
