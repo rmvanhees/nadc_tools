@@ -128,7 +128,7 @@ int main ( int argc, char *argv[] )
 {
      register int na = 0; 
 
-     char flname[MAX_STRING_LENGTH];
+     char flname[2 * MAX_STRING_LENGTH];
 
      register unsigned int nr;
 
@@ -277,7 +277,7 @@ int main ( int argc, char *argv[] )
 	  GomeJDAY2adaguc( rec->jday, hdr.validity_start );
 	  GomeJDAY2adaguc( rec[hdr.numRec-1].jday, hdr.validity_stop );
      }
-     (void) snprintf( flname, MAX_STRING_LENGTH, "%s/"ADAGUC_PROD_TEMPLATE, 
+     (void) snprintf( flname, sizeof(flname), "%s/"ADAGUC_PROD_TEMPLATE, 
 		      param.outdir, param.prodClass, 
 		      hdr.validity_start, hdr.validity_stop, 1 );
 

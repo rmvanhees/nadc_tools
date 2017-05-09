@@ -230,6 +230,7 @@ unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
 	  } case 113: {
 	       if ( strncmp( line, " STATE_ID", 9 ) == 0 )
 		    use_fmt_short = TRUE;
+	       break;
 	  } case 54: {
 	       const char fmt[] = "%s = %s %s";
 

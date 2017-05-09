@@ -432,13 +432,13 @@ void SCIA_LV1_WR_ASCII_MDS( const struct param_record param,
  * create unique output file
  */
      if ( source == SCIA_NADIR )
-	  (void) snprintf( ext_str, 10, "nadir_%02u", mds->state_index );
+	  (void) snprintf( ext_str, 10, "nadir_%02u", mds->state_index % 100 );
      else if ( source == SCIA_LIMB )
-	  (void) snprintf( ext_str, 10, "limb_%02u", mds->state_index );
+	  (void) snprintf( ext_str, 10, "limb_%02u", mds->state_index % 100 );
      else if ( source == SCIA_MONITOR )
-	  (void) snprintf( ext_str, 10, "moni_%02u", mds->state_index );
+	  (void) snprintf( ext_str, 10, "moni_%02u", mds->state_index % 100 );
      else if ( source == SCIA_OCCULT )
-	  (void) snprintf( ext_str, 10, "occult_%02u", mds->state_index );
+	  (void) snprintf( ext_str, 10, "occult_%02u", mds->state_index % 100 );
      else
 	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
@@ -581,13 +581,17 @@ void SCIA_LV1C_WR_ASCII_MDS( const struct param_record param,
  * create unique output file
  */
      if ( source == SCIA_NADIR )
-	  (void) snprintf( ext_str, 10, "nadir_%02u", mds_1c->state_index );
+	  (void) snprintf( ext_str, 10, "nadir_%02u",
+			   mds_1c->state_index % 100 );
      else if ( source == SCIA_LIMB )
-	  (void) snprintf( ext_str, 10, "limb_%02u", mds_1c->state_index );
+	  (void) snprintf( ext_str, 10, "limb_%02u",
+			   mds_1c->state_index % 100 );
      else if ( source == SCIA_MONITOR )
-	  (void) snprintf( ext_str, 10, "moni_%02u", mds_1c->state_index );
+	  (void) snprintf( ext_str, 10, "moni_%02u",
+			   mds_1c->state_index % 100 );
      else if ( source == SCIA_OCCULT )
-	  (void) snprintf( ext_str, 10, "occult_%02u", mds_1c->state_index );
+	  (void) snprintf( ext_str, 10, "occult_%02u",
+			   mds_1c->state_index % 100 );
      else
 	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
@@ -702,13 +706,17 @@ void SCIA_LV1C_WR_ASCII_MDS_PMD( const struct param_record param,
  * create unique output file
  */
      if ( source == SCIA_NADIR )
-	  (void) snprintf( ext_str, 14, "nadir_pmd_%02u", pmd->state_index );
+	  (void) snprintf( ext_str, 14, "nadir_pmd_%02u",
+			   pmd->state_index % 100 );
      else if ( source == SCIA_LIMB )
-	  (void) snprintf( ext_str, 14, "limb_pmd_%02u", pmd->state_index );
+	  (void) snprintf( ext_str, 14, "limb_pmd_%02u",
+			   pmd->state_index % 100 );
      else if ( source == SCIA_MONITOR )
-	  (void) snprintf( ext_str, 14, "moni_pmd_%02u", pmd->state_index );
+	  (void) snprintf( ext_str, 14, "moni_pmd_%02u",
+			   pmd->state_index % 100 );
      else if ( source == SCIA_OCCULT )
-	  (void) snprintf( ext_str, 14, "occult_pmd_%02u", pmd->state_index );
+	  (void) snprintf( ext_str, 14, "occult_pmd_%02u",
+			   pmd->state_index % 100 );
      else
 	  NADC_RETURN_ERROR( NADC_ERR_PDS_KEY, "unknown MDS type" );
      outfl = CRE_ASCII_File( param.outfile, ext_str );
@@ -783,7 +791,7 @@ void SCIA_LV1C_WR_ASCII_MDS_POLV( const struct param_record param,
 {
      register unsigned int   nr;
 
-     char  ext_str[14], date_str[UTC_STRING_LENGTH];
+     char  ext_str[15], date_str[UTC_STRING_LENGTH];
      unsigned int count[2];
      FILE  *outfl;
 /*
@@ -798,11 +806,14 @@ void SCIA_LV1C_WR_ASCII_MDS_POLV( const struct param_record param,
  * create unique output file
  */
      if ( source == SCIA_NADIR )
-	  (void) snprintf( ext_str, 14, "nadir_polV_%02u", polV->state_index );
+	  (void) snprintf( ext_str, sizeof(ext_str), "nadir_polV_%02u",
+			   polV->state_index % 100 );
      else if ( source == SCIA_LIMB )
-	  (void) snprintf( ext_str, 14, "limb_polV_%02u", polV->state_index );
+	  (void) snprintf( ext_str, sizeof(ext_str), "limb_polV_%02u",
+			   polV->state_index % 100 );
      else if ( source == SCIA_OCCULT )
-	  (void) snprintf( ext_str, 14, "occult_polV_%02u", polV->state_index);
+	  (void) snprintf( ext_str, sizeof(ext_str), "occult_polV_%02u",
+			   polV->state_index % 100 );
      else if ( source == SCIA_MONITOR )
 	  return;
      else

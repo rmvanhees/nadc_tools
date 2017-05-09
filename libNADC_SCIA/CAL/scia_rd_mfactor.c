@@ -700,15 +700,16 @@ void file_aux( /*@out@*/ char *file_name, const char* dir_name,
 
      /* not within validity time of found AUX file*/
      if ( strncmp( start_date, entries[--n]->d_name+46, 15 ) > 0 ) {
-	  char msg[MAX_STRING_LENGTH];
+	  char msg[2 * MAX_STRING_LENGTH];
 
-	  (void) snprintf( msg, MAX_STRING_LENGTH,
+	  (void) snprintf( msg, sizeof(msg),
 			   "Auxiliary file %s not within validity time %s.", 
 			   entries[n]->d_name, start_date );
 	  SCIA_ERROR( FATAL, msg, "" );
      }
      /*  write file_name including path */
-     (void) sprintf (file_name, "%s/%s", dir_name, entries[n]->d_name);
+     (void) snprintf (file_name, MAX_STRING_LENGTH, "%s/%s",
+		      dir_name, entries[n]->d_name);
      /* free memories */
      for ( n = 0; n < n_entries; n++ ) free( entries[n] );
      free( entries );

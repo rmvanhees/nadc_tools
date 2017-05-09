@@ -92,7 +92,8 @@ void SCIA_LV2_WR_ASCII_SPH( struct param_record param,
 			 sph->no_doas_win );
      ndim = 2;
      for ( ni = 0; ni < sph->no_doas_win; ni++ ) {
-	  (void) snprintf(cbuff, MX_SZ_CBUFF, "DOAS_FITTING_WINDOW_%02u", ni);
+	  (void) snprintf(cbuff, MX_SZ_CBUFF, "DOAS_FITTING_WINDOW_%02u",
+			  ni % 100);
 	  ubuff[0] = sph->doas_win[ni].wv_min;
 	  ubuff[1] = sph->doas_win[ni].wv_max;
 	  nadc_write_arr_ushort( outfl, ++nr, cbuff, 1, &ndim, ubuff );
@@ -101,7 +102,8 @@ void SCIA_LV2_WR_ASCII_SPH( struct param_record param,
      nadc_write_ushort( outfl, ++nr, "NO_OF_BIAS_FITTING_WIN", 
 			 sph->no_bias_win );
      for ( ni = 0; ni < sph->no_bias_win; ni++ ) {
-	  (void) snprintf(cbuff, MX_SZ_CBUFF, "BIAS_FITTING_WINDOW_%02u", ni);
+	  (void) snprintf(cbuff, MX_SZ_CBUFF, "BIAS_FITTING_WINDOW_%02u",
+			  ni % 100);
 	  ubuff[0] = sph->bias_win[ni].wv_min;
 	  ubuff[1] = sph->bias_win[ni].wv_max;
 	  if ( sph->bias_win[ni].nr_micro == 0 )

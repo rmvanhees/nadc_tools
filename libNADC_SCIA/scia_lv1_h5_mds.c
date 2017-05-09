@@ -522,16 +522,16 @@ unsigned int SCIA_LV1_RD_H5_MDS( const char *scia_fl,
      if ( grp_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      switch ( source ) {
      case SCIA_NADIR:
-	  (void) snprintf( grp_name, 10, "nadir_%02u", state->indx );
+	  (void) snprintf( grp_name, 10, "nadir_%02u", state->indx % 100 );
 	  break;
      case SCIA_LIMB:
-	  (void) snprintf( grp_name, 10, "limb_%02u", state->indx );
+	  (void) snprintf( grp_name, 10, "limb_%02u", state->indx % 100 );
 	  break;
      case SCIA_MONITOR:
-	  (void) snprintf( grp_name, 10, "moni_%02u", state->indx );
+	  (void) snprintf( grp_name, 10, "moni_%02u", state->indx % 100 );
 	  break;
      case SCIA_OCCULT:
-	  (void) snprintf( grp_name, 10, "occult_%02u", state->indx );
+	  (void) snprintf( grp_name, 10, "occult_%02u", state->indx % 100 );
 	  break;
      default:
 	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
@@ -651,16 +651,16 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
      if ( grp_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/MDS" );
      switch ( (int) mds->type_mds ) {
      case SCIA_NADIR:
-	  (void) snprintf( grp_name, 10, "nadir_%02u", mds->state_index );
+	  (void) snprintf(grp_name, 10, "nadir_%02u", mds->state_index % 100);
 	  break;
      case SCIA_LIMB:
-	  (void) snprintf( grp_name, 10, "limb_%02u", mds->state_index );
+	  (void) snprintf(grp_name, 10, "limb_%02u", mds->state_index % 100);
 	  break;
      case SCIA_MONITOR:
-	  (void) snprintf( grp_name, 10, "moni_%02u", mds->state_index );
+	  (void) snprintf(grp_name, 10, "moni_%02u", mds->state_index % 100);
 	  break;
      case SCIA_OCCULT:
-	  (void) snprintf( grp_name, 10, "occult_%02u", mds->state_index );
+	  (void) snprintf(grp_name, 10, "occult_%02u", mds->state_index % 100);
 	  break;
      default:
 	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
@@ -815,7 +815,7 @@ void SCIA_LV1_WR_H5_MDS( const struct param_record param,
 /*
  * set name of the cluster
  */
-	  (void) snprintf( clus_name, 11, "cluster_%02d", ((int) nc+1) );
+	  (void) snprintf( clus_name, 11, "cluster_%02d", ((int) nc+1) % 100 );
 /*
  * write reticon data
  */
@@ -936,19 +936,19 @@ void SCIA_LV1C_WR_H5_MDS( const struct param_record param,
      switch ( (int) mds_1c->type_mds ) {
      case SCIA_NADIR:
 	  (void) snprintf( grp_name, 15, "/MDS/nadir_%02u", 
-			   mds_1c->state_index );
+			   mds_1c->state_index % 100 );
 	  break;
      case SCIA_LIMB:
 	  (void) snprintf( grp_name, 15, "/MDS/limb_%02u", 
-			   mds_1c->state_index );
+			   mds_1c->state_index % 100 );
 	  break;
      case SCIA_MONITOR:
 	  (void) snprintf( grp_name, 15, "/MDS/moni_%02u", 
-			   mds_1c->state_index );
+			   mds_1c->state_index % 100 );
 	  break;
      case SCIA_OCCULT:
 	  (void) snprintf( grp_name, 15, "/MDS/occult_%02u", 
-			   mds_1c->state_index );
+			   mds_1c->state_index % 100 );
 	  break;
      default:
 	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
@@ -1143,19 +1143,19 @@ void SCIA_LV1C_WR_H5_MDS_PMD( const struct param_record param,
      switch ( (int) pmd->type_mds ) {
      case SCIA_NADIR:
 	  (void) snprintf( grp_name, 19, "/MDS/nadir_%02u/PMD", 
-			   pmd->state_index );
+			   pmd->state_index % 100 );
 	  break;
      case SCIA_LIMB:
 	  (void) snprintf( grp_name, 19, "/MDS/limb_%02u/PMD",
-			   pmd->state_index );
+			   pmd->state_index % 100 );
 	  break;
      case SCIA_MONITOR:
 	  (void) snprintf( grp_name, 19, "/MDS/moni_%02u/PMD", 
-			   pmd->state_index );
+			   pmd->state_index % 100 );
 	  break;
      case SCIA_OCCULT:
 	  (void) snprintf( grp_name, 19, "/MDS/occult_%02u/PMD", 
-			   pmd->state_index );
+			   pmd->state_index % 100 );
 	  break;
      default:
 	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );
@@ -1296,19 +1296,19 @@ void SCIA_LV1C_WR_H5_MDS_POLV( const struct param_record param,
      switch ( (int) polV->type_mds ) {
      case SCIA_NADIR:
 	  (void) snprintf( grp_name, 20, "/MDS/nadir_%02u/polV", 
-			   polV->state_index );
+			   polV->state_index % 100 );
 	  break;
      case SCIA_LIMB:
 	  (void) snprintf( grp_name, 20, "/MDS/limb_%02u/polV", 
-			   polV->state_index );
+			   polV->state_index % 100 );
 	  break;
      case SCIA_MONITOR:
 	  (void) snprintf( grp_name, 20, "/MDS/moni_%02u/polV", 
-			   polV->state_index );
+			   polV->state_index % 100 );
 	  break;
      case SCIA_OCCULT:
 	  (void) snprintf( grp_name, 20, "/MDS/occult_%02u/polV", 
-			   polV->state_index );
+			   polV->state_index % 100 );
 	  break;
      default:
 	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown MDS type" );

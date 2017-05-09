@@ -18,39 +18,32 @@
 static
 void SHELLdd( unsigned short dim, double *ra, double *rra )
 {
-     register unsigned short ii, jj;
+     unsigned short ij = 1, gap = 1;
 
-     unsigned short inc;
-     double         buff, test;
+     while (1 == 1) {
+	  if ((ij = 3 * ij + 1) < dim)
+	       dim = ij;
+	  else
+	       break;
+     }
+ 
+     while(gap > 0) {
+	  register unsigned short ii = gap;
 
-     const unsigned short uint16_one = (unsigned short) 1;
-/*
- * determine the starting increment
- */
-     ra--; rra--;
-     inc = uint16_one;
-     do {
-          inc *= 3;
-          inc++;
-     } while ( inc <= dim );
-/*
- * loop over the partial sorts
- */
-     do {
-          inc /= 3;
-          for ( ii = inc + uint16_one; ii <= dim; ii++ ) {
-               test = ra[ii];
-               buff = rra[ii];
+	  while(ii < dim) {
+	       register unsigned short jj = ii;
+	       double temp = ra[ii];
+	       double buff = rra[ii];
 
-               jj = ii;
-               while ( ra[jj-inc] > test ) {
-                    ra[jj] = ra[jj-inc];
-                    rra[jj] = rra[jj-inc];
-                    jj -= inc;
-                    if ( jj <= inc ) /*@innerbreak@*/ break;
-               }
-               ra[jj] = test;
-               rra[jj] = buff;
-          }
-     } while ( inc > uint16_one );
+	       while(jj >= gap && ra[jj - gap] > temp) {
+		    ra[jj] = ra[jj - gap];
+		    rra[jj] = rra[jj - gap];
+		    jj -= gap;
+	       }
+	       ra[jj] = temp;
+	       rra[jj] = buff;
+	       ii++;
+	  }
+	  gap /= 3;
+     }
 }

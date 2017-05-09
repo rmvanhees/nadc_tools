@@ -414,17 +414,16 @@ void MERIS_SHOW_PARAM( int instrument __attribute ((unused)),
      register unsigned int nr = 0;
 
      char    cbuff[MAX_STRING_LENGTH];
-     char    string[SHORT_STRING_LENGTH];
      time_t  tp[1];
 
      FILE *outfl = stdout;
 /*
  * show program name and version
  */
-     (void) snprintf( string, SHORT_STRING_LENGTH, "%s (version %-d.%-d.%-d)", 
+     (void) snprintf( cbuff, MAX_STRING_LENGTH, "%s (version %-d.%-d.%-d)", 
 		      param.program, nadc_vers_major, nadc_vers_minor, 
 		      nadc_vers_release );
-     nadc_write_text( outfl, ++nr, "Program", string );
+     nadc_write_text( outfl, ++nr, "Program", cbuff );
 /*
  * show time of call
  */

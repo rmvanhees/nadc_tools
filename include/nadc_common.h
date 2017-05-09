@@ -87,8 +87,8 @@ extern "C" {
 
 #define SHORT_STRING_LENGTH        ((size_t) 80)
 #define MAX_STRING_LENGTH          ((size_t) 256)
-#define UTC_STRING_LENGTH          28
-#define DATE_STRING_LENGTH         25
+#define UTC_STRING_LENGTH          29
+#define DATE_STRING_LENGTH         26
 #define DATE_ONLY_STRING_LENGTH    11
 #define TIME_ONLY_STRING_LENGTH    12
 
@@ -254,8 +254,8 @@ struct param_record
 
      char  pselect[MAX_STRING_LENGTH];
 
-     char  program[MAX_STRING_LENGTH];
-     char  infile[MAX_STRING_LENGTH];
+     char  program[SHORT_STRING_LENGTH];
+     char  infile[MAX_STRING_LENGTH-3];
      char  outfile[MAX_STRING_LENGTH];
      char  hdf5_name[MAX_STRING_LENGTH];
 
