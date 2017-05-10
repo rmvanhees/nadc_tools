@@ -258,7 +258,7 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
  * initialise param-structure
  */
      NADC_INIT_PARAM( param );
-     (void) snprintf( param->program, MAX_STRING_LENGTH, "%s", argv[0] );
+     (void) snprintf( param->program, sizeof(param->program), "%s", argv[0] );
 /*
  * check number of options
  */
@@ -289,8 +289,8 @@ void MERIS_SET_PARAM( int argc, char *argv[], int instrument,
 			 char cbuff[MAX_STRING_LENGTH];
 
 			 (void) snprintf( cbuff, MAX_STRING_LENGTH,
-					 "Filename too long (max: %d)\n",
-					 (int) MAX_STRING_LENGTH );
+					 "Filename too long (max: %zd)\n",
+					 MAX_STRING_LENGTH );
 			 
 			 NADC_RETURN_ERROR( NADC_ERR_FATAL, cbuff );
 		    }

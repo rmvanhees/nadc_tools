@@ -334,7 +334,7 @@ void ASCII_2_MJD( const char ASCII_DateTime[], int *mjd2000,
 void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec, 
 		  char ASCII_DateTime[] )
 {
-     unsigned int iday, ihour, imin, imon, imsec, isec, iyear;
+     unsigned int ihour, imin, imon, imsec, isec, iyear;
      double       mday, jday;
 /*
  * convert to julian day
@@ -342,7 +342,6 @@ void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec,
      jday = utc_day + jday_01011950;
      Julian_2_MJD( jday, &mday, &imon, &iyear );
 
-     iday = (unsigned int) mday;
      isec = (unsigned int) (utc_msec / 1000U);
      imsec = (unsigned int) (utc_msec - 1000 * isec);
      ihour = isec / 3600; 
@@ -350,7 +349,7 @@ void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec,
      imin  = isec / 60;
      isec -= 60 * imin;
      (void) snprintf( ASCII_DateTime, DATE_STRING_LENGTH,
-		      "%.2d-%3s-%.4u %.2u:%.2u:%.2u.%.3u", iday % 100,
+		      "%02d-%3s-%04u %02u:%02u:%02u.%03u", ((int) mday) % 100,
 		      Month_Names[imon-1], iyear % 10000, ihour % 100,
 		      imin % 100, isec % 100, imsec % 1000 );
 }
@@ -374,7 +373,7 @@ void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec,
 void MJD_2_ASCII( int mjd2000, unsigned int second, unsigned int mu_sec, 
 		  char *ASCII_DateTime )
 {
-     unsigned int iday, ihour, imin, imon, isec, iyear;
+     unsigned int ihour, imin, imon, isec, iyear;
      double       mday, jday;
 /*
  * convert to julian day
@@ -382,13 +381,12 @@ void MJD_2_ASCII( int mjd2000, unsigned int second, unsigned int mu_sec,
      jday = mjd2000 + jday_01012000;
      Julian_2_MJD( jday, &mday, &imon, &iyear );
 
-     iday  = (unsigned int) mday;
      ihour = (unsigned int)(second / 3600);
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
      (void) snprintf( ASCII_DateTime, UTC_STRING_LENGTH,
-		      "%.2d-%3s-%.4u %.2u:%.2u:%.2u.%.6u", iday % 100, 
+		      "%02d-%3s-%04u %02u:%02u:%02u.%06u", ((int) mday) % 100, 
 		      Month_Names[imon-1], iyear % 10000, ihour % 100,
 		      imin % 100, isec % 100, mu_sec % 1000000 );
 }
@@ -426,7 +424,7 @@ void UTC_2_DATETIME( unsigned int utc_day, unsigned int utc_msec,
      imin  = isec / 60;
      isec -= 60 * imin;
      (void) snprintf( dateTime, DATE_STRING_LENGTH,
-		      "%.4u-%.2u-%.2d %.2u:%.2u:%.2u.%.3u", iyear % 10000,
+		      "%04u-%02u-%02d %02u:%02u:%02u.%03u", iyear % 10000,
 		      imon % 100, ((int) mday) % 100, ihour % 100,
 		      imin % 100, isec % 100, imsec % 1000 );
 }
@@ -510,7 +508,7 @@ void MJD_2_DATETIME( int mjd2000, unsigned int second, unsigned int mu_sec,
      imin  = isec / 60;
      isec -= 60 * imin;
      (void) snprintf( dateTime, UTC_STRING_LENGTH-1,
-		      "%.4u-%.2u-%.2d %.2u:%.2u:%.2u.%.6u", iyear % 10000, 
+		      "%04u-%02u-%02d %02u:%02u:%02u.%06u", iyear % 10000, 
 		      imon % 100, ((int) mday) % 100,
 		      ihour % 100, imin % 100, isec % 100, mu_sec );
 }
@@ -546,7 +544,7 @@ void MJD_2_YMD( int mjd2000, unsigned int second, char *dateTime )
      imin  = isec / 60;
      isec -= 60 * imin;
      (void) snprintf( dateTime, UTC_STRING_LENGTH-1,
-		      "%.4u%.2u%.2d_%.2u%.2u%.2u", iyear % 10000, 
+		      "%04u%02u%02d_%02u%02u%02u", iyear % 10000, 
 		      imon % 100, ((int) mday) % 100,
 		      ihour % 100, imin % 100, isec % 100 );
 }

@@ -648,8 +648,8 @@ void SCIA_LV1_RD_ONE_MDS( FILE *fd, unsigned long long clus_mask,
 	       }
 	       break;
 	  default:
-	       (void) snprintf( msg, 25, "unknown reticon type: %02hhu",
-				state->Clcon[nc].type % 100 );
+	       (void) snprintf( msg, 25, "unknown reticon type: %02d",
+				((int) state->Clcon[nc].type) % 100 );
 	       NADC_GOTO_ERROR( NADC_ERR_FATAL, msg );
 	  }
      } while ( ++nc < state->num_clus );
