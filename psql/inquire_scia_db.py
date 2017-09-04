@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # (c) SRON - Netherlands Institute for Space Research (2016).
 # All Rights Reserved.
@@ -541,7 +541,6 @@ def scia_orbit_range(string):
 
 def scia_lon_range(string):
     res = [float(str) for str in string[1:-1].split(',')]
-    print( res )
     if len(res) > 2:
         msg = '%r is not a orbit number or range' % string
         raise argparse.ArgumentTypeError(msg)
@@ -587,13 +586,14 @@ if __name__ == '__main__':
     parser_name.add_argument( '--lon', default=[-180., 180.],
                               type=scia_lon_range,
                               help='selection on longitude <-180,180]' )
-    parser_name.add_argument( '-o', '--output', type=str, default='state',
+    parser_name.add_argument( '-o', type=str, default='state',
                               choices=['meta', 'state'],
                               help='select information to be returned' )
     
     # define subparsers for queries on product type
     parser_type = subparsers.add_parser( 'type',
-                            help='perform selection on product level' )
+                                help='perform selection on product level',
+                                formatter_class=argparse.RawTextHelpFormatter)
     parser_type.add_argument( 'type', nargs='?', type=int, 
                               choices=[0, 1, 2],
                               help='level of product to select' )
@@ -613,13 +613,13 @@ if __name__ == '__main__':
                               choices=['nadir','limb','occultation','monitor'],
                               help='selection on observation mode' )
     parser_type.add_argument( '--date', type=str,
-                         help='''select entries on start time of science data;
-         [yyyy]: selection between yyyy and (yyyy+1);
-         [yyyymm]: selection between yyyymm and yyyy(mm+1);
-         [yyyymmdd]: selection between yyyymmdd and yyyymm(dd+1);
-         [yyyymmddhh]: selection between yyyymmddhh and yyyymmdd(hh+1);
-         [yyyymmddhhmm]: selection between yyyymmddhh and yyyymmddhh(mm+1)
-         ''')
+                         help='''select entries on start time of science data:
+        [yyyy]: selection between yyyy and (yyyy+1);
+        [yyyymm]: selection between yyyymm and yyyy(mm+1);
+        [yyyymmdd]: selection between yyyymmdd and yyyymm(dd+1);
+        [yyyymmddhh]: selection between yyyymmddhh and yyyymmdd(hh+1);
+        [yyyymmddhhmm]: selection between yyyymmddhhmm and yyyymmddhh(mm+1)
+                         ''')
     rtime_opts = ('1h','2h','3h','4h','5h','6h','7h','8h','9h','10h',
                   '11h','12h','13h','14h','15h','16h','17h','18h','19h','20h',
                   '21h','22h','23h','1d','2d','3d','4d','5d','6d','7d')
@@ -631,7 +631,7 @@ if __name__ == '__main__':
     parser_type.add_argument( '--lon', default=[-180., 180.],
                               type=scia_lon_range,
                               help='selection on longitude <-180,180]' )
-    parser_type.add_argument( '-o', '--output', type=str, default='product',
+    parser_type.add_argument( '-o', type=str, default='product',
                               choices=['product', 'meta', 'state'],
                               help='select information to be returned' )
     args = parser.parse_args()
