@@ -51,6 +51,7 @@ PRO SCIA_RD_DSD, mph, dsd, status=status
   compile_opt idl2,logical_predicate,hidden
 
 ;read Data Set Descriptor records
+  print, mph.num_dsd-1
   dsd = replicate( {dsd_scia}, mph.num_dsd-1 )
   num = call_external( lib_name('libnadc_idl'), '_ENVI_RD_DSD', $
                        mph, dsd, /CDECL )
