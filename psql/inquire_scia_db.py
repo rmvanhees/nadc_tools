@@ -586,7 +586,7 @@ if __name__ == '__main__':
     parser_name.add_argument( '--lon', default=[-180., 180.],
                               type=scia_lon_range,
                               help='selection on longitude <-180,180]' )
-    parser_name.add_argument( '-o', type=str, default='state',
+    parser_name.add_argument( '-o', '--output', type=str, default='state',
                               choices=['meta', 'state'],
                               help='select information to be returned' )
     
@@ -631,7 +631,7 @@ if __name__ == '__main__':
     parser_type.add_argument( '--lon', default=[-180., 180.],
                               type=scia_lon_range,
                               help='selection on longitude <-180,180]' )
-    parser_type.add_argument( '-o', type=str, default='product',
+    parser_type.add_argument( '-o', '--output', type=str, default='product',
                               choices=['product', 'meta', 'state'],
                               help='select information to be returned' )
     args = parser.parse_args()
