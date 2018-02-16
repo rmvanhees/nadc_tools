@@ -227,8 +227,8 @@ void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
 
 	  nadc_write_float( outfl, ++nr, "Orbit phase", 
 			     5, vlcp[nd].orbit_phase );
-	  count[0] = 10;
-	  nadc_write_arr_float( outfl, ++nr, "Obm det PMD", 
+	  count[0] = IR_CHANNELS + PMD_NUMBER;
+	  nadc_write_arr_float( outfl, ++nr, "Temperatures: OBM CHANNELS PMD", 
 				 1, count, 3, vlcp[nd].obm_pmd );
 	  count[0] = IR_CHANNELS;
 	  count[1] = CHANNEL_SIZE;
@@ -238,7 +238,7 @@ void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
 				 "Error on variable fraction of LC", 
 				 2, count, 5, vlcp[nd].var_lc_error );
 
-	  count[1] = SCIENCE_CHANNELS;
+	  count[0] = SCIENCE_CHANNELS;
 	  nadc_write_arr_float( outfl, ++nr, "Solar straylight", 
 				 2, count, 5, vlcp[nd].solar_stray );
 	  nadc_write_arr_float( outfl, ++nr, "Error on Solar straylight", 
@@ -249,7 +249,7 @@ void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
 	  nadc_write_arr_float( outfl, ++nr, 
 				 "Error on Straylight offset PMD", 
 				 1, count, 5, vlcp[nd].pmd_stray_error );
-	  count[0] = 2;
+	  count[0] = IR_PMD_NUMBER;
 	  nadc_write_arr_float( outfl, ++nr, "Dark offset PMD", 
 				 1, count, 5, vlcp[nd].pmd_dark );
 	  nadc_write_arr_float( outfl, ++nr, 

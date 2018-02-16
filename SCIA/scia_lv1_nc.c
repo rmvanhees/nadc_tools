@@ -38,6 +38,8 @@
  */
 #define  _ISOC99_SOURCE
 
+#define  _XOPEN_SOURCE   /* needed for function strptime() */
+
 /*+++++ System headers +++++*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -97,47 +99,47 @@ void DELTA_TIME2MJD(const struct tm tm_ref, double delta_time,
      mjd->musec = NINT(1e6 * (delta_time - (int) delta_time));
 }
 
-static
-void SCIA_NC_RD_MPH(hid_t fid, struct mph_envi *mph)
-{
-     hid_t gid = -1;
-/*
- * open group /METADATA
- */
-     gid = NADC_OPEN_HDF5_Group( fid, "/METADATA" );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/METADATA" );
-/*
- * set return values
- */
-     (void) H5Gclose( gid );
-     return;
-done:
-     H5E_BEGIN_TRY {
-          (void) H5Fclose( gid );
-     } H5E_END_TRY;
-     return;
-}
+/* static */
+/* void SCIA_NC_RD_MPH(hid_t fid, struct mph_envi *mph) */
+/* { */
+/*      hid_t gid = -1; */
+/* /\* */
+/*  * open group /METADATA */
+/*  *\/ */
+/*      gid = NADC_OPEN_HDF5_Group( fid, "/METADATA" ); */
+/*      if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/METADATA" ); */
+/* /\* */
+/*  * set return values */
+/*  *\/ */
+/*      (void) H5Gclose( gid ); */
+/*      return; */
+/* done: */
+/*      H5E_BEGIN_TRY { */
+/*           (void) H5Fclose( gid ); */
+/*      } H5E_END_TRY; */
+/*      return; */
+/* } */
 
-static
-void SCIA_LV1_NC_RD_SPH(hid_t fid, struct sph1_scia *sph)
-{
-     hid_t gid = -1;
-/*
- * open group /METADATA
- */
-     gid = NADC_OPEN_HDF5_Group( fid, "/METADATA" );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/METADATA" );
-/*
- * set return values
- */
-     (void) H5Gclose( gid );
-     return;
-done:
-     H5E_BEGIN_TRY {
-          (void) H5Fclose( gid );
-     } H5E_END_TRY;
-     return;
-}
+/* static */
+/* void SCIA_LV1_NC_RD_SPH(hid_t fid, struct sph1_scia *sph) */
+/* { */
+/*      hid_t gid = -1; */
+/* /\* */
+/*  * open group /METADATA */
+/*  *\/ */
+/*      gid = NADC_OPEN_HDF5_Group( fid, "/METADATA" ); */
+/*      if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/METADATA" ); */
+/* /\* */
+/*  * set return values */
+/*  *\/ */
+/*      (void) H5Gclose( gid ); */
+/*      return; */
+/* done: */
+/*      H5E_BEGIN_TRY { */
+/*           (void) H5Fclose( gid ); */
+/*      } H5E_END_TRY; */
+/*      return; */
+/* } */
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_EKD
@@ -348,6 +350,7 @@ unsigned int SCIA_LV1_NC_RD_VLCP(hid_t fid, struct vlcp_scia **vlcp_out)
      unsigned int   num_vlcp;
      size_t         dim_size;
 
+     float  *rbuff;
      double *dbuff;
 
      struct vlcp_scia *vlcp;
@@ -412,14 +415,14 @@ unsigned int SCIA_LV1_NC_RD_VLCP(hid_t fid, struct vlcp_scia **vlcp_out)
           NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "orbit_phase");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
           NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "orbit_phase");
-     if ( (dbuff = (double *) malloc(num_vlcp * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5LTread_dataset( gid, "orbit_phase", type_id, dbuff ) < 0 )
+     if ( (rbuff = (float *) malloc(num_vlcp * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "orbit_phase", type_id, rbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "orbit_phase" );
      for ( ni = 0; ni < num_vlcp; ni++ ) {
-	  vlcp[ni].orbit_phase = (float) dbuff[ni];
+	  vlcp[ni].orbit_phase = rbuff[ni];
      }
-     free( dbuff );
+     free( rbuff );
      (void) H5Tclose( type_id );
      (void) H5Dclose( dset_id );
      // channel_temperature      Dataset {num_vlcp, num_temp}
@@ -428,16 +431,15 @@ unsigned int SCIA_LV1_NC_RD_VLCP(hid_t fid, struct vlcp_scia **vlcp_out)
           NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "channel_temperature");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
           NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "channel_temperature");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5LTread_dataset( gid, "channel_temperature", type_id, dbuff ) < 0 )
+     if ( (rbuff = (float *) malloc(dim_size * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "channel_temperature", type_id, rbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "channel_temperature" );
      for ( nr = ni = 0; ni < num_vlcp; ni++ ) {
-	  nr += 1;
-	  for ( ns = 0; ns < num_temp-1; ns++ )
-	       vlcp[ni].obm_pmd[ns] = (float) dbuff[nr++];
+	  for ( ns = 0; ns < num_temp; ns++ )
+	       vlcp[ni].obm_pmd[ns] = rbuff[nr++];
      }
-     free( dbuff );
+     free( rbuff );
      (void) H5Tclose( type_id );
      (void) H5Dclose( dset_id );
      // leakage_current          Dataset {num_vlcp, spectral_channel_ir}
@@ -769,7 +771,10 @@ done:
 .COMMENTS    none
 -------------------------*/
 static
-unsigned int SCIA_LV1_NC_RD_STATE(hid_t fid, struct state1_scia **state_out)
+unsigned int SCIA_LV1_NC_RD_STATE(hid_t fid,
+				  /*@out@*/ struct state1_scia **state_out)
+       /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
+       /*@modifies errno, nadc_stat, nadc_err_stack, *state@*/
 {
      register unsigned char  nc;
      register unsigned short ni;
@@ -792,10 +797,6 @@ unsigned int SCIA_LV1_NC_RD_STATE(hid_t fid, struct state1_scia **state_out)
      hsize_t cur_dims;
 
      struct tm tm_ref;
-
-     // attribute 'time_reference'
-     (void) H5LTget_attribute_string(fid, "/", "time_reference", ref_date);
-     (void) strptime(ref_date, "%Y-%m-%dT%H:%M:%S", &tm_ref);
 /*
  * obtain dimensions
  */
@@ -803,7 +804,7 @@ unsigned int SCIA_LV1_NC_RD_STATE(hid_t fid, struct state1_scia **state_out)
           NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "state" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose( dset_id );
-     num_state = (unsigned short) cur_dims;
+     num_state = (unsigned int) cur_dims;
 /*
  * allocate memory
  */
@@ -813,6 +814,11 @@ unsigned int SCIA_LV1_NC_RD_STATE(hid_t fid, struct state1_scia **state_out)
      }
      if ( (state = state_out[0]) == NULL ) 
           NADC_GOTO_ERROR( NADC_ERR_ALLOC, "state" );
+/*
+ * read global attribute "time_reference"
+ */
+     (void) H5LTget_attribute_string(fid, "/", "time_reference", ref_date);
+     (void) strptime(ref_date, "%Y-%m-%dT%H:%M:%S", &tm_ref);
 /*
  * open group /STATES
  */
@@ -1014,7 +1020,7 @@ unsigned int SCIA_LV1_NC_RD_STATE(hid_t fid, struct state1_scia **state_out)
      if ( H5LTread_dataset( gid, "measurement_category", type_id, cbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "measurement_category" );
      for ( ns = 0; ns < num_state; ns++ ) {
-	  state[ns].type_mds = cbuff[ns];
+	  state[ns].category = cbuff[ns];
      }
      free( cbuff );
      (void) H5Tclose( type_id );
@@ -1207,44 +1213,41 @@ int main(int argc, char *argv[])
        Use_Extern_Alloc;@*/
      /*@modifies errno, stderr, stdout, nadc_stat, nadc_err_stack@*/
 {
-     unsigned int num_dsd, num_dsr, num_state;
+     unsigned int num_state;
      unsigned int num;
-
-     int is_scia_lv1c;
 
      hid_t  fid = 0;
 
      struct param_record param;
-     struct base_scia   base;
-     struct mph_envi    mph;
-     struct sip_scia    sip;
-     struct sph1_scia   sph;
-     struct dsd_envi    *dsd;
-     struct sqads1_scia *sqads;
-     struct lads_scia   *lads;
+     //struct base_scia   base;
+     //struct mph_envi    mph;
+     //struct sip_scia    sip;
+     //struct sph1_scia   sph;
+     //struct sqads1_scia *sqads;
+     //struct lads_scia   *lads;
      struct clcp_scia   clcp;
-     struct vlcp_scia   *vlcp;
-     struct ppg_scia    ppg;
-     struct scp_scia    *scp;
-     struct srs_scia    *srs;
-     struct cal_options calopt;
-     struct pspn_scia   *pspn;
-     struct psplo_scia  *pspl;
-     struct psplo_scia  *pspo;
-     struct rspn_scia   *rspn;
-     struct rsplo_scia  *rspl;
-     struct rsplo_scia  *rspo;
-     struct ekd_scia    ekd;
-     struct asfp_scia   *asfp;
-     struct sfp_scia    *sfp;
-     struct state1_scia *state, *mds_state;
-     struct mds1_pmd    *pmd;
-     struct mds1_aux    *aux;
-     struct lcpn_scia   *lcpn;
-     struct ppgn_scia   *ppgn;
-     struct dark_scia   *dark;
-     struct scpn_scia   *scpn;
-     struct srsn_scia   *srsn;
+     struct vlcp_scia   *vlcp = NULL;
+     //struct ppg_scia    ppg;
+     //struct scp_scia    *scp;
+     //struct srs_scia    *srs;
+     //struct cal_options calopt;
+     //struct pspn_scia   *pspn;
+     //struct psplo_scia  *pspl;
+     //struct psplo_scia  *pspo;
+     //struct rspn_scia   *rspn;
+     //struct rsplo_scia  *rspl;
+     //struct rsplo_scia  *rspo;
+     //struct ekd_scia    ekd;
+     //struct asfp_scia   *asfp;
+     //struct sfp_scia    *sfp;
+     struct state1_scia *state = NULL;
+     //struct mds1_pmd    *pmd;
+     //struct mds1_aux    *aux;
+     //struct lcpn_scia   *lcpn;
+     //struct ppgn_scia   *ppgn;
+     //struct dark_scia   *dark;
+     //struct scpn_scia   *scpn;
+     //struct srsn_scia   *srsn;
 /*
  * initialization of command-line parameters
  */
@@ -1274,16 +1277,16 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write Main Product Header
  */
-     SCIA_NC_RD_MPH(fid, &mph);
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MPH");
+     /* SCIA_NC_RD_MPH(fid, &mph); */
+     /* if ( IS_ERR_STAT_FATAL )  */
+     /* 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MPH"); */
 /*
  * -------------------------
  * read/write Specific Product Header
  */
-     SCIA_LV1_NC_RD_SPH(fid, &sph);
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SPH");
+     /* SCIA_LV1_NC_RD_SPH(fid, &sph); */
+     /* if ( IS_ERR_STAT_FATAL )  */
+     /* 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SPH"); */
 /*
  * -------------------------
  * read/write Summary of Quality Flags per State records
