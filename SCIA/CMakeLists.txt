@@ -47,6 +47,9 @@ else ()
    target_link_libraries(scia_nl1 nadc_scia_cal)
 endif ()
 
+add_executable(scia_lv1_nc scia_lv1_nc.c)
+target_link_libraries(scia_lv1_nc nadc_scia)
+
 add_executable(scia_ol2 ${SCIA_LV2_SRCS})
 if (PGSQL_FOUND)
    target_link_libraries(scia_ol2 nadc_scia ${PGSQL_LIBRARY})
@@ -56,7 +59,7 @@ endif ()
 
 ## Installation instructions
 install (
-  TARGETS scia_dmop scia_nl0 scia_nl1 scia_ol2
+  TARGETS scia_dmop scia_nl0 scia_nl1 scia_lv1_nc scia_ol2
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

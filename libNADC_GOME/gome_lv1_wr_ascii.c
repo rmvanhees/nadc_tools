@@ -175,25 +175,25 @@ void GOME_LV1_WR_ASCII_SPH( struct param_record param,
      nadc_write_uint( outfl, nr, "Satellite binary counter",
 		       sph->time_counter );
      nadc_write_uint( outfl, nr, "Satellite binary counter period", 
-		       sph->time_period );
+		      sph->time_period );
 /* 07 */
      nadc_write_short( outfl, ++nr, "SDP PMD entry", sph->pmd_entry );
 /* 08 */
      nadc_write_short( outfl, ++nr, "SDP SubSet counter entry", 
-			sph->subset_entry );
+		       sph->subset_entry );
 /* 09 */
      nadc_write_short( outfl, ++nr, "SDP Integration Status entry", 
-			sph->intgstat_entry );
+		       sph->intgstat_entry );
 /* 10 */
      nadc_write_short( outfl, ++nr, "SDP Peltier entry", sph->peltier_entry );
 /* 11 */
      nadc_write_short( outfl, ++nr, "SDP Instrument Status_2 entry", 
-			sph->status2_entry );
+		       sph->status2_entry );
 /* 12 */
      count[0] = 2;
      count[1] = PMD_NUMBER;
      nadc_write_arr_float( outfl, ++nr, "PMD's conversion Factors",
-			    2, count, 4, sph->pmd_conv );
+			   2, count, 4, sph->pmd_conv );
 /* 13 */
      nadc_write_uint( outfl, ++nr, "STATE UTC day", sph->state_utc_day );
      nadc_write_uint( outfl, nr, "STATE UTC ms", sph->state_utc_ms );
@@ -354,13 +354,13 @@ void GOME_LV1_WR_ASCII_FCD( struct param_record param,
 /* 06 */
      count[1] = NUM_STRAY_GHOSTS;
      nadc_write_arr_short( outfl, nr, "Ghost symmetry", 
-			   2, count, (short *) fcd->ghost.symmetry );
+			   2, count, (const short *) fcd->ghost.symmetry );
      nadc_write_arr_short( outfl, nr, "Ghost centre", 
-			   2, count, (short *) fcd->ghost.center );
+			   2, count, (const short *) fcd->ghost.center );
      nadc_write_arr_float( outfl, nr, "Ghost Defocusing", 
-			   2, count, 4, (float *) fcd->ghost.defocus );
+			   2, count, 4, (const float *) fcd->ghost.defocus );
      nadc_write_arr_float( outfl, nr, "Ghost Energy", 
-			   2, count, 4, (float *) fcd->ghost.energy );
+			   2, count, 4, (const float *) fcd->ghost.energy );
 /* 07 */
      nadc_write_short( outfl, ++nr, "TriangleConvolutionWidth", 
 			fcd->width_conv );
@@ -658,14 +658,14 @@ void GOME_LV1_WR_ASCII_PCD( struct param_record param, short nr_pcd,
 	  count[0] = PMD_IN_GRID;
 	  count[1] = PMD_NUMBER;
 	  nadc_write_arr_ushort( outfl, nr, "PMD values", 2, count, 
-				  (unsigned short *) pcd[nii].ihr.pmd );
+				 (const unsigned short *) pcd[nii].ihr.pmd );
 	  count[0] = SCIENCE_CHANNELS;
 	  nadc_write_arr_short( outfl, nr, "Peltier values", 1, count, 
 				  pcd[nii].ihr.peltier );
 /* 10 */
 	  count[0] = NUM_SPEC_BANDS;
 	  nadc_write_arr_short( outfl, ++nr, "Index to spectral bands", 
-				 1, count, pcd[nii].indx_bands );
+				1, count, pcd[nii].indx_bands );
 
 	  if ( param.calib_pmd != CALIB_NONE ) {
 	       register short nj, np;
@@ -823,14 +823,14 @@ void GOME_LV1_WR_ASCII_SMCD( unsigned char flag_origin,
 	  count[0] = PMD_IN_GRID;
 	  count[1] = PMD_NUMBER;
 	  nadc_write_arr_ushort( outfl, nr, "PMD values", 2, count, 
-				  (unsigned short *) smcd[nii].ihr.pmd );
+				 (const unsigned short *) smcd[nii].ihr.pmd );
 	  count[0] = SCIENCE_CHANNELS;
 	  nadc_write_arr_short( outfl, nr, "Peltier values", 1, count, 
-				  smcd[nii].ihr.peltier );
+				smcd[nii].ihr.peltier );
 /* 11 */
 	  count[0] = NUM_SPEC_BANDS;
 	  nadc_write_arr_short( outfl, ++nr, "Index to spectral bands", 
-				 1, count, smcd[nii].indx_bands );
+				1, count, smcd[nii].indx_bands );
      }
      (void) fclose( outfl );
 }
