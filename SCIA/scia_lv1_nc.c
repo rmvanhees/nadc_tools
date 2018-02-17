@@ -155,6 +155,175 @@ void DELTA_TIME2MJD(const struct tm tm_ref, double delta_time,
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_EKD(hid_t fid, /*@out@*/ struct ekd_scia *ekd)
+{
+     register unsigned short ns;
+
+     unsigned short spectral_channel;
+
+     double *dbuff;
+
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group /CALIBRATION/KEYDATA_ERRORS 
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/CALIBRATION/KEYDATA_ERRORS" );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION/KEYDATA_ERRORS");
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+/*
+ * read KEYDATA_ERRORS datasets
+ */
+     // bsdf_error               Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "bsdf_error", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "bsdf_error");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "bsdf_error");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "bsdf_error", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "bsdf_error" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].bsdf[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mu2_accuracy             Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "mu2_accuracy", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mu2_accuracy");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mu2_accuracy");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mu2_accuracy", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mu2_accuracy" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].mu2_nadir[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mu2dl_accuracy           Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "mu2dl_accuracy", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mu2dl_accuracy");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mu2dl_accuracy");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mu2dl_accuracy", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mu2dl_accuracy" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].mu2_limb[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mu3_accuracy             Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "mu3_accuracy", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mu3_accuracy");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mu3_accuracy");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mu3_accuracy" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].mu3_nadir[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mu3dl_accuracy           Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "mu3dl_accuracy", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mu3dl_accuracy");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mu3dl_accuracy");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mu3dl_accuracy", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mu3dl_accuracy" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].mu3_limb[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // radsens_limb_error       Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "radsens_limb_error", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "radsens_limb_error");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "radsens_limb_error");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "radsens_limb_error", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "radsens_limb_error" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].radiance_limb[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // radsens_nadir_error      Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "radsens_nadir_error", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "radsens_nadir_error");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "radsens_nadir_error");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "radsens_nadir_error", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "radsens_nadir_error" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].radiance_nadir[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // radsens_optical_bench_error Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "radsens_optical_bench_error", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "radsens_optical_bench_error");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "radsens_optical_bench_error");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "radsens_optical_bench_error", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "radsens_optical_bench_error" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].radiance_vis[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // radsens_sun_error        Dataset {spectral_channel}
+     if ( (dset_id = H5Dopen(gid, "radsens_sun_error", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "radsens_sun_error");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "radsens_sun_error");
+     dbuff = (double *) malloc(spectral_channel * sizeof(double));
+     if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "radsens_sun_error", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "radsens_sun_error" );
+     for ( ns = 0; ns < spectral_channel; ns++ )
+	  ekd[ns].radiance_sun[ns] = (float) dbuff[ns];
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return 1;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_CLCP
@@ -606,6 +775,85 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_SRS(hid_t fid, struct srs_scia **srs_out)
+{
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_srs;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct srs_scia *srs;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group /CALIBRATION/MEAN_SUN_REFERENCE 
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/CALIBRATION/MEAN_SUN_REFERENCE " );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION/MEAN_SUN_REFERENCE ");
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_srs = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          srs_out[0] = (struct srs_scia *) 
+               calloc((size_t) num_srs, sizeof(struct srs_scia));
+     }
+     if ( (srs = srs_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "srs" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_srs * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       srs[ni].wvlen_sun[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_srs;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NV_RD_PSPL
@@ -615,12 +863,92 @@ done:
      input:
             hid_t fid        :         HDF5 file identifier 
     output:
-            struct pspn_scia **pspl :  Polarisation Sensitivity Parameters
+            struct psplo_scia **pspl :  Polarisation Sensitivity Parameters
                                         (limb)
 .RETURNS     number of data set records read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_PSPL(hid_t fid, struct psplo_scia **pspl_out)
+{
+     const char grp_name[] = \
+	  "/CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION";
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_pspl;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct psplo_scia *pspl;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group POLARISATION_SENSITIVITY_LIMB_OCCULTATION
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_pspl = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          pspl_out[0] = (struct psplo_scia *) 
+               calloc((size_t) num_pspl, sizeof(struct psplo_scia));
+     }
+     if ( (pspl = pspl_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspl" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_pspl * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_pspl; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       pspl[ni].mu2[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_pspl;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NV_RD_PSPN
@@ -636,21 +964,181 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_PSPN(hid_t fid, struct pspn_scia **pspn_out)
+{
+     const char grp_name[] =
+	  "/CALIBRATION/POLARISATION_SENSITIVITY_NADIR";
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_pspn;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct pspn_scia *pspn;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group POLARISATION_SENSITIVITY_NADIR
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_pspn = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          pspn_out[0] = (struct pspn_scia *) 
+               calloc((size_t) num_pspn, sizeof(struct pspn_scia));
+     }
+     if ( (pspn = pspn_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspn" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_pspn * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_pspn; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       pspn[ni].mu2[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_pspn;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
-.IDENTifer   SCIA_LV1_NV_RD_PSPL
+.IDENTifer   SCIA_LV1_NV_RD_PSPO
 .PURPOSE     read Polarisation Sensitivity Parameters (occultation)
 .INPUT/OUTPUT
-  call as   num = SCIA_LV1_RD_PSPL( fid, &pspo );
+  call as   num = SCIA_LV1_RD_PSPO( fid, &pspo );
      input:
             hid_t fid        :         HDF5 file identifier 
     output:
-            struct pspn_scia **pspo :  Polarisation Sensitivity Parameters
+            struct psplo_scia **pspo :  Polarisation Sensitivity Parameters
                                         (occultation)
 .RETURNS     number of data set records read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_PSPO(hid_t fid, struct psplo_scia **pspo_out)
+{
+     const char grp_name[] = \
+	  "/CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION_NDF";
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_pspo;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct psplo_scia *pspo;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group POLARISATION_SENSITIVITY_LIMB_OCCULTATION_NDF
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_pspo = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          pspo_out[0] = (struct psplo_scia *) 
+               calloc((size_t) num_pspo, sizeof(struct psplo_scia));
+     }
+     if ( (pspo = pspo_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspo" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_pspo * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_pspo; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       pspo[ni].mu2[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_pspo;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_PPG
@@ -666,6 +1154,85 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_PPG(hid_t fid, struct ppg_scia **ppg_out)
+{
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_ppg;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct ppg_scia *ppg;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group /CALIBRATION/PPG_ETALON
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/CALIBRATION/PPG_ETALON" );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/CALIBRATION/PPG_ETALON" );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_ppg = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          ppg_out[0] = (struct ppg_scia *) 
+               calloc((size_t) num_ppg, sizeof(struct ppg_scia));
+     }
+     if ( (ppg = ppg_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "ppg" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_ppg * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_ppg; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       ppg[ni].ppg_fact[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_ppg;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_RSPL
@@ -675,12 +1242,92 @@ done:
      input:
             hid_t fid        :         HDF5 file identifier
     output:
-            struct rspn_scia **rspl :  Radiation Sensitivity Parameters
+            struct rsplo_scia **rspl :  Radiation Sensitivity Parameters
                                         (limb)
 .RETURNS     number of data set records read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_RSPL(hid_t fid, struct rsplo_scia **rspl_out)
+{
+     const char grp_name[] = \
+	  "/CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION";
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_rspl;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct rsplo_scia *rspl;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group RADIANCE_SENSITIVITY_LIMB_OCCULTATION
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_rspl = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          rspl_out[0] = (struct rsplo_scia *) 
+               calloc((size_t) num_rspl, sizeof(struct rsplo_scia));
+     }
+     if ( (rspl = rspl_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspl" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_rspl * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_rspl; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       rspl[ni].sensitivity[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_rspl;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_RSPN
@@ -696,6 +1343,86 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_RSPN(hid_t fid, struct rspn_scia **rspn_out)
+{
+     const char grp_name[] = \
+	  "/CALIBRATION/RADIANCE_SENSITIVITY_NADIR";
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_rspn;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct rspn_scia *rspn;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group RADIANCE_SENSITIVITY_NADIR
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_rspn = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          rspn_out[0] = (struct rspn_scia *) 
+               calloc((size_t) num_rspn, sizeof(struct rspn_scia));
+     }
+     if ( (rspn = rspn_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspn" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_rspn * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_rspn; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       rspn[ni].sensitivity[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_rspn;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_RSPO
@@ -705,12 +1432,92 @@ done:
      input:
             hid_t fid        :         HDF5 file identifier
     output:
-            struct rspn_scia **rspo :  Radiation Sensitivity Parameters
+            struct rsplo_scia **rspo :  Radiation Sensitivity Parameters
                                         (occultation)
 .RETURNS     number of data set records read (unsigned int)
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_RSPO(hid_t fid, struct rsplo_scia **rspo_out)
+{
+     const char grp_name[] = \
+	  "/CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF";
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_rspo;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct rsplo_scia *rspo;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_rspo = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          rspo_out[0] = (struct rsplo_scia *) 
+               calloc((size_t) num_rspo, sizeof(struct rsplo_scia));
+     }
+     if ( (rspo = rspo_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspo" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_rspo * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_rspo; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       rspo[ni].sensitivity[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_rspo;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_SFP
@@ -726,6 +1533,83 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_SFP(hid_t fid, struct sfp_scia **sfp_out)
+{
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_sfp;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct sfp_scia *sfp;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group /CALIBRATION/
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/CALIBRATION/SLIT_FUNCTION" );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/CALIBRATION/SLIT_FUNCTION" );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_sfp = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          sfp_out[0] = (struct sfp_scia *) 
+               calloc((size_t) num_sfp, sizeof(struct sfp_scia));
+     }
+     if ( (sfp = sfp_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sfp" );
+/*
+ * read SLIT_FUNCTION datasets
+ */
+     // 
+     dim_size = num_sfp * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_sfp; ni++ ) {
+	  sfp[ni].fwhm_slit_fun = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_sfp;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_ASFP
@@ -740,6 +1624,83 @@ done:
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_ASFP(hid_t fid, struct asfp_scia **asfp_out)
+{
+     const char grp_name[] = "/CALIBRATION/SMALL_AP_SLIT_FUNCTION";
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_asfp;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct asfp_scia *asfp;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group SMALL_AP_SLIT_FUNCTION
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
+     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_asfp = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          asfp_out[0] = (struct asfp_scia *) 
+               calloc((size_t) num_asfp, sizeof(struct asfp_scia));
+     }
+     if ( (asfp = asfp_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "asfp" );
+/*
+ * read SMALL_AP_SLIT_FUNCTION datasets
+ */
+     // 
+     dim_size = num_asfp * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_asfp; ni++ ) {
+	  asfp[ni].fwhm_slit_fun = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_asfp;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_SCP
@@ -755,6 +1716,85 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_SCP(hid_t fid, struct scp_scia **scp_out)
+{
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short spectral_channel;
+     unsigned int   num_scp;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct scp_scia *scp;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * open group /CALIBRATION/SPECTRAL_CALIBRATION
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/CALIBRATION/SPECTRAL_CALIBRATION" );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION/SPECTRAL_CALIBRATION");
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     spectral_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_scp = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          scp_out[0] = (struct scp_scia *) 
+               calloc((size_t) num_scp, sizeof(struct scp_scia));
+     }
+     if ( (scp = scp_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "scp" );
+/*
+ * read LEAKAGE_CURRENT datasets
+ */
+     // 
+     dim_size = num_scp * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     for ( nr = ni = 0; ni < num_scp; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       scp[ni].coeffs[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_scp;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_STATE
@@ -1190,6 +2230,127 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_LADS(hid_t fid, struct lads_scia **lads_out)
+{
+     register unsigned short ns;
+     register unsigned int   ni, nr;
+
+     unsigned short num_corner;
+     unsigned int   num_state;
+     size_t         dim_size;
+
+     double *dbuff;
+
+     struct tm tm_ref;
+     struct lads_scia *lads;
+
+     char   ref_date[25];
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * read global attribute "time_reference"
+ */
+     (void) H5LTget_attribute_string(fid, "/", "time_reference", ref_date);
+     (void) strptime(ref_date, "%Y-%m-%dT%H:%M:%S", &tm_ref);
+/*
+ * open group STATES_GEOLOCATION
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/STATES_GEOLOCATION" );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/STATES_GEOLOCATION" );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( fid, "state", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "state" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_state = (unsigned int) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "corner", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "corner" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_corner = (unsigned short) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          lads_out[0] = (struct lads_scia *) 
+               calloc((size_t) num_state, sizeof(struct lads_scia));
+     }
+     if ( (lads = lads_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "lads" );
+/*
+ * read STATES_GEOLOCATION datasets
+ */
+     // delta_time               Dataset {num_state}
+     if ( (dset_id = H5Dopen(gid, "delta_time", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "delta_time");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "delta_time");
+     if ( (dbuff = (double *) malloc(num_state * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "delta_time", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "delta_time" );
+     for ( ni = 0; ni < num_state; ni++ ) {
+	  struct mjd_envi mjd;
+	  DELTA_TIME2MJD(tm_ref, dbuff[ni], &mjd);
+	  (void) memcpy(&lads[ni].mjd, &mjd, sizeof(struct mjd_envi));
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // latitude_bounds          Dataset {num_state, num_corner}
+     dim_size = num_state * num_corner;
+     if ( (dset_id = H5Dopen(gid, "latitude_bounds", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "latitude_bounds");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "latitude_bounds");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "latitude_bounds", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "latitude_bounds" );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  for ( ns = 0; ns < num_corner; ns++ )
+	       lads[ni].corner[ns].lat = NINT(1e6 * dbuff[nr++]);
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // longitude_bounds         Dataset {num_state, num_corner}
+     dim_size = num_state * num_corner;
+     if ( (dset_id = H5Dopen(gid, "longitude_bounds", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "longitude_bounds");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "longitude_bounds");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "longitude_bounds", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "longitude_bounds" );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  for ( ns = 0; ns < num_corner; ns++ )
+	       lads[ni].corner[ns].lon = NINT(1e6 * dbuff[nr++]);
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_state;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV1_NC_RD_SQADS
@@ -1205,7 +2366,246 @@ done:
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
+static
+unsigned int SCIA_LV1_NC_RD_SQADS(hid_t fid, struct sqads1_scia **sqads_out)
+{
+     register unsigned short ns;
+     register unsigned int   ni, nr;
 
+     unsigned short detector, num_channel;
+     unsigned int   num_state;
+     size_t         dim_size;
+
+     char   *cbuff;
+     short  *sbuff;
+     float  *rbuff;
+     double *dbuff;
+
+     char   ref_date[25];
+
+     struct tm tm_ref;
+     struct sqads1_scia *sqads;
+     
+     hid_t gid = -1;
+     hid_t dset_id = -1;
+     hid_t type_id = -1;
+     hsize_t cur_dims;
+/*
+ * read global attribute "time_reference"
+ */
+     (void) H5LTget_attribute_string(fid, "/", "time_reference", ref_date);
+     (void) strptime(ref_date, "%Y-%m-%dT%H:%M:%S", &tm_ref);
+/*
+ * open group /STATES_QUALITY
+ */
+     gid = NADC_OPEN_HDF5_Group( fid, "/STATES_QUALITY" );
+     if ( gid < 0 )
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, "/STATES_QUALITY" );
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen( gid, "detector", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "detector" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     detector = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( gid, "detector_channel", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "detector_channel" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_channel = (unsigned short) cur_dims;
+     if ( (dset_id = H5Dopen( fid, "state", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "state" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_state = (unsigned int) cur_dims;
+/*
+ * allocate memory
+ */
+     if ( ! Use_Extern_Alloc ) {
+          sqads_out[0] = (struct sqads1_scia *) 
+               calloc((size_t) num_state, sizeof(struct sqads1_scia));
+     }
+     if ( (sqads = sqads_out[0]) == NULL ) 
+          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sqads" );
+/*
+ * read STATES_QUALITY datasets
+ */
+     // decontamination_flag     Dataset {num_state, num_channel}
+     dim_size = num_state * num_channel;
+     if ( (dset_id = H5Dopen(gid, "decontamination_flag", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "decontamination_flag");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "decontamination_flag");
+     if ( (cbuff = (char *) malloc(dim_size)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5LTread_dataset( gid, "decontamination_flag", type_id, cbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "decontamination_flag" );
+     //for ( nr = ni = 0; ni < num_state; ni++ ) {
+     //for ( ns = 0; ns < num_channel; ns++ )
+     //not_used = (unsigned char) cbuff[nr++];
+     //}
+     free( cbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // delta_time               Dataset {num_state}
+     if ( (dset_id = H5Dopen(gid, "delta_time", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "delta_time");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "delta_time");
+     if ( (dbuff = (double *) malloc(num_state * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "delta_time", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "delta_time" );
+     for ( ni = 0; ni < num_state; ni++ ) {
+	  struct mjd_envi mjd;
+	  DELTA_TIME2MJD(tm_ref, dbuff[ni], &mjd);
+	  (void) memcpy(&sqads[ni].mjd, &mjd, sizeof(struct mjd_envi));
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // diff_fraunhofer          Dataset {num_state, num_channel}
+     dim_size = num_state * num_channel;
+     if ( (dset_id = H5Dopen(gid, "diff_fraunhofer", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "diff_fraunhofer");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "diff_fraunhofer");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "diff_fraunhofer", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "diff_fraunhofer" );
+     //for ( nr = ni = 0; ni < num_state; ni++ ) {
+     //for ( ns = 0; ns < spectral_channel; ns++ )
+     //sqads[ni].[ns] = (float) dbuff[nr++];
+     //}
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // hot_pixel_counter        Dataset {num_state, detector}
+     dim_size = num_state * detector;
+     if ( (dset_id = H5Dopen(gid, "hot_pixel_counter", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "hot_pixel_counter");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "hot_pixel_counter");
+     if ( (sbuff = (short *) malloc(dim_size * sizeof(short))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sbuff" );
+     if (H5LTread_dataset( gid, "hot_pixel_counter", type_id, sbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "hot_pixel_counter" );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  for ( ns = 0; ns < detector; ns++ )
+	       sqads[ni].hotpixel[ns] = (unsigned short) sbuff[nr++];
+     }
+     free( sbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // leakage_quality          Dataset {num_state, detector}
+     dim_size = num_state * num_channel;
+     if ( (dset_id = H5Dopen(gid, "leakage_quality", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "leakage_quality");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "leakage_quality");
+     if ( (rbuff = (float *) malloc(dim_size * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "leakage_quality", type_id, rbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "leakage_quality" );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  for ( ns = 0; ns < detector; ns++ )
+	       sqads[ni].mean_wv_diff[ns] = rbuff[nr++];
+     }
+     free( rbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // overall_quality_flag     Dataset {num_state}
+     if ( (dset_id = H5Dopen(gid, "overall_quality_flag", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "overall_quality_flag");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "overall_quality_flag");
+     if ( (cbuff = (char *) malloc(num_state)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5LTread_dataset( gid, "overall_quality_flag", type_id, cbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "overall_quality_flag" );
+     for ( ni = 0; ni < num_state; ni++ ) {
+	  sqads[ni].flag_mds = (unsigned char) cbuff[ni];
+     }
+     free( cbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // rainbow_flag             Dataset {num_state}
+     if ( (dset_id = H5Dopen(gid, "rainbow_flag", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "rainbow_flag");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "rainbow_flag");
+     if ( (cbuff = (char *) malloc(num_state)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5LTread_dataset( gid, "rainbow_flag", type_id, cbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "rainbow_flag" );
+     for ( ni = 0; ni < num_state; ni++ ) {
+	  sqads[ni].flag_rainbow = (unsigned char) cbuff[ni];
+     }
+     free( cbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // saa_flag                 Dataset {num_state}
+     if ( (dset_id = H5Dopen(gid, "saa_flag", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "saa_flag");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "saa_flag");
+     if ( (cbuff = (char *) malloc(num_state)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5LTread_dataset( gid, "saa_flag", type_id, cbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "saa_flag" );
+     for ( ni = 0; ni < num_state; ni++ ) {
+	  sqads[ni].flag_saa_region = (unsigned char) cbuff[ni];
+     }
+     free( cbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // stddev_fraunhofer        Dataset {num_state, num_channel}
+     dim_size = num_state * num_channel;
+     if ( (dset_id = H5Dopen(gid, "stddev_fraunhofer", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "stddev_fraunhofer");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "stddev_fraunhofer");
+     if ( (rbuff = (float *) malloc(dim_size * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "stddev_fraunhofer", type_id, rbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "stddev_fraunhofer" );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  for ( ns = 0; ns < num_channel; ns++ )
+	       sqads[ni].sdev_wv_diff[ns] = rbuff[nr++];
+     }
+     free( rbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // sun_glint_flag           Dataset {num_state}
+     if ( (dset_id = H5Dopen(gid, "sun_glint_flag", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "sun_glint_flag");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "sun_glint_flag");
+     if ( (cbuff = (char *) malloc(num_state)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5LTread_dataset( gid, "sun_glint_flag", type_id, cbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "sun_glint_flag" );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  sqads[ni].flag_glint = (unsigned char) cbuff;
+     }
+     free( cbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+/*
+ * set return values
+ */
+     (void) H5Gclose( gid );
+     return num_state;
+done:
+     H5E_BEGIN_TRY {
+          (void) H5Tclose( type_id );
+          (void) H5Dclose( dset_id );
+          (void) H5Fclose( gid );
+     } H5E_END_TRY;
+     return 0;
+}
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 int main(int argc, char *argv[])
@@ -1223,8 +2623,8 @@ int main(int argc, char *argv[])
      //struct mph_envi    mph;
      //struct sip_scia    sip;
      //struct sph1_scia   sph;
-     //struct sqads1_scia *sqads;
-     //struct lads_scia   *lads;
+     struct sqads1_scia *sqads;
+     struct lads_scia   *lads = NULL;
      struct clcp_scia   clcp;
      struct vlcp_scia   *vlcp = NULL;
      //struct ppg_scia    ppg;
@@ -1237,7 +2637,7 @@ int main(int argc, char *argv[])
      //struct rspn_scia   *rspn;
      //struct rsplo_scia  *rspl;
      //struct rsplo_scia  *rspo;
-     //struct ekd_scia    ekd;
+     struct ekd_scia    ekd;
      //struct asfp_scia   *asfp;
      //struct sfp_scia    *sfp;
      struct state1_scia *state = NULL;
@@ -1291,10 +2691,24 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write Summary of Quality Flags per State records
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_SQADS\n");
+     num = SCIA_LV1_NC_RD_SQADS(fid, &sqads);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SQADS");
+     SCIA_LV1_WR_ASCII_SQADS(param, num, sqads);
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SQADS" );
 /*
  * -------------------------
  * read/write Geolocation of the States
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_LADS\n");
+     num = SCIA_LV1_NC_RD_LADS(fid, &lads);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "LADS");
+     SCIA_WR_ASCII_LADS(param, num, lads);
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LADS" );
 /*
  * -------------------------
  * read/write Static Instrument Parameters
@@ -1367,6 +2781,13 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write Errors on Key Data
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_EKD\n");
+     num = SCIA_LV1_NC_RD_EKD(fid, &ekd);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "EKD");
+     SCIA_LV1_WR_ASCII_EKD(param, &ekd);
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "EKD" );
 /*
  * -------------------------
  * read/write Slit Function Parameters
