@@ -16,7 +16,7 @@ PRO DEFS_NADC, DATADIR
              numLv0PMDpacket :    200us ,$
              numLv0AuxBCP    :     16us ,$
              numLv0AuxPMTC   :      5us ,$
-             sciaUTCstring   :     28us ,$
+             sciaUTCstring   :     29us ,$
              dataDir         :  DATADIR $
          }
 

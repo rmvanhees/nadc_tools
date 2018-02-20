@@ -77,9 +77,9 @@ After checking out a working copy, you will be left with the following directory
 | Name      | Version | Relevance | Notes                                                      |
 |-----------|---------|-----------|------------------------------------------------------------|
 | HDF5      | 1.8.x   | mandatory | Hierarchical Data Format, version 5 (www.hdfgroup.org)     |
-| netCDF-4  | 4.2.x   | optional  | Network Common Data Form, version 4 (www.unidata.ucar.edu) |                                                      |
+| netCDF-4  | 4.2.x   | optional  | Network Common Data Form, version 4 (www.unidata.ucar.edu) |
 | PostgreSQL| 9.x     | optional  | www.postgresql.org                                         |
-
+-j4 
 
 ## Configuration and build ##
 

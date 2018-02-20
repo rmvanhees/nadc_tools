@@ -540,15 +540,16 @@ def scia_orbit_range(string):
     return res
 
 def scia_lon_range(string):
-    res = [float(str) for str in string[1:-1].split(',')]
+    res = [float(str) for str in string.split(',')]
     if len(res) > 2:
         msg = '%r is not a orbit number or range' % string
         raise argparse.ArgumentTypeError(msg)
     elif len(res) == 1:
         res = [ res[0] - 0.1, res[0] + 0.1 ]
     else:
-        if len(res) == 2 and res[0] > res[1]: res.sort()
-        
+        if len(res) == 2 and res[0] > res[1]:
+            res.sort()
+
     return res
 
 def scia_lat_range(string):
@@ -559,8 +560,9 @@ def scia_lat_range(string):
     elif len(res) == 1:
         res = [ res[0] - 0.1, res[0] + 0.1 ]
     else:
-        if len(res) == 2 and res[0] > res[1]: res.sort()
-        
+        if len(res) == 2 and res[0] > res[1]:
+            res.sort()
+
     return res
 
 #+++++++++++++++++++++++++

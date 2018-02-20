@@ -85,8 +85,8 @@ SCIA_LV1_RD_STATE, dsd, state, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; read (level 0) PMD data packets
-SCIA_LV1_RD_PMD, dsd, pmd_lv0, status=status
-IF status NE 0 THEN NADC_ERR_TRACE
+#SCIA_LV1_RD_PMD, dsd, pmd_lv0, status=status
+#IF status NE 0 THEN NADC_ERR_TRACE
 
 ; read (level 0) Auxiliary data packets
 SCIA_LV1_RD_AUX, dsd, aux_lv0, status=status
