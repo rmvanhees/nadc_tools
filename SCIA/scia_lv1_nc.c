@@ -234,7 +234,7 @@ unsigned int SCIA_LV1_NC_RD_EKD(hid_t fid, /*@out@*/ struct ekd_scia *ekd)
           NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mu3_accuracy");
      dbuff = (double *) malloc(spectral_channel * sizeof(double));
      if ( dbuff == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
+     if (H5LTread_dataset( gid, "mu3_accuracy", type_id, dbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mu3_accuracy" );
      for ( ns = 0; ns < spectral_channel; ns++ )
 	  ekd[ns].mu3_nadir[ns] = (float) dbuff[ns];
@@ -781,37 +781,45 @@ unsigned int SCIA_LV1_NC_RD_SRS(hid_t fid, struct srs_scia **srs_out)
      register unsigned short ns;
      register unsigned int   ni, nr;
 
-     unsigned short spectral_channel;
+     unsigned short num_pmd, spectral_channel;
      unsigned int   num_srs;
      size_t         dim_size;
 
+     char   **cbuff;
+     float  *rbuff;
      double *dbuff;
 
      struct srs_scia *srs;
      
      hid_t gid = -1;
+     hid_t space_id = -1;
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
 /*
  * open group /CALIBRATION/MEAN_SUN_REFERENCE 
  */
-     gid = NADC_OPEN_HDF5_Group( fid, "/CALIBRATION/MEAN_SUN_REFERENCE " );
+     gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION/MEAN_SUN_REFERENCE");
      if ( gid < 0 )
-	  NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION/MEAN_SUN_REFERENCE ");
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION/MEAN_SUN_REFERENCE");
 /*
  * obtain dimensions
  */
+     if ( (dset_id = H5Dopen( fid, "pmd", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "pmd" );
+     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     (void) H5Dclose( dset_id );
+     num_pmd = (unsigned short) cur_dims;
      if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose( dset_id );
      spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     if ( (dset_id = H5Dopen( gid, "record", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "record" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose( dset_id );
-     num_srs = (unsigned int) cur_dims;
+     num_srs = (unsigned int) cur_dims;   /* keep cur_dims == num_srs */
 /*
  * allocate memory
  */
@@ -822,21 +830,218 @@ unsigned int SCIA_LV1_NC_RD_SRS(hid_t fid, struct srs_scia **srs_out)
      if ( (srs = srs_out[0]) == NULL ) 
           NADC_GOTO_ERROR( NADC_ERR_ALLOC, "srs" );
 /*
- * read LEAKAGE_CURRENT datasets
+ * read MEAN_SUN_REFERENCE datasets
  */
-     // 
-     dim_size = num_srs * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     // doppler_shift            Dataset {num_srs}
+     if ( (dset_id = H5Dopen(gid, "doppler_shift", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "doppler_shift");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "doppler_shift");
+     if ( (rbuff = (float *) malloc(num_srs * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "doppler_shift", type_id, rbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "doppler_shift" );
+     for ( ni = 0; ni < num_srs; ni++ ) {
+	  srs[ni].dopp_shift = rbuff[ni];
+     }
+     free( rbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_azimuth         Dataset {num_srs}
+     if ( (dset_id = H5Dopen(gid, "mean_sun_azimuth", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_azimuth");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_azimuth");
+     if ( (rbuff = (float *) malloc(num_srs * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_azimuth", type_id, rbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_azimuth" );
+     for ( ni = 0; ni < num_srs; ni++ ) {
+	  srs[ni].avg_asm = rbuff[ni];
+     }
+     free( rbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_elevation       Dataset {num_srs}
+     if ( (dset_id = H5Dopen(gid, "mean_sun_elevation", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_elevation");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_elevation");
+     if ( (rbuff = (float *) malloc(num_srs * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_elevation", type_id, rbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_elevation" );
+     for ( ni = 0; ni < num_srs; ni++ ) {
+	  srs[ni].avg_esm = rbuff[ni];
+     }
+     free( rbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_solar_elevation Dataset {num_srs}
+     if ( (dset_id = H5Dopen(gid, "mean_sun_solar_elevation", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_solar_elevation");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_solar_elevation");
+     if ( (rbuff = (float *) malloc(num_srs * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_solar_elevation", type_id, rbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_solar_elevation" );
+     for ( ni = 0; ni < num_srs; ni++ ) {
+	  srs[ni].avg_elev_sun = rbuff[ni];
+     }
+     free( rbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // type                     Dataset {num_srs, S(3)}
+     if ( (dset_id = H5Dopen(gid, "type", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "type");
+     type_id = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size (type_id, H5T_VARIABLE);
+     space_id = H5Screate_simple(1, &cur_dims, NULL);
+     if ( (cbuff = (char **) malloc((size_t) cur_dims)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5Dread(dset_id, type_id, space_id, H5S_ALL, H5S_ALL, cbuff) < 0)
+	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "type" );
+     for ( ni = 0; ni < num_srs; ni++ ) {
+	  (void) fprintf(stdout, "[%u] %s\n", ni, cbuff[ni]);
+	  (void) strlcpy(srs[ni].sun_spec_id, cbuff[ni], 3);
+     }
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     (void) H5Sclose(space_id);
+     free(cbuff);
+     // lambda_mean_sun          Dataset {num_srs, spectral_channel}
+     dim_size = num_srs * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "lambda_mean_sun", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "lambda_mean_sun");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "lambda_mean_sun");
      if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5LTread_dataset( gid, "", type_id, dbuff ) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
+     if (H5LTread_dataset( gid, "lambda_mean_sun", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "lambda_mean_sun" );
      for ( nr = ni = 0; ni < num_srs; ni++ ) {
 	  for ( ns = 0; ns < spectral_channel; ns++ )
 	       srs[ni].wvlen_sun[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_accuracy        Dataset {num_srs, spectral_channel}
+     dim_size = num_srs * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_accuracy", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_accuracy");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_accuracy");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_accuracy", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_accuracy" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       srs[ni].accuracy_sun[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_etalon          Dataset {num_srs, spectral_channel}
+     dim_size = num_srs * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_etalon", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_etalon");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_etalon");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_etalon", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_etalon" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       srs[ni].etalon[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_precision       Dataset {num_srs, spectral_channel}
+     dim_size = num_srs * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_precision", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_precision");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_precision");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_precision", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_precision" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       srs[ni].precision_sun[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_reference       Dataset {num_srs, spectral_channel}
+     dim_size = num_srs * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_reference", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_reference");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_reference");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_reference", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_reference" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       srs[ni].mean_sun[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_pmd             Dataset {num_srs, num_pmd}
+     dim_size = num_srs * num_pmd;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_pmd", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_pmd");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_pmd");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_pmd", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_pmd" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < num_pmd; ns++ )
+	       srs[ni].pmd_mean[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_out_of_band_signal_nd_in Dataset {num_srs, num_pmd}
+     dim_size = num_srs * num_pmd;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_out_of_band_signal_nd_in", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_out_of_band_signal_nd_in");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_out_of_band_signal_nd_in");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_out_of_band_signal_nd_in", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_out_of_band_signal_nd_in" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < num_pmd; ns++ )
+	       srs[ni].pmd_out_nd_in[ns] = (float) dbuff[nr++];
+     }
+     free( dbuff );
+     (void) H5Tclose( type_id );
+     (void) H5Dclose( dset_id );
+     // mean_sun_out_of_band_signal_nd_out Dataset {num_srs, num_pmd}
+     dim_size = num_srs * num_pmd;
+     if ( (dset_id = H5Dopen(gid, "mean_sun_out_of_band_signal_nd_out", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "mean_sun_out_of_band_signal_nd_out");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "mean_sun_out_of_band_signal_nd_out");
+     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5LTread_dataset( gid, "mean_sun_out_of_band_signal_nd_out", type_id, dbuff ) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "mean_sun_out_of_band_signal_nd_out" );
+     for ( nr = ni = 0; ni < num_srs; ni++ ) {
+	  for ( ns = 0; ns < num_pmd; ns++ )
+	       srs[ni].pmd_out_nd_out[ns] = (float) dbuff[nr++];
      }
      free( dbuff );
      (void) H5Tclose( type_id );
@@ -2270,7 +2475,7 @@ unsigned int SCIA_LV1_NC_RD_LADS(hid_t fid, struct lads_scia **lads_out)
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose( dset_id );
      num_state = (unsigned int) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "corner", H5P_DEFAULT )) < 0 )
+     if ( (dset_id = H5Dopen( fid, "corner", H5P_DEFAULT )) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "corner" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose( dset_id );
@@ -2315,8 +2520,13 @@ unsigned int SCIA_LV1_NC_RD_LADS(hid_t fid, struct lads_scia **lads_out)
      if (H5LTread_dataset( gid, "latitude_bounds", type_id, dbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "latitude_bounds" );
      for ( nr = ni = 0; ni < num_state; ni++ ) {
-	  for ( ns = 0; ns < num_corner; ns++ )
-	       lads[ni].corner[ns].lat = NINT(1e6 * dbuff[nr++]);
+	  for ( ns = 0; ns < num_corner; ns++ ) {
+	       if ( dbuff[nr] >= -90. && dbuff[nr] <= 90 )
+		    lads[ni].corner[ns].lat = NINT(1e6 * dbuff[nr]);
+	       else
+		    lads[ni].corner[ns].lat = 0.;
+	       nr++;
+	  }
      }
      free( dbuff );
      (void) H5Tclose( type_id );
@@ -2332,8 +2542,13 @@ unsigned int SCIA_LV1_NC_RD_LADS(hid_t fid, struct lads_scia **lads_out)
      if (H5LTread_dataset( gid, "longitude_bounds", type_id, dbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "longitude_bounds" );
      for ( nr = ni = 0; ni < num_state; ni++ ) {
-	  for ( ns = 0; ns < num_corner; ns++ )
-	       lads[ni].corner[ns].lon = NINT(1e6 * dbuff[nr++]);
+	  for ( ns = 0; ns < num_corner; ns++ ) {
+	       if ( dbuff[nr] >= -180. && dbuff[nr] <= 180.  )
+		    lads[ni].corner[ns].lon = NINT(1e6 * dbuff[nr]);
+	       else
+		    lads[ni].corner[ns].lon = 0.;
+	       nr++;
+	  }
      }
      free( dbuff );
      (void) H5Tclose( type_id );
@@ -2404,7 +2619,7 @@ unsigned int SCIA_LV1_NC_RD_SQADS(hid_t fid, struct sqads1_scia **sqads_out)
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "detector", H5P_DEFAULT )) < 0 )
+     if ( (dset_id = H5Dopen( fid, "detector", H5P_DEFAULT )) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "detector" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose( dset_id );
@@ -2471,15 +2686,15 @@ unsigned int SCIA_LV1_NC_RD_SQADS(hid_t fid, struct sqads1_scia **sqads_out)
           NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "diff_fraunhofer");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
           NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "diff_fraunhofer");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5LTread_dataset( gid, "diff_fraunhofer", type_id, dbuff ) < 0 )
+     if ( (rbuff = (float *) malloc(dim_size * sizeof(float))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     if (H5LTread_dataset( gid, "diff_fraunhofer", type_id, rbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "diff_fraunhofer" );
-     //for ( nr = ni = 0; ni < num_state; ni++ ) {
-     //for ( ns = 0; ns < spectral_channel; ns++ )
-     //sqads[ni].[ns] = (float) dbuff[nr++];
-     //}
-     free( dbuff );
+     for ( nr = ni = 0; ni < num_state; ni++ ) {
+	  for ( ns = 0; ns < num_channel; ns++ )
+	       sqads[ni].mean_wv_diff[ns] = rbuff[nr++];
+     }
+     free( rbuff );
      (void) H5Tclose( type_id );
      (void) H5Dclose( dset_id );
      // hot_pixel_counter        Dataset {num_state, detector}
@@ -2500,7 +2715,7 @@ unsigned int SCIA_LV1_NC_RD_SQADS(hid_t fid, struct sqads1_scia **sqads_out)
      (void) H5Tclose( type_id );
      (void) H5Dclose( dset_id );
      // leakage_quality          Dataset {num_state, detector}
-     dim_size = num_state * num_channel;
+     dim_size = num_state * detector;
      if ( (dset_id = H5Dopen(gid, "leakage_quality", H5P_DEFAULT)) < 0 )
           NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "leakage_quality");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
@@ -2510,8 +2725,11 @@ unsigned int SCIA_LV1_NC_RD_SQADS(hid_t fid, struct sqads1_scia **sqads_out)
      if (H5LTread_dataset( gid, "leakage_quality", type_id, rbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "leakage_quality" );
      for ( nr = ni = 0; ni < num_state; ni++ ) {
-	  for ( ns = 0; ns < detector; ns++ )
-	       sqads[ni].mean_wv_diff[ns] = rbuff[nr++];
+	  for ( ns = 0; ns < detector; ns++ ) {
+	       if ( rbuff[nr] < 1e36 ) 
+		    sqads[ni].mean_diff_leak[ns] = rbuff[nr];
+	       nr++;
+	  }
      }
      free( rbuff );
      (void) H5Tclose( type_id );
@@ -2629,7 +2847,7 @@ int main(int argc, char *argv[])
      struct vlcp_scia   *vlcp = NULL;
      //struct ppg_scia    ppg;
      //struct scp_scia    *scp;
-     //struct srs_scia    *srs;
+     struct srs_scia    *srs = NULL;
      //struct cal_options calopt;
      //struct pspn_scia   *pspn;
      //struct psplo_scia  *pspl;
@@ -2753,6 +2971,14 @@ int main(int argc, char *argv[])
  * read/write Sun Reference Spectrum 
  *    always write this GADS, because it is required by most retrievals
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_SRS\n");
+     num = SCIA_LV1_NC_RD_SRS(fid, &srs);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SRS");
+     SCIA_LV1_WR_ASCII_SRS(param, num, srs);
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SRS");
+     free(srs);
 /*
  * -------------------------
  * read/write Polarisation Sensitivity Parameters Nadir
@@ -2861,6 +3087,7 @@ int main(int argc, char *argv[])
 /*
  * close input file and PDS file
  */
+     (void) fprintf(stdout, "close input file\n");
      if ( fid > 0 ) {
 	  if ( ! IS_ERR_STAT_FATAL && param.write_pds == PARAM_SET ) {
 	       if ( IS_ERR_STAT_FATAL )
@@ -2869,15 +3096,9 @@ int main(int argc, char *argv[])
 	  (void) H5Fclose(fid);
      }
 /*
- * close HDF5 output file
- */
-     if ( param.write_hdf5 == PARAM_SET ) {
-	  if ( param.hdf_file_id >= 0 && H5Fclose(param.hdf_file_id) < 0 )
-	       NADC_ERROR(NADC_ERR_HDF_FILE, param.hdf5_name);
-     }
-/*
  * display error messages?
  */
+     (void) fprintf(stdout, "any messages?\n");
      if ( param.flag_silent == PARAM_UNSET ) NADC_Err_Trace(stderr);
      if ( IS_ERR_STAT_FATAL ) 
 	  return NADC_ERR_FATAL;
