@@ -904,7 +904,7 @@ unsigned int SCIA_LV1_NC_RD_SRS(hid_t fid, struct srs_scia **srs_out)
 	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "type" );
      for ( ni = 0; ni < num_srs; ni++ ) {
 	  (void) fprintf(stdout, "[%u] %s\n", ni, cbuff[ni]);
-	  (void) strlcpy(srs[ni].sun_spec_id, cbuff[ni], 3);
+	  (void) nadc_strlcpy(srs[ni].sun_spec_id, cbuff[ni], 3);
      }
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
@@ -2806,7 +2806,7 @@ unsigned int SCIA_LV1_NC_RD_SQADS(hid_t fid, struct sqads1_scia **sqads_out)
      if (H5LTread_dataset( gid, "sun_glint_flag", type_id, cbuff ) < 0 )
           NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "sun_glint_flag" );
      for ( nr = ni = 0; ni < num_state; ni++ ) {
-	  sqads[ni].flag_glint = (unsigned char) cbuff;
+	  sqads[ni].flag_glint = (unsigned char) cbuff[ni];
      }
      free( cbuff );
      (void) H5Tclose( type_id );
@@ -2841,7 +2841,7 @@ int main(int argc, char *argv[])
      //struct mph_envi    mph;
      //struct sip_scia    sip;
      //struct sph1_scia   sph;
-     struct sqads1_scia *sqads;
+     struct sqads1_scia *sqads = NULL;
      struct lads_scia   *lads = NULL;
      struct clcp_scia   clcp;
      struct vlcp_scia   *vlcp = NULL;
