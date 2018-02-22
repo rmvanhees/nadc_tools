@@ -51,7 +51,11 @@ from __future__ import print_function
 from __future__ import division
 
 import sys
-import psycopg2
+import warnings
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    import psycopg2
 
 from datetime import datetime, timedelta
 
@@ -355,7 +359,19 @@ def get_best_products( args ):
     stateTBL = 'stateinfo'
 
     # selection (only) on stateTable
-    where_state = ["substr({}.softVersion,{},1) <> \'0\'".format(stateTBL, args.type+1)]
+    where_state = ["substr({}.softVersion,{},1) <> \'0\'".format(stateTBL,
+                                                                 args.type+1)]
+
+    if args.lon != [-180., 180.] or args.lat != [-90., 90.]:
+        mystr = "{}.tile && ST_GeomFromText(\'POLYGON((" \
+                "{:g} {:g},{:g} {:g},{:g} {:g},{:g} {:g},{:g} {:g}))\'" \
+                ",4326)"
+        mystr = mystr.format( stateTBL, args.lon[1], args.lat[0],
+                              args.lon[1], args.lat[1],
+                              args.lon[0], args.lat[1],
+                              args.lon[0], args.lat[0],
+                              args.lon[1], args.lat[0] )
+        where_state.append( mystr )
     
     # selection on metaTable or stateTable
     if args.orbit is not None:
