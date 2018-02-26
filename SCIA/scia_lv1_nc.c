@@ -30,7 +30,7 @@
 .RETURNS     non-negative on success, negative on failure
 .COMMENTS    None
 .ENVIRONment None
-.VERSION      1.0   30-Dec-2017 created by R. M. van Hees
+.VERSION      0.1   30-Dec-2017 created by R. M. van Hees
 ------------------------------------------------------------*/
 /*
  * Define _ISOC99_SOURCE to indicate
@@ -1077,8 +1077,6 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_PSPL(hid_t fid, struct psplo_scia **pspl_out)
 {
-     const char grp_name[] = \
-	  "/CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION";
      register unsigned short ni, nj, ns;
      register unsigned int   np, nr;
 
@@ -1095,23 +1093,32 @@ unsigned int SCIA_LV1_NC_RD_PSPL(hid_t fid, struct psplo_scia **pspl_out)
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
+     /*
+      * define name of group and data sets
+      */
+     const char grp_name[] = \
+	  "/CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION";
+     const char ds_name_asm[] = "angle_asm_limb";
+     const char ds_name_esm[] = "angle_esm_limb";
+     const char ds_name_mu2[] = "polarisation_sensitivity_limb_mu2";
+     const char ds_name_mu3[] = "polarisation_sensitivity_limb_mu3";
 /*
  * open group /CALIBRATION
  */
-     // angle_asm_limb           Dataset {23}
      gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION");
      if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION");
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen(gid, "angle_asm_limb", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "angle_asm_limb" );
+     // angle_asm_limb           Dataset {23}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_asm );
      (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      num_asm = (unsigned short) cur_dims;
      // angle_esm_limb           Dataset {5}
-     if ( (dset_id = H5Dopen(gid, "angle_esm_limb", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "angle_esm_limb" );
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_esm );
      (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      num_esm = (unsigned short) cur_dims;
@@ -1144,49 +1151,49 @@ unsigned int SCIA_LV1_NC_RD_PSPL(hid_t fid, struct psplo_scia **pspl_out)
  * read POLARISATION_SENSITIVITY_LIMB_OCCULTATION datasets
  */
      // angle_asm_limb           Dataset {num_asm}
-     if ( (dset_id = H5Dopen(gid, "angle_asm_limb", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "angle_asm_limb");
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_asm);
      if ( (type_id = H5Dget_type(dset_id)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "angle_asm_limb");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_asm);
      if ( (val_asm = (double *) malloc(num_asm * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_asm" );
      if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_asm) < 0)
-          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "angle_asm_limb");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_asm);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
      // angle_esm_limb           Dataset {num_esm}
-     if ( (dset_id = H5Dopen(gid, "angle_esm_limb", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "angle_esm_limb");
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_esm);
      if ( (type_id = H5Dget_type(dset_id)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "angle_esm_limb");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_esm);
      if ( (val_esm = (double *) malloc(num_esm * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_esm" );
      if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_esm) < 0)
-          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "angle_esm_limb");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_esm);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
      // polarisation_sensitivity_limb_mu2 Dataset {num_esm, num_asm, 8192}
      dim_size = num_pspl * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "polarisation_sensitivity_limb_mu2", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "polarisation_sensitivity_limb_mu2");
+     if ( (dset_id = H5Dopen(gid, ds_name_mu2, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_mu2);
      if ( (type_id = H5Dget_type(dset_id)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "polarisation_sensitivity_limb_mu2");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_mu2);
      if ( (val_mu2 = (double *) malloc(dim_size * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_mu2" );
      if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_mu2) < 0)
-          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "polarisation_sensitivity_limb_mu2");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_mu2);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
      // polarisation_sensitivity_limb_mu3 Dataset {num_esm, num_asm, 8192}
      dim_size = num_pspl * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "polarisation_sensitivity_limb_mu3", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "polarisation_sensitivity_limb_mu3");
+     if ( (dset_id = H5Dopen(gid, ds_name_mu3, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_mu3);
      if ( (type_id = H5Dget_type(dset_id)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "polarisation_sensitivity_limb_mu3");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_mu3);
      if ( (val_mu3 = (double *) malloc(dim_size * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_mu3" );
      if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_mu3) < 0)
-          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "polarisation_sensitivity_limb_mu3");
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_mu3);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
@@ -1244,16 +1251,15 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_PSPN(hid_t fid, struct pspn_scia **pspn_out)
 {
-     const char grp_name[] =
-	  "/CALIBRATION/POLARISATION_SENSITIVITY_NADIR";
      register unsigned short ns;
-     register unsigned int   ni, nr;
+     register unsigned int   np, nr;
 
-     unsigned short spectral_channel;
+     unsigned short num_esm, spectral_channel;
      unsigned int   num_pspn;
      size_t         dim_size;
 
-     double *dbuff;
+     double *val_esm = NULL;
+     double *val_mu2 = NULL, *val_mu3 = NULL;
 
      struct pspn_scia *pspn;
      
@@ -1261,24 +1267,44 @@ unsigned int SCIA_LV1_NC_RD_PSPN(hid_t fid, struct pspn_scia **pspn_out)
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
+     /*
+      * define name of group and data sets
+      */
+     const char grp_name[] = \
+	  "/CALIBRATION/POLARISATION_SENSITIVITY_NADIR";
+     const char ds_name_esm[] = "angle_esm_nadir";
+     const char ds_name_mu2[] = "polarisation_sensitivity_nadir_mu2";
+     const char ds_name_mu3[] = "polarisation_sensitivity_nadir_mu3";
 /*
- * open group POLARISATION_SENSITIVITY_NADIR
+ * open group /CALIBRATION
  */
-     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+     gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION");
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION");
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     // angle_esm_nadir           Dataset {17}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_esm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_esm = (unsigned short) cur_dims;
+
+     (void) H5Gclose(gid);
+     num_pspn = num_esm;
+/*
+ * open group /CALIBRATION/POLARISATION_SENSITIVITY_NADIR
+ */
+     gid = NADC_OPEN_HDF5_Group(fid, grp_name);
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, grp_name);
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen(gid, "spectral_channel", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "spectral_channel");
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     num_pspn = (unsigned int) cur_dims;
 /*
  * allocate memory
  */
@@ -1287,33 +1313,68 @@ unsigned int SCIA_LV1_NC_RD_PSPN(hid_t fid, struct pspn_scia **pspn_out)
                calloc((size_t) num_pspn, sizeof(struct pspn_scia));
      }
      if ( (pspn = pspn_out[0]) == NULL ) 
-          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspn" );
+          NADC_GOTO_ERROR(NADC_ERR_ALLOC, "pspn");
 /*
- * read LEAKAGE_CURRENT datasets
+ * read POLARISATION_SENSITIVITY_NADIR datasets
  */
-     // 
-     dim_size = num_pspn * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     // angle_esm_nadir           Dataset {num_esm}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_esm);
      if ( (type_id = H5Dget_type(dset_id)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0)
-          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "");
-     for ( nr = ni = 0; ni < num_pspn; ni++ ) {
-	  for ( ns = 0; ns < spectral_channel; ns++ )
-	       pspn[ni].mu2[ns] = (float) dbuff[nr++];
-     }
-     free( dbuff );
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_esm);
+     if ( (val_esm = (double *) malloc(num_esm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_esm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_esm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_esm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // polarisation_sensitivity_nadir_mu2 Dataset {num_esm, spectral_channel}
+     dim_size = num_pspn * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, ds_name_mu2, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_mu2);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_mu2);
+     if ( (val_mu2 = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_mu2" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_mu2) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_mu2);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // polarisation_sensitivity_nadir_mu3 Dataset {num_esm, spectral_channel}
+     dim_size = num_pspn * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, ds_name_mu3, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_mu3);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_mu3);
+     if ( (val_mu3 = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_mu3" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_mu3) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_mu3);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
+ * store data in output structure
+ */
+     for ( nr = np = 0; np < num_esm; np++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ ) {
+	       pspn[np].mu2[ns] = val_mu2[nr];
+	       pspn[np].mu3[ns] = val_mu3[nr];
+	       nr++;
+	  }
+	  pspn[np].ang_esm = (float) val_esm[np];
+     }
+/*
  * set return values
  */
+     free(val_esm);
+     free(val_mu2);
+     free(val_mu3);
      (void) H5Gclose(gid);
      return num_pspn;
 done:
+     if (val_esm != NULL ) free(val_esm);
+     if (val_mu2 != NULL ) free(val_mu2);
+     if (val_mu3 != NULL ) free(val_mu3);
      H5E_BEGIN_TRY {
           (void) H5Tclose(type_id);
           (void) H5Dclose(dset_id);
@@ -1339,16 +1400,15 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_PSPO(hid_t fid, struct psplo_scia **pspo_out)
 {
-     const char grp_name[] = \
-	  "/CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION_NDF";
-     register unsigned short ns;
-     register unsigned int   ni, nr;
+     register unsigned short ni, nj, ns;
+     register unsigned int   np, nr;
 
-     unsigned short spectral_channel;
+     unsigned short num_asm, num_esm, spectral_channel;
      unsigned int   num_pspo;
      size_t         dim_size;
 
-     double *dbuff;
+     double *val_asm = NULL, *val_esm = NULL;
+     double *val_mu2 = NULL, *val_mu3 = NULL;
 
      struct psplo_scia *pspo;
      
@@ -1356,24 +1416,51 @@ unsigned int SCIA_LV1_NC_RD_PSPO(hid_t fid, struct psplo_scia **pspo_out)
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
+     /*
+      * define name of group and data sets
+      */
+     const char grp_name[] = \
+	  "/CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION_NDF";
+     const char ds_name_asm[] = "angle_asm_limb_ndf";
+     const char ds_name_esm[] = "angle_esm_limb_ndf";
+     const char ds_name_mu2[] = "polarisation_sensitivity_limb_mu2_NDF";
+     const char ds_name_mu3[] = "polarisation_sensitivity_limb_mu3_NDF";
 /*
- * open group POLARISATION_SENSITIVITY_LIMB_OCCULTATION_NDF
+ * open group /CALIBRATION
  */
-     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+     gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION");
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION");
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     // angle_asm_limb_ndf       Dataset {9}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_asm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_asm = (unsigned short) cur_dims;
+     // angle_esm_limb_ndf       Dataset {5}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_esm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_esm = (unsigned short) cur_dims;
+
+     (void) H5Gclose(gid);
+     num_pspo = num_asm * num_esm;
+/*
+ * open group /CALIBRATION/POLARISATION_SENSITIVITY_LIMB_OCCULTATION_NDF
+ */
+     gid = NADC_OPEN_HDF5_Group(fid, grp_name);
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, grp_name);
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen(gid, "spectral_channel", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "spectral_channel");
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     num_pspo = (unsigned int) cur_dims;
 /*
  * allocate memory
  */
@@ -1382,33 +1469,86 @@ unsigned int SCIA_LV1_NC_RD_PSPO(hid_t fid, struct psplo_scia **pspo_out)
                calloc((size_t) num_pspo, sizeof(struct psplo_scia));
      }
      if ( (pspo = pspo_out[0]) == NULL ) 
-          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pspo" );
+          NADC_GOTO_ERROR(NADC_ERR_ALLOC, "pspo");
 /*
- * read LEAKAGE_CURRENT datasets
+ * read POLARISATION_SENSITIVITY_LIMB_OCCULTATION datasets
  */
-     // 
-     dim_size = num_pspo * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     // angle_asm_limb_ndf       Dataset {num_asm}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_asm);
      if ( (type_id = H5Dget_type(dset_id)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0)
-          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "");
-     for ( nr = ni = 0; ni < num_pspo; ni++ ) {
-	  for ( ns = 0; ns < spectral_channel; ns++ )
-	       pspo[ni].mu2[ns] = (float) dbuff[nr++];
-     }
-     free( dbuff );
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_asm);
+     if ( (val_asm = (double *) malloc(num_asm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_asm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_asm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_asm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // angle_esm_limb_ndf       Dataset {num_esm}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_esm);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_esm);
+     if ( (val_esm = (double *) malloc(num_esm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_esm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_esm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_esm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // polarisation_sensitivity_limb_mu2_ndf Dataset {num_esm, num_asm, 8192}
+     dim_size = num_pspo * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, ds_name_mu2, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_mu2);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_mu2);
+     if ( (val_mu2 = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_mu2" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_mu2) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_mu2);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // polarisation_sensitivity_limb_mu3 Dataset {num_esm, num_asm, 8192}
+     dim_size = num_pspo * spectral_channel;
+     if ( (dset_id = H5Dopen(gid, ds_name_mu3, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_mu3);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_mu3);
+     if ( (val_mu3 = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_mu3" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_mu3) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_mu3);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
+ * store data in output structure
+ */
+     np = nr = 0;
+     for ( nj = 0; nj < num_esm; nj++ ) {
+	  for ( ni = 0; ni < num_asm; ni++ ) {
+	       for ( ns = 0; ns < spectral_channel; ns++ ) {
+		    pspo[np].mu2[ns] = val_mu2[nr];
+		    pspo[np].mu3[ns] = val_mu3[nr];
+		    nr++;
+	       }
+	       pspo[np].ang_esm = (float) val_esm[nj];
+	       pspo[np].ang_asm = (float) val_asm[ni];
+	       np++;
+	  }
+     }
+/*
  * set return values
  */
+     free(val_asm);
+     free(val_esm);
+     free(val_mu2);
+     free(val_mu3);
      (void) H5Gclose(gid);
      return num_pspo;
 done:
+     if (val_asm != NULL ) free(val_asm);
+     if (val_esm != NULL ) free(val_esm);
+     if (val_mu2 != NULL ) free(val_mu2);
+     if (val_mu3 != NULL ) free(val_mu3);
      H5E_BEGIN_TRY {
           (void) H5Tclose(type_id);
           (void) H5Dclose(dset_id);
@@ -1528,16 +1668,15 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_RSPL(hid_t fid, struct rsplo_scia **rspl_out)
 {
-     const char grp_name[] = \
-	  "/CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION";
-     register unsigned short ns;
-     register unsigned int   ni, nr;
+     register unsigned short ni, nj, ns;
+     register unsigned int   np, nr;
 
-     unsigned short spectral_channel;
+     unsigned short num_asm, num_esm, spectral_channel;
      unsigned int   num_rspl;
      size_t         dim_size;
 
-     double *dbuff;
+     double *val_asm = NULL, *val_esm = NULL;
+     double *val_rsl = NULL;
 
      struct rsplo_scia *rspl;
      
@@ -1545,24 +1684,50 @@ unsigned int SCIA_LV1_NC_RD_RSPL(hid_t fid, struct rsplo_scia **rspl_out)
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
+     /*
+      * define name of group and data sets
+      */
+     const char grp_name[] = \
+	  "/CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION";
+     const char ds_name_asm[] = "angle_asm_limb";
+     const char ds_name_esm[] = "angle_esm_limb";
+     const char ds_name_rsl[] = "radiance_sensitivity_limb";
 /*
- * open group RADIANCE_SENSITIVITY_LIMB_OCCULTATION
+ * open group /CALIBRATION
  */
-     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+     gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION");
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION");
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     // angle_asm_limb           Dataset {23}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_asm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_asm = (unsigned short) cur_dims;
+     // angle_esm_limb           Dataset {5}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_esm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_esm = (unsigned short) cur_dims;
+
+     (void) H5Gclose(gid);
+     num_rspl = num_asm * num_esm;
+/*
+ * open group /CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION
+ */
+     gid = NADC_OPEN_HDF5_Group(fid, grp_name);
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, grp_name);
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen(gid, "spectral_channel", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "spectral_channel");
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     num_rspl = (unsigned int) cur_dims;
 /*
  * allocate memory
  */
@@ -1571,33 +1736,69 @@ unsigned int SCIA_LV1_NC_RD_RSPL(hid_t fid, struct rsplo_scia **rspl_out)
                calloc((size_t) num_rspl, sizeof(struct rsplo_scia));
      }
      if ( (rspl = rspl_out[0]) == NULL ) 
-          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspl" );
+          NADC_GOTO_ERROR(NADC_ERR_ALLOC, "rspl");
 /*
- * read LEAKAGE_CURRENT datasets
+ * read RADIANCE_SENSITIVITY_LIMB_OCCULTATION datasets
  */
-     // 
+     // angle_asm_limb           Dataset {num_asm}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_asm);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_asm);
+     if ( (val_asm = (double *) malloc(num_asm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_asm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_asm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_asm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // angle_esm_limb           Dataset {num_esm}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_esm);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_esm);
+     if ( (val_esm = (double *) malloc(num_esm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_esm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_esm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_esm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // radiance_sensitivity_limb Dataset {num_esm, num_asm, spectral_channel}
      dim_size = num_rspl * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
-     if ( (type_id = H5Dget_type( dset_id )) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
-     for ( nr = ni = 0; ni < num_rspl; ni++ ) {
-	  for ( ns = 0; ns < spectral_channel; ns++ )
-	       rspl[ni].sensitivity[ns] = (float) dbuff[nr++];
-     }
-     free( dbuff );
+     if ( (dset_id = H5Dopen(gid, ds_name_rsl, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_rsl);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_rsl);
+     if ( (val_rsl = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_rsl" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_rsl) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_rsl);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
+ * store data in output structure
+ */
+     np = nr = 0;
+     for ( nj = 0; nj < num_esm; nj++ ) {
+	  for ( ni = 0; ni < num_asm; ni++ ) {
+	       for ( ns = 0; ns < spectral_channel; ns++ )
+		    rspl[np].sensitivity[ns] = val_rsl[nr++];
+	       rspl[np].ang_esm = (float) val_esm[nj];
+	       rspl[np].ang_asm = (float) val_asm[ni];
+	       np++;
+	  }
+     }
+/*
  * set return values
  */
+     free(val_asm);
+     free(val_esm);
+     free(val_rsl);
      (void) H5Gclose(gid);
      return num_rspl;
 done:
+     if (val_asm != NULL ) free(val_asm);
+     if (val_esm != NULL ) free(val_esm);
+     if (val_rsl != NULL ) free(val_rsl);
      H5E_BEGIN_TRY {
           (void) H5Tclose(type_id);
           (void) H5Dclose(dset_id);
@@ -1623,16 +1824,15 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_RSPN(hid_t fid, struct rspn_scia **rspn_out)
 {
-     const char grp_name[] = \
-	  "/CALIBRATION/RADIANCE_SENSITIVITY_NADIR";
      register unsigned short ns;
-     register unsigned int   ni, nr;
+     register unsigned int   np, nr;
 
-     unsigned short spectral_channel;
+     unsigned short num_esm, spectral_channel;
      unsigned int   num_rspn;
      size_t         dim_size;
 
-     double *dbuff;
+     double *val_esm = NULL;
+     double *val_rsn = NULL;
 
      struct rspn_scia *rspn;
      
@@ -1640,24 +1840,43 @@ unsigned int SCIA_LV1_NC_RD_RSPN(hid_t fid, struct rspn_scia **rspn_out)
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
+     /*
+      * define name of group and data sets
+      */
+     const char grp_name[] = \
+	  "/CALIBRATION/RADIANCE_SENSITIVITY_NADIR";
+     const char ds_name_esm[] = "angle_esm_nadir";
+     const char ds_name_rsn[] = "radiance_sensitivity_nadir";
 /*
- * open group RADIANCE_SENSITIVITY_NADIR
+ * open group /CALIBRATION
  */
-     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+     gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION");
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION");
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     // angle_esm_nadir           Dataset {17}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_esm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_esm = (unsigned short) cur_dims;
+
+     (void) H5Gclose(gid);
+     num_rspn = num_esm;
+/*
+ * open group /CALIBRATION/RADIANCE_SENSITIVITY_NADIR
+ */
+     gid = NADC_OPEN_HDF5_Group(fid, grp_name);
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, grp_name);
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen(gid, "spectral_channel", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "spectral_channel");
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     num_rspn = (unsigned int) cur_dims;
 /*
  * allocate memory
  */
@@ -1666,33 +1885,51 @@ unsigned int SCIA_LV1_NC_RD_RSPN(hid_t fid, struct rspn_scia **rspn_out)
                calloc((size_t) num_rspn, sizeof(struct rspn_scia));
      }
      if ( (rspn = rspn_out[0]) == NULL ) 
-          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspn" );
+          NADC_GOTO_ERROR(NADC_ERR_ALLOC, "rspn");
 /*
- * read LEAKAGE_CURRENT datasets
+ * read RADIANCE_SENSITIVITY_NADIR datasets
  */
-     // 
+     // angle_esm_nadir           Dataset {num_esm}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_esm);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_esm);
+     if ( (val_esm = (double *) malloc(num_esm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_esm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_esm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_esm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // radiance_sensitivity_nadir Dataset {num_esm, spectral_channel}
      dim_size = num_rspn * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
-     if ( (type_id = H5Dget_type( dset_id )) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
-     for ( nr = ni = 0; ni < num_rspn; ni++ ) {
-	  for ( ns = 0; ns < spectral_channel; ns++ )
-	       rspn[ni].sensitivity[ns] = (float) dbuff[nr++];
-     }
-     free( dbuff );
+     if ( (dset_id = H5Dopen(gid, ds_name_rsn, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_rsn);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_rsn);
+     if ( (val_rsn = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_rsn" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_rsn) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_rsn);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
+ * store data in output structure
+ */
+     for ( nr = np = 0; np < num_esm; np++ ) {
+	  for ( ns = 0; ns < spectral_channel; ns++ )
+	       rspn[np].sensitivity[ns] = val_rsn[nr++];
+	  rspn[np].ang_esm = (float) val_esm[np];
+     }
+/*
  * set return values
  */
+     free(val_esm);
+     free(val_rsn);
      (void) H5Gclose(gid);
      return num_rspn;
 done:
+     if (val_esm != NULL ) free(val_esm);
+     if (val_rsn != NULL ) free(val_rsn);
      H5E_BEGIN_TRY {
           (void) H5Tclose(type_id);
           (void) H5Dclose(dset_id);
@@ -1718,16 +1955,15 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_RSPO(hid_t fid, struct rsplo_scia **rspo_out)
 {
-     const char grp_name[] = \
-	  "/CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF";
-     register unsigned short ns;
-     register unsigned int   ni, nr;
+     register unsigned short ni, nj, ns;
+     register unsigned int   np, nr;
 
-     unsigned short spectral_channel;
+     unsigned short num_asm, num_esm, spectral_channel;
      unsigned int   num_rspo;
      size_t         dim_size;
 
-     double *dbuff;
+     double *val_asm = NULL, *val_esm = NULL;
+     double *val_rsl = NULL;
 
      struct rsplo_scia *rspo;
      
@@ -1735,24 +1971,50 @@ unsigned int SCIA_LV1_NC_RD_RSPO(hid_t fid, struct rsplo_scia **rspo_out)
      hid_t dset_id = -1;
      hid_t type_id = -1;
      hsize_t cur_dims;
+     /*
+      * define name of group and data sets
+      */
+     const char grp_name[] = \
+	  "/CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF";
+     const char ds_name_asm[] = "angle_asm_limb_ndf";
+     const char ds_name_esm[] = "angle_esm_limb_ndf";
+     const char ds_name_rsl[] = "radiance_sensitivity_limb_ndf";
 /*
- * open group RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF
+ * open group /CALIBRATION
  */
-     gid = NADC_OPEN_HDF5_Group( fid, grp_name );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grp_name );
+     gid = NADC_OPEN_HDF5_Group(fid, "/CALIBRATION");
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, "/CALIBRATION");
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
+     // angle_asm_limb_ndf           Dataset {23}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_asm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_asm = (unsigned short) cur_dims;
+     // angle_esm_limb_ndf           Dataset {5}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, ds_name_esm );
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
+     (void) H5Dclose(dset_id);
+     num_esm = (unsigned short) cur_dims;
+
+     (void) H5Gclose(gid);
+     num_rspo = num_asm * num_esm;
+/*
+ * open group /CALIBRATION/RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF
+ */
+     gid = NADC_OPEN_HDF5_Group(fid, grp_name);
+     if ( gid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, grp_name);
+/*
+ * obtain dimensions
+ */
+     if ( (dset_id = H5Dopen(gid, "spectral_channel", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "spectral_channel");
+     (void) H5LDget_dset_dims(dset_id, &cur_dims);
      (void) H5Dclose(dset_id);
      spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     num_rspo = (unsigned int) cur_dims;
 /*
  * allocate memory
  */
@@ -1761,33 +2023,69 @@ unsigned int SCIA_LV1_NC_RD_RSPO(hid_t fid, struct rsplo_scia **rspo_out)
                calloc((size_t) num_rspo, sizeof(struct rsplo_scia));
      }
      if ( (rspo = rspo_out[0]) == NULL ) 
-          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "rspo" );
+          NADC_GOTO_ERROR(NADC_ERR_ALLOC, "rspo");
 /*
- * read LEAKAGE_CURRENT datasets
+ * read RADIANCE_SENSITIVITY_LIMB_OCCULTATION_NDF datasets
  */
-     // 
+     // angle_asm_limb           Dataset {num_asm}
+     if ( (dset_id = H5Dopen(gid, ds_name_asm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_asm);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_asm);
+     if ( (val_asm = (double *) malloc(num_asm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_asm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_asm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_asm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // angle_esm_limb           Dataset {num_esm}
+     if ( (dset_id = H5Dopen(gid, ds_name_esm, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_esm);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_esm);
+     if ( (val_esm = (double *) malloc(num_esm * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_esm" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_esm) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_esm);
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // radiance_sensitivity_limb_ndf Dataset {num_esm, num_asm, spectral_channel}
      dim_size = num_rspo * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
-     if ( (type_id = H5Dget_type( dset_id )) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
-     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
-     for ( nr = ni = 0; ni < num_rspo; ni++ ) {
-	  for ( ns = 0; ns < spectral_channel; ns++ )
-	       rspo[ni].sensitivity[ns] = (float) dbuff[nr++];
-     }
-     free( dbuff );
+     if ( (dset_id = H5Dopen(gid, ds_name_rsl, H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, ds_name_rsl);
+     if ( (type_id = H5Dget_type(dset_id)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, ds_name_rsl);
+     if ( (val_rsl = (double *) malloc(dim_size * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_rsl" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, val_rsl) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_RD, ds_name_rsl);
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
+ * store data in output structure
+ */
+     np = nr = 0;
+     for ( nj = 0; nj < num_esm; nj++ ) {
+	  for ( ni = 0; ni < num_asm; ni++ ) {
+	       for ( ns = 0; ns < spectral_channel; ns++ )
+		    rspo[np].sensitivity[ns] = val_rsl[nr++];
+	       rspo[np].ang_esm = (float) val_esm[nj];
+	       rspo[np].ang_asm = (float) val_asm[ni];
+	       np++;
+	  }
+     }
+/*
  * set return values
  */
+     free(val_asm);
+     free(val_esm);
+     free(val_rsl);
      (void) H5Gclose(gid);
      return num_rspo;
 done:
+     if (val_asm != NULL ) free(val_asm);
+     if (val_esm != NULL ) free(val_esm);
+     if (val_rsl != NULL ) free(val_rsl);
      H5E_BEGIN_TRY {
           (void) H5Tclose(type_id);
           (void) H5Dclose(dset_id);
@@ -2921,12 +3219,12 @@ int main(int argc, char *argv[])
      //struct scp_scia    *scp;
      struct srs_scia    *srs = NULL;
      //struct cal_options calopt;
-     //struct pspn_scia   *pspn;
+     struct pspn_scia   *pspn = NULL;
      struct psplo_scia  *pspl = NULL;
-     //struct psplo_scia  *pspo;
-     //struct rspn_scia   *rspn;
-     //struct rsplo_scia  *rspl;
-     //struct rsplo_scia  *rspo;
+     struct psplo_scia  *pspo = NULL;
+     struct rspn_scia   *rspn = NULL;
+     struct rsplo_scia  *rspl = NULL;
+     struct rsplo_scia  *rspo = NULL;
      struct ekd_scia    ekd;
      //struct asfp_scia   *asfp;
      //struct sfp_scia    *sfp;
@@ -3055,6 +3353,14 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write Polarisation Sensitivity Parameters Nadir
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_PSPN\n");
+     num = SCIA_LV1_NC_RD_PSPN(fid, &pspn);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+     	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPN");
+     SCIA_LV1_WR_ASCII_PSPN(param, num, pspn);
+     if ( IS_ERR_STAT_FATAL )
+     	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "PSPN");
+     free(pspn);
 /*
  * -------------------------
  * read/write Polarisation Sensitivity Parameters Limb
@@ -3071,18 +3377,50 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write Polarisation Sensitivity Parameters Occultation
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_PSPO\n");
+     num = SCIA_LV1_NC_RD_PSPO(fid, &pspo);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+     	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPO");
+     SCIA_LV1_WR_ASCII_PSPO(param, num, pspo);
+     if ( IS_ERR_STAT_FATAL )
+     	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "PSPO");
+     free(pspo);
 /*
  * -------------------------
  * read/write Radiation Sensitivity Parameters Nadir
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_RSPN\n");
+     num = SCIA_LV1_NC_RD_RSPN(fid, &rspn);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+     	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "RSPN");
+     SCIA_LV1_WR_ASCII_RSPN(param, num, rspn);
+     if ( IS_ERR_STAT_FATAL )
+     	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "RSPN");
+     free(rspn);
 /*
  * -------------------------
  * read/write Radiation Sensitivity Parameters Limb
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_RSPL\n");
+     num = SCIA_LV1_NC_RD_RSPL(fid, &rspl);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+     	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "RSPL");
+     SCIA_LV1_WR_ASCII_RSPL(param, num, rspl);
+     if ( IS_ERR_STAT_FATAL )
+     	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "RSPL");
+     free(rspl);
 /*
  * -------------------------
  * read/write Radiation Sensitivity Parameters Occultation
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_RSPO\n");
+     num = SCIA_LV1_NC_RD_RSPO(fid, &rspo);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+     	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "RSPO");
+     SCIA_LV1_WR_ASCII_RSPO(param, num, rspo);
+     if ( IS_ERR_STAT_FATAL )
+     	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "RSPO");
+     free(rspo);
 /*
  * -------------------------
  * read/write Errors on Key Data
