@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2018 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -89,10 +89,10 @@ void SCIA_LV1_WR_ASCII_SIP( struct param_record param,
      nadc_write_uchar( outfl, ++nr, "ds_n_phases", sip->ds_n_phases );
      count[0] = (unsigned int) sip->ds_n_phases;
      nadc_write_arr_float( outfl, ++nr, "ds_phase_boundaries",
-			    1, count, 6, sip->ds_phase_boundaries );
+			   1, count, 6, sip->ds_phase_boundaries );
      count[0] = 2;
      nadc_write_arr_float( outfl, ++nr, "lc_stray_indx",
-			    1, count, 6, sip->lc_stray_indx );
+			   1, count, 6, sip->lc_stray_indx );
      nadc_write_uchar( outfl, ++nr, "lc_harm_order", sip->lc_harm_order );
      nadc_write_uchar( outfl, ++nr, "ds_poly_order", sip->ds_poly_order );
      
@@ -103,24 +103,24 @@ void SCIA_LV1_WR_ASCII_SIP( struct param_record param,
 
      count[0] = SCIENCE_CHANNELS;
      nadc_write_arr_float( outfl, ++nr, "electrons_bu",
-			    1, count, 6, sip->electrons_bu );
+			   1, count, 6, sip->electrons_bu );
      nadc_write_float( outfl, ++nr, "ppg_error", 5, sip->ppg_error );
      nadc_write_float( outfl, ++nr, "stray_error", 5, sip->stray_error );
 
      nadc_write_uchar( outfl, ++nr, "sp_n_phases", sip->sp_n_phases );
      count[0] = (unsigned int) sip->sp_n_phases;
      nadc_write_arr_float( outfl, ++nr, "sp_phase_boundaries",
-			    1, count, 6, sip->sp_phase_boundaries );
+			   1, count, 6, sip->sp_phase_boundaries );
      nadc_write_short( outfl, ++nr, "startpix_6+", sip->startpix_6 );
      nadc_write_short( outfl, ++nr, "startpix_8+", sip->startpix_8 );
      nadc_write_float( outfl, ++nr, "h_toa", 2, sip->h_toa );
      nadc_write_float( outfl, ++nr, "lambda_end_gdf", 
-			2, sip->lambda_end_gdf );
+		       2, sip->lambda_end_gdf );
      nadc_write_text( outfl, ++nr, "do_pol_point", sip->do_pol_point );
 
      count[0] = SCIENCE_CHANNELS;
      nadc_write_arr_ushort( outfl, ++nr, "sat_level",
-			     1, count, sip->sat_level );
+			    1, count, sip->sat_level );
      nadc_write_ushort( outfl, ++nr, "pmd_sat_limit", sip->pmd_sat_limit );
 
      nadc_write_text( outfl, ++nr, "do_use_limb_dark", 
@@ -137,7 +137,7 @@ void SCIA_LV1_WR_ASCII_SIP( struct param_record param,
 
      count[0] = SCIENCE_CHANNELS;
      nadc_write_arr_uchar( outfl, ++nr, "level_2_smr",
-			     1, count, sip->level_2_smr );
+			   1, count, sip->level_2_smr );
      (void) fclose( outfl );
 }
 
@@ -168,28 +168,28 @@ void SCIA_LV1_WR_ASCII_CLCP( struct param_record param,
  * write ASCII dump of CLCP record
  */
      nadc_write_header( outfl, nr, param.infile, 
-			 "Leakage Current Parameters (constant fraction)" );
+			"Leakage Current Parameters (constant fraction)" );
      count[0] = SCIENCE_CHANNELS;
      count[1] = CHANNEL_SIZE;
      nadc_write_arr_float( outfl, ++nr, "Const. frac. of the FPN", 
-			    2, count, 3, clcp->fpn );
+			   2, count, 3, clcp->fpn );
      nadc_write_arr_float( outfl, ++nr, "Error on const. frac. of FPN",
-			    2, count, 6, clcp->fpn_error );
+			   2, count, 6, clcp->fpn_error );
      nadc_write_arr_float( outfl, ++nr, "Const. frac. of the LC", 
-			    2, count, 3, clcp->lc );
+			   2, count, 3, clcp->lc );
      nadc_write_arr_float( outfl, ++nr, "Error on const. frac. of LC", 
-			    2, count, 6, clcp->lc_error );
-     count[0] = 2;
-     count[1] = PMD_NUMBER;
+			   2, count, 6, clcp->lc_error );
+     count[0] = PMD_NUMBER;
+     count[1] = 2;
      nadc_write_arr_float( outfl, ++nr, 
-			    "Const. frac. of PMD dark offset", 
-			    2, count, 3, clcp->pmd_dark );
+			   "Const. frac. of PMD dark offset", 
+			   2, count, 3, clcp->pmd_dark );
      nadc_write_arr_float( outfl, ++nr, "Error on PMD dark offset", 
-			    2, count, 6, clcp->pmd_dark_error );
+			   2, count, 6, clcp->pmd_dark_error );
      count[0] = SCIENCE_CHANNELS;
      count[1] = CHANNEL_SIZE;
      nadc_write_arr_float( outfl, ++nr, "Mean noise", 
-			    2, count, 6, clcp->mean_noise );
+			   2, count, 6, clcp->mean_noise );
      (void) fclose( outfl );
 }
 
@@ -221,40 +221,40 @@ void SCIA_LV1_WR_ASCII_VLCP( struct param_record param, unsigned int num_dsr,
  * write ASCII dump of VLCP record
  */
      nadc_write_header( outfl, 0, param.infile, 
-			 "Leakage Current Parameters (variable fraction)" );
+			"Leakage Current Parameters (variable fraction)" );
      for ( nd = 0; nd < num_dsr; nd++ ) {
 	  register unsigned int nr = 0;
 
 	  nadc_write_float( outfl, ++nr, "Orbit phase", 
-			     5, vlcp[nd].orbit_phase );
+			    5, vlcp[nd].orbit_phase );
 	  count[0] = IR_CHANNELS + PMD_NUMBER;
 	  nadc_write_arr_float( outfl, ++nr, "Temperatures: OBM CHANNELS PMD", 
-				 1, count, 3, vlcp[nd].obm_pmd );
+				1, count, 3, vlcp[nd].obm_pmd );
 	  count[0] = IR_CHANNELS;
 	  count[1] = CHANNEL_SIZE;
 	  nadc_write_arr_float( outfl, ++nr, "Variable fraction of LC", 
-				 2, count, 5, vlcp[nd].var_lc );
+				2, count, 5, vlcp[nd].var_lc );
 	  nadc_write_arr_float( outfl, ++nr, 
-				 "Error on variable fraction of LC", 
-				 2, count, 5, vlcp[nd].var_lc_error );
+				"Error on variable fraction of LC", 
+				2, count, 5, vlcp[nd].var_lc_error );
 
 	  count[0] = SCIENCE_CHANNELS;
 	  nadc_write_arr_float( outfl, ++nr, "Solar straylight", 
-				 2, count, 5, vlcp[nd].solar_stray );
+				2, count, 5, vlcp[nd].solar_stray );
 	  nadc_write_arr_float( outfl, ++nr, "Error on Solar straylight", 
-				 2, count, 5, vlcp[nd].solar_stray_error );
+				2, count, 5, vlcp[nd].solar_stray_error );
 	  count[0] = PMD_NUMBER;
 	  nadc_write_arr_float( outfl, ++nr, "Straylight offset PMD", 
-				 1, count, 5, vlcp[nd].pmd_stray );
+				1, count, 5, vlcp[nd].pmd_stray );
 	  nadc_write_arr_float( outfl, ++nr, 
-				 "Error on Straylight offset PMD", 
-				 1, count, 5, vlcp[nd].pmd_stray_error );
+				"Error on Straylight offset PMD", 
+				1, count, 5, vlcp[nd].pmd_stray_error );
 	  count[0] = IR_PMD_NUMBER;
 	  nadc_write_arr_float( outfl, ++nr, "Dark offset PMD", 
-				 1, count, 5, vlcp[nd].pmd_dark );
+				1, count, 5, vlcp[nd].pmd_dark );
 	  nadc_write_arr_float( outfl, ++nr, 
-				 "Error on Dark offset PMD", 
-				 1, count, 5, vlcp[nd].pmd_dark_error );
+				"Error on Dark offset PMD", 
+				1, count, 5, vlcp[nd].pmd_dark_error );
      }
      (void) fclose( outfl );
 }
@@ -289,15 +289,15 @@ void SCIA_LV1_WR_ASCII_PPG( struct param_record param,
      count[0] = SCIENCE_CHANNELS;
      count[1] = CHANNEL_SIZE;
      nadc_write_arr_float( outfl, ++nr, "Pixel-to-pixel gain factor", 
-			    2, count, 5, ppg->ppg_fact );
+			   2, count, 5, ppg->ppg_fact );
      nadc_write_arr_float( outfl, ++nr, "Etalon correction factor", 
-			    2, count, 5, ppg->etalon_fact );
-     nadc_write_arr_float( outfl, ++nr, "Etalon residue", 
-			    -2, count, 5, ppg->etalon_resid );
+			   2, count, 5, ppg->etalon_fact );
+     nadc_write_arr_float( outfl, ++nr, "Etalon residual", 
+			   2, count, 5, ppg->etalon_resid );
      nadc_write_arr_float( outfl, ++nr, "WLS degradation factor", 
-			    2, count, 5, ppg->wls_deg_fact );
+			   2, count, 5, ppg->wls_deg_fact );
      nadc_write_arr_uchar( outfl, ++nr, "Bad pixel mask", 
-			    2, count, ppg->bad_pixel );
+			   2, count, ppg->bad_pixel );
      (void) fclose( outfl );
 }
 
@@ -330,7 +330,7 @@ void SCIA_LV1_WR_ASCII_BASE( struct param_record param,
      count[0] = SCIENCE_CHANNELS;
      count[1] = CHANNEL_SIZE;
      nadc_write_arr_float( outfl, 1, "Wavelength det. Pixel", 
-			    2, count, 5, base->wvlen_det_pix );
+			   2, count, 5, base->wvlen_det_pix );
      (void) fclose( outfl );
 }
 
@@ -364,18 +364,18 @@ void SCIA_LV1_WR_ASCII_SCP( struct param_record param, unsigned int num_dsr,
      nadc_write_header( outfl, 0, param.infile, 
 			 "Spectral Calibration Parameters" );
      count[0] = SCIENCE_CHANNELS;
-     count[1] = 5;
+     count[1] = NUM_SPEC_COEFFS;
      for ( nd = 0; nd < num_dsr; nd++ ) {
 	  nr = 1;
 	  nadc_write_float( outfl, nr++, "Orbit phase", 5, 
-			     scp[nd].orbit_phase );
+			    scp[nd].orbit_phase );
 	  nadc_write_arr_double( outfl, nr++, 
-				  "Coeffs of 4th order polynomial", 
-				  -2, count, 5, scp[nd].coeffs );
+				 "Coeffs of 4th order polynomial", 
+				 2, count, 5, scp[nd].coeffs );
 	  nadc_write_arr_ushort( outfl, nr++, "Number of lines used", 
-				  1, count, scp[nd].num_lines );
+				 1, count, scp[nd].num_lines );
 	  nadc_write_arr_float( outfl, nr, "Wavelength calibration error", 
-				 1, count, 5, scp[nd].wv_error_calib );
+				1, count, 5, scp[nd].wv_error_calib );
      }
      (void) fclose( outfl );
 }
@@ -416,33 +416,33 @@ void SCIA_LV1_WR_ASCII_SRS( struct param_record param, unsigned int num_dsr,
 	  count[0] = SCIENCE_CHANNELS;
 	  count[1] = CHANNEL_SIZE;
 	  nadc_write_arr_float( outfl, nr++, "Wavelength", 
-				 2, count, 5, srs[nd].wvlen_sun );
+				2, count, 5, srs[nd].wvlen_sun );
 	  nadc_write_arr_float( outfl, nr++, "Mean reference spectrum", 
-				 2, count, 5, srs[nd].mean_sun );
+				2, count, 5, srs[nd].mean_sun );
 	  nadc_write_arr_float( outfl, nr++, "Radiometric precision",
-				 2, count, 5, srs[nd].precision_sun );
+				2, count, 5, srs[nd].precision_sun );
 	  nadc_write_arr_float( outfl, nr++, "Radiometric accuracy",
-				 2, count, 5, srs[nd].accuracy_sun );
+				2, count, 5, srs[nd].accuracy_sun );
 	  nadc_write_arr_float( outfl, nr++, "Aperture etalon",
-				 2, count, 5, srs[nd].etalon );
+				2, count, 5, srs[nd].etalon );
 	  nadc_write_float( outfl, nr++, 
-			     "Average azimuth mirror position", 
-			     5, srs[nd].avg_asm );
+			    "Average azimuth mirror position", 
+			    5, srs[nd].avg_asm );
 	  nadc_write_float( outfl, nr++, 
-			     "Average elevation mirror position", 
-			     5, srs[nd].avg_esm );
+			    "Average elevation mirror position", 
+			    5, srs[nd].avg_esm );
 	  nadc_write_float( outfl, nr++, 
-			     "Average Solar elevation angle", 
-			     5, srs[nd].avg_elev_sun );
+			    "Average Solar elevation angle", 
+			    5, srs[nd].avg_elev_sun );
 	  count[0] = PMD_NUMBER;
 	  nadc_write_arr_float( outfl, nr++, "Mean value of PMD", 
-				 1, count, 5, srs[nd].pmd_mean );
+				1, count, 5, srs[nd].pmd_mean );
 	  nadc_write_arr_float( outfl, nr++, "PMD out_nd_out signal", 
-				 1, count, 5, srs[nd].pmd_out_nd_out );
+				1, count, 5, srs[nd].pmd_out_nd_out );
 	  nadc_write_arr_float( outfl, nr++, "PMD out_nd_in signal", 
-				 1, count, 5, srs[nd].pmd_out_nd_in );
+				1, count, 5, srs[nd].pmd_out_nd_in );
 	  nadc_write_float( outfl, nr, "Doppler shift (500nm)", 
-			     5, srs[nd].dopp_shift );
+			    5, srs[nd].dopp_shift );
      }
      (void) fclose( outfl );
 }
@@ -481,7 +481,7 @@ void SCIA_LV1_WR_ASCII_PSPN( struct param_record param, unsigned int num_dsr,
      for ( nd = 0; nd < num_dsr; nd++ ) {
 	  nr = 1;
 	  nadc_write_float( outfl, nr++, "Elevation mirror position", 
-			     5, pspn[nd].ang_esm );
+			    5, pspn[nd].ang_esm );
 	  nadc_write_arr_double( outfl, nr++, 
 				 "Mu2 nadir for elevation mirror", 
 				 2, count, 5, pspn[nd].mu2 );
@@ -526,9 +526,9 @@ void SCIA_LV1_WR_ASCII_PSPL( struct param_record param, unsigned int num_dsr,
      for ( nd = 0; nd < num_dsr; nd++ ) {
 	  nr = 1;
 	  nadc_write_float( outfl, nr++, "Elevation mirror position", 
-			     5, pspl[nd].ang_esm );
+			    5, pspl[nd].ang_esm );
 	  nadc_write_float( outfl, nr++, "Azimuth mirror position", 
-			     5, pspl[nd].ang_asm );
+			    5, pspl[nd].ang_asm );
 	  nadc_write_arr_double( outfl, nr++, 
 				 "Mu2 limb for elevation mirror", 
 				 2, count, 5, pspl[nd].mu2 );
@@ -573,9 +573,9 @@ void SCIA_LV1_WR_ASCII_PSPO( struct param_record param, unsigned int num_dsr,
      for ( nd = 0; nd < num_dsr; nd++ ) {
 	  nr = 1;
 	  nadc_write_float( outfl, nr++, "Elevation mirror position", 
-			     5, pspo[nd].ang_esm );
+			    5, pspo[nd].ang_esm );
 	  nadc_write_float( outfl, nr++, "Azimuth mirror position", 
-			     5, pspo[nd].ang_asm );
+			    5, pspo[nd].ang_asm );
 	  nadc_write_arr_double( outfl, nr++, 
 				 "Mu2 limb for elevation mirror", 
 				 2, count, 5, pspo[nd].mu2 );
@@ -802,7 +802,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
      na = 0;
      do { ubuff[na] = sfp[na].pix_pos_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_ushort( outfl, nr++, "Pixel position of slit function", 
-			     1, count, ubuff );
+			    1, count, ubuff );
      free( ubuff );
 
      cbuff = (unsigned char *) malloc( (size_t) num_dsr );
@@ -811,7 +811,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
      na = 0;
      do { cbuff[na] = sfp[na].type_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_uchar( outfl, nr++, "Type of slit function", 
-			    1, count, cbuff );
+			   1, count, cbuff );
      free( cbuff );
 
      rbuff = (float *) malloc( num_dsr * sizeof( float ));
@@ -823,7 +823,7 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
      na = 0;
      do { rbuff[na] = sfp[na].f_voi_fwhm_loren; } while( ++na < num_dsr );
      nadc_write_arr_float( outfl, nr, "f_voi_fwhm_loren", 
-			    1, count, 5, rbuff );
+			   1, count, 5, rbuff );
      free( rbuff );
 
      (void) fclose( outfl );
@@ -868,7 +868,7 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
      na = 0;
      do { ubuff[na] = asfp[na].pix_pos_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_ushort( outfl, nr++, "Pixel position of slit function", 
-			     1, count, ubuff );
+			    1, count, ubuff );
      free( ubuff );
 
      cbuff = (unsigned char *) malloc( (size_t) num_dsr );
@@ -877,7 +877,7 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
      na = 0;
      do { cbuff[na] = asfp[na].type_slit_fun; } while( ++na < num_dsr );
      nadc_write_arr_uchar( outfl, nr++, "Type of slit function", 
-			    1, count, cbuff );
+			   1, count, cbuff );
      free( cbuff );
 
      rbuff = (float *) malloc( num_dsr * sizeof( float ));
@@ -889,9 +889,8 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
      na = 0;
      do { rbuff[na] = asfp[na].f_voi_fwhm_gauss; } while( ++na < num_dsr );
      nadc_write_arr_float( outfl, nr, "f_voi_fwhm_gauss", 
-			    1, count, 5, rbuff );
+			   1, count, 5, rbuff );
      free( rbuff );
 
      (void) fclose( outfl );
 }
-
