@@ -55,10 +55,10 @@
 
 static const size_t asfp_size = sizeof( struct asfp_scia );
 static const size_t asfp_offs[NFIELDS] = {
-     HOFFSET( struct asfp_scia, pix_pos_slit_fun ),
-     HOFFSET( struct asfp_scia, type_slit_fun ),
-     HOFFSET( struct asfp_scia, fwhm_slit_fun ),
-     HOFFSET( struct asfp_scia, f_voi_fwhm_gauss )
+     HOFFSET( struct asfp_scia, type ),
+     HOFFSET( struct asfp_scia, pixel_position ),
+     HOFFSET( struct asfp_scia, fwhm ),
+     HOFFSET( struct asfp_scia, fwhm_gauss )
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -70,21 +70,20 @@ void SCIA_LV1_WR_H5_ASFP( struct param_record param, unsigned int nr_asfp,
      const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
 
      const char *asfp_names[NFIELDS] = {
-          "pix_pos_slit_fun", "type_slit_fun", 
-	  "fwhm_slit_fun", "f_voi_fwhm_gaus"
+          "type", "pixel_position", "fwhm", "fwhm_gauss"
      };
 #if !defined(__mips) && !defined (__hpux)
      const hid_t asfp_type[NFIELDS] = {
-	  H5T_NATIVE_USHORT, H5T_NATIVE_UCHAR, 
-	  H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT
+	  H5T_NATIVE_CHAR, H5T_NATIVE_SHORT,
+	  H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE
      };
 #else
      hid_t asfp_type[NFIELDS];
 
-     asfp_type[0] = H5T_NATIVE_USHORT;
-     asfp_type[1] = H5T_NATIVE_UCHAR;
-     asfp_type[2] = H5T_NATIVE_FLOAT;
-     asfp_type[3] = H5T_NATIVE_FLOAT;
+     asfp_type[0] = H5T_NATIVE_CHAR;
+     asfp_type[1] = H5T_NATIVE_SHORT;
+     asfp_type[2] = H5T_NATIVE_DOUBLE;
+     asfp_type[3] = H5T_NATIVE_DOUBLE;
 #endif
 /*
  * check number of ASFP records

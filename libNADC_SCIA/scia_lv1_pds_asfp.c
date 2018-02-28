@@ -48,15 +48,7 @@
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 #include <swap_bytes.h>
-
-static
-void Sun2Intel_ASFP( struct asfp_scia *asfp )
-{
-     asfp->pix_pos_slit_fun = byte_swap_u16( asfp->pix_pos_slit_fun );
-     IEEE_Swap__FLT( &asfp->fwhm_slit_fun );
-     IEEE_Swap__FLT( &asfp->f_voi_fwhm_gauss );
-}
-#endif /* _SWAP_TO_LITTLE_ENDIAN */
+#endif
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
@@ -81,8 +73,10 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
      char         *asfp_pntr, *asfp_char = NULL;
      size_t       dsr_size;
 
+     unsigned short usbuff;
      unsigned int indx_dsd;
      unsigned int nr_dsr = 0;  /* initialize the return value */
+     float rbuff;
 
      struct asfp_scia *asfp;
 
@@ -118,18 +112,31 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( asfp_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "ASFP(dsr)" );
 /*
  * read data buffer to ASFP structure
  */
 	  asfp_pntr = asfp_char;
-	  (void) memcpy( &asfp->pix_pos_slit_fun, asfp_pntr, ENVI_USHRT );
+	  (void) memcpy( &usbuff, asfp_pntr, ENVI_USHRT );
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  asfp->pixel_position = (short) byte_swap_u16(usbuff);
+#else
+	  asfp->pixel_position = (short) usbuff;
+#endif
 	  asfp_pntr += ENVI_USHRT;
-	  (void) memcpy( &asfp->type_slit_fun, asfp_pntr, ENVI_UCHAR );
-	  asfp_pntr += ENVI_UCHAR;
-	  (void) memcpy( &asfp->fwhm_slit_fun, asfp_pntr, ENVI_FLOAT );
+	  (void) memcpy( &asfp->type, asfp_pntr, ENVI_UCHAR );
+	  asfp_pntr += ENVI_CHAR;
+	  (void) memcpy( &rbuff, asfp_pntr, ENVI_FLOAT );
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  asfp->fwhm = (double) rbuff;
 	  asfp_pntr += ENVI_FLOAT;
-	  (void) memcpy( &asfp->f_voi_fwhm_gauss, asfp_pntr, ENVI_FLOAT );
+	  (void) memcpy( &rbuff, asfp_pntr, ENVI_FLOAT );
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  asfp->fwhm_gauss = (double) rbuff;
 	  asfp_pntr += ENVI_FLOAT;
 /*
  * check if we read the whole DSR
@@ -138,12 +145,6 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
 	       free( asfp_char );
 	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  }
-/*
- * byte swap data to local representation
- */
-#ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_ASFP( asfp );
-#endif
 	  asfp++;
      } while ( ++nr_dsr < dsd[indx_dsd].num_dsr );
      asfp_pntr = NULL;
@@ -169,10 +170,11 @@ unsigned int SCIA_LV1_RD_ASFP( FILE *fd, unsigned int num_dsd,
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV1_WR_ASFP( FILE *fd, unsigned int num_asfp,
-		       const struct asfp_scia *asfp_in )
+		       const struct asfp_scia *asfp )
 {
-     struct asfp_scia asfp;
-
+     unsigned short usbuff;
+     float rbuff;
+     
      struct dsd_envi dsd = {
           "SMALL_AP_SLIT_FUNCTION", "G",
           "                                                              ",
@@ -188,24 +190,35 @@ void SCIA_LV1_WR_ASFP( FILE *fd, unsigned int num_asfp,
  * read data set records
  */
      do {
-	  (void) memcpy( &asfp, asfp_in, sizeof( struct asfp_scia ) );
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_ASFP( &asfp );
+	  usbuff = (unsigned short) byte_swap_16(asfp->pixel_position);
+#else
+	  usbuff = asfp->pixel_position;
 #endif
-	  if ( fwrite( &asfp.pix_pos_slit_fun, ENVI_USHRT, 1, fd ) != 1 )
+	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
-	  if ( fwrite( &asfp.type_slit_fun, ENVI_UCHAR, 1, fd ) != 1 )
+	  if ( fwrite( &asfp->type, ENVI_UCHAR, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
-	  if ( fwrite( &asfp.fwhm_slit_fun, ENVI_FLOAT, 1, fd ) != 1 )
+	  
+	  rbuff = (float) asfp->fwhm;
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
-	  if ( fwrite( &asfp.f_voi_fwhm_gauss, ENVI_FLOAT, 1, fd ) != 1 )
+	  
+	  rbuff = (float) asfp->fwhm_gauss;
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
-	  asfp_in++;
+	  asfp++;
      } while ( ++dsd.num_dsr < num_asfp );
 /*
  * update list of written DSD records

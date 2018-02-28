@@ -2131,12 +2131,12 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_SFP(hid_t fid, struct sfp_scia **sfp_out)
 {
-     register unsigned int   ni, nr;
+     register unsigned int   ni;
 
-     unsigned short spectral_channel;
-     unsigned int   num_sfp;
-     size_t         dim_size;
+     unsigned int num_sfp;
 
+     char   *cbuff;
+     short  *sbuff;
      double *dbuff;
 
      struct sfp_scia *sfp;
@@ -2158,13 +2158,8 @@ unsigned int SCIA_LV1_NC_RD_SFP(hid_t fid, struct sfp_scia **sfp_out)
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     if ( (dset_id = H5Dopen( gid, "record", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "record" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose(dset_id);
      num_sfp = (unsigned int) cur_dims;
@@ -2180,20 +2175,64 @@ unsigned int SCIA_LV1_NC_RD_SFP(hid_t fid, struct sfp_scia **sfp_out)
 /*
  * read SLIT_FUNCTION datasets
  */
-     // 
-     dim_size = num_sfp * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     // slit_function_fwhm       Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "slit_function_fwhm", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "slit_function_fwhm");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "slit_function_fwhm");
+     if ( (dbuff = (double *) malloc(num_sfp * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
      if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
-     for ( nr = ni = 0; ni < num_sfp; ni++ ) {
-	  sfp[ni].fwhm_slit_fun = (float) dbuff[nr++];
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "slit_function_fwhm" );
+     for ( ni = 0; ni < num_sfp; ni++ ) {
+	  sfp[ni].fwhm = dbuff[ni];
      }
      free( dbuff );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // slit_function_fwhm_gaussian Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "slit_function_fwhm_gaussian", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "slit_function_fwhm_gaussian");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "slit_function_fwhm_gaussian");
+     if ( (dbuff = (double *) malloc(num_sfp * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "slit_function_fwhm_gaussian" );
+     for ( ni = 0; ni < num_sfp; ni++ ) {
+	  sfp[ni].fwhm_gauss = dbuff[ni];
+     }
+     free( dbuff );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // slit_function_pixel_position Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "slit_function_pixel_position", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "slit_function_pixel_position");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "slit_function_pixel_position");
+     if ( (sbuff = (short *) malloc(num_sfp * sizeof(short))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sbuff" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, sbuff) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "slit_function_pixel_position" );
+     for ( ni = 0; ni < num_sfp; ni++ ) {
+	  sfp[ni].pixel_position = sbuff[ni];
+     }
+     free( sbuff );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // slit_function_type       Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "slit_function_type", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "slit_function_type");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "slit_function_type");
+     if ( (cbuff = (char *) malloc(num_sfp)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuff) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "slit_function_type" );
+     for ( ni = 0; ni < num_sfp; ni++ ) {
+	  sfp[ni].type = cbuff[ni];
+     }
+     free( cbuff );
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
@@ -2226,12 +2265,12 @@ done:
 static
 unsigned int SCIA_LV1_NC_RD_ASFP(hid_t fid, struct asfp_scia **asfp_out)
 {
-     register unsigned int   ni, nr;
+     register unsigned int   ni;
 
-     unsigned short spectral_channel;
      unsigned int   num_asfp;
-     size_t         dim_size;
 
+     char   *cbuff;
+     short  *sbuff;
      double *dbuff;
 
      struct asfp_scia *asfp;
@@ -2252,13 +2291,8 @@ unsigned int SCIA_LV1_NC_RD_ASFP(hid_t fid, struct asfp_scia **asfp_out)
 /*
  * obtain dimensions
  */
-     if ( (dset_id = H5Dopen( gid, "spectral_channel", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "spectral_channel" );
-     (void) H5LDget_dset_dims( dset_id, &cur_dims );
-     (void) H5Dclose(dset_id);
-     spectral_channel = (unsigned short) cur_dims;
-     if ( (dset_id = H5Dopen( gid, "orbit_phase", H5P_DEFAULT )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "orbit_phase" );
+     if ( (dset_id = H5Dopen( gid, "record", H5P_DEFAULT )) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "record" );
      (void) H5LDget_dset_dims( dset_id, &cur_dims );
      (void) H5Dclose(dset_id);
      num_asfp = (unsigned int) cur_dims;
@@ -2274,20 +2308,64 @@ unsigned int SCIA_LV1_NC_RD_ASFP(hid_t fid, struct asfp_scia **asfp_out)
 /*
  * read SMALL_AP_SLIT_FUNCTION datasets
  */
-     // 
-     dim_size = num_asfp * spectral_channel;
-     if ( (dset_id = H5Dopen(gid, "", H5P_DEFAULT)) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "");
+     // small_ap_slit_function_fwhm       Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "small_ap_slit_function_fwhm", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "small_ap_slit_function_fwhm");
      if ( (type_id = H5Dget_type( dset_id )) < 0 )
-          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "");
-     if ( (dbuff = (double *) malloc(dim_size * sizeof(double))) == NULL )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "small_ap_slit_function_fwhm");
+     if ( (dbuff = (double *) malloc(num_asfp * sizeof(double))) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
      if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "" );
-     for ( nr = ni = 0; ni < num_asfp; ni++ ) {
-	  asfp[ni].fwhm_slit_fun = (float) dbuff[nr++];
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "small_ap_slit_function_fwhm" );
+     for ( ni = 0; ni < num_asfp; ni++ ) {
+	  asfp[ni].fwhm = dbuff[ni];
      }
      free( dbuff );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // small_ap_slit_function_fwhm_gaussian Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "small_ap_slit_function_fwhm_gaussian", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "small_ap_slit_function_fwhm_gaussian");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "small_ap_slit_function_fwhm_gaussian");
+     if ( (dbuff = (double *) malloc(num_asfp * sizeof(double))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dbuff" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuff) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "small_ap_slit_function_fwhm_gaussian" );
+     for ( ni = 0; ni < num_asfp; ni++ ) {
+	  asfp[ni].fwhm_gauss = dbuff[ni];
+     }
+     free( dbuff );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // small_ap_slit_function_pixel_position Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "small_ap_slit_function_pixel_position", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "small_ap_slit_function_pixel_position");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "small_ap_slit_function_pixel_position");
+     if ( (sbuff = (short *) malloc(num_asfp * sizeof(short))) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sbuff" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, sbuff) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "small_ap_slit_function_pixel_position" );
+     for ( ni = 0; ni < num_asfp; ni++ ) {
+	  asfp[ni].pixel_position = sbuff[ni];
+     }
+     free( sbuff );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(dset_id);
+     // small_ap_slit_function_type       Dataset {record}
+     if ( (dset_id = H5Dopen(gid, "small_ap_slit_function_type", H5P_DEFAULT)) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "small_ap_slit_function_type");
+     if ( (type_id = H5Dget_type( dset_id )) < 0 )
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "small_ap_slit_function_type");
+     if ( (cbuff = (char *) malloc(num_asfp)) == NULL )
+	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "cbuff" );
+     if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuff) < 0 )
+          NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "small_ap_slit_function_type" );
+     for ( ni = 0; ni < num_asfp; ni++ ) {
+	  asfp[ni].type = cbuff[ni];
+     }
+     free( cbuff );
      (void) H5Tclose(type_id);
      (void) H5Dclose(dset_id);
 /*
@@ -3368,8 +3446,8 @@ int main(int argc, char *argv[])
      struct rsplo_scia   *rspl = NULL;
      struct rsplo_scia   *rspo = NULL;
      struct ekd_scia     ekd;
-     //struct asfp_scia   *asfp;
-     //struct sfp_scia    *sfp;
+     struct asfp_scia    *asfp = NULL;
+     struct sfp_scia     *sfp = NULL;
      struct state1_scia  *state = NULL;
      //struct mds1_pmd    *pmd;
      //struct mds1_aux    *aux;
@@ -3593,10 +3671,24 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write Slit Function Parameters
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_SFP\n");
+     num = SCIA_LV1_NC_RD_SFP(fid, &sfp);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SFP");
+     SCIA_LV1_WR_ASCII_SFP(param, num, sfp);
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFP" );
 /*
  * -------------------------
  * read/write Small Aperture Slit Function Parameters
  */
+     (void) fprintf(stdout, "start SCIA_LV1_NC_RD_ASFP\n");
+     num = SCIA_LV1_NC_RD_ASFP(fid, &asfp);
+     if ( IS_ERR_STAT_FATAL || num ==  0 )
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "ASFP");
+     SCIA_LV1_WR_ASCII_ASFP(param, num, asfp);
+     if ( IS_ERR_STAT_FATAL )
+	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "ASFP" );
 /* -------------------------
  * read/write States of the Product
  */

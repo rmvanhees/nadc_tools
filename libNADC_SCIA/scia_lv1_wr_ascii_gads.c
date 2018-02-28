@@ -779,12 +779,12 @@ void SCIA_LV1_WR_ASCII_EKD( struct param_record param,
 void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
 			    const struct sfp_scia *sfp )
 {
-     register unsigned int na, nr = 1;
+     register unsigned int na, nr = 0;
 
-     unsigned char  *cbuff;
-     unsigned short *ubuff;
-     unsigned int   count[1];
-     float          *rbuff;
+     signed char   *cbuff;
+     short         *sbuff;
+     unsigned int  count[1];
+     double        *dbuff;
 
      FILE *outfl = CRE_ASCII_File( param.outfile, "sfp" );
 
@@ -794,37 +794,36 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
  * write ASCII dump of SFP record
  */
      nadc_write_header( outfl, 0, param.infile, "Slit Function Parameters" );
-
      count[0] = num_dsr;
-     ubuff = (unsigned short *) malloc( num_dsr * sizeof( short ));
-     if ( ubuff == NULL ) 
-          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ubuff" );
-     na = 0;
-     do { ubuff[na] = sfp[na].pix_pos_slit_fun; } while( ++na < num_dsr );
-     nadc_write_arr_ushort( outfl, nr++, "Pixel position of slit function", 
-			    1, count, ubuff );
-     free( ubuff );
-
-     cbuff = (unsigned char *) malloc( (size_t) num_dsr );
+     cbuff = (signed char *) malloc( (size_t) num_dsr );
      if ( cbuff == NULL )
           NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      na = 0;
-     do { cbuff[na] = sfp[na].type_slit_fun; } while( ++na < num_dsr );
-     nadc_write_arr_uchar( outfl, nr++, "Type of slit function", 
+     do { cbuff[na] = sfp[na].type; } while( ++na < num_dsr );
+     nadc_write_arr_schar( outfl, ++nr, "Type of slit function", 
 			   1, count, cbuff );
      free( cbuff );
 
-     rbuff = (float *) malloc( num_dsr * sizeof( float ));
-     if ( rbuff == NULL ) 
-          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     sbuff = (short *) malloc( num_dsr * sizeof( short ));
+     if ( sbuff == NULL ) 
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      na = 0;
-     do { rbuff[na] = sfp[na].fwhm_slit_fun; } while( ++na < num_dsr );
-     nadc_write_arr_float( outfl, nr++, "fwhm_slit_fun", 1, count, 5, rbuff );
+     do { sbuff[na] = sfp[na].pixel_position; } while( ++na < num_dsr );
+     nadc_write_arr_short( outfl, ++nr, "Pixel position of slit function", 
+			   1, count, sbuff );
+     free( sbuff );
+
+     dbuff = (double *) malloc( num_dsr * sizeof( double ));
+     if ( dbuff == NULL ) 
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "dbuff" );
      na = 0;
-     do { rbuff[na] = sfp[na].f_voi_fwhm_loren; } while( ++na < num_dsr );
-     nadc_write_arr_float( outfl, nr, "f_voi_fwhm_loren", 
-			   1, count, 5, rbuff );
-     free( rbuff );
+     do { dbuff[na] = sfp[na].fwhm; } while( ++na < num_dsr );
+     nadc_write_arr_double( outfl, ++nr, "fwhm", 1, count, 5, dbuff );
+     na = 0;
+     do { dbuff[na] = sfp[na].fwhm_gauss; } while( ++na < num_dsr );
+     nadc_write_arr_double( outfl, nr, "fwhm_gauss", 
+			    1, count, 5, dbuff );
+     free( dbuff );
 
      (void) fclose( outfl );
 }
@@ -845,12 +844,12 @@ void SCIA_LV1_WR_ASCII_SFP( struct param_record param, unsigned int num_dsr,
 void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
 			     const struct asfp_scia *asfp )
 {
-     register unsigned int na, nr = 1;
+     register unsigned int na, nr = 0;
 
-     unsigned char  *cbuff;
-     unsigned short *ubuff;
-     unsigned int   count[1];
-     float          *rbuff;
+     signed char  *cbuff;
+     short        *sbuff;
+     unsigned int count[1];
+     double       *dbuff;
 
      FILE *outfl = CRE_ASCII_File( param.outfile, "asfp" );
 
@@ -862,35 +861,34 @@ void SCIA_LV1_WR_ASCII_ASFP( struct param_record param, unsigned int num_dsr,
      nadc_write_header( outfl, 0, param.infile, 
 			 "Small Aperture Slit Function Parameters" );
      count[0] = num_dsr;
-     ubuff = (unsigned short *) malloc( num_dsr * sizeof( short ));
-     if ( ubuff == NULL ) 
-          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "ubuff" );
-     na = 0;
-     do { ubuff[na] = asfp[na].pix_pos_slit_fun; } while( ++na < num_dsr );
-     nadc_write_arr_ushort( outfl, nr++, "Pixel position of slit function", 
-			    1, count, ubuff );
-     free( ubuff );
-
-     cbuff = (unsigned char *) malloc( (size_t) num_dsr );
+     cbuff = (signed char *) malloc( (size_t) num_dsr );
      if ( cbuff == NULL ) 
           NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cbuff" );
      na = 0;
-     do { cbuff[na] = asfp[na].type_slit_fun; } while( ++na < num_dsr );
-     nadc_write_arr_uchar( outfl, nr++, "Type of slit function", 
+     do { cbuff[na] = asfp[na].type; } while( ++na < num_dsr );
+     nadc_write_arr_schar( outfl, ++nr, "Type of slit function", 
 			   1, count, cbuff );
      free( cbuff );
 
-     rbuff = (float *) malloc( num_dsr * sizeof( float ));
-     if ( rbuff == NULL ) 
-          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "rbuff" );
+     sbuff = (short *) malloc( num_dsr * sizeof( short ));
+     if ( sbuff == NULL ) 
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "sbuff" );
      na = 0;
-     do { rbuff[na] = asfp[na].fwhm_slit_fun; } while( ++na < num_dsr );
-     nadc_write_arr_float( outfl, nr++, "fwhm_slit_fun", 1, count, 5, rbuff );
+     do { sbuff[na] = asfp[na].pixel_position; } while( ++na < num_dsr );
+     nadc_write_arr_short( outfl, ++nr, "Pixel position of slit function", 
+			   1, count, sbuff );
+     free( sbuff );
+
+     dbuff = (double *) malloc( num_dsr * sizeof( double ));
+     if ( dbuff == NULL ) 
+          NADC_RETURN_ERROR( NADC_ERR_ALLOC, "dbuff" );
      na = 0;
-     do { rbuff[na] = asfp[na].f_voi_fwhm_gauss; } while( ++na < num_dsr );
-     nadc_write_arr_float( outfl, nr, "f_voi_fwhm_gauss", 
-			   1, count, 5, rbuff );
-     free( rbuff );
+     do { dbuff[na] = asfp[na].fwhm; } while( ++na < num_dsr );
+     nadc_write_arr_double( outfl, ++nr, "fwhm", 1, count, 5, dbuff );
+     na = 0;
+     do { dbuff[na] = asfp[na].fwhm_gauss; } while( ++na < num_dsr );
+     nadc_write_arr_double( outfl, ++nr, "fwhm gauss", 1, count, 5, dbuff );
+     free( dbuff );
 
      (void) fclose( outfl );
 }
