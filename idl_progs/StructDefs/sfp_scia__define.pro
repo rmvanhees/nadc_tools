@@ -2,9 +2,9 @@ PRO sfp_scia__define
 compile_opt idl2,hidden
 
 struct = { sfp_scia ,$
-           pix_pos_slit_fun : 0us  ,$
-           type_slit_fun    : 0b   ,$
-           fwhm_slit_fun    : 0.0  ,$
-           f_voi_fwhm_loren : 0.0  $
+           pixel_position : 0s   ,$
+           type           : 0b   ,$
+           fwhm           : 0.d  ,$
+           fwhm_gauss     : 0.d  $
          }
 END

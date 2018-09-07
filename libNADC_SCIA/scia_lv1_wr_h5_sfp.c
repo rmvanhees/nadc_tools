@@ -55,10 +55,10 @@
 
 static const size_t sfp_size = sizeof( struct sfp_scia );
 static const size_t sfp_offs[NFIELDS] = {
-     HOFFSET( struct sfp_scia, pix_pos_slit_fun ),
-     HOFFSET( struct sfp_scia, type_slit_fun ),
-     HOFFSET( struct sfp_scia, fwhm_slit_fun ),
-     HOFFSET( struct sfp_scia, f_voi_fwhm_loren )
+     HOFFSET( struct sfp_scia, type ),
+     HOFFSET( struct sfp_scia, pixel_position ),
+     HOFFSET( struct sfp_scia, fwhm ),
+     HOFFSET( struct sfp_scia, fwhm_gauss )
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -69,21 +69,20 @@ void SCIA_LV1_WR_H5_SFP( struct param_record param, unsigned int nr_sfp,
      hbool_t compress;
 
      const char *sfp_names[NFIELDS] = {
-          "pix_pos_slit_fun", "type_slit_fun", 
-	  "fwhm_slit_fun", "f_voi_fwhm_loren"
+          "type", "pixel_position", "fwhm", "fwhm_gauss"
      };
 #if !defined(__mips) && !defined (__hpux)
      const hid_t sfp_type[NFIELDS] = {
-	  H5T_NATIVE_USHORT, H5T_NATIVE_UCHAR, 
-	  H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT
+	  H5T_NATIVE_CHAR, H5T_NATIVE_SHORT, 
+	  H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE
      };
 #else
      hid_t sfp_type[NFIELDS];
 
-     sfp_type[0] = H5T_NATIVE_USHORT;
-     sfp_type[1] = H5T_NATIVE_UCHAR;
-     sfp_type[2] = H5T_NATIVE_FLOAT;
-     sfp_type[3] = H5T_NATIVE_FLOAT;
+     sfp_type[0] = H5T_NATIVE_CHAR;
+     sfp_type[1] = H5T_NATIVE_SHOR;
+     sfp_type[2] = H5T_NATIVE_DOUBLE;
+     sfp_type[3] = H5T_NATIVE_DOUBLE;
 #endif
 /*
  * check number of SFP records

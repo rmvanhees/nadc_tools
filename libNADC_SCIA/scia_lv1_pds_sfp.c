@@ -48,15 +48,7 @@
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 #include <swap_bytes.h>
-
-static
-void Sun2Intel_SFP( struct sfp_scia *sfp )
-{
-     sfp->pix_pos_slit_fun = byte_swap_u16( sfp->pix_pos_slit_fun );
-     IEEE_Swap__FLT( &sfp->fwhm_slit_fun );
-     IEEE_Swap__FLT( &sfp->f_voi_fwhm_loren );
-}
-#endif /* _SWAP_TO_LITTLE_ENDIAN */
+#endif
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
@@ -81,9 +73,11 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
 {
      char         *sfp_pntr, *sfp_char = NULL;
      size_t       dsr_size;
-     unsigned int indx_dsd;
 
-     unsigned int nr_dsr = 0;
+     unsigned short usbuff;
+     unsigned int indx_dsd;
+     unsigned int nr_dsr = 0;  /* initialize the return value */
+     float rbuff;
 
      struct sfp_scia *sfp;
 
@@ -108,7 +102,7 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
  * allocate memory to temporary store data for output structure
  */
      dsr_size = (size_t) dsd[indx_dsd].dsr_size;
-     if ( (sfp_char = (char *) malloc( dsr_size )) == NULL ) 
+     if ( (sfp_char = (char *) malloc( dsr_size )) == NULL )
 	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "sfp_char" );
 /*
  * rewind/read input data file
@@ -119,18 +113,31 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
  */
      do {
 	  if ( fread( sfp_char, dsr_size, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
+	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SFP(dsr)" );
 /*
  * read data buffer to SFP structure
  */
 	  sfp_pntr = sfp_char;
-	  (void) memcpy( &sfp->pix_pos_slit_fun, sfp_pntr, ENVI_USHRT );
+	  (void) memcpy( &usbuff, sfp_pntr, ENVI_USHRT );
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  sfp->pixel_position = (short) byte_swap_u16(usbuff);
+#else
+	  sfp->pixel_position = (short) usbuff;
+#endif
 	  sfp_pntr += ENVI_USHRT;
-	  (void) memcpy( &sfp->type_slit_fun, sfp_pntr, ENVI_UCHAR );
-	  sfp_pntr += ENVI_UCHAR;
-	  (void) memcpy( &sfp->fwhm_slit_fun, sfp_pntr, ENVI_FLOAT );
+	  (void) memcpy( &sfp->type, sfp_pntr, ENVI_UCHAR );
+	  sfp_pntr += ENVI_CHAR;
+	  (void) memcpy( &rbuff, sfp_pntr, ENVI_FLOAT );
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  sfp->fwhm = (double) rbuff;
 	  sfp_pntr += ENVI_FLOAT;
-	  (void) memcpy( &sfp->f_voi_fwhm_loren, sfp_pntr, ENVI_FLOAT );
+	  (void) memcpy( &rbuff, sfp_pntr, ENVI_FLOAT );
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  sfp->fwhm_gauss = (double) rbuff;
 	  sfp_pntr += ENVI_FLOAT;
 /*
  * check if we read the whole DSR
@@ -139,20 +146,14 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
 	       free( sfp_char );
 	       NADC_GOTO_ERROR( NADC_ERR_PDS_SIZE, dsd_name );
 	  }
-/*
- * byte swap data to local representation
- */
-#ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_SFP( sfp );
-#endif
 	  sfp++;
      } while ( ++nr_dsr < dsd[indx_dsd].num_dsr );
+     sfp_pntr = NULL;
 /*
  * set return values
  */
-     sfp_pntr = NULL;
  done:
-     if ( sfp_char != NULL ) free( sfp_char );
+     if ( sfp_char != NULL ) free(sfp_char);
      return nr_dsr;
 }
 
@@ -171,9 +172,10 @@ unsigned int SCIA_LV1_RD_SFP( FILE *fd, unsigned int num_dsd,
 .COMMENTS    none
 -------------------------*/
 void SCIA_LV1_WR_SFP( FILE *fd, unsigned int num_sfp,
-		      const struct sfp_scia *sfp_in )
+		      const struct sfp_scia *sfp )
 {
-     struct sfp_scia sfp;
+     unsigned short usbuff;
+     float rbuff;
 
      struct dsd_envi dsd = {
           "SLIT_FUNCTION", "G",
@@ -187,34 +189,42 @@ void SCIA_LV1_WR_SFP( FILE *fd, unsigned int num_sfp,
 	  return;
      }
 /*
- * write data set records
+ * read data set records
  */
      do {
-	  (void)memcpy( &sfp, sfp_in, sizeof( struct sfp_scia ));
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_SFP( &sfp );
+	  usbuff = (unsigned short) byte_swap_16(sfp->pixel_position);
+#else
+	  usbuff = sfp->pixel_position;
 #endif
-/*
- * write SFP structure file
- */
-	  if ( fwrite( &sfp.pix_pos_slit_fun, ENVI_USHRT, 1, fd ) != 1 )
+	  if ( fwrite( &usbuff, ENVI_USHRT, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_USHRT;
-	  if ( fwrite( &sfp.type_slit_fun, ENVI_UCHAR, 1, fd ) != 1 )
+	  if ( fwrite( &sfp->type, ENVI_UCHAR, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_UCHAR;
-	  if ( fwrite( &sfp.fwhm_slit_fun, ENVI_FLOAT, 1, fd ) != 1 )
+	  
+	  rbuff = (float) sfp->fwhm;
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
-	  if ( fwrite( &sfp.f_voi_fwhm_loren, ENVI_FLOAT, 1, fd ) != 1 )
+	  
+	  rbuff = (float) sfp->fwhm_gauss;
+#ifdef _SWAP_TO_LITTLE_ENDIAN
+	  IEEE_Swap__FLT(&rbuff);
+#endif
+	  if ( fwrite( &rbuff, ENVI_FLOAT, 1, fd ) != 1 )
 	       NADC_RETURN_ERROR( NADC_ERR_PDS_WR, "" );
 	  dsd.size += ENVI_FLOAT;
 
-	  sfp_in++;
+	  sfp++;
      } while ( ++dsd.num_dsr < num_sfp );
 /*
  * update list of written DSD records
  */
-     dsd.dsr_size = (unsigned int) (dsd.size / dsd.num_dsr);
+     dsd.dsr_size = (int) (dsd.size / dsd.num_dsr);
      SCIA_LV1_ADD_DSD( &dsd );
 }

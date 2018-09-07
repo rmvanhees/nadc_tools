@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2018 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -438,29 +438,29 @@ void nadc_write_arr_uchar( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, " %3u", (unsigned int) (*key_val++) );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, " %3u", 
 				    (unsigned int) (*key_val++) );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ )
 	       (void) fprintf( fp, "# %3u\n", (unsigned int) (*key_val++) );
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, " %3u", (unsigned int) 
 				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
@@ -505,28 +505,28 @@ void nadc_write_arr_schar( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, " %3d", (int) (*key_val++) );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, " %3d", (int) (*key_val++) );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ )
 	       (void) fprintf( fp, "# %3d\n", (int) (*key_val++) );
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, " %3d", 
 				    (int) key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
@@ -571,28 +571,28 @@ void nadc_write_arr_short( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, " %+5hd", *key_val++ );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, " %+5hd", *key_val++ );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ )
 	       (void) fprintf( fp, "# %+5hd\n", *key_val++ );
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, " %+5hd", 
 				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
@@ -637,28 +637,28 @@ void nadc_write_arr_ushort( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, " %5hu", *key_val++ );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, " %5hu", *key_val++ );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ )
 	       (void) fprintf( fp, "# %5hu\n", *key_val++ );
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, " %5hu", 
 				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
@@ -702,28 +702,28 @@ void nadc_write_arr_int( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, " %+10d", *key_val++ );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, " %+10d", *key_val++ );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ )
 	       (void) fprintf( fp, "# %+10d\n", *key_val++ );
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, " %+10d", 
 				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
@@ -768,28 +768,28 @@ void nadc_write_arr_uint( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, " %10u", *key_val++ );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, " %10u", *key_val++ );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ )
 	       (void) fprintf( fp, "# %10u\n", *key_val++ );
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, " %10u", 
 				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
@@ -838,22 +838,18 @@ void nadc_write_arr_float( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, str_fmt, *key_val++ );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
 
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ ) {
-		    if ( isnormal( *key_val ) )
-			 (void) fprintf( fp, str_fmt, *key_val++ );
-		    else
-			 (void) fprintf( fp, " NaN" );
-	       }
+	       for ( nx = 0; nx < val_count[1]; nx++ )
+		    (void) fprintf( fp, str_fmt, *key_val++ );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ ) {
@@ -862,19 +858,15 @@ void nadc_write_arr_float( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
 
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ ) {
-		    if ( isnormal(key_val[nx + ny * val_count[0]] ) )
-			 (void) fprintf( fp, str_fmt, 
-					 key_val[nx + ny * val_count[0]] );
-		    else
-			 (void) fprintf( fp, " NaN" ); 
-	       }
+	       for ( ny = 0; ny < val_count[0]; ny++ )
+		    (void) fprintf( fp, str_fmt,
+				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else {
@@ -922,18 +914,18 @@ void nadc_write_arr_double( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, str_fmt, *key_val++ );
 	  (void) fprintf( fp, "\n" );
      } else if ( val_ndim == 2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0], val_count[1] );
 
-	  for ( ny = 0; ny < val_count[1]; ny++ ) {
+	  for ( ny = 0; ny < val_count[0]; ny++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( nx = 0; nx < val_count[0]; nx++ )
+	       for ( nx = 0; nx < val_count[1]; nx++ )
 		    (void) fprintf( fp, str_fmt, *key_val++ );
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -1 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[1,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[1][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[0] );
 	  for ( nx = 0; nx < val_count[0]; nx++ ) {
@@ -942,13 +934,13 @@ void nadc_write_arr_double( FILE *fp, unsigned int key_num,
 	       (void) fprintf( fp, "\n" );
 	  }
      } else if ( val_ndim == -2 ) {
-	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u,%-u]\n", key_num,
+	  (void) fprintf( fp, "%3u %s %-33s %s array[%-u][%-u]\n", key_num,
 			  FIELD_SEPARATOR, key_wrd, FIELD_SEPARATOR, 
 			  val_count[1], val_count[0] );
 
-	  for ( nx = 0; nx < val_count[0]; nx++ ) {
+	  for ( nx = 0; nx < val_count[1]; nx++ ) {
 	       (void) fprintf( fp, "#" );
-	       for ( ny = 0; ny < val_count[1]; ny++ )
+	       for ( ny = 0; ny < val_count[0]; ny++ )
 		    (void) fprintf( fp, str_fmt, 
 				    key_val[nx + ny * val_count[0]] );
 	       (void) fprintf( fp, "\n" );

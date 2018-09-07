@@ -249,31 +249,31 @@ struct rsplo_scia
 
 struct ekd_scia
 {
-     float mu2_nadir[SCIENCE_PIXELS];
-     float mu3_nadir[SCIENCE_PIXELS];
-     float mu2_limb[SCIENCE_PIXELS];
-     float mu3_limb[SCIENCE_PIXELS];
-     float radiance_vis[SCIENCE_PIXELS];
-     float radiance_nadir[SCIENCE_PIXELS];
-     float radiance_limb[SCIENCE_PIXELS];
-     float radiance_sun[SCIENCE_PIXELS];
-     float bsdf[SCIENCE_PIXELS];
+     float  mu2_nadir[SCIENCE_PIXELS];
+     float  mu3_nadir[SCIENCE_PIXELS];
+     float  mu2_limb[SCIENCE_PIXELS];
+     float  mu3_limb[SCIENCE_PIXELS];
+     float  radiance_vis[SCIENCE_PIXELS];
+     float  radiance_nadir[SCIENCE_PIXELS];
+     float  radiance_limb[SCIENCE_PIXELS];
+     float  radiance_sun[SCIENCE_PIXELS];
+     float  bsdf[SCIENCE_PIXELS];
 };
 
 struct sfp_scia
 {
-     unsigned short pix_pos_slit_fun;
-     unsigned char  type_slit_fun;
-     float          fwhm_slit_fun;
-     float          f_voi_fwhm_loren;
+     char   type;
+     short  pixel_position;
+     double fwhm;
+     double fwhm_gauss;
 };
 
 struct asfp_scia
 {
-     unsigned short pix_pos_slit_fun;
-     unsigned char  type_slit_fun;
-     float          fwhm_slit_fun;
-     float          f_voi_fwhm_gauss;
+     char   type;
+     short  pixel_position;
+     double fwhm;
+     double fwhm_gauss;
 };
 
 #define LV1_Clcon_LENGTH    17     /* size on disk */
