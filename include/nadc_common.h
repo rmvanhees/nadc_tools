@@ -87,7 +87,7 @@ extern "C" {
 
 #define SHORT_STRING_LENGTH        ((size_t) 80)
 #define MAX_STRING_LENGTH          ((size_t) 256)
-#define UTC_STRING_LENGTH          29
+#define UTC_STRING_LENGTH          28
 #define DATE_STRING_LENGTH         26
 #define DATE_ONLY_STRING_LENGTH    11
 #define TIME_ONLY_STRING_LENGTH    12
