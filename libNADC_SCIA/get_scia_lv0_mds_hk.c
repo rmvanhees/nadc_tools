@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2006 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2006 - 2018 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -26,7 +26,8 @@
 		       GET_SCIA_LV0_STATE_DETtemp, GET_SCIA_LV0_STATE_OBMtemp,
 		       GET_SCIA_LV0_STATE_PMDtemp
 .ENVIRONment None
-.VERSION     1.4     04-May-2010   GET_SCIA_LV0_STATE_OBMtemp, returns OBM 
+.VERSION     1.5     15-Nov-2018   added BCPS H/W delay for exact timing, RvH
+             1.4     04-May-2010   GET_SCIA_LV0_STATE_OBMtemp, returns OBM 
                                    temperature accoding to SOST or SDMF pre-v3.1
              1.3     03-Mar-2010   fixed long standing bug: 
                                      mixing radTemp and azTemp, RvH
@@ -253,16 +254,19 @@ double GET_SCIA_LV0_MDS_TIME( int source, const void *mds_lv0 )
      double jday = NAN;
 
      const double sec2day = 24. * 60 * 60;
+     const double hw_delay = 0.092765;      // BCPS H/W delay (92.765 ms)
 
-     const unsigned short ri[MAX_NUM_STATE] = {
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 111, 86, 
-	  303, 86, 86, 86, 86, 86, 86, 86, 111, 303
-     };
+     // BCPS enable delay per instrument state
+     const unsigned short ri[MAX_NUM_STATE+1] = 
+       {0,
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 111, 86, 
+	303, 86, 86, 86, 86, 86, 86, 86, 111, 303
+       };
 
      if ( source == SCIA_AUX_PACKET ) {
 	  const struct mds0_aux *aux = (const struct mds0_aux *) mds_lv0;
@@ -282,7 +286,7 @@ double GET_SCIA_LV0_MDS_TIME( int source, const void *mds_lv0 )
           } while ( ! found && ++ni < NUM_LV0_AUX_PMTC_FRAME );
           if ( found ) {
 	       dsec  = aux->isp.secnd + aux->isp.musec / 1e6
-		    + ri[aux->data_hdr.state_id-1] / 256.
+		    + hw_delay + ri[aux->data_hdr.state_id] / 256.
 		    + delay;
 	       jday = aux->isp.days + dsec / sec2day;
 	  }
@@ -290,7 +294,7 @@ double GET_SCIA_LV0_MDS_TIME( int source, const void *mds_lv0 )
 	  const struct mds0_det *det = (const struct mds0_det *) mds_lv0;
 
 	  dsec = det->isp.secnd + det->isp.musec / 1000000.
-	       + ri[det->data_hdr.state_id-1] / 256.
+	       + hw_delay + ri[det->data_hdr.state_id] / 256.
 	       + det->data_src[0].hdr.bcps / 16.;
 	  jday = det->isp.days + dsec / sec2day;
      } else {            /* SCIA_PMD_PACKET */
@@ -311,7 +315,7 @@ double GET_SCIA_LV0_MDS_TIME( int source, const void *mds_lv0 )
           } while ( ! found && ++ni < NUM_LV0_PMD_PACKET );
           if ( found ) {
 	       dsec = pmd->isp.secnd + pmd->isp.musec / 1e6
-		    + ri[pmd->data_hdr.state_id-1] / 256.
+		    + hw_delay + ri[pmd->data_hdr.state_id] / 256.
 		    + delay;
 	       jday = pmd->isp.days + dsec / sec2day;
 	  }
@@ -347,16 +351,19 @@ void GET_SCIA_LV0_MDS_TIME_ARR( int source, const void *mds_lv0,
      double dsec;
 
      const double sec2day = 24. * 60 * 60;
+     const double hw_delay = 0.092765;      // BCPS H/W delay (92.765 ms)
 
-     const unsigned short ri[MAX_NUM_STATE] = {
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
-	  86, 86, 86, 86, 86, 86, 86, 86, 111, 86, 
-	  303, 86, 86, 86, 86, 86, 86, 86, 111, 303
-     };
+     // BCPS enable delay per instrument state
+     const unsigned short ri[MAX_NUM_STATE+1] =
+       {0,
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 
+	86, 86, 86, 86, 86, 86, 86, 86, 111, 86, 
+	303, 86, 86, 86, 86, 86, 86, 86, 111, 303
+       };
 
      if ( source == SCIA_AUX_PACKET ) {
 	  const struct mds0_aux *aux = (const struct mds0_aux *) mds_lv0;
@@ -364,7 +371,7 @@ void GET_SCIA_LV0_MDS_TIME_ARR( int source, const void *mds_lv0,
 	  const unsigned short AUX_SYNC = 0xDDDD;
 
 	  dsec = aux->isp.secnd + aux->isp.musec / 1e6
-	       + ri[aux->data_hdr.state_id-1] / 256.;
+	       + hw_delay + ri[aux->data_hdr.state_id] / 256.;
 	  ni = 0;
 	  do { 
 	       register unsigned short nj = 0;
@@ -384,7 +391,7 @@ void GET_SCIA_LV0_MDS_TIME_ARR( int source, const void *mds_lv0,
 	  const unsigned short PMD_SYNC = 0xEEEE;
 
 	  dsec = pmd->isp.secnd + pmd->isp.musec / 1e6
-	       + ri[pmd->data_hdr.state_id-1] / 256.;
+	       + hw_delay + ri[pmd->data_hdr.state_id] / 256.;
 	  ni = 0;
 	  do {
 	       if ( pmd->data_src.packet[ni].sync == PMD_SYNC ) {
@@ -401,7 +408,7 @@ void GET_SCIA_LV0_MDS_TIME_ARR( int source, const void *mds_lv0,
 	  const struct mds0_det *det = (const struct mds0_det *) mds_lv0;
 
 	  dsec = det->isp.secnd + det->isp.musec / 1e6
-	       + ri[det->data_hdr.state_id-1] / 256. 
+	       + hw_delay + ri[det->data_hdr.state_id] / 256. 
 	       + det->data_src->hdr.bcps / 16.;
 	  *jday = det->isp.days + dsec / sec2day;
      }
