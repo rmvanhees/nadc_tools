@@ -154,7 +154,6 @@ int main( int argc, char *argv[] )
 	  param.hdf_file_id = SCIA_CRE_H5_FILE( SCIA_LEVEL_0, &param );
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
-	  SCIA_WR_H5_VERSION( param.hdf_file_id );
      }
 /*
  * -------------------------

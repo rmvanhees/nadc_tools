@@ -242,9 +242,9 @@ struct param_record
      unsigned short calib_pmd;
      unsigned int   calib_scia;
 
-     int   hdf_file_id;
-
      unsigned long long clus_mask;
+
+     signed long long hdf_file_id;
 
      unsigned char  catID[MAX_NUM_STATE];
      unsigned char  stateID[MAX_NUM_STATE];
