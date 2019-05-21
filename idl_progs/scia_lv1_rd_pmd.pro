@@ -61,18 +61,18 @@ PRO SCIA_LV1_RD_PMD, dsd, pmd, status=status
   pmd = -1
 
 ; get index to data set descriptor 
-  indx_dsd = WHERE( STRCOMPRESS(STRING(dsd[*].name), /REMOVE) $
-                    EQ 'PMD_PACKETS', count )
+  indx_dsd = WHERE(STRCOMPRESS(STRING(dsd[*].name), /REMOVE) $
+                   EQ 'PMD_PACKETS', count)
   IF count EQ 0 THEN $
      MESSAGE, ' FATAL, could not find keyword: ' + 'PMD_PACKETS'
 
 ;read Data Set Descriptor records
-  num_dsd = ULONG( SIZE( dsd, /N_ELEMENTS ))
+  num_dsd = ULONG(SIZE(dsd, /N_ELEMENTS))
   num_pmd = dsd[indx_dsd].num_dsr
   IF num_pmd GT 0 THEN BEGIN
-     pmd = replicate( {mds1_pmd}, num_pmd )
-     num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_PMD', $
-                          num_dsd, dsd, pmd, /CDECL )
+     pmd = replicate({mds1_pmd}, num_pmd)
+     num = call_external(lib_name('libnadc_idl'), '_SCIA_LV1_RD_PMD', $
+                         num_dsd, dsd, pmd, /CDECL)
 
 ; check error status
      IF num NE num_pmd THEN status = -1

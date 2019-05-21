@@ -21,7 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     perform Polarisation correction on Sciamachy L1b science data
 .INPUT/OUTPUT
-  call as   SCIA_ATBD_CAL_POL( fileParam, wvlen, state, mds_1b, mds_1c );
+  call as   SCIA_ATBD_CAL_POL(fileParam, wvlen, state, mds_1b, mds_1c);
      input:  
              struct file_rec *fileParam : file/calibration parameters
 	     struct wvlen_rec wvlen     : Solar and science wavelength grid
@@ -79,7 +79,7 @@ static char  do_pol_point[NUM_FRAC_POLV+1];
 .IDENTifer   Get_PolarisationValues
 .PURPOSE     
 .INPUT/OUTPUT
-  call as    Get_PolarisationValues( num_clcon, state, mds_1b, polV_out );
+  call as    Get_PolarisationValues(num_clcon, state, mds_1b, polV_out);
      input:
 	    unsigned short num_clcon :  index of current cluster
 	    struct state1_scia *state:  structure with States of the product
@@ -91,10 +91,10 @@ static char  do_pol_point[NUM_FRAC_POLV+1];
 .COMMENTS    static function
 -------------------------*/
 static
-void Get_PolarisationValues( unsigned short num_clcon,
-			     const struct state1_scia *state,
-			     const struct mds1_scia *mds_1b,
-			     /*@out@*/ struct polV_scia **polV_out )
+void Get_PolarisationValues(unsigned short num_clcon,
+			    const struct state1_scia *state,
+			    const struct mds1_scia *mds_1b,
+			    /*@out@*/ struct polV_scia **polV_out)
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack, *polV_out@*/
 {
@@ -115,33 +115,33 @@ void Get_PolarisationValues( unsigned short num_clcon,
      n_pol_all = 0;
      do {
 	  n_pol_dsr = state->num_polar[nr] / state->num_dsr;
-	  if ( state->Clcon[num_clcon].intg_time == state->intg_times[nr] ) {
+	  if (state->Clcon[num_clcon].intg_time == state->intg_times[nr]) {
 	       n_pol_all = state->num_polar[nr];
 	       break;
 	  }
 	  indx_1b += n_pol_dsr;
-     } while ( ++nr < state->num_intg );
-     if ( n_pol_all == 0 ) {
+     } while (++nr < state->num_intg);
+     if (n_pol_all == 0) {
 	  polV_out[0] = NULL;
-	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "invalid integration time" );
+	  NADC_RETURN_ERROR(NADC_ERR_FATAL, "invalid integration time");
      }
 /*
  * collect all fractional polarization data
  */
      polV = (struct polV_scia *) 
-	  malloc( n_pol_all * sizeof( struct polV_scia ));
-     if ( polV == NULL ) {
+	  malloc(n_pol_all * sizeof(struct polV_scia));
+     if (polV == NULL) {
 	  polV_out[0] = NULL;     
-	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "polV" );
+	  NADC_RETURN_ERROR(NADC_ERR_ALLOC, "polV");
      }
      nd = 0;
      indx_1c = 0;
      do {
-	  (void) memcpy( &polV[indx_1c],
+	  (void) memcpy(&polV[indx_1c],
 			 &mds_1b[nd].polV[indx_1b],
-			 n_pol_dsr * sizeof( struct polV_scia ) );
+			 n_pol_dsr * sizeof(struct polV_scia));
 	  indx_1c += n_pol_dsr;
-     } while( ++nd < state->num_dsr );
+     } while(++nd < state->num_dsr);
      polV_out[0] = polV;
 }
 
@@ -149,7 +149,7 @@ void Get_PolarisationValues( unsigned short num_clcon,
 .IDENTifer   Get_GDF_Curve
 .PURPOSE     calculate the Generalised Distribution Function (GDF)
 .INPUT/OUTPUT
-  call as   Get_GDF_Curve( polV, q_wv, q_val, u_wv, u_val );
+  call as   Get_GDF_Curve(polV, q_wv, q_val, u_wv, u_val);
      input:
             struct polV_scia *polval :  polarisation values for current cluster
     output:
@@ -162,17 +162,17 @@ void Get_PolarisationValues( unsigned short num_clcon,
 .COMMENTS    static function
 -------------------------*/
 static inline
-unsigned short Get_GDF_Curve( const struct polV_scia *polval,
-                              /*@out@*/ double *q_wv, /*@out@*/ double *q_val,
-                              /*@out@*/ double *u_wv, /*@out@*/ double *u_val )
+unsigned short Get_GDF_Curve(const struct polV_scia *polval,
+			     /*@out@*/ double *q_wv, /*@out@*/ double *q_val,
+			     /*@out@*/ double *u_wv, /*@out@*/ double *u_val)
      /*@globals errno;@*/
 {
 /*
  * check GDF parameters
  */
-     if ( (int)(polval->gdf.beta - 0.5f) == -99 
+     if ((int)(polval->gdf.beta - 0.5f) == -99 
 	  || (int)(polval->gdf.p_bar - 0.5f) == -99 
-	  || (int)(polval->gdf.w0 - 0.5f) == -99 ) {
+	  || (int)(polval->gdf.w0 - 0.5f) == -99) {
 	  *q_wv = *q_val = *u_wv = *u_val = -1.;
           return 0u;
      } else {
@@ -191,12 +191,12 @@ unsigned short Get_GDF_Curve( const struct polV_scia *polval,
 /*
  * calculate GDF curve
  */
-	  for ( ng = 0; ng < NUM_GDF_STEPS; ng++ ) {
+	  for (ng = 0; ng < NUM_GDF_STEPS; ng++) {
 	       gdf_wv_diff -= wv_step;
 
 	       q_wv[ng] = u_wv[ng] = polval->rep_wv[PMD_THEORY] - gdf_wv_diff;
 
-	       fw = exp( beta * gdf_wv_diff );
+	       fw = exp(beta * gdf_wv_diff);
 	       q_val[ng] = p_bar + w0 * fw / ((1. + fw) * (1. + fw));
 	       u_val[ng] = u_ratio * q_val[ng];
 	  }
@@ -208,7 +208,7 @@ unsigned short Get_GDF_Curve( const struct polV_scia *polval,
 .IDENTifer   Get_QU_Fit
 .PURPOSE     Derive Q and U for requested wavelength grid 
 .INPUT/OUTPUT
-  call as   num = Get_QU_Fit( polV, num_pixels, pixel_wv, q_Fit, u_Fit );
+  call as   num = Get_QU_Fit(polV, num_pixels, pixel_wv, q_Fit, u_Fit);
      input:
             struct polV_scia *polval  : polarisation values for current cluster
 	    unsigned short num_pixels : number of pixels
@@ -221,9 +221,9 @@ unsigned short Get_GDF_Curve( const struct polV_scia *polval,
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_QU_Fit( const struct polV_scia *polV, 
-			   unsigned short num_pixels, const float *pixel_wv,
-			   /*@out@*/ double *q_Fit, /*@out@*/ double *u_Fit )
+unsigned short Get_QU_Fit(const struct polV_scia *polV, 
+			  unsigned short num_pixels, const float *pixel_wv,
+			  /*@out@*/ double *q_Fit, /*@out@*/ double *u_Fit)
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, q_Fit, u_Fit@*/
 {
@@ -242,48 +242,48 @@ unsigned short Get_QU_Fit( const struct polV_scia *polV,
      n_pol = 0;
      do {
 	  q_Fit[n_pol] = u_Fit[n_pol] = 0.0;
-     } while ( ++n_pol < num_pixels );
+     } while (++n_pol < num_pixels);
 /*
  * collect applicable Q and U values
  */
      n_pol = 0;
      do {
-	  if ( do_pol_point[n_pol] == 'f' ) {
-	       if ( polV->error_Q[n_pol] >= 0.f ) {
+	  if (do_pol_point[n_pol] == 'f') {
+	       if (polV->error_Q[n_pol] >= 0.f) {
 		    q_val[q_num] = -polV->Q[n_pol];
 		    q_wv[q_num++] = polV->rep_wv[n_pol];
 	       }
-	       if ( polV->error_U[n_pol] >= 0.f  ) {
+	       if (polV->error_U[n_pol] >= 0.f ) {
 		    u_val[u_num] = polV->U[n_pol];
 		    u_wv[u_num++] = polV->rep_wv[n_pol];
 	       }
 	  }
-     } while ( ++n_pol < NUM_FRAC_POLV );
+     } while (++n_pol < NUM_FRAC_POLV);
 /*
  * apply analytic curves
  */
-     if ( polV->error_Q[0] >= 0.f && polV->error_U[0] >= 0.f ) {
-	  n_pol = Get_GDF_Curve( polV, q_wv+q_num, q_val+q_num, 
-				 u_wv+u_num, u_val+u_num );
+     if (polV->error_Q[0] >= 0.f && polV->error_U[0] >= 0.f) {
+	  n_pol = Get_GDF_Curve(polV, q_wv+q_num, q_val+q_num, 
+				u_wv+u_num, u_val+u_num);
 	  q_num += n_pol;
 	  u_num += n_pol;
      }
 /*
  * skip remainder of the loop if we didn't find any Q or U values
  */
-     if ( q_num == 0 || u_num == 0 ) return 0;
+     if (q_num == 0 || u_num == 0) return 0;
 /*
  * sort Q and U values
  */
-     SHELLdd( q_num, q_wv, q_val );
-     SHELLdd( u_num, u_wv, u_val );
+     SHELLdd(q_num, q_wv, q_val);
+     SHELLdd(u_num, u_wv, u_val);
 /*
  * append 4 points for straight interpolation
  */
      wv_min = q_wv[0];
      wv_max = q_wv[q_num-1];
-     (void) memmove( q_wv+2, q_wv, q_num * sizeof(double) );
-     (void) memmove( q_val+2, q_val, q_num * sizeof(double) );
+     (void) memmove(q_wv+2, q_wv, q_num * sizeof(double));
+     (void) memmove(q_val+2, q_val, q_num * sizeof(double));
 
      q_num += 4;
      q_wv[0]       = wv_min - 40.;
@@ -292,15 +292,15 @@ unsigned short Get_QU_Fit( const struct polV_scia *polV,
      q_wv[q_num-1] = wv_max + 40.;
      q_val[0] = (q_val[1] = q_val[2]);
      q_val[q_num-1] = (q_val[q_num-2] = q_val[q_num-3]);
-     FIT_GRID_AKIMA( FLT64_T, FLT64_T, (size_t) q_num, q_wv, q_val, 
-		     FLT32_T, FLT64_T, (size_t) num_pixels, pixel_wv, q_Fit );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "FIT_GRID_AKIMA" );
+     FIT_GRID_AKIMA(FLT64_T, FLT64_T, (size_t) q_num, q_wv, q_val, 
+		     FLT32_T, FLT64_T, (size_t) num_pixels, pixel_wv, q_Fit);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_FATAL, "FIT_GRID_AKIMA");
 
      wv_min = u_wv[0];
      wv_max = u_wv[u_num-1];
-     (void) memmove( u_wv+2, u_wv, u_num * sizeof(double) );
-     (void) memmove( u_val+2, u_val, u_num * sizeof(double) );
+     (void) memmove(u_wv+2, u_wv, u_num * sizeof(double));
+     (void) memmove(u_val+2, u_val, u_num * sizeof(double));
 
      u_num += 4;
      u_wv[0]       = wv_min - 40.;
@@ -309,10 +309,10 @@ unsigned short Get_QU_Fit( const struct polV_scia *polV,
      u_wv[u_num-1] = wv_max + 40.;
      u_val[0] = (u_val[1] = u_val[2]);
      u_val[u_num-1] = (u_val[u_num-2] = u_val[u_num-3]);
-     FIT_GRID_AKIMA( FLT64_T, FLT64_T, (size_t) u_num, u_wv, u_val, 
-		     FLT32_T, FLT64_T, (size_t) num_pixels, pixel_wv, u_Fit );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "FIT_GRID_AKIMA" );
+     FIT_GRID_AKIMA(FLT64_T, FLT64_T, (size_t) u_num, u_wv, u_val, 
+		     FLT32_T, FLT64_T, (size_t) num_pixels, pixel_wv, u_Fit);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_FATAL, "FIT_GRID_AKIMA");
      return ((u_num > q_num) ? u_num : q_num);
 done:
      return 0;
@@ -324,7 +324,7 @@ done:
 .PURPOSE     Obtain Polarisation Sensitivity Parameters for viewing geometry 
              and wavelength grid of the science data for a whole state
 .INPUT/OUTPUT
-  call as    Get_PolSensNadir( fileParam, wvlen, &pspn );
+  call as    Get_PolSensNadir(fileParam, wvlen, &pspn);
      input:
             struct file_rec *fileParam: file/calibration parameters
 	    struct wvlen_rec wvlen    : Solar/science wavelength grid
@@ -334,9 +334,9 @@ done:
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_PolSensNadir( const struct file_rec *fileParam, 
+unsigned short Get_PolSensNadir(const struct file_rec *fileParam, 
 				 const struct wvlen_rec wvlen, 
-				 struct pspn_scia **pspn_out )
+				 struct pspn_scia **pspn_out)
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, *pspn_out@*/
 {
@@ -351,33 +351,33 @@ unsigned short Get_PolSensNadir( const struct file_rec *fileParam,
      pspn_out[0] = NULL;
 
      num_psp = (unsigned short)
-	  SCIA_LV1_RD_PSPN( fileParam->fp, fileParam->num_dsd, 
-			    fileParam->dsd, &pspn );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PSPN" );
+	  SCIA_LV1_RD_PSPN(fileParam->fp, fileParam->num_dsd, 
+			    fileParam->dsd, &pspn);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPN");
 /*
  * interpolate sensitivities to wavelength grid (when do_pixelwise equals 'f')
  */
-     for ( n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++ ) {
-	  if ( do_pixelwise[n_ch] == 'f' ) {
+     for (n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++) {
+	  if (do_pixelwise[n_ch] == 'f') {
 	       unsigned int offs = n_ch * CHANNEL_SIZE;
 
-	       for ( nr = 0; nr < num_psp; nr++ ) {
-		    (void) memcpy( rbuff, &pspn[nr].mu2[offs],
-				   CHANNEL_SIZE * sizeof(double) );
+	       for (nr = 0; nr < num_psp; nr++) {
+		    (void) memcpy(rbuff, &pspn[nr].mu2[offs],
+				   CHANNEL_SIZE * sizeof(double));
 
-		    FIT_GRID_AKIMA( FLT32_T, FLT64_T, CHANNEL_SIZE,
+		    FIT_GRID_AKIMA(FLT32_T, FLT64_T, CHANNEL_SIZE,
 				    wvlen.solar+offs, rbuff,
 				    FLT32_T, FLT64_T, CHANNEL_SIZE,
-				    wvlen.science+offs, &pspn[nr].mu2[offs] );
+				    wvlen.science+offs, &pspn[nr].mu2[offs]);
 
-		    (void) memcpy( rbuff, &pspn[nr].mu3[offs],
-				   CHANNEL_SIZE * sizeof(double) );
+		    (void) memcpy(rbuff, &pspn[nr].mu3[offs],
+				   CHANNEL_SIZE * sizeof(double));
 
-		    FIT_GRID_AKIMA( FLT32_T, FLT64_T, CHANNEL_SIZE,
+		    FIT_GRID_AKIMA(FLT32_T, FLT64_T, CHANNEL_SIZE,
 				    wvlen.solar+offs, rbuff,
 				    FLT32_T, FLT64_T, CHANNEL_SIZE,
-				    wvlen.science+offs, &pspn[nr].mu3[offs] );
+				    wvlen.science+offs, &pspn[nr].mu3[offs]);
 	       }
 	  }
      }
@@ -393,7 +393,7 @@ unsigned short Get_PolSensNadir( const struct file_rec *fileParam,
 .IDENTifer   InterpolPSPN
 .PURPOSE     calculate polarisation sensitivity for give pixel & esm-angle
 .INPUT/OUTPUT
-  call as    InterpolPSPN( id, ang_esm, pspn, &mu2, &mu3 );
+  call as    InterpolPSPN(id, ang_esm, pspn, &mu2, &mu3);
      input:
 	    unsigned short   id       : pixel ID [0:8191]
 	    float            ang_esm  : mirror elevation angle
@@ -408,9 +408,9 @@ unsigned short Get_PolSensNadir( const struct file_rec *fileParam,
 .COMMENTS    static function
 -------------------------*/
 static inline
-void InterpolPSPN( unsigned short id, float ang_esm,
+void InterpolPSPN(unsigned short id, float ang_esm,
 		   const struct pspn_scia *pspn, 
-		   /*@out@*/ double *mu2, /*@out@*/ double *mu3 )
+		   /*@out@*/ double *mu2, /*@out@*/ double *mu3)
 {
      double frac = (double) (ang_esm - pspn->ang_esm)
 	  / (double) (pspn[1].ang_esm - pspn->ang_esm);
@@ -423,7 +423,7 @@ void InterpolPSPN( unsigned short id, float ang_esm,
 .IDENTifer   Apply_PolCorrNadir
 .PURPOSE     apply polarisation sensitivity correction (Nadir)
 .INPUT/OUTPUT
-  call as    Apply_PolCorrNadir( num_psp, pspn, polV, mds_1c );
+  call as    Apply_PolCorrNadir(num_psp, pspn, polV, mds_1c);
      input:
             unsigned short    num_psp : number of PSPN records
             struct pspn_scia  *pspn   : polarisation sensitivity parameters
@@ -435,9 +435,9 @@ void InterpolPSPN( unsigned short id, float ang_esm,
 .COMMENTS    static function
 -------------------------*/
 static
-void Apply_PolCorrNadir( unsigned short num_psp, const struct pspn_scia  *pspn,
+void Apply_PolCorrNadir(unsigned short num_psp, const struct pspn_scia  *pspn,
 			 const struct polV_scia *polV, 
-			 struct mds1c_scia *mds_1c )
+			 struct mds1c_scia *mds_1c)
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack, *mds_1c@*/
 {
@@ -452,30 +452,32 @@ void Apply_PolCorrNadir( unsigned short num_psp, const struct pspn_scia  *pspn,
 	  register unsigned short np = 0;
 	  register unsigned short nr = 0;
 
-	  if ( Get_QU_Fit( polV, mds_1c->num_pixels, mds_1c->pixel_wv,
-			   q_Fit, u_Fit ) == 0 ) continue;
+	  (void) Get_QU_Fit(polV, mds_1c->num_pixels, mds_1c->pixel_wv,
+			    q_Fit, u_Fit);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "Get_QU_Fit");
 
 	  angEsm = alpha0_esm + 0.5 * mds_1c->geoN[nobs].pos_esm;
 
 	  /* find pspn record with ang_esm just smaller than angEsm */
 	  do {
-	       if ( angEsm >= pspn[nr].ang_esm ) break;
-	  } while ( ++nr < num_psp );
-	  if ( nr == num_psp ) 
+	       if (angEsm >= pspn[nr].ang_esm) break;
+	  } while (++nr < num_psp);
+	  if (nr == num_psp) 
 	       nr -= 2;
-	  else if ( nr > 0 ) 
+	  else if (nr > 0) 
 	       nr--;
 
 	  do {
 	       register unsigned short id = mds_1c->pixel_ids[np];
 
-	       InterpolPSPN( id, angEsm, pspn+nr, &mu2, &mu3 );
+	       InterpolPSPN(id, angEsm, pspn+nr, &mu2, &mu3);
 
 	       corrP = (float) (1 + mu2 * q_Fit[np] + mu3 * u_Fit[np]);
 
 	       *signal /= corrP;
-	  } while ( ++signal, ++np < mds_1c->num_pixels );
-     } while ( ++polV, ++nobs < mds_1c->num_obs );
+	  } while (++signal, ++np < mds_1c->num_pixels);
+     } while (++polV, ++nobs < mds_1c->num_obs);
 }
 
 /*+++++++++++++++++++++++++ Static Functions (PSPLO) +++++++++++++++++++++++*/
@@ -484,7 +486,7 @@ void Apply_PolCorrNadir( unsigned short num_psp, const struct pspn_scia  *pspn,
 .PURPOSE     Obtain Polarisation Sensitivity Parameters for viewing geometry 
              and wavelength grid of the science data for a whole state
 .INPUT/OUTPUT
-  call as    Get_PolSensLimb( fileParam, wvlen, &pspl );
+  call as    Get_PolSensLimb(fileParam, wvlen, &pspl);
      input:
             struct file_rec *fileParam: file/calibration parameters
 	    struct wvlen_rec wvlen    : Solar/science wavelength grid
@@ -494,9 +496,9 @@ void Apply_PolCorrNadir( unsigned short num_psp, const struct pspn_scia  *pspn,
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_PolSensLimb( const struct file_rec *fileParam, 
+unsigned short Get_PolSensLimb(const struct file_rec *fileParam, 
 				const struct wvlen_rec wvlen, 
-				struct psplo_scia **pspl_out )
+				struct psplo_scia **pspl_out)
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, *pspl_out@*/
 {
@@ -511,33 +513,33 @@ unsigned short Get_PolSensLimb( const struct file_rec *fileParam,
      pspl_out[0] = NULL;
 
      num_psp = (unsigned short)
-	  SCIA_LV1_RD_PSPL( fileParam->fp, fileParam->num_dsd, 
-			    fileParam->dsd, &pspl );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PSPL" );
+	  SCIA_LV1_RD_PSPL(fileParam->fp, fileParam->num_dsd, 
+			    fileParam->dsd, &pspl);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPL");
 /*
  * interpolate sensitivities to wavelength grid (when do_pixelwise equals 'f')
  */
-     for ( n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++ ) {
-	  if ( do_pixelwise[n_ch] == 'f' ) {
+     for (n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++) {
+	  if (do_pixelwise[n_ch] == 'f') {
 	       unsigned int offs = n_ch * CHANNEL_SIZE;
 
-	       for ( nr = 0; nr < num_psp; nr++ ) {
-		    (void) memcpy( rbuff, &pspl[nr].mu2[offs],
-				   CHANNEL_SIZE * sizeof(double) );
+	       for (nr = 0; nr < num_psp; nr++) {
+		    (void) memcpy(rbuff, &pspl[nr].mu2[offs],
+				   CHANNEL_SIZE * sizeof(double));
 
-		    FIT_GRID_AKIMA( FLT32_T, FLT64_T, CHANNEL_SIZE,
+		    FIT_GRID_AKIMA(FLT32_T, FLT64_T, CHANNEL_SIZE,
 				    wvlen.solar+offs, rbuff,
 				    FLT32_T, FLT64_T, CHANNEL_SIZE,
-				    wvlen.science+offs, &pspl[nr].mu2[offs] );
+				    wvlen.science+offs, &pspl[nr].mu2[offs]);
 
-		    (void) memcpy( rbuff, &pspl[nr].mu3[offs],
-				   CHANNEL_SIZE * sizeof(double) );
+		    (void) memcpy(rbuff, &pspl[nr].mu3[offs],
+				   CHANNEL_SIZE * sizeof(double));
 
-		    FIT_GRID_AKIMA( FLT32_T, FLT64_T, CHANNEL_SIZE,
+		    FIT_GRID_AKIMA(FLT32_T, FLT64_T, CHANNEL_SIZE,
 				    wvlen.solar+offs, rbuff,
 				    FLT32_T, FLT64_T, CHANNEL_SIZE,
-				    wvlen.science+offs, &pspl[nr].mu3[offs] );
+				    wvlen.science+offs, &pspl[nr].mu3[offs]);
 	       }
 	  }
      }
@@ -554,7 +556,7 @@ unsigned short Get_PolSensLimb( const struct file_rec *fileParam,
 .PURPOSE     Obtain Polarisation Sensitivity Parameters for viewing geometry 
              and wavelength grid of the science data for a whole state
 .INPUT/OUTPUT
-  call as    Get_PolSensOccul( fileParam, wvlen, &pspo );
+  call as    Get_PolSensOccul(fileParam, wvlen, &pspo);
      input:
             struct file_rec *fileParam: file/calibration parameters
 	    struct wvlen_rec wvlen    : Solar/science wavelength grid
@@ -564,9 +566,9 @@ unsigned short Get_PolSensLimb( const struct file_rec *fileParam,
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short Get_PolSensOccul( const struct file_rec *fileParam, 
+unsigned short Get_PolSensOccul(const struct file_rec *fileParam, 
 				 const struct wvlen_rec wvlen, 
-				 struct psplo_scia **pspo_out )
+				 struct psplo_scia **pspo_out)
       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
       /*@modifies errno, nadc_stat, nadc_err_stack, fileParam->fp, *pspo_out@*/
 {
@@ -581,33 +583,33 @@ unsigned short Get_PolSensOccul( const struct file_rec *fileParam,
      pspo_out[0] = NULL;
 
      num_psp = (unsigned short)
-	  SCIA_LV1_RD_PSPO( fileParam->fp, fileParam->num_dsd, 
-			    fileParam->dsd, &pspo );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "PSPO" );
+	  SCIA_LV1_RD_PSPO(fileParam->fp, fileParam->num_dsd, 
+			    fileParam->dsd, &pspo);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPO");
 /*
  * interpolate sensitivities to wavelength grid (when do_pixelwise equals 'f')
  */
-     for ( n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++ ) {
-	  if ( do_pixelwise[n_ch] == 'f' ) {
+     for (n_ch = 0; n_ch < SCIENCE_CHANNELS; n_ch++) {
+	  if (do_pixelwise[n_ch] == 'f') {
 	       unsigned int offs = n_ch * CHANNEL_SIZE;
 
-	       for ( nr = 0; nr < num_psp; nr++ ) {
-		    (void) memcpy( rbuff, &pspo[nr].mu2[offs],
-				   CHANNEL_SIZE * sizeof(double) );
+	       for (nr = 0; nr < num_psp; nr++) {
+		    (void) memcpy(rbuff, &pspo[nr].mu2[offs],
+				   CHANNEL_SIZE * sizeof(double));
 
-		    FIT_GRID_AKIMA( FLT32_T, FLT64_T, CHANNEL_SIZE,
+		    FIT_GRID_AKIMA(FLT32_T, FLT64_T, CHANNEL_SIZE,
 				    wvlen.solar+offs, rbuff,
 				    FLT32_T, FLT64_T, CHANNEL_SIZE,
-				    wvlen.science+offs, &pspo[nr].mu2[offs] );
+				    wvlen.science+offs, &pspo[nr].mu2[offs]);
 
-		    (void) memcpy( rbuff, &pspo[nr].mu3[offs],
-				   CHANNEL_SIZE * sizeof(double) );
+		    (void) memcpy(rbuff, &pspo[nr].mu3[offs],
+				   CHANNEL_SIZE * sizeof(double));
 
-		    FIT_GRID_AKIMA( FLT32_T, FLT64_T, CHANNEL_SIZE,
+		    FIT_GRID_AKIMA(FLT32_T, FLT64_T, CHANNEL_SIZE,
 				    wvlen.solar+offs, rbuff,
 				    FLT32_T, FLT64_T, CHANNEL_SIZE,
-				    wvlen.science+offs, &pspo[nr].mu3[offs] );
+				    wvlen.science+offs, &pspo[nr].mu3[offs]);
 	       }
 	  }
      }
@@ -623,7 +625,7 @@ unsigned short Get_PolSensOccul( const struct file_rec *fileParam,
 .IDENTifer   Get_Matrix_PSPLO
 .PURPOSE     create a 2d-matrix to a psplo structure
 .INPUT/OUTPUT
-  call as   mtx = Get_Matrix_PSPLO( num_dsr, psplo, &n_asm, &n_esm );
+  call as   mtx = Get_Matrix_PSPLO(num_dsr, psplo, &n_asm, &n_esm);
      input:
             unsigned short num_dsr   : number of PSPLO records
             struct psplo_scia *psplo : PSPLO structures
@@ -635,10 +637,10 @@ unsigned short Get_PolSensOccul( const struct file_rec *fileParam,
 .COMMENTS    static function
 -------------------------*/
 static /*@null@*/ /*@out@*/ /*@only@*/ const
-struct psplo_scia **Get_Matrix_PSPLO( unsigned short num_dsr,
+struct psplo_scia **Get_Matrix_PSPLO(unsigned short num_dsr,
                                       const struct psplo_scia *psplo,
                                       /*@out@*/ unsigned short *n_asm,
-                                      /*@out@*/ unsigned short *n_esm )
+                                      /*@out@*/ unsigned short *n_esm)
      /*@globals  nadc_stat, nadc_err_stack;@*/
 {
      register unsigned short nr, offs;
@@ -649,19 +651,19 @@ struct psplo_scia **Get_Matrix_PSPLO( unsigned short num_dsr,
      const struct psplo_scia **mtx_psplo;
 
      *n_asm = *n_esm = 0;
-     for ( nr = 0; nr < num_dsr; nr++ ) {
-          if ( psplo[nr].ang_asm == tmpAzi  ) (*n_esm)++;
-          if ( psplo[nr].ang_esm == tmpElev ) (*n_asm)++;
+     for (nr = 0; nr < num_dsr; nr++) {
+          if (psplo[nr].ang_asm == tmpAzi ) (*n_esm)++;
+          if (psplo[nr].ang_esm == tmpElev) (*n_asm)++;
      }
-     if ( (*n_asm) == 0 || (*n_esm) == 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mtx_psplo" );
+     if ((*n_asm) == 0 || (*n_esm) == 0)
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mtx_psplo");
 /*
  * allocate pointers to rows
  */
      mtx_psplo = (const struct psplo_scia **)
-          malloc( (*n_esm) * sizeof( const struct psplo_scia * ) );
-     if ( mtx_psplo == NULL )
-          NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mtx_psplo" );
+          malloc((*n_esm) * sizeof(const struct psplo_scia *));
+     if (mtx_psplo == NULL)
+          NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mtx_psplo");
 /*
  * set pointes to rows
  */
@@ -669,7 +671,7 @@ struct psplo_scia **Get_Matrix_PSPLO( unsigned short num_dsr,
      do {
           mtx_psplo[nr] = psplo + offs;
           offs += (*n_asm);
-     } while ( ++nr < (*n_esm) );
+     } while (++nr < (*n_esm));
      return mtx_psplo;
  done:
      return NULL;
@@ -679,8 +681,8 @@ struct psplo_scia **Get_Matrix_PSPLO( unsigned short num_dsr,
 .IDENTifer   InterpolPSPLO
 .PURPOSE     calculate polarisation sensitivity for give pixel & esm/asm-angle
 .INPUT/OUTPUT
-  call as    InterpolPSPLO( id, ang_asm, ang_esm, psplo_el_mn, psplo_el_mx, 
-                                      &mu2, &mu3 );
+  call as    InterpolPSPLO(id, ang_asm, ang_esm, psplo_el_mn, psplo_el_mx, 
+                                      &mu2, &mu3);
      input:
 	    unsigned short   id       :  pixel ID [0:8191]
 	    float            ang_asm  :  mirror azimuth angle
@@ -695,10 +697,10 @@ struct psplo_scia **Get_Matrix_PSPLO( unsigned short num_dsr,
 .COMMENTS    static function
 -------------------------*/
 static inline
-void InterpolPSPLO( unsigned short id, float ang_asm, float ang_esm,
+void InterpolPSPLO(unsigned short id, float ang_asm, float ang_esm,
 		    const struct psplo_scia *psplo_el_mn, 
 		    const struct psplo_scia *psplo_el_mx, 
-		    /*@out@*/ double *mu2, /*@out@*/ double *mu3 )
+		    /*@out@*/ double *mu2, /*@out@*/ double *mu3)
 {
      double  frac, asm1_mu2, asm2_mu2, asm1_mu3, asm2_mu3;
 
@@ -726,7 +728,7 @@ void InterpolPSPLO( unsigned short id, float ang_asm, float ang_esm,
 .IDENTifer   Apply_PolCorrLO
 .PURPOSE     apply polarisation sensitivity correction (Limb/Occultation)
 .INPUT/OUTPUT
-  call as    Apply_PolCorrLO( num_psp, psplo, polV, mds_1c );
+  call as    Apply_PolCorrLO(num_psp, psplo, polV, mds_1c);
      input:
             unsigned short    num_psp : number of PSPLO records
             struct psplo_scia *psplo   : polarisation sensitivity parameters
@@ -737,8 +739,8 @@ void InterpolPSPLO( unsigned short id, float ang_asm, float ang_esm,
 .COMMENTS    static function
 -------------------------*/
 static
-void Apply_PolCorrLO( unsigned short num_psp, const struct psplo_scia *psplo,
-		      const struct polV_scia *polV, struct mds1c_scia *mds_1c )
+void Apply_PolCorrLO(unsigned short num_psp, const struct psplo_scia *psplo,
+		      const struct polV_scia *polV, struct mds1c_scia *mds_1c)
 {
      register unsigned short na, ne, nobs = 0;
 
@@ -750,13 +752,15 @@ void Apply_PolCorrLO( unsigned short num_psp, const struct psplo_scia *psplo,
      double mu2, mu3, q_Fit[CHANNEL_SIZE], u_Fit[CHANNEL_SIZE];
 
      const struct psplo_scia
-          **mtx_psplo = Get_Matrix_PSPLO( num_psp, psplo, &n_asm, &n_esm );
+          **mtx_psplo = Get_Matrix_PSPLO(num_psp, psplo, &n_asm, &n_esm);
 
      do {
 	  register unsigned short np = 0;
 
-	  if ( Get_QU_Fit( polV, mds_1c->num_pixels, mds_1c->pixel_wv,
-			   q_Fit, u_Fit ) == 0 ) continue;
+	  (void) Get_QU_Fit(polV, mds_1c->num_pixels, mds_1c->pixel_wv,
+			    q_Fit, u_Fit);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "Get_QU_Fit");
 	  
 	  angAsm = alpha0_asm - 0.5 * mds_1c->geoL[nobs].pos_asm;
 	  angEsm = alpha0_esm + 0.5 * mds_1c->geoL[nobs].pos_esm;
@@ -764,44 +768,44 @@ void Apply_PolCorrLO( unsigned short num_psp, const struct psplo_scia *psplo,
           /* find psplo record with ang_esm just smaller than angEsm */
           ne = 0;
           do {
-               if ( angEsm >= mtx_psplo[ne][0].ang_esm ) break;
-          } while ( ++ne < n_esm );
-          if ( ne == n_esm ) 
+               if (angEsm >= mtx_psplo[ne][0].ang_esm) break;
+          } while (++ne < n_esm);
+          if (ne == n_esm) 
 	       ne -= 2;
-          else if ( ne > 0 ) 
+          else if (ne > 0) 
 	       ne--;
 
           /* find psplo record with ang_asm just smaller than angAsm */
           na = 0;
           do {
-               if ( angAsm >= mtx_psplo[ne][na].ang_asm ) break;
-          } while ( ++na < n_asm );
-          if ( na == n_asm ) 
+               if (angAsm >= mtx_psplo[ne][na].ang_asm) break;
+          } while (++na < n_asm);
+          if (na == n_asm) 
 	       na -= 2;
-          else if ( na > 0 ) 
+          else if (na > 0) 
 	       na--;
 
 	  do {
 	       register unsigned short id = mds_1c->pixel_ids[np];
 
-	       InterpolPSPLO( id, angAsm, angEsm, mtx_psplo[ne]+na, 
-			      mtx_psplo[ne+1]+na, &mu2, &mu3 );
+	       InterpolPSPLO(id, angAsm, angEsm, mtx_psplo[ne]+na, 
+			      mtx_psplo[ne+1]+na, &mu2, &mu3);
 
 	       corrP = (float) (1 + mu2 * q_Fit[np] + mu3 * u_Fit[np]);
 
 	       *signal /= (float) corrP;
-	  } while ( ++signal, ++np < mds_1c->num_pixels );
-     } while ( ++polV, ++nobs < mds_1c->num_obs );
+	  } while (++signal, ++np < mds_1c->num_pixels);
+     } while (++polV, ++nobs < mds_1c->num_obs);
 
-     free( mtx_psplo );
+     free(mtx_psplo);
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_ATBD_CAL_POL( const struct file_rec *fileParam,
+void SCIA_ATBD_CAL_POL(const struct file_rec *fileParam,
 			const struct wvlen_rec wvlen,
 			const struct state1_scia *state, 
 			const struct mds1_scia *mds_1b,
-			struct mds1c_scia *mds_1c )
+			struct mds1c_scia *mds_1c)
 {
      register unsigned short num;
 
@@ -814,73 +818,73 @@ void SCIA_ATBD_CAL_POL( const struct file_rec *fileParam,
 
      const bool Save_Extern_Alloc = Use_Extern_Alloc;
 
-     if ( (int) state->type_mds == SCIA_MONITOR ) return;
+     if ((int) state->type_mds == SCIA_MONITOR) return;
 /*
  * set some global variables
  */
      alpha0_asm = fileParam->alpha0_asm - 360.f;
      alpha0_esm = fileParam->alpha0_esm - 360.f;
      lambda_end_gdf = fileParam->lambda_end_gdf;
-     (void) memcpy( do_pixelwise, fileParam->do_pixelwise, SCIENCE_CHANNELS+1);
-     (void) memcpy( do_pol_point, fileParam->do_pol_point, NUM_FRAC_POLV+1 );
+     (void) memcpy(do_pixelwise, fileParam->do_pixelwise, SCIENCE_CHANNELS+1);
+     (void) memcpy(do_pol_point, fileParam->do_pol_point, NUM_FRAC_POLV+1);
 /*
  * read/interpolate polarisation sensitivity parameters
  */
      Use_Extern_Alloc = FALSE;
-     switch ( (int) state->type_mds ) {
+     switch ((int) state->type_mds) {
      case SCIA_NADIR:
-	  num_psp = Get_PolSensNadir( fileParam, wvlen, &pspn );
-	  if ( IS_ERR_STAT_FATAL )
-	    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_PolSensNadir" );
+	  num_psp = Get_PolSensNadir(fileParam, wvlen, &pspn);
+	  if (IS_ERR_STAT_FATAL)
+	    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_PolSensNadir");
 
 	  num = 0;
 	  do {
-	       Get_PolarisationValues( num, state, mds_1b, &polV );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_PolVal" );
-	       Apply_PolCorrNadir( num_psp, pspn, polV, mds_1c );
-	       free( polV );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Apply_PolCorr" );
-	  } while ( ++mds_1c, ++num < state->num_clus );
+	       Get_PolarisationValues(num, state, mds_1b, &polV);
+	       if (IS_ERR_STAT_FATAL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_PolVal");
+	       Apply_PolCorrNadir(num_psp, pspn, polV, mds_1c);
+	       free(polV);
+	       if (IS_ERR_STAT_FATAL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Apply_PolCorr");
+	  } while (++mds_1c, ++num < state->num_clus);
  
-	  if ( pspn != NULL ) free( pspn );
+	  if (pspn != NULL) free(pspn);
 	  break;
      case SCIA_LIMB:
-	  num_psp = Get_PolSensLimb( fileParam, wvlen, &pspl );
-	  if ( IS_ERR_STAT_FATAL )
-	    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_PolSensLimb" );
+	  num_psp = Get_PolSensLimb(fileParam, wvlen, &pspl);
+	  if (IS_ERR_STAT_FATAL)
+	    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_PolSensLimb");
 
 	  num = 0;
 	  do {
-	       Get_PolarisationValues( num, state, mds_1b, &polV );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_PolVal" );
-	       Apply_PolCorrLO( num_psp, pspl, polV, mds_1c );
-	       free( polV );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Apply_PolCorr" );
-	  } while ( ++mds_1c, ++num < state->num_clus );
+	       Get_PolarisationValues(num, state, mds_1b, &polV);
+	       if (IS_ERR_STAT_FATAL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_PolVal");
+	       Apply_PolCorrLO(num_psp, pspl, polV, mds_1c);
+	       free(polV);
+	       if (IS_ERR_STAT_FATAL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Apply_PolCorr");
+	  } while (++mds_1c, ++num < state->num_clus);
 
-	  if ( pspl != NULL ) free( pspl );
+	  if (pspl != NULL) free(pspl);
 	  break;
      case SCIA_OCCULT:
-	  num_psp = Get_PolSensOccul( fileParam, wvlen, &pspo );
-	  if ( IS_ERR_STAT_FATAL )
-	    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_PolSensOccul" );
+	  num_psp = Get_PolSensOccul(fileParam, wvlen, &pspo);
+	  if (IS_ERR_STAT_FATAL)
+	    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_PolSensOccul");
 
 	  num = 0;
 	  do {
-	       Get_PolarisationValues( num, state, mds_1b, &polV );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Get_PolVal" );
-	       Apply_PolCorrLO( num_psp, pspo, polV, mds_1c );
-	       free( polV );
-	       if ( IS_ERR_STAT_FATAL )
-		    NADC_GOTO_ERROR( NADC_ERR_FATAL, "Apply_PolCorr" );
-	  } while ( ++mds_1c, ++num < state->num_clus );
+	       Get_PolarisationValues(num, state, mds_1b, &polV);
+	       if (IS_ERR_STAT_FATAL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Get_PolVal");
+	       Apply_PolCorrLO(num_psp, pspo, polV, mds_1c);
+	       free(polV);
+	       if (IS_ERR_STAT_FATAL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "Apply_PolCorr");
+	  } while (++mds_1c, ++num < state->num_clus);
 
-	  if ( pspo != NULL ) free( pspo );
+	  if (pspo != NULL) free(pspo);
 	  break;
      }
  done:

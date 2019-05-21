@@ -11,24 +11,24 @@ FUNCTION GET_SDMF_PATH, SDMF_VERSION=SDMF_VERSION
     '2.4': BEGIN
        IF FILE_TEST( '/array/slot2D/SDMF/2.4.1', /DIRECTORY ) THEN $
           path = '/array/slot2D/SDMF/2.4.1/' $
-       ELSE IF FILE_TEST( '/SCIA/SDMF/2.4.1', /DIRECTORY ) THEN $
-          path = '/SCIA/SDMF/2.4.1/' $
+       ELSE IF FILE_TEST( '/SCIA/sdmf/2.4.1', /DIRECTORY ) THEN $
+          path = '/SCIA/sdmf/2.4.1/' $
        ELSE $
           MESSAGE, ' *** Path to SDMF directory could not be determined', /INFO
        END
     '3.0': BEGIN
        IF FILE_TEST( '/array/slot2D/SDMF/3.0', /DIRECTORY ) THEN $
           path = '/array/slot2D/SDMF/3.0/' $
-       ELSE IF FILE_TEST( '/SCIA/SDMF/3.0', /DIRECTORY ) THEN $$
-          path = '/SCIA/SDMF/3.0/' $
+       ELSE IF FILE_TEST( '/SCIA/sdmf/3.0', /DIRECTORY ) THEN $$
+          path = '/SCIA/sdmf/3.0/' $
        ELSE $
           MESSAGE, ' *** Path to SDMF directory could not be determined', /INFO
        END
     '3.1': BEGIN
        IF FILE_TEST( '/array/slot2D/SDMF/3.1', /DIRECTORY ) THEN $
           path = '/array/slot2D/SDMF/3.1/' $
-       ELSE IF FILE_TEST( '/SCIA/SDMF/3.1', /DIRECTORY ) THEN $$
-          path = '/SCIA/SDMF/3.1/' $
+       ELSE IF FILE_TEST( '/SCIA/sdmf/3.1', /DIRECTORY ) THEN $$
+          path = '/SCIA/sdmf/3.1/' $
        ELSE $
           MESSAGE, ' *** Path to SDMF directory could not be determined', /INFO
        END
@@ -38,8 +38,8 @@ FUNCTION GET_SDMF_PATH, SDMF_VERSION=SDMF_VERSION
     '3.2': BEGIN
        IF FILE_TEST( '/array/slot2D/SDMF/3.2', /DIRECTORY ) THEN $
           path = '/array/slot2D/SDMF/3.2/' $
-       ELSE IF FILE_TEST( '/SCIA/SDMF/3.2', /DIRECTORY ) THEN $$
-          path = '/SCIA/SDMF/3.2/' $
+       ELSE IF FILE_TEST( '/SCIA/sdmf/3.2', /DIRECTORY ) THEN $$
+          path = '/SCIA/sdmf/3.2/' $
        ELSE $
           MESSAGE, ' *** Path to SDMF directory could not be determined', /INFO
        END

@@ -21,7 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     read table for Epitaxx non-linearity correction
 .INPUT/OUTPUT
-  call as    SCIA_RD_H5_NLIN( &nlin );
+  call as    SCIA_RD_H5_NLIN(&nlin);
      output: 
              struct scia_nlincorr *nlin :
                     size_t dims[2]     : dimension of matrix (hdf5 definition)
@@ -63,58 +63,58 @@
         /* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_RD_H5_NLIN( struct scia_nlincorr *nlin )
+void SCIA_RD_H5_NLIN(struct scia_nlincorr *nlin)
 {
      hid_t  file_id = 0;
      hsize_t hdims[2];
 
-     char *env_str = getenv( "SCIA_NLCORR_DB" );
+     char *env_str = getenv("SCIA_NLCORR_DB");
 /*
  * open non-linearity correction database (HDF5-file)
  */
-     if ( env_str != NULL ) {
+     if (env_str == NULL) {
 	  const char nlin_fl[] = DATA_DIR"/NLcorr.h5";
 
-          file_id = H5Fopen( nlin_fl, H5F_ACC_RDONLY, H5P_DEFAULT );
-          if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( NADC_ERR_HDF_FILE, nlin_fl );
+          file_id = H5Fopen(nlin_fl, H5F_ACC_RDONLY, H5P_DEFAULT);
+          if (file_id < 0) 
+               NADC_RETURN_ERROR(NADC_ERR_HDF_FILE, nlin_fl);
      } else {
-          file_id = H5Fopen( env_str, H5F_ACC_RDONLY, H5P_DEFAULT );
-          if ( file_id < 0 ) 
-               NADC_RETURN_ERROR( NADC_ERR_HDF_FILE, env_str );
+          file_id = H5Fopen(env_str, H5F_ACC_RDONLY, H5P_DEFAULT);
+          if (file_id < 0) 
+               NADC_RETURN_ERROR(NADC_ERR_HDF_FILE, env_str);
      }
 /*
  * read datasets
  */
-     (void) H5LTget_dataset_info( file_id, "nLinTable", hdims, NULL, NULL );
+     (void) H5LTget_dataset_info(file_id, "nLinTable", hdims, NULL, NULL);
      nlin->dims[0] = (size_t) hdims[0];
      nlin->dims[1] = (size_t) hdims[1];
-     nlin->matrix = ALLOC_R2D( nlin->dims[0], nlin->dims[1] );
-     if ( nlin->matrix == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "nlin->matrix" );
-     (void) H5LTread_dataset_float( file_id, "nLinTable", nlin->matrix[0] );
-     nlin->curve = (char *) malloc( SCIENCE_PIXELS );
-     if ( nlin->curve == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "nlin->curve" );
-     (void) H5LTread_dataset_char( file_id, "CurveIndex", nlin->curve );
+     nlin->matrix = ALLOC_R2D(nlin->dims[0], nlin->dims[1]);
+     if (nlin->matrix == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "nlin->matrix");
+     (void) H5LTread_dataset_float(file_id, "nLinTable", nlin->matrix[0]);
+     nlin->curve = (char *) malloc(SCIENCE_PIXELS);
+     if (nlin->curve == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "nlin->curve");
+     (void) H5LTread_dataset_char(file_id, "CurveIndex", nlin->curve);
 /*
  * give message to user
  */
-     NADC_ERROR( NADC_ERR_NONE, 
-             "\n\tapplied non-linearity correction (SRON-SCIA-PhE-RP-013)" );
+     NADC_ERROR(NADC_ERR_NONE, 
+             "\n\tapplied non-linearity correction (SRON-SCIA-PhE-RP-013)");
  done:
-     if ( file_id >= 0 ) (void) H5Fclose( file_id );
+     if (file_id >= 0) (void) H5Fclose(file_id);
 }
 
-void SCIA_FREE_H5_NLIN( struct scia_nlincorr *nlin )
+void SCIA_FREE_H5_NLIN(struct scia_nlincorr *nlin)
 {
-     if ( nlin->curve != NULL ) free( nlin->curve );
-     if ( nlin->matrix != NULL ) FREE_2D( (void **) nlin->matrix );     
+     if (nlin->curve != NULL) free(nlin->curve);
+     if (nlin->matrix != NULL) FREE_2D((void **) nlin->matrix);     
 }
 
 /*
  * compile code with (on x86_32):
- * gcc -Wall -Os -DDATA_DIR='"/SCIA/share/nadc_tools"' -DTEST_PROG -I$HDF5_DIR/include -I../include -o test_rd_h5_nlin scia_rd_h5_nlin.c -L$HOME/lib -lNADC -L$HDF5_DIR/lib -lhdf5_hl -lhdf5 -lz -lm
+ * gcc -Wall -Os -DDATA_DIR='"/SCIA/share/nadc_tools"' -DTEST_PROG -I$HDF5_DIR/include -I../../include -o test_rd_h5_nlin scia_rd_h5_nlin.c -L$HOME/x86_64/lib -lnadc -L$HDF5_DIR/lib -lhdf5_hl -lhdf5 -lz -lm
  */
 #ifdef TEST_PROG
 #include <stdio.h>
@@ -123,20 +123,20 @@ int main()
 {
      register size_t ii;
 
-     struct scia_nlincorr nlin = { {0,0}, NULL, NULL };
+     struct scia_nlincorr nlin = {{0,0}, NULL, NULL};
 
-     SCIA_RD_H5_NLIN( &nlin );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "SCIA_RD_H5_NLIN" );
-     (void) fprintf( stdout, "DIMS: %zd %zd\n", nlin.dims[0], nlin.dims[1] );
-     for ( ii = 0; ii < nlin.dims[1]; ii++ )
-	  (void) fprintf( stdout, "%15.6E", nlin.matrix[12][ii] );
-     (void) fprintf( stdout, "\n" );
+     SCIA_RD_H5_NLIN(&nlin);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_FATAL, "SCIA_RD_H5_NLIN");
+     (void) fprintf(stdout, "DIMS: %zd %zd\n", nlin.dims[0], nlin.dims[1]);
+     for (ii = 0; ii < nlin.dims[1]; ii++)
+	  (void) fprintf(stdout, "%15.6E", nlin.matrix[12][ii]);
+     (void) fprintf(stdout, "\n");
 
 done:
-     SCIA_FREE_H5_NLIN( &nlin );
-     NADC_Err_Trace( stderr );
-     if ( IS_ERR_STAT_FATAL ) 
+     SCIA_FREE_H5_NLIN(&nlin);
+     NADC_Err_Trace(stderr);
+     if (IS_ERR_STAT_FATAL) 
           return NADC_ERR_FATAL;
      else
           return NADC_ERR_NONE;

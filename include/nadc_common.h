@@ -243,9 +243,11 @@ struct param_record
      unsigned int   calib_scia;
 
      unsigned long long clus_mask;
-
+#ifdef _HDF5_H
+     hid_t hdf_file_id;
+#else
      signed long long hdf_file_id;
-
+#endif
      unsigned char  catID[MAX_NUM_STATE];
      unsigned char  stateID[MAX_NUM_STATE];
 

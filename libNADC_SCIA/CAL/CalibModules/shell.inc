@@ -2,7 +2,7 @@
 .IDENTifer   SHELLdd
 .PURPOSE     sorting an array into ascending numerical order by Shell's method
 .INPUT/OUTPUT
-  call as   SHELLdd( dim, ra, rra );
+  call as   SHELLdd(dim, ra, rra);
 
      input:
             unsigned short dim :  dimension of the array to be sorted
@@ -15,35 +15,43 @@
              Shell's method is a N^3/2 routine, and should be used
              for small N, say N < 500
 -------------------------*/
-static
-void SHELLdd( unsigned short dim, double *ra, double *rra )
-{
-     unsigned short ij = 1, gap = 1;
+/* Performs an insertion sort on elements of a[] with the given gap.
+  * If gap == 1, performs an ordinary insertion sort.
+  * If gap >= length, does nothing.
+  */
+static inline
+void shellSortPhase(int dim, int gap, double ra[], double rra[]) {
+     int ii;
+     
+     for (ii = gap; ii < dim; ++ii) {
+	  int jj;
+	  double temp = ra[ii];
+	  double buff = rra[ii];
 
-     while (1 == 1) {
-	  if ((ij = 3 * ij + 1) < dim)
-	       dim = ij;
-	  else
-	       break;
-     }
- 
-     while(gap > 0) {
-	  register unsigned short ii = gap;
-
-	  while(ii < dim) {
-	       register unsigned short jj = ii;
-	       double temp = ra[ii];
-	       double buff = rra[ii];
-
-	       while(jj >= gap && ra[jj - gap] > temp) {
-		    ra[jj] = ra[jj - gap];
-		    rra[jj] = rra[jj - gap];
-		    jj -= gap;
-	       }
-	       ra[jj] = temp;
-	       rra[jj] = buff;
-	       ii++;
+	  for (jj = ii - gap; jj >= 0 && ra[jj] > temp; jj -= gap) {
+	       ra[jj + gap] = ra[jj];
+	       rra[jj + gap] = rra[jj];
 	  }
-	  gap /= 3;
+	  ra[jj + gap] = temp;
+	  rra[jj + gap] = buff;
      }
 }
+
+/*
+ * gaps[] should approximate
+ *     a [[w:geometric progression|geometric progression]].
+ * The following sequence is the best known in terms of the average number
+ * of key comparisons made [http://www.research.att.com/~njas/sequences/A102549]
+ */
+static
+void SHELLdd(unsigned short dim, double *ra, double *rra)
+{
+     static const int gaps[] = {
+	  1, 4, 10, 23, 57, 132, 301, 701
+     };
+     int dim_gaps = sizeof(gaps) / sizeof(gaps[0]);
+     int sizeIndex;
+
+     for (sizeIndex = dim_gaps - 1; sizeIndex >= 0; --sizeIndex)
+	  shellSortPhase((int) dim, gaps[sizeIndex], ra, rra);
+ }

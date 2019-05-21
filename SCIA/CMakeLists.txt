@@ -1,6 +1,7 @@
 set (SCIA_LV0_SRCS scia_nl0.c)
 set (SCIA_LV1_SRCS scia_nl1.c)
 set (SCIA_LV2_SRCS scia_ol2.c)
+set (INSTALL_TARGETS scia_dmop scia_nl0 scia_nl1 scia_ol2)
 
 ## define pre-compiler flags
 if (PGSQL_FOUND)
@@ -47,8 +48,11 @@ else ()
    target_link_libraries(scia_nl1 nadc_scia_cal)
 endif ()
 
-add_executable(scia_lv1_nc scia_lv1_nc.c)
-target_link_libraries(scia_lv1_nc nadc_scia)
+if (HDF5_VERSION VERSION_GREATER 1.10)
+   add_executable(scia_lv1_nc scia_lv1_nc.c)
+   target_link_libraries(scia_lv1_nc nadc_scia)
+   list (APPEND INSTALL_TARGETS scia_lv1_nc)
+endif ()
 
 add_executable(scia_ol2 ${SCIA_LV2_SRCS})
 if (PGSQL_FOUND)
@@ -59,7 +63,7 @@ endif ()
 
 ## Installation instructions
 install (
-  TARGETS scia_dmop scia_nl0 scia_nl1 scia_lv1_nc scia_ol2
+  TARGETS ${INSTALL_TARGETS}
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

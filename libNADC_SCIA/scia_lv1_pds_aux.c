@@ -50,11 +50,11 @@
 #include <swap_bytes.h>
 
 static
-void Sun2Intel_AUX( struct mds1_aux *aux )
+void Sun2Intel_AUX(struct mds1_aux *aux)
 {
-     aux->mjd.days = byte_swap_32( aux->mjd.days );
-     aux->mjd.secnd = byte_swap_u32( aux->mjd.secnd );
-     aux->mjd.musec = byte_swap_u32( aux->mjd.musec );
+     aux->mjd.days = byte_swap_32(aux->mjd.days);
+     aux->mjd.secnd = byte_swap_u32(aux->mjd.secnd);
+     aux->mjd.musec = byte_swap_u32(aux->mjd.musec);
 }
 #endif /* _SWAP_TO_LITTLE_ENDIAN */
 
@@ -63,7 +63,7 @@ void Sun2Intel_AUX( struct mds1_aux *aux )
 .IDENTifer   SCIA_LV1_RD_AUX
 .PURPOSE     read/write auxiliary Data Packets
 .INPUT/OUTPUT
-  call as   nr_dsr = SCIA_LV1_RD_AUX( fd, num_dsd, dsd, &aux );
+  call as   nr_dsr = SCIA_LV1_RD_AUX(fd, num_dsd, dsd, &aux);
      input:
             FILE *fd              :  stream pointer
 	    unsigned int num_dsd  :  number of DSDs
@@ -75,9 +75,9 @@ void Sun2Intel_AUX( struct mds1_aux *aux )
 	     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd, 
+unsigned int SCIA_LV1_RD_AUX(FILE *fd, unsigned int num_dsd, 
 			      const struct dsd_envi *dsd,
-			      struct mds1_aux **aux_out )
+			      struct mds1_aux **aux_out)
 {
      unsigned int indx_dsd;
 
@@ -90,42 +90,47 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
  * get index to data set descriptor
  */
      NADC_ERR_SAVE();
-     indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, dsd_name );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, dsd_name );
-     if ( IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0 ) {
+     indx_dsd = ENVI_GET_DSD_INDEX(num_dsd, dsd, dsd_name);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, dsd_name);
+     if (IS_ERR_STAT_ABSENT || dsd[indx_dsd].num_dsr == 0) {
           NADC_ERR_RESTORE();
           aux_out[0] = NULL;
           return 0u;
      }
-     if ( ! Use_Extern_Alloc ) {
+     (void) fprintf(stdout, "size mds1_aux: %zd %zd %zd %zd %zd %zd\n",
+		    sizeof(struct mds1_aux),
+		    sizeof(struct mjd_envi), sizeof(struct packet_hdr),
+		    sizeof(struct data_hdr), sizeof(struct pmtc_hdr),
+		    sizeof(struct pmtc_frame));
+     if (! Use_Extern_Alloc) {
 	  aux_out[0] = (struct mds1_aux *) 
-	       malloc( dsd[indx_dsd].num_dsr * sizeof(struct mds1_aux));
+	       malloc(dsd[indx_dsd].num_dsr * sizeof(struct mds1_aux));
      }
-     if ( (aux = aux_out[0]) == NULL )  
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "aux" );
+     if ((aux = aux_out[0]) == NULL)  
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "aux");
 /*
  * rewind/read input data file
  */
-     (void) fseek( fd, (long) dsd[indx_dsd].offset, SEEK_SET );
+     (void) fseek(fd, (long) dsd[indx_dsd].offset, SEEK_SET);
 /*
  * read data set records
  */
      do {
-	  if ( fread( &aux->mjd, sizeof(struct mjd_envi), 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
-	  if ( fread( &aux->flag_mds, ENVI_UCHAR, 1, fd ) != 1 )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "" );
-	  SCIA_LV0_RD_LV1_AUX( fd, aux );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_AUX" );
+	  if (fread(&aux->mjd, sizeof(struct mjd_envi), 1, fd) != 1)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "");
+	  if (fread(&aux->flag_mds, ENVI_UCHAR, 1, fd) != 1)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "");
+	  SCIA_LV0_RD_LV1_AUX(fd, aux);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_AUX");
 /*
  * byte swap data to local representation
  */
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_AUX( aux );
+	  Sun2Intel_AUX(aux);
 #endif
-     } while ( aux++, ++nr_dsr < dsd[indx_dsd].num_dsr );
+     } while (aux++, ++nr_dsr < dsd[indx_dsd].num_dsr);
 /*
  * set return values
  */
@@ -137,7 +142,7 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 .IDENTifer   SCIA_LV1_WR_AUX
 .PURPOSE     write auxiliary Data Packets
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_AUX( fd, num_aux, aux );
+  call as    SCIA_LV1_WR_AUX(fd, num_aux, aux);
      input:
             FILE *fd              :  stream pointer
 	    unsigned int num_aux  :  number of Auxiliary records
@@ -147,8 +152,8 @@ unsigned int SCIA_LV1_RD_AUX( FILE *fd, unsigned int num_dsd,
 	     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV1_WR_AUX( FILE *fd, unsigned int num_aux,
-		      const struct mds1_aux *aux_in )
+void SCIA_LV1_WR_AUX(FILE *fd, unsigned int num_aux,
+		      const struct mds1_aux *aux_in)
 {
      struct mds1_aux aux;
 
@@ -158,26 +163,26 @@ void SCIA_LV1_WR_AUX( FILE *fd, unsigned int num_aux,
           0u, 0u, 0u, 0
      };
 
-     if ( num_aux == 0u ) {
-	  (void) strcpy( dsd.flname, "NOT USED" );
-	  SCIA_LV1_ADD_DSD( &dsd );
+     if (num_aux == 0u) {
+	  (void) strcpy(dsd.flname, "NOT USED");
+	  SCIA_LV1_ADD_DSD(&dsd);
 	  return;
      }
 /*
  * write data set records
  */
      do {
-	  (void) memcpy( &aux, aux_in, sizeof( struct mds1_aux ) );
+	  (void) memcpy(&aux, aux_in, sizeof(struct mds1_aux));
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_AUX( &aux );
+	  Sun2Intel_AUX(&aux);
 #endif
-	  dsd.size += SCIA_LV0_WR_LV1_AUX( fd, aux );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "SCIA_LV0_WR_LV1_AUX" );
-     } while ( aux_in++, ++dsd.num_dsr < num_aux );
+	  dsd.size += SCIA_LV0_WR_LV1_AUX(fd, aux);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "SCIA_LV0_WR_LV1_AUX");
+     } while (aux_in++, ++dsd.num_dsr < num_aux);
 /*
  * update list of written DSD records
  */
      dsd.dsr_size = (int) (dsd.size / dsd.num_dsr);
-     SCIA_LV1_ADD_DSD( &dsd );
+     SCIA_LV1_ADD_DSD(&dsd);
 }
