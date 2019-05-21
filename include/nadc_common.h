@@ -243,11 +243,7 @@ struct param_record
      unsigned int   calib_scia;
 
      unsigned long long clus_mask;
-#ifdef _HDF5_H
-     hid_t hdf_file_id;
-#else
-     signed long long hdf_file_id;
-#endif
+
      unsigned char  catID[MAX_NUM_STATE];
      unsigned char  stateID[MAX_NUM_STATE];
 
@@ -266,6 +262,11 @@ struct param_record
      float geo_lon[2];
      float sunz[2];
      float wave[2];
+#ifdef _HDF5_H
+     hid_t hdf_file_id;
+#else
+     int   hdf_file_id;
+#endif
 };
 
 #define MAX_ADAGUC_INFILES   256
