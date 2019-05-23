@@ -25,7 +25,7 @@ else ()
    target_link_libraries(nadc_tosomi ${TOSOMI_LIBS})
 endif ()
 
-add_executable(adaguc_tosomi adaguc_tosomi.c  ${TOSOMI_SRCS})
+add_executable(adaguc_tosomi adaguc_tosomi.c ${TOSOMI_SRCS})
 
 target_link_libraries(adaguc_tosomi ${TOSOMI_LIBS})
 

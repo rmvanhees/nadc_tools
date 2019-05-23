@@ -99,10 +99,6 @@ unsigned int SCIA_LV1_RD_PMD(FILE *fd, unsigned int num_dsd,
           pmd_out[0] = NULL;
           return 0u;
      }
-     (void) fprintf(stdout, "size mds1_pmd: %zd %zd %zd %zd %zd\n",
-		    sizeof(struct mds1_pmd),
-		    sizeof(struct mjd_envi), sizeof(struct packet_hdr),
-		    sizeof(struct data_hdr), sizeof(struct pmd_src));
      if (! Use_Extern_Alloc) {
 	  pmd_out[0] = (struct mds1_pmd *) 
 	       malloc(dsd[indx_dsd].num_dsr * sizeof(struct mds1_pmd));

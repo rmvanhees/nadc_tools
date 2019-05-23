@@ -98,11 +98,6 @@ unsigned int SCIA_LV1_RD_AUX(FILE *fd, unsigned int num_dsd,
           aux_out[0] = NULL;
           return 0u;
      }
-     (void) fprintf(stdout, "size mds1_aux: %zd %zd %zd %zd %zd %zd\n",
-		    sizeof(struct mds1_aux),
-		    sizeof(struct mjd_envi), sizeof(struct packet_hdr),
-		    sizeof(struct data_hdr), sizeof(struct pmtc_hdr),
-		    sizeof(struct pmtc_frame));
      if (! Use_Extern_Alloc) {
 	  aux_out[0] = (struct mds1_aux *) 
 	       malloc(dsd[indx_dsd].num_dsr * sizeof(struct mds1_aux));
