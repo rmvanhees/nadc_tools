@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2007 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2007 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     remove entries in database for a Sciamachy level 2 product
 .INPUT/OUTPUT
-  call as   SCIA_OL2_DEL_ENTRY( conn, be_verbose, flname );
+  call as   SCIA_OL2_DEL_ENTRY(conn, flname);
      input:  
              MYSQL *mysql        :  PostgreSQL connection handle
-	     bool be_verbose     :  be verbose
              char *flname        :  filename of the Sciamachy Level 2 product
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
@@ -78,7 +77,7 @@ WHERE pk_stateinfo=%u AND SUBSTR(softVersion,3,1)=\'%s\'"
 				/* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_OL2_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
+void SCIA_OL2_DEL_ENTRY(PGconn *conn, const char *flname)
 {
      register int nr;
 
@@ -90,63 +89,65 @@ void SCIA_OL2_DEL_ENTRY( PGconn *conn, bool be_verbose, const char *flname )
      int      nrow, numChar;
 
      PGresult *res, *res_update;
+
+     bool  be_verbose = nadc_get_param_uint8("flag_verbose");
 /*
  * strip path of file-name
  */
-     if ( (cpntr = strrchr( flname, '/' )) != NULL ) {
-          (void) nadc_strlcpy( sciafl, ++cpntr, SHORT_STRING_LENGTH );
+     if ((cpntr = strrchr(flname, '/')) != NULL) {
+          (void) nadc_strlcpy(sciafl, ++cpntr, SHORT_STRING_LENGTH);
      } else {
-          (void) nadc_strlcpy( sciafl, flname, SHORT_STRING_LENGTH );
+          (void) nadc_strlcpy(sciafl, flname, SHORT_STRING_LENGTH);
      }
 /*
  * check if we have to reverse field "softVersion[2]" in table "stateinfo"
  */
-     numChar = snprintf( sql_query, SQL_STR_SIZE, SELECT_FROM_STATEINFO,
-			 sciafl );
-     if ( be_verbose )
-          (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
-     if ( numChar >= SQL_STR_SIZE )
-          NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
-     res = PQexec( conn, sql_query );
-     if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-          NADC_RETURN_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
+     numChar = snprintf(sql_query, SQL_STR_SIZE, SELECT_FROM_STATEINFO,
+			 sciafl);
+     if (be_verbose)
+          (void) printf("%s(): %s [%-d]\n", __func__, sql_query, numChar);
+     if (numChar >= SQL_STR_SIZE)
+          NADC_RETURN_ERROR(NADC_ERR_STRLEN, "sql_query");
+     res = PQexec(conn, sql_query);
+     if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+          NADC_RETURN_ERROR(NADC_ERR_SQL, PQresultErrorMessage(res));
      }
 /* return when no entries are found */
-     if ( (nrow = PQntuples( res )) == 0 ) goto done;
+     if ((nrow = PQntuples(res)) == 0) goto done;
 /*
  * update field "softVersion[2]" in table "stateinfo"
  */
-     (void) nadc_strlcpy( procStage, sciafl+10, 2 );
-     for ( nr = 0; nr < nrow; nr++ ) {
-          cpntr = PQgetvalue( res, nr, 0 );
-          indx = (unsigned int) strtoul( cpntr, (char **)NULL, 10 );
-          numChar = snprintf( sql_query, SQL_STR_SIZE, 
-			      UPDATE_STATEINFO, indx, procStage );
-	  if ( be_verbose )
-	       (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
-	  if ( numChar >= SQL_STR_SIZE )
-	       NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
-          res_update = PQexec( conn, sql_query );
-          if ( PQresultStatus( res_update ) != PGRES_COMMAND_OK ) {
-               NADC_ERROR( NADC_ERR_SQL, 
-                           PQresultErrorMessage(res_update) );
-               PQclear( res_update );
+     (void) nadc_strlcpy(procStage, sciafl+10, 2);
+     for (nr = 0; nr < nrow; nr++) {
+          cpntr = PQgetvalue(res, nr, 0);
+          indx = (unsigned int) strtoul(cpntr, (char **)NULL, 10);
+          numChar = snprintf(sql_query, SQL_STR_SIZE, 
+			      UPDATE_STATEINFO, indx, procStage);
+	  if (be_verbose)
+	       (void) printf("%s(): %s [%-d]\n", __func__, sql_query, numChar);
+	  if (numChar >= SQL_STR_SIZE)
+	       NADC_RETURN_ERROR(NADC_ERR_STRLEN, "sql_query");
+          res_update = PQexec(conn, sql_query);
+          if (PQresultStatus(res_update) != PGRES_COMMAND_OK) {
+               NADC_ERROR(NADC_ERR_SQL, 
+                           PQresultErrorMessage(res_update));
+               PQclear(res_update);
                goto done;
           }
-          PQclear( res_update );
+          PQclear(res_update);
      }
  done:
-     PQclear( res );
+     PQclear(res);
 /*
  * remove entry from table "meta__2P"
  */
-     numChar = snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_META, sciafl );
-     if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
-     if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
-     res = PQexec( conn, sql_query );
-     if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
-     PQclear( res );
+     numChar = snprintf(sql_query, SQL_STR_SIZE, DELETE_FROM_META, sciafl);
+     if (be_verbose)
+	  (void) printf("%s(): %s [%-d]\n", __func__, sql_query, numChar);
+     if (numChar >= SQL_STR_SIZE)
+	  NADC_RETURN_ERROR(NADC_ERR_STRLEN, "sql_query");
+     res = PQexec(conn, sql_query);
+     if (PQresultStatus(res) != PGRES_COMMAND_OK)
+	  NADC_ERROR(NADC_ERR_SQL, PQresultErrorMessage(res));
+     PQclear(res);
 }

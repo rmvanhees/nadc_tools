@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2002 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2002 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     combine channel and cluster selection into a mask (0/1)
 .INPUT/OUTPUT
-  call as   clus_mask = SCIA_LV1_CHAN2CLUS( param, state );
+  call as   clus_mask = SCIA_LV1_CHAN2CLUS(state);
 
      input: 
-             struct param_record param :  struct holding user-defined settings
 	     struct state1_scia *state :  structure with States of the product
 
 .RETURNS     mask with clusters to be selected (unsigned long long)
@@ -51,41 +50,23 @@
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 unsigned
-long long SCIA_LV1_CHAN2CLUS( const struct param_record param, 
-			      const struct state1_scia *state )
+long long SCIA_LV1_CHAN2CLUS(const struct state1_scia *state)
 {
-     register unsigned short nc;
+     register unsigned short nc = 0;
 
      unsigned long long clus_mask = 0ULL;
-/*
- * no selection on spectral bands
- */
-     if ( param.chan_mask == BAND_ALL )
-	  return param.clus_mask;
-/*
- * no selection on clus_mask
- */
-     if ( param.clus_mask == ~0ULL ) {
-	  nc = 0;
-	  do {
-	       if ( SELECTED_CHANNEL( param.chan_mask, 
-				      state->Clcon[nc].channel )){
-		    Set_Bit_LL( &clus_mask, (unsigned char) nc );
-	       }
-	  } while( ++nc < state->num_clus );
-	  return clus_mask;
-     }
-/*
- * both channel and cluster selection!
- */
-     nc = 0;
+
      do {
-	  if ( Get_Bit_LL( param.clus_mask, (unsigned char) nc ) != 0ULL &&
-	       SELECTED_CHANNEL( param.chan_mask, state->Clcon[nc].channel )){
-	       Set_Bit_LL( &clus_mask, (unsigned char) nc );
-	  }
-     } while( ++nc < state->num_clus );
+	  int ichan = state->Clcon[nc].channel - 1;
+
+	  if (nadc_get_param_chan(ichan) == (unsigned char) 0)
+	       continue;
+
+	  if (nadc_get_param_clus(nc) == 0ULL)
+	       continue;
+	  
+	  Set_Bit_LL(&clus_mask, (unsigned char) nc);
+     } while(++nc < state->num_clus);
 
      return clus_mask;
 }
-

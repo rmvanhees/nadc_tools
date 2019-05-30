@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 SPH data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_SPH( param, sph );
+  call as    SCIA_LV1_WR_H5_SPH(sph);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct sph1_scia    *sph  : Specific Product Header data
 
 .RETURNS     Nothing
@@ -52,38 +51,38 @@
 
 #define NFIELDS    24
 
-static const size_t sph_size = sizeof( struct sph1_scia );
+static const size_t sph_size = sizeof(struct sph1_scia);
 static const size_t sph_offs[NFIELDS] = {
-     HOFFSET( struct sph1_scia, spec_cal ),
-     HOFFSET( struct sph1_scia, saturate ),
-     HOFFSET( struct sph1_scia, dark_check ),
-     HOFFSET( struct sph1_scia, dead_pixel ),
-     HOFFSET( struct sph1_scia, key_data ),
-     HOFFSET( struct sph1_scia, m_factor ),
-     HOFFSET( struct sph1_scia, descriptor ),
-     HOFFSET( struct sph1_scia, init_version ),
-     HOFFSET( struct sph1_scia, start_time ),
-     HOFFSET( struct sph1_scia, stop_time ),
-     HOFFSET( struct sph1_scia, stripline ),
-     HOFFSET( struct sph1_scia, slice_pos ),
-     HOFFSET( struct sph1_scia, no_slice ),
-     HOFFSET( struct sph1_scia, no_nadir ),
-     HOFFSET( struct sph1_scia, no_limb ),
-     HOFFSET( struct sph1_scia, no_occult ),
-     HOFFSET( struct sph1_scia, no_monitor ),
-     HOFFSET( struct sph1_scia, no_noproc ),
-     HOFFSET( struct sph1_scia, comp_dark ),
-     HOFFSET( struct sph1_scia, incomp_dark ),
-     HOFFSET( struct sph1_scia, start_lat ),
-     HOFFSET( struct sph1_scia, start_lon ),
-     HOFFSET( struct sph1_scia, stop_lat ),
-     HOFFSET( struct sph1_scia, stop_lon )
+     HOFFSET(struct sph1_scia, spec_cal),
+     HOFFSET(struct sph1_scia, saturate),
+     HOFFSET(struct sph1_scia, dark_check),
+     HOFFSET(struct sph1_scia, dead_pixel),
+     HOFFSET(struct sph1_scia, key_data),
+     HOFFSET(struct sph1_scia, m_factor),
+     HOFFSET(struct sph1_scia, descriptor),
+     HOFFSET(struct sph1_scia, init_version),
+     HOFFSET(struct sph1_scia, start_time),
+     HOFFSET(struct sph1_scia, stop_time),
+     HOFFSET(struct sph1_scia, stripline),
+     HOFFSET(struct sph1_scia, slice_pos),
+     HOFFSET(struct sph1_scia, no_slice),
+     HOFFSET(struct sph1_scia, no_nadir),
+     HOFFSET(struct sph1_scia, no_limb),
+     HOFFSET(struct sph1_scia, no_occult),
+     HOFFSET(struct sph1_scia, no_monitor),
+     HOFFSET(struct sph1_scia, no_noproc),
+     HOFFSET(struct sph1_scia, comp_dark),
+     HOFFSET(struct sph1_scia, incomp_dark),
+     HOFFSET(struct sph1_scia, start_lat),
+     HOFFSET(struct sph1_scia, start_lon),
+     HOFFSET(struct sph1_scia, stop_lat),
+     HOFFSET(struct sph1_scia, stop_lon)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_SPH( struct param_record param, 
-			 const struct sph1_scia *sph )
+void SCIA_LV1_WR_H5_SPH(const struct sph1_scia *sph)
 {
+     hid_t   fid;
      hid_t   sph_type[NFIELDS];
      hid_t   string_type00, string_type01, string_type02, string_type03, 
 	  string_type04, string_type05, string_type06, string_type07, 
@@ -106,26 +105,26 @@ void SCIA_LV1_WR_H5_SPH( struct param_record param,
 /*
  * define user-defined data types of the Table-fields
  */
-     string_type00 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type00, (size_t) 5 );
-     string_type01 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type01, (size_t) 5 );
-     string_type02 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type02, (size_t) 5 );
-     string_type03 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type03, (size_t) 5 );
-     string_type04 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type04, (size_t) 6 );
-     string_type05 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type05, (size_t) 6 );
-     string_type06 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type06, (size_t) 29 );
-     string_type07 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type07, (size_t) 38 );
-     string_type08 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type08, (size_t) UTC_STRING_LENGTH );
-     string_type09 = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( string_type09, (size_t) UTC_STRING_LENGTH );
+     string_type00 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type00, (size_t) 5);
+     string_type01 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type01, (size_t) 5);
+     string_type02 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type02, (size_t) 5);
+     string_type03 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type03, (size_t) 5);
+     string_type04 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type04, (size_t) 6);
+     string_type05 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type05, (size_t) 6);
+     string_type06 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type06, (size_t) 29);
+     string_type07 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type07, (size_t) 38);
+     string_type08 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type08, (size_t) UTC_STRING_LENGTH);
+     string_type09 = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(string_type09, (size_t) UTC_STRING_LENGTH);
      sph_type[0]  = string_type00;
      sph_type[1]  = string_type01;
      sph_type[2]  = string_type02;
@@ -153,21 +152,22 @@ void SCIA_LV1_WR_H5_SPH( struct param_record param,
 /*
  * create table
  */
-     (void) H5TBmake_table( "Specific Product Header", param.hdf_file_id, 
+     fid = nadc_get_param_hid("hdf_file_id");
+     (void) H5TBmake_table("Specific Product Header", fid, 
 			    "SPH", (hsize_t) NFIELDS, (hsize_t) 1, sph_size, 
 			    sph_names, sph_offs, sph_type, 
-			    chunk_size, fill_data, compress, sph );
+			    chunk_size, fill_data, compress, sph);
 /*
  * close interface
  */
-     (void) H5Tclose( string_type00 );
-     (void) H5Tclose( string_type01 );
-     (void) H5Tclose( string_type02 );
-     (void) H5Tclose( string_type03 );
-     (void) H5Tclose( string_type04 );
-     (void) H5Tclose( string_type05 );
-     (void) H5Tclose( string_type06 );
-     (void) H5Tclose( string_type07 );
-     (void) H5Tclose( string_type08 );
-     (void) H5Tclose( string_type09 );
+     (void) H5Tclose(string_type00);
+     (void) H5Tclose(string_type01);
+     (void) H5Tclose(string_type02);
+     (void) H5Tclose(string_type03);
+     (void) H5Tclose(string_type04);
+     (void) H5Tclose(string_type05);
+     (void) H5Tclose(string_type06);
+     (void) H5Tclose(string_type07);
+     (void) H5Tclose(string_type08);
+     (void) H5Tclose(string_type09);
 }

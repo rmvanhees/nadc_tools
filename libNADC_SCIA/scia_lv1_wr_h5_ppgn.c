@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 PPGN data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_PPGN( param, nr_ppgn, ppgn );
+  call as    SCIA_LV1_WR_H5_PPGN(nr_ppgn, ppgn);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned int nr_ppgn      : number of PPGN/Etalon parameters
 	     struct ppgn_scia *ppgn    : new PPG/Etalon parameters
 
@@ -54,70 +53,71 @@
 #define NFIELDS    8
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_PPGN( struct param_record param, unsigned int nr_ppgn,
-			  const struct ppgn_scia *ppgn )
+void SCIA_LV1_WR_H5_PPGN(unsigned int nr_ppgn, const struct ppgn_scia *ppgn)
 {
-     hid_t   ads_id;
+     hid_t   fid, ads_id;
      hsize_t adim;
      herr_t  stat;
 
      hid_t   ppgn_type[NFIELDS];
 
-     const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
-     const size_t ppgn_size = sizeof( struct ppgn_scia );
+     const hbool_t compress = \
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
+     const size_t ppgn_size = sizeof(struct ppgn_scia);
      const char *ppgn_names[NFIELDS] = { 
 	  "mjd", "flag_mds", "gain_fact", "etalon_fact", "etalon_resid", 
 	  "avg_wls_spec", "sd_wls_spec", "bad_pixel"
      };
      const size_t ppgn_offs[NFIELDS] = {
-	  HOFFSET( struct ppgn_scia, mjd ),
-	  HOFFSET( struct ppgn_scia, flag_mds ),
-	  HOFFSET( struct ppgn_scia, gain_fact ),
-	  HOFFSET( struct ppgn_scia, etalon_fact ),
-	  HOFFSET( struct ppgn_scia, etalon_resid ),
-	  HOFFSET( struct ppgn_scia, avg_wls_spec ),
-	  HOFFSET( struct ppgn_scia, sd_wls_spec ),
-	  HOFFSET( struct ppgn_scia, bad_pixel )
+	  HOFFSET(struct ppgn_scia, mjd),
+	  HOFFSET(struct ppgn_scia, flag_mds),
+	  HOFFSET(struct ppgn_scia, gain_fact),
+	  HOFFSET(struct ppgn_scia, etalon_fact),
+	  HOFFSET(struct ppgn_scia, etalon_resid),
+	  HOFFSET(struct ppgn_scia, avg_wls_spec),
+	  HOFFSET(struct ppgn_scia, sd_wls_spec),
+	  HOFFSET(struct ppgn_scia, bad_pixel)
      };
 /*
  * check number of PMD records
  */
-     if ( nr_ppgn == 0 ) return;
+     if (nr_ppgn == 0) return;
 /*
  * open/create group /ADS
  */
-     ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     ads_id = NADC_OPEN_HDF5_Group(fid, "/ADS");
+     if (ads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/ADS");
 /*
  * write PPGN data sets
  */
      adim = SCIENCE_PIXELS;
-     ppgn_type[0] = H5Topen( param.hdf_file_id, "mjd", H5P_DEFAULT );
-     ppgn_type[1] = H5Tcopy( H5T_NATIVE_UCHAR );
+     ppgn_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
+     ppgn_type[1] = H5Tcopy(H5T_NATIVE_UCHAR);
      adim = SCIENCE_PIXELS;
-     ppgn_type[2] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppgn_type[3] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppgn_type[4] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppgn_type[5] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppgn_type[6] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppgn_type[7] = H5Tarray_create( H5T_NATIVE_UCHAR, 1, &adim );
+     ppgn_type[2] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppgn_type[3] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppgn_type[4] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppgn_type[5] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppgn_type[6] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppgn_type[7] = H5Tarray_create(H5T_NATIVE_UCHAR, 1, &adim);
 
-     stat = H5TBmake_table( "ppgn", ads_id, "NEW_PPG_ETALON", 
+     stat = H5TBmake_table("ppgn", ads_id, "NEW_PPG_ETALON", 
                             NFIELDS, 1, ppgn_size, ppgn_names,
                             ppgn_offs, ppgn_type, 1,
-                            NULL, compress, ppgn );
-     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "ppgn" );
+                            NULL, compress, ppgn);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "ppgn");
 /*
  * close interface
  */
  done:
-     (void) H5Tclose( ppgn_type[0] );
-     (void) H5Tclose( ppgn_type[1] );
-     (void) H5Tclose( ppgn_type[2] );
-     (void) H5Tclose( ppgn_type[3] );
-     (void) H5Tclose( ppgn_type[4] );
-     (void) H5Tclose( ppgn_type[5] );
-     (void) H5Tclose( ppgn_type[6] );
-     (void) H5Tclose( ppgn_type[7] );
-     (void) H5Gclose( ads_id );
+     (void) H5Tclose(ppgn_type[0]);
+     (void) H5Tclose(ppgn_type[1]);
+     (void) H5Tclose(ppgn_type[2]);
+     (void) H5Tclose(ppgn_type[3]);
+     (void) H5Tclose(ppgn_type[4]);
+     (void) H5Tclose(ppgn_type[5]);
+     (void) H5Tclose(ppgn_type[6]);
+     (void) H5Tclose(ppgn_type[7]);
+     (void) H5Gclose(ads_id);
 }

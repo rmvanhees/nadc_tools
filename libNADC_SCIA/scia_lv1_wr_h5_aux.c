@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 Auxiliary data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_AUX( param, nr_aux, aux );
+  call as    SCIA_LV1_WR_H5_AUX(nr_aux, aux);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned int nr_aux       : number of Auxiliary data packets
 	     struct aux_scia *aux      : structure with Auxiliary data packets
 
@@ -54,26 +53,26 @@
 
 #define NFIELDS    6
 
-static const size_t aux_size = sizeof( struct mds1_aux );
+static const size_t aux_size = sizeof(struct mds1_aux);
 static const size_t aux_offs[NFIELDS] = {
-     HOFFSET( struct mds1_aux, mjd ),
-     HOFFSET( struct mds1_aux, flag_mds ),
-     HOFFSET( struct mds1_aux, packet_hdr ),
-     HOFFSET( struct mds1_aux, data_hdr ),
-     HOFFSET( struct mds1_aux, pmtc_hdr ),
-     HOFFSET( struct mds1_aux, data_src )
+     HOFFSET(struct mds1_aux, mjd),
+     HOFFSET(struct mds1_aux, flag_mds),
+     HOFFSET(struct mds1_aux, packet_hdr),
+     HOFFSET(struct mds1_aux, data_hdr),
+     HOFFSET(struct mds1_aux, pmtc_hdr),
+     HOFFSET(struct mds1_aux, data_src)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_AUX( struct param_record param, unsigned int nr_aux,
-			 const struct mds1_aux *aux )
+void SCIA_LV1_WR_H5_AUX(unsigned int nr_aux, const struct mds1_aux *aux)
 {
-     hid_t   ads_id, tid_pmtc;
+     hid_t   fid, ads_id, tid_pmtc;
      hid_t   aux_type[NFIELDS];
 
      hsize_t adim;
 
-     const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
+     const hbool_t compress = \
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
      const char *aux_names[NFIELDS] = {
           "dsr_time", "attach_flag", "packet_hdr", 
 	  "data_hdr", "pmtc_hdr", "data_src"
@@ -81,38 +80,39 @@ void SCIA_LV1_WR_H5_AUX( struct param_record param, unsigned int nr_aux,
 /*
  * check number of AUX records
  */
-     if ( nr_aux == 0 ) return;
+     if (nr_aux == 0) return;
 /*
  * open/create group /ADS
  */
-     ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     ads_id = NADC_OPEN_HDF5_Group(fid, "/ADS");
+     if (ads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/ADS");
 /*
  * define user-defined data types of the Table-fields
  */
-     aux_type[0] = H5Topen( param.hdf_file_id, "mjd", H5P_DEFAULT );
-     aux_type[1] = H5Tcopy( H5T_NATIVE_UCHAR );
-     aux_type[2] = H5Topen( param.hdf_file_id, "packet_hdr", H5P_DEFAULT );
-     aux_type[3] = H5Topen( param.hdf_file_id, "data_hdr", H5P_DEFAULT );
-     aux_type[4] = H5Topen( param.hdf_file_id, "pmtc_hdr", H5P_DEFAULT );
-     tid_pmtc = H5Topen( param.hdf_file_id, "pmtc_frame", H5P_DEFAULT );
+     aux_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
+     aux_type[1] = H5Tcopy(H5T_NATIVE_UCHAR);
+     aux_type[2] = H5Topen(fid, "packet_hdr", H5P_DEFAULT);
+     aux_type[3] = H5Topen(fid, "data_hdr", H5P_DEFAULT);
+     aux_type[4] = H5Topen(fid, "pmtc_hdr", H5P_DEFAULT);
+     tid_pmtc = H5Topen(fid, "pmtc_frame", H5P_DEFAULT);
      adim = NUM_LV0_AUX_PMTC_FRAME;
-     aux_type[5] = H5Tarray_create( tid_pmtc, 1, &adim );
-     (void) H5Tclose( tid_pmtc );
+     aux_type[5] = H5Tarray_create(tid_pmtc, 1, &adim);
+     (void) H5Tclose(tid_pmtc);
 /*
  * create table
  */
-     (void) H5TBmake_table( "aux", ads_id, "AUXILIARY_PACKETS", NFIELDS, 
+     (void) H5TBmake_table("aux", ads_id, "AUXILIARY_PACKETS", NFIELDS, 
 			    nr_aux, aux_size, aux_names, aux_offs, aux_type, 
-			    nr_aux, NULL, compress, aux );
+			    nr_aux, NULL, compress, aux);
 /*
  * close interface
  */
-     (void) H5Tclose( aux_type[0] );
-     (void) H5Tclose( aux_type[1] );
-     (void) H5Tclose( aux_type[2] );
-     (void) H5Tclose( aux_type[3] );
-     (void) H5Tclose( aux_type[4] );
-     (void) H5Tclose( aux_type[5] );
-     (void) H5Gclose( ads_id );
+     (void) H5Tclose(aux_type[0]);
+     (void) H5Tclose(aux_type[1]);
+     (void) H5Tclose(aux_type[2]);
+     (void) H5Tclose(aux_type[3]);
+     (void) H5Tclose(aux_type[4]);
+     (void) H5Tclose(aux_type[5]);
+     (void) H5Gclose(ads_id);
 }

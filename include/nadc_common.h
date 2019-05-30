@@ -117,6 +117,7 @@ extern "C" {
 #define ENVI_INT    ((size_t) 4)
 #define ENVI_UINT   ((size_t) 4)
 #define ENVI_LLONG  ((size_t) 8)
+#define ENVI_ULLONG ((size_t) 8)
 #define ENVI_FLOAT  ((size_t) 4)
 #define ENVI_DBLE   ((size_t) 8)
 
@@ -383,433 +384,493 @@ struct state_list_rec
 /* 
  * prototype declarations of functions common to all libraries
  */
-extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       unsigned char **ALLOC_UC2D( size_t, size_t )
+extern /*@null@*/ /*@out@*/ /*@only@*/
+       unsigned char **ALLOC_UC2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       char **ALLOC_C2D( size_t, size_t )
+       char **ALLOC_C2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       unsigned short **ALLOC_US2D( size_t, size_t )
+       unsigned short **ALLOC_US2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       short **ALLOC_S2D( size_t, size_t )
+       short **ALLOC_S2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       short ***ALLOC_S3D( size_t, size_t, size_t )
+       short ***ALLOC_S3D(size_t, size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       int **ALLOC_I2D( size_t, size_t )
+       int **ALLOC_I2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       float **ALLOC_R2D( size_t, size_t )
+       float **ALLOC_R2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       double **ALLOC_D2D( size_t, size_t )
+       double **ALLOC_D2D(size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       int ***ALLOC_I3D( size_t, size_t, size_t )
+       int ***ALLOC_I3D(size_t, size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@out@*/ /*@only@*/ 
-       int ****ALLOC_I4D( size_t, size_t, size_t, size_t )
+       int ****ALLOC_I4D(size_t, size_t, size_t, size_t)
      /*@globals nadc_stat, nadc_err_stack;@*/
      /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void FREE_2D( /*@notnull@*/ /*@only@*/ void **p ) 
+extern void FREE_2D(/*@notnull@*/ /*@only@*/ void **p) 
      /*@modifies p, *p@*/;
-extern void FREE_3D( /*@notnull@*/ /*@only@*/ void ***p ) 
+extern void FREE_3D(/*@notnull@*/ /*@only@*/ void ***p) 
      /*@modifies p, *p, **p@*/;
-extern void FREE_4D( /*@notnull@*/ /*@only@*/ void ****p ) 
+extern void FREE_4D(/*@notnull@*/ /*@only@*/ void ****p) 
      /*@modifies p, *p, **p, ***p@*/;
 
-extern int BinarySearch( int, const int *, const int *, int );
+extern int BinarySearch(int, const int *, const int *, int);
 
-extern size_t NADC_BIWEIGHT( const size_t, const float *, 
-			     /*@out@*/ float *median,
-			     /*@out@*/ /*@null@*/ float *scale )
+extern size_t NADC_BIWEIGHT(const size_t, const float *, 
+			    /*@out@*/ float *median,
+			    /*@out@*/ /*@null@*/ float *scale)
      /*@globals  nadc_stat, nadc_err_stack, errno;@*/
      /*@modifies nadc_stat, nadc_err_stack, errno, median, scale@*/;
-extern void NADC_INTERPOL( float, float, float, unsigned int, const float *, 
-			   const float *, /*@unique@*/ float *Y )
+extern void NADC_INTERPOL(float, float, float, unsigned int, const float *, 
+			  const float *, /*@unique@*/ float *Y)
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack, Y@*/;
-extern void NADC_INTERPOL_d( float, float, float, unsigned int, const float *, 
-			   const float *, /*@unique@*/ double *Y )
+extern void NADC_INTERPOL_d(float, float, float, unsigned int, const float *, 
+			    const float *, /*@unique@*/ double *Y)
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack, Y@*/;
 
-extern unsigned char SELECTuc( const size_t, const size_t, 
-			       const unsigned char * );
-extern short  SELECTs( const size_t, const size_t, const short  * );
-extern int    SELECTi( const size_t, const size_t, const int    * );
-extern float  SELECTr( const size_t, const size_t, const float  * );
-extern double SELECTd( const size_t, const size_t, const double * );
+extern unsigned char nadc_get_param_uint8(const char *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern unsigned short nadc_get_param_uint16(const char *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern unsigned int nadc_get_param_uint32(const char *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern void nadc_get_param_range(const char *, float *value)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack, value@*/;
+extern /*@null@*/ /*@out@*/ /*@only@*/
+      char * nadc_get_param_string(const char *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern int nadc_set_param_uint8(const char *, const unsigned char)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern int nadc_set_param_uint16(const char *, const unsigned short)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern int nadc_set_param_uint32(const char *, const unsigned int)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern int nadc_set_param_range(const char *, const float *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern int nadc_set_param_string(const char *, const char *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+extern void nadc_free_param_string(void);
 
-extern size_t NADC_SIGMACLIPPED( const size_t, const float *, 
-				 /*@out@*/ float *mean,
-				 /*@out@*/ float *sdev )
+extern bool nadc_get_param_chan(int);
+extern void nadc_repr_param_chan(size_t, char *str)
+      /*@modifies str@*/;
+extern int nadc_set_param_chan(const unsigned char *, int);
+extern bool nadc_get_param_clus(int);
+extern void nadc_repr_param_clus(size_t, char *str)
+      /*@modifies str@*/;
+extern int nadc_set_param_clus(const unsigned char *, int);
+extern bool nadc_get_param_cat(int);
+extern void nadc_repr_param_cat(size_t, char *str)
+      /*@modifies str@*/;
+extern int nadc_set_param_cat(const unsigned char *, int);
+extern bool nadc_get_param_state(int);
+extern void nadc_repr_param_state(size_t, char *str)
+      /*@modifies str@*/;
+extern int nadc_set_param_state(const unsigned char *, int)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
+
+extern unsigned char SELECTuc(const size_t, const size_t, 
+			       const unsigned char *);
+extern short  SELECTs(const size_t, const size_t, const short  *);
+extern int    SELECTi(const size_t, const size_t, const int    *);
+extern float  SELECTr(const size_t, const size_t, const float  *);
+extern double SELECTd(const size_t, const size_t, const double *);
+
+extern size_t NADC_SIGMACLIPPED(const size_t, const float *, 
+				/*@out@*/ float *mean,
+				/*@out@*/ float *sdev)
      /*@globals  nadc_stat, nadc_err_stack, errno;@*/
      /*@modifies nadc_stat, nadc_err_stack, errno, mean, sdev@*/;
 
-extern size_t nadc_strlcpy( /*@out@*/ char *, 
-			    /*@unique@*/ const char *, size_t );
-extern size_t nadc_strlcat( /*@out@*/ char *, 
-			    /*@unique@*/ const char *, size_t );
-extern void nadc_rstrip( /*@out@*/ char *, /*@unique@*/ const char * );
+extern size_t nadc_strlcpy(/*@out@*/ char *, 
+			   /*@unique@*/ const char *, size_t);
+extern size_t nadc_strlcat(/*@out@*/ char *, 
+			   /*@unique@*/ const char *, size_t);
+extern void nadc_rstrip(/*@out@*/ char *, /*@unique@*/ const char *);
 
-extern void Set_Bit_LL( unsigned long long *, unsigned char );
-extern unsigned long long Get_Bit_LL( unsigned long long, unsigned char )
+extern void Set_Bit_uc(unsigned char *, int);
+extern unsigned char Get_Bit_uc(unsigned char, int) __attribute__ ((const));
+extern void Set_Bit_LL(unsigned long long *, int);
+extern unsigned long long Get_Bit_LL(unsigned long long, int)
      __attribute__ ((const));
 
-extern void Julian_2_MJD( double, /*@out@*/ double *, 
-			  /*@out@*/ unsigned int *, /*@out@*/ unsigned int * );
-extern void MJD_2_Julian( double, unsigned int, unsigned int, 
-			  /*@out@*/ double * );
-extern void ASCII_2_UTC( const char *, 
-			/*@out@*/ unsigned int *, /*@out@*/ unsigned int * )
+extern void Julian_2_MJD(double, /*@out@*/ double *, 
+			 /*@out@*/ unsigned int *, /*@out@*/ unsigned int *);
+extern void MJD_2_Julian(double, unsigned int, unsigned int, 
+			 /*@out@*/ double *);
+extern void ASCII_2_UTC(const char *, 
+			/*@out@*/ unsigned int *, /*@out@*/ unsigned int *)
      /*@globals errno;@*/;
-extern void ASCII_2_MJD( const char ASCII_DateTime[], /*@out@*/ int *, 
-			 /*@out@*/ unsigned int *, /*@out@*/ unsigned int * )
+extern void ASCII_2_MJD(const char ASCII_DateTime[], /*@out@*/ int *, 
+			/*@out@*/ unsigned int *, /*@out@*/ unsigned int *)
      /*@globals errno;@*/;
-extern double DATETIME_2_JULIAN( const char *, unsigned int )
+extern double DATETIME_2_JULIAN(const char *, unsigned int)
      /*@globals errno;@*/;
-extern void UTC_2_ASCII( unsigned int, unsigned int, /*@out@*/ char * );
-extern void UTC_2_DATETIME( unsigned int, unsigned int, /*@out@*/ char * );
-extern void MJD_2_ASCII( int, unsigned int, unsigned int, /*@out@*/ char * );
-extern void MJD_2_DATETIME( int, unsigned int, unsigned int, /*@out@*/char * );
-extern void MJD_2_YMD( int, unsigned int, /*@out@*/ char * );
-extern void GomeJDAY2adaguc( double, /*@out@*/ char *dateTime );
-extern double Adaguc2gomeJDAY( const char * );
-extern void SciaJDAY2adaguc( double, /*@out@*/ char *dateTime );
-extern double Adaguc2sciaJDAY( const char * );
+extern void UTC_2_ASCII(unsigned int, unsigned int, /*@out@*/ char *);
+extern void UTC_2_DATETIME(unsigned int, unsigned int, /*@out@*/ char *);
+extern void MJD_2_ASCII(int, unsigned int, unsigned int, /*@out@*/ char *);
+extern void MJD_2_DATETIME(int, unsigned int, unsigned int, /*@out@*/char *);
+extern void MJD_2_YMD(int, unsigned int, /*@out@*/ char *);
+extern void GomeJDAY2adaguc(double, /*@out@*/ char *dateTime);
+extern double Adaguc2gomeJDAY(const char *);
+extern void SciaJDAY2adaguc(double, /*@out@*/ char *dateTime);
+extern double Adaguc2sciaJDAY(const char *);
 
-extern void NADC_AKIMA_SU( int, int, size_t, const void *, const void *, 
-		    /*@out@*/ double *a_coef, /*@out@*/ double *b_coef, 
-		    /*@out@*/ double *c_coef, /*@out@*/ double *d_coef )
+extern void NADC_AKIMA_SU(int, int, size_t, const void *, const void *, 
+			  /*@out@*/ double *a_coef, /*@out@*/ double *b_coef, 
+			  /*@out@*/ double *c_coef, /*@out@*/ double *d_coef)
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack, a_coef, b_coef, c_coef, d_coef@*/;
-extern double NADC_AKIMA_PO( size_t, const double *, const double *, 
-			     const double *, const double *, const double *, 
-			     double );
-extern void  FIT_GRID_AKIMA( int, int, size_t, const void *, const void *, 
-			     int, int, size_t, const void *, 
-			     /*@out@*/ void *yres )
+extern double NADC_AKIMA_PO(size_t, const double *, const double *, 
+			    const double *, const double *, const double *, 
+			    double);
+extern void  FIT_GRID_AKIMA(int, int, size_t, const void *, const void *, 
+			    int, int, size_t, const void *, 
+			    /*@out@*/ void *yres)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, yres@*/;
 
-extern void NADC_FIT( size_t, const float *, const float *, const float *,
-		      /*@out@*/ float *fit_a, 
-		      /*@null@*/ /*@out@*/ float *fit_b, 
-		      /*@out@*/ float *sig_a, /*@out@*/ float *sig_b, 
-		      /*@out@*/ float *chisq, 
-		      /*@null@*/ /*@out@*/ float *q_fit  )
+extern void NADC_FIT(size_t, const float *, const float *, const float *,
+		     /*@out@*/ float *fit_a, 
+		     /*@null@*/ /*@out@*/ float *fit_b, 
+		     /*@out@*/ float *sig_a, /*@out@*/ float *sig_b, 
+		     /*@out@*/ float *chisq, 
+		     /*@null@*/ /*@out@*/ float *q_fit )
        /*@globals  errno;@*/
        /*@modifies errno, *fit_a, *fit_b, *sig_a, *sig_b, *chisq, *q_fit@*/;
 
-extern void NADC_MEDFIT( size_t, const float *, const float *, 
-		      /*@out@*/ float *fit_a, /*@out@*/ float *fit_b, 
-		      /*@out@*/ float *abdev )
+extern void NADC_MEDFIT(size_t, const float *, const float *, 
+			/*@out@*/ float *fit_a, /*@out@*/ float *fit_b, 
+			/*@out@*/ float *abdev)
        /*@globals  errno;@*/
        /*@modifies errno, *fit_a, *fit_b, *abdev@*/;
 
-extern void NADC_RECEIVEDATE( const char *, /*@out@*/ char *datetime )
+extern void NADC_RECEIVEDATE(const char *, /*@out@*/ char *datetime)
        /*@modifies datetime@*/;
 
-extern bool NADC_CHECK_FOR_SAA( const double, const double )
+extern bool NADC_CHECK_FOR_SAA(const double, const double)
      __attribute__ ((const));
 
-extern unsigned int nadc_file_size( const char * );
+extern unsigned int nadc_file_size(const char *);
 
-extern bool nadc_file_equal( const char *, const char * )
+extern bool nadc_file_equal(const char *, const char *)
        /*@globals  errno;@*/
        /*@modifies errno@*/;
 
-extern bool nadc_file_exists( const char * )
+extern bool nadc_file_exists(const char *)
        /*@globals  errno;@*/
        /*@modifies errno@*/;
 
-extern void NADC_FLIPc( enum nadc_flip, const unsigned int *, signed char *matrix )
+extern void NADC_FLIPc(enum nadc_flip, const unsigned int *,
+		       signed char *matrix)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies matrix, nadc_stat, nadc_err_stack@*/;
-extern void NADC_FLIPu( enum nadc_flip, const unsigned int *, unsigned char *matrix )
+extern void NADC_FLIPu(enum nadc_flip, const unsigned int *,
+		       unsigned char *matrix)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies matrix, nadc_stat, nadc_err_stack@*/;
-extern void NADC_FLIPs( enum nadc_flip, const unsigned int *, short *matrix )
+extern void NADC_FLIPs(enum nadc_flip, const unsigned int *, short *matrix)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies matrix, nadc_stat, nadc_err_stack@*/;
-extern void NADC_FLIPr( enum nadc_flip, const unsigned int *, float *matrix )
+extern void NADC_FLIPr(enum nadc_flip, const unsigned int *, float *matrix)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies matrix, nadc_stat, nadc_err_stack@*/;
 
-extern void ADAGUC_INIT_PARAM( int, char **, 
-			       /*@out@*/ struct param_adaguc *param )
+extern void ADAGUC_INIT_PARAM(int, char **, 
+			      /*@out@*/ struct param_adaguc *param)
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
 
-extern void NADC_INIT_PARAM( /*@out@*/ struct param_record *param )
+extern void NADC_INIT_PARAM(/*@out@*/ struct param_record *param)
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
 
-extern void NADC_USRINP( int , /*@unique@*/ const char *, int , 
-			/*@out@*/ void *pntr, /*@out@*/ int *nrval )
+extern void NADC_USRINP(int , /*@unique@*/ const char *, int , 
+			/*@out@*/ void *pntr, /*@out@*/ int *nrval)
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, *nrval, *pntr@*/;
 
-extern short NADC_USRINDX( const char *, int, /*@out@*/ short *indices )
+extern short NADC_USRINDX(const char *, int, /*@out@*/ short *indices)
      /*@globals  errno, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, nadc_stat, nadc_err_stack, *indices@*/;
 
-extern void ENVI_WR_ASCII_MPH( struct param_record, 
-			       const struct mph_envi * )
+extern void ENVI_WR_ASCII_MPH(const struct mph_envi *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
-extern void ENVI_WR_ASCII_DSD( struct param_record, unsigned int, 
-			       const struct dsd_envi * )
+extern void ENVI_WR_ASCII_DSD(unsigned int, const struct dsd_envi *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
-extern unsigned int ENVI_GET_DSD_INDEX( unsigned int, const struct dsd_envi *,
-					const char * )
+extern unsigned int ENVI_GET_DSD_INDEX(unsigned int, const struct dsd_envi *,
+				       const char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 
 #if defined _STDIO_H || defined _STDIO_H_
-extern unsigned int ENVI_RD_PDS_INFO( FILE *fp, /*@out@*/ char *keyword, 
-                                      /*@out@*/ char *keyvalue )
+extern unsigned int ENVI_RD_PDS_INFO(FILE *fp, /*@out@*/ char *keyword, 
+				     /*@out@*/ char *keyvalue)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, keyword, keyvalue@*/;
 
-extern void ENVI_RD_MPH( FILE *fp, /*@out@*/ struct mph_envi *mph )
+extern void ENVI_RD_MPH(FILE *fp, /*@out@*/ struct mph_envi *mph)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *mph@*/;
-extern void ENVI_WR_MPH( FILE *fp, const struct mph_envi )
+extern void ENVI_WR_MPH(FILE *fp, const struct mph_envi)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp@*/;
-extern unsigned int ENVI_RD_DSD( FILE *fp, const struct mph_envi,
-				 /*@out@*/ struct dsd_envi *dsd_out )
+extern unsigned int ENVI_RD_DSD(FILE *fp, const struct mph_envi,
+				/*@out@*/ struct dsd_envi *dsd_out)
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *dsd_out@*/;
-extern void ENVI_WR_DSD( FILE *fp, const unsigned int,
-			 const struct dsd_envi *dsd_out )
+extern void ENVI_WR_DSD(FILE *fp, const unsigned int,
+			const struct dsd_envi *dsd_out)
        /*@globals  errno;@*/
        /*@modifies errno, fp@*/;
 
-extern void NADC_CopyRight( FILE *stream )
+extern void NADC_CopyRight(FILE *stream)
      /*@modifies stream@*/;
-extern void NADC_SHOW_VERSION( FILE *stream, const char * )
+extern void NADC_SHOW_VERSION(FILE *stream, const char *)
      /*@modifies stream@*/;
 
-extern void NADC_Info_Proc( FILE *stream, const char *, unsigned int )
+extern void NADC_Info_Proc(FILE *stream, const char *, unsigned int)
      /*@modifies stream@*/;
-extern void NADC_Info_Update( FILE *stream, unsigned short, unsigned int )
+extern void NADC_Info_Update(FILE *stream, unsigned short, unsigned int)
      /*@modifies stream@*/;
-extern void NADC_Info_Finish( FILE *stream, unsigned short, unsigned int )
+extern void NADC_Info_Finish(FILE *stream, unsigned short, unsigned int)
      /*@modifies stream@*/;
 
 extern /*@null@*/ /*@dependent@*/
-       FILE *CRE_ASCII_File( const char *, const char * )
+       FILE *CRE_ASCII_File(const char *, const char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 extern /*@null@*/ /*@dependent@*/
-       FILE *CAT_ASCII_File( const char *, const char * )
+       FILE *CAT_ASCII_File(const char *, const char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_text( FILE *fp, unsigned int, const char *, 
-			     const char * )
+extern void nadc_write_text(FILE *fp, unsigned int, const char *, 
+			    const char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_bool( FILE *fp, unsigned int, const char *, bool )
+extern void nadc_write_bool(FILE *fp, unsigned int, const char *, bool)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_schar( FILE *fp, unsigned int, const char *, 
-			      signed char )
+extern void nadc_write_schar(FILE *fp, unsigned int, const char *, 
+			     signed char)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_uchar( FILE *fp, unsigned int, const char *, 
-			      unsigned char )
+extern void nadc_write_uchar(FILE *fp, unsigned int, const char *, 
+			     unsigned char)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_short( FILE *fp, unsigned int, const char *,  short )
+extern void nadc_write_short(FILE *fp, unsigned int, const char *,  short)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_ushort( FILE *fp, unsigned int, const char *, 
-			       unsigned short )
+extern void nadc_write_ushort(FILE *fp, unsigned int, const char *, 
+			      unsigned short)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_int( FILE *fp, unsigned int, const char *, int )
+extern void nadc_write_int(FILE *fp, unsigned int, const char *, int)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_uint( FILE *fp, unsigned int, const char *, 
-			     unsigned int )
+extern void nadc_write_uint(FILE *fp, unsigned int, const char *, 
+			    unsigned int)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_long( FILE *fp, unsigned int, const char *, long )
+extern void nadc_write_long(FILE *fp, unsigned int, const char *, long)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_float( FILE *fp, unsigned int, const char *, int, 
-			      float )
+extern void nadc_write_float(FILE *fp, unsigned int, const char *, int, 
+			     float)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_double( FILE *fp, unsigned int, const char *, int, 
-			       double )
+extern void nadc_write_double(FILE *fp, unsigned int, const char *, int, 
+			      double)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_schar( FILE *fp, unsigned int, const char *, int, 
-				  const unsigned int *, const signed char * )
+extern void nadc_write_arr_schar(FILE *fp, unsigned int, const char *, int, 
+				 const unsigned int *, const signed char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_uchar( FILE *fp, unsigned int, const char *, int, 
+extern void nadc_write_arr_uchar(FILE *fp, unsigned int, const char *, int, 
+				 const unsigned int *, 
+				 const unsigned char *)
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies fp, nadc_stat, nadc_err_stack@*/;
+extern void nadc_write_arr_short(FILE *fp, unsigned int, const char *, int, 
+				 const unsigned int *, const short *)
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies fp, nadc_stat, nadc_err_stack@*/;
+extern void nadc_write_arr_ushort(FILE *fp, unsigned int, const char *, int, 
 				  const unsigned int *, 
-				  const unsigned char * )
+				  const unsigned short *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_short( FILE *fp, unsigned int, const char *, int, 
-				  const unsigned int *, const short * )
+extern void nadc_write_arr_int(FILE *fp, unsigned int, const char *, int, 
+			       const unsigned int *, const int *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_ushort( FILE *fp, unsigned int, const char *, int, 
-				   const unsigned int *, 
-				   const unsigned short * )
+extern void nadc_write_arr_uint(FILE *fp, unsigned int, const char *, int, 
+				const unsigned int *, const unsigned int *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_int( FILE *fp, unsigned int, const char *, int, 
-				const unsigned int *, const int * )
+extern void nadc_write_arr_float(FILE *fp, unsigned int, const char *, int, 
+				 const unsigned int *, int, const float *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_uint( FILE *fp, unsigned int, const char *, int, 
-				 const unsigned int *, const unsigned int * )
+extern void nadc_write_arr_double(FILE *fp, unsigned int, const char *, int, 
+				  const unsigned int *, int, const double *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_float( FILE *fp, unsigned int, const char *, int, 
-				  const unsigned int *, int, const float * )
-       /*@globals  nadc_stat, nadc_err_stack;@*/
-       /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_arr_double( FILE *fp, unsigned int, const char *, int, 
-				   const unsigned int *, int, const double *)
-       /*@globals  nadc_stat, nadc_err_stack;@*/
-       /*@modifies fp, nadc_stat, nadc_err_stack@*/;
-extern void nadc_write_header( FILE *fp, unsigned int, const char *, 
-			       const char * )
+extern void nadc_write_header(FILE *fp, unsigned int, const char *, 
+			      const char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies fp, nadc_stat, nadc_err_stack@*/;
 
-extern void NADC_GET_XML_METADB( FILE *stream, /*@out@*/ char *, 
-				 /*@out@*/ char *, /*@out@*/ char *,
-				 /*@out@*/ char * )
+extern void NADC_GET_XML_METADB(FILE *stream, /*@out@*/ char *, 
+				/*@out@*/ char *, /*@out@*/ char *,
+				/*@out@*/ char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies stream, nadc_stat, nadc_err_stack@*/;
 
 #endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
 #ifdef _HDF5_H
-extern hid_t NADC_OPEN_HDF5_Group( hid_t, const char * );
-
-extern void NADC_WR_HDF5_Attribute( hid_t, const char *, hid_t,
-				    int, const hsize_t *, const void * )
+extern hid_t nadc_get_param_hid(const char *)
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack*/;
+extern int nadc_set_param_hid(const char *, const hid_t)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
 
-extern void NADC_RD_HDF5_Dataset( hid_t, const char *, hid_t, 
-				  /*@out@*/ int *rank, 
-				  /*@out@*/ hsize_t *dims, 
-                                  /*@out@*/ void **data_out )
+extern hid_t NADC_OPEN_HDF5_Group(hid_t, const char *);
+
+extern void NADC_WR_HDF5_Attribute(hid_t, const char *, hid_t,
+				   int, const hsize_t *, const void *)
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack*/;
+
+extern void NADC_RD_HDF5_Dataset(hid_t, const char *, hid_t, 
+				 /*@out@*/ int *rank, 
+				 /*@out@*/ hsize_t *dims, 
+				 /*@out@*/ void **data_out)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, rank, dims, *data_out*/;
 
-extern void NADC_WR_HDF5_Dataset( hbool_t, hid_t, const char *,
-				  hid_t, int, const hsize_t *, const void * )
+extern void NADC_WR_HDF5_Dataset(hbool_t, hid_t, const char *,
+				 hid_t, int, const hsize_t *, const void *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
 
-extern void NADC_WR_HDF5_Vlen_Dataset( hbool_t, hid_t, const char *, 
-				       hid_t, int, const hsize_t *, 
-				       /*@only@*/ void * )
+extern void NADC_WR_HDF5_Vlen_Dataset(hbool_t, hid_t, const char *, 
+				      hid_t, int, const hsize_t *, 
+				      /*@only@*/ void *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
 
-extern void NADC_CRE_H5_EArray_uint8( hid_t, const char *,
-				      const hsize_t, int, 
-				      const unsigned char * )
+extern void NADC_CRE_H5_EArray_uint8(hid_t, const char *,
+				     const hsize_t, int, 
+				     const unsigned char *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_CRE_H5_EArray_uint16( hid_t, const char *,
-				       const hsize_t, int,
-				       const unsigned short * )
-       /*@globals  nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_CRE_H5_EArray_int32( hid_t, const char *,
+extern void NADC_CRE_H5_EArray_uint16(hid_t, const char *,
 				      const hsize_t, int,
-				      const int * )
+				      const unsigned short *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_CRE_H5_EArray_uint32( hid_t, const char *,
-				       const hsize_t, int,
-				       const unsigned int * )
+extern void NADC_CRE_H5_EArray_int32(hid_t, const char *,
+				     const hsize_t, int,
+				     const int *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_CRE_H5_EArray_float( hid_t, const char *,
-				      const hsize_t, int, const float * )
+extern void NADC_CRE_H5_EArray_uint32(hid_t, const char *,
+				      const hsize_t, int,
+				      const unsigned int *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_CRE_H5_EArray_struct( hid_t, const char *, const hsize_t, 
-				       int, hid_t, const void * )
+extern void NADC_CRE_H5_EArray_float(hid_t, const char *,
+				     const hsize_t, int, const float *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_CAT_H5_EArray( hid_t, const char *, 
-				int, size_t, const void * )
+extern void NADC_CRE_H5_EArray_struct(hid_t, const char *, const hsize_t, 
+				      int, hid_t, const void *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
-extern void NADC_WR_H5_EArray( hid_t, const char *, 
-			       size_t, size_t, const void * )
+extern void NADC_CAT_H5_EArray(hid_t, const char *, 
+			       int, size_t, const void *)
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack*/;
+extern void NADC_WR_H5_EArray(hid_t, const char *, 
+			      size_t, size_t, const void *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack*/;
 
-extern void NADC_RD_H5_EArray_uint8( hid_t, const char *, hsize_t, int, 
+extern void NADC_RD_H5_EArray_uint8(hid_t, const char *, hsize_t, int, 
+				    const int *, 
+				    /*@out@*/ unsigned char *buffer)
+       /*@globals  nadc_stat, nadc_err_stack;@*/
+       /*@modifies nadc_stat, nadc_err_stack, buffer*/;
+extern void NADC_RD_H5_EArray_uint16(hid_t, const char *, hsize_t, int, 
 				     const int *, 
-				     /*@out@*/ unsigned char *buffer )
+				     /*@out@*/ unsigned short *buffer)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, buffer*/;
-extern void NADC_RD_H5_EArray_uint16( hid_t, const char *, hsize_t, int, 
-				      const int *, 
-				      /*@out@*/ unsigned short *buffer )
+extern void NADC_RD_H5_EArray_int32(hid_t, const char *, hsize_t, int, 
+				    const int *, /*@out@*/ int *buffer)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, buffer*/;
-extern void NADC_RD_H5_EArray_int32( hid_t, const char *, hsize_t, int, 
-				     const int *, /*@out@*/ int *buffer )
+extern void NADC_RD_H5_EArray_uint32(hid_t, const char *, hsize_t, int, 
+				     const int *, 
+				     /*@out@*/ unsigned int *buffer)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, buffer*/;
-extern void NADC_RD_H5_EArray_uint32( hid_t, const char *, hsize_t, int, 
-				      const int *, 
-				      /*@out@*/ unsigned int *buffer )
-       /*@globals  nadc_stat, nadc_err_stack;@*/
-       /*@modifies nadc_stat, nadc_err_stack, buffer*/;
-extern void NADC_RD_H5_EArray_float( hid_t, const char *, hsize_t, int, 
-				     const int *, /*@out@*/ float *buffer )
+extern void NADC_RD_H5_EArray_float(hid_t, const char *, hsize_t, int, 
+				    const int *, /*@out@*/ float *buffer)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, buffer*/;
 
-extern hid_t PYTABLE_open_file( const char *, const char * );
-extern hid_t PYTABLE_open_group( hid_t, const char * );
-extern herr_t PYTABLE_make_array( hid_t, const char *, const char *,
-				  const int, const hsize_t *, int, hid_t, 
-				  const hsize_t *, /*@null@*/ void *,
-				  unsigned int, bool, bool, const void * );
-extern herr_t PYTABLE_append_array( hid_t, const char *, 
-				    int, int, const void * );
-extern herr_t PYTABLE_write_records( hid_t, const char *, hsize_t *, hsize_t *,
-				     hsize_t *, const void * );
+extern hid_t PYTABLE_open_file(const char *, const char *);
+extern hid_t PYTABLE_open_group(hid_t, const char *);
+extern herr_t PYTABLE_make_array(hid_t, const char *, const char *,
+				 const int, const hsize_t *, int, hid_t, 
+				 const hsize_t *, /*@null@*/ void *,
+				 unsigned int, bool, bool, const void *);
+extern herr_t PYTABLE_append_array(hid_t, const char *, 
+				    int, int, const void *);
+extern herr_t PYTABLE_write_records(hid_t, const char *, hsize_t *, hsize_t *,
+				    hsize_t *, const void *);
 #endif   /* ---- defined _HDF5_H ----- */
 
 #ifdef __cplusplus
   }
 #endif
 #endif    /* __NADC_COMMON */
-

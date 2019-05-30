@@ -290,8 +290,7 @@ void SCIA_ATBD_CAL_REFL( const struct file_rec *fileParam,
 
 	  /* KB: Apply mfactor, if needed */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	       SCIA_LV1_MFACTOR_SRS( fileParam->sensing_start, 
-				     fileParam->calibFlag, 1, &srs );
+	       SCIA_LV1_MFACTOR_SRS( fileParam->sensing_start, 1, &srs );
 	  }
      }
 /*
@@ -347,8 +346,7 @@ void SCIA_SRON_CAL_REFL( const struct file_rec *fileParam,
 
 	  /* KB: Apply mfactor, if needed */
 	  if ( (fileParam->calibFlag & DO_MFACTOR_RAD) != UINT_ZERO ) {
-	       SCIA_LV1_MFACTOR_SRS( fileParam->sensing_start, 
-				     fileParam->calibFlag, 1, &srs );
+	       SCIA_LV1_MFACTOR_SRS( fileParam->sensing_start, 1, &srs );
 	  }
      }
 /*

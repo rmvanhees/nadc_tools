@@ -110,23 +110,8 @@ set (SCIA_LV1_SRCS
 )
 
 set (SCIA_LV2_SRCS
-    scia_lv2_rd_bias.c
-    scia_lv2_rd_cld.c
-    scia_lv2_rd_doas.c
-    scia_lv2_rd_geo.c
-    scia_lv2_rd_sph.c
-    scia_lv2_rd_sqads.c
     scia_lv2_rd_state.c
-    scia_lv2_wr_ascii_ads.c
-    scia_lv2_wr_ascii_mds.c
-    scia_lv2_wr_ascii_sph.c
-    scia_lv2_wr_h5_bias.c
-    scia_lv2_wr_h5_cld.c
-    scia_lv2_wr_h5_doas.c
-    scia_lv2_wr_h5_geo.c
-    scia_lv2_wr_h5_sph.c
-    scia_lv2_wr_h5_sqads.c
-    scia_lv2_wr_h5_state.c
+    scia_lv2_wr_state.c
     scia_ol2_pds_sph.c
     scia_ol2_rd_cld.c
     scia_ol2_rd_geo.c

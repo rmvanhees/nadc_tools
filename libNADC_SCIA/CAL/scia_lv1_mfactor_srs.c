@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2007 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2007 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,7 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     apply mfactor M_CAL to SMR (ESM Diffuser: first spectrum)
 .INPUT/OUTPUT
-  call as    SCIA_LV1_MFACTOR_SRS ( sensing_start, calibFlag, num_dsr, srs );
+  call as    SCIA_LV1_MFACTOR_SRS (sensing_start, calibFlag, num_dsr, srs);
      input:
             char *sensing_start     :  taken from MPH
 	    unsigned int calibFlag  :  bit-flag which defines how to calibrate
@@ -49,28 +49,30 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_MFACTOR_SRS( const char *sensing_start, unsigned int calibFlag,
-			   unsigned int num_dsr, struct srs_scia *srs_out )
+void SCIA_LV1_MFACTOR_SRS(const char *sensing_start,
+			   unsigned int num_dsr, struct srs_scia *srs_out)
 {
      float mfactor[SCIENCE_PIXELS];
 
      register unsigned int n_pix = 0;
 
+     unsigned int calibFlag = nadc_get_param_uint32("calib_scia");
+
 /* nothing to do */
-     if ( (calibFlag & DO_MFACTOR_RAD) == UINT_ZERO ) return;
-     if ( num_dsr == 0 ) return;
+     if ((calibFlag & DO_MFACTOR_RAD) == UINT_ZERO) return;
+     if (num_dsr == 0) return;
 
 /* obtain m-factor values */
-    SCIA_RD_MFACTOR( M_CAL, sensing_start, calibFlag, mfactor );
-    if ( IS_ERR_STAT_FATAL )
-	 NADC_RETURN_ERROR( NADC_ERR_FATAL, "SCIA_LV1_MFACTOR" );
+    SCIA_RD_MFACTOR(M_CAL, sensing_start, calibFlag, mfactor);
+    if (IS_ERR_STAT_FATAL)
+	 NADC_RETURN_ERROR(NADC_ERR_FATAL, "SCIA_LV1_MFACTOR");
 /* 
  * Apply mfactor to first SMR, which is the ESM-diffuser spectrum
  *  for all known products.
  */
     do {
 	 srs_out[0].mean_sun[n_pix] *= mfactor[n_pix];
-    } while ( ++n_pix < SCIENCE_PIXELS);
+    } while (++n_pix < SCIENCE_PIXELS);
 }
 
 

@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 EKD data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_EKD( param, ekd );
+  call as    SCIA_LV1_WR_H5_EKD(ekd);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct ekd_scia *ekd      : Errors on Key data
 
 .RETURNS     Nothing
@@ -52,68 +51,69 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_EKD( struct param_record param,
-			 const struct ekd_scia *ekd )
+void SCIA_LV1_WR_H5_EKD(const struct ekd_scia *ekd)
 {
-     hid_t   gads_id;
+     hid_t   fid, gads_id;
      hsize_t adim;
      herr_t  stat;
 
      hid_t   ekd_type[9];
 
-     const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
+     const hbool_t compress = \
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
 
      const char *ekd_names[] = { "mu2_nadir", "mu3_nadir", "mu2_limb", 
 				 "mu3_limb", "radiance_vis", "radiance_nadir", 
 				 "radiance_limb", "radiance_sun", "bsdf" };
-     const size_t ekd_size = sizeof( struct ekd_scia );
+     const size_t ekd_size = sizeof(struct ekd_scia);
      const size_t ekd_offs[] = {
-	  HOFFSET( struct ekd_scia, mu2_nadir ),
-	  HOFFSET( struct ekd_scia, mu3_nadir ),
-	  HOFFSET( struct ekd_scia, mu2_limb ),
-	  HOFFSET( struct ekd_scia, mu3_limb ),
-	  HOFFSET( struct ekd_scia, radiance_vis ),
-	  HOFFSET( struct ekd_scia, radiance_nadir ),
-	  HOFFSET( struct ekd_scia, radiance_limb ),
-	  HOFFSET( struct ekd_scia, radiance_sun ),
-	  HOFFSET( struct ekd_scia, bsdf ),
+	  HOFFSET(struct ekd_scia, mu2_nadir),
+	  HOFFSET(struct ekd_scia, mu3_nadir),
+	  HOFFSET(struct ekd_scia, mu2_limb),
+	  HOFFSET(struct ekd_scia, mu3_limb),
+	  HOFFSET(struct ekd_scia, radiance_vis),
+	  HOFFSET(struct ekd_scia, radiance_nadir),
+	  HOFFSET(struct ekd_scia, radiance_limb),
+	  HOFFSET(struct ekd_scia, radiance_sun),
+	  HOFFSET(struct ekd_scia, bsdf),
      };
 /*
  * open/create group /GADS
  */
-     gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     gads_id = NADC_OPEN_HDF5_Group(fid, "/GADS");
+     if (gads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/GADS");
 /*
  * write EKD data sets
  */
      adim = SCIENCE_PIXELS;
-     ekd_type[0] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[1] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[2] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[3] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[4] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[5] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[6] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[7] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ekd_type[8] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
+     ekd_type[0] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[1] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[2] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[3] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[4] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[5] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[6] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[7] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ekd_type[8] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
 
-     stat = H5TBmake_table( "ekd", gads_id, "ERRORS_ON_KEY_DATA",
+     stat = H5TBmake_table("ekd", gads_id, "ERRORS_ON_KEY_DATA",
                             9, 1, ekd_size, ekd_names,
                             ekd_offs, ekd_type, 1,
-                            NULL, compress, ekd );
-     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "ekd" );
+                            NULL, compress, ekd);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "ekd");
 /*
  * close interface
  */
  done:
-     (void) H5Tclose( ekd_type[0] );
-     (void) H5Tclose( ekd_type[1] );
-     (void) H5Tclose( ekd_type[2] );
-     (void) H5Tclose( ekd_type[3] );
-     (void) H5Tclose( ekd_type[4] );
-     (void) H5Tclose( ekd_type[5] );
-     (void) H5Tclose( ekd_type[6] );
-     (void) H5Tclose( ekd_type[7] );
-     (void) H5Tclose( ekd_type[8] );
-     (void) H5Gclose( gads_id );
+     (void) H5Tclose(ekd_type[0]);
+     (void) H5Tclose(ekd_type[1]);
+     (void) H5Tclose(ekd_type[2]);
+     (void) H5Tclose(ekd_type[3]);
+     (void) H5Tclose(ekd_type[4]);
+     (void) H5Tclose(ekd_type[5]);
+     (void) H5Tclose(ekd_type[6]);
+     (void) H5Tclose(ekd_type[7]);
+     (void) H5Tclose(ekd_type[8]);
+     (void) H5Gclose(gads_id);
 }

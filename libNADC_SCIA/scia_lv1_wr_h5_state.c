@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 STATE data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_STATE( param, nr_state, state );
+  call as    SCIA_LV1_WR_H5_STATE(nr_state, state);
 
      input:  
-             struct param_record param  : struct holding user-defined settings
 	     unsigned int nr_state      : number of Summary of Quality Flags
 	     struct state1_scia *state  : States of the Product
 
@@ -56,38 +55,38 @@
 
 #define NFIELDS    23
 
-static const size_t state_size = sizeof( struct state1_scia );
+static const size_t state_size = sizeof(struct state1_scia);
 static const size_t state_offs[NFIELDS] = {
-     HOFFSET( struct state1_scia, mjd ),
-     HOFFSET( struct state1_scia, Clcon ),
-     HOFFSET( struct state1_scia, flag_mds ),
-     HOFFSET( struct state1_scia, flag_reason ),
-     HOFFSET( struct state1_scia, type_mds ),
-     HOFFSET( struct state1_scia, category ),
-     HOFFSET( struct state1_scia, state_id ),
-     HOFFSET( struct state1_scia, dur_scan ),
-     HOFFSET( struct state1_scia, longest_intg_time ),
-     HOFFSET( struct state1_scia, num_clus ),
-     HOFFSET( struct state1_scia, num_aux ),
-     HOFFSET( struct state1_scia, num_pmd ),
-     HOFFSET( struct state1_scia, num_intg ),
-     HOFFSET( struct state1_scia, intg_times ),
-     HOFFSET( struct state1_scia, num_polar ),
-     HOFFSET( struct state1_scia, total_polar ),
-     HOFFSET( struct state1_scia, num_dsr ),
-     HOFFSET( struct state1_scia, indx ),
-     HOFFSET( struct state1_scia, length_dsr ),
-     HOFFSET( struct state1_scia, offset ),
-     HOFFSET( struct state1_scia, offs_pmd ),
-     HOFFSET( struct state1_scia, offs_polV ),
-     HOFFSET( struct state1_scia, orbit_phase )
+     HOFFSET(struct state1_scia, mjd),
+     HOFFSET(struct state1_scia, Clcon),
+     HOFFSET(struct state1_scia, flag_mds),
+     HOFFSET(struct state1_scia, flag_reason),
+     HOFFSET(struct state1_scia, type_mds),
+     HOFFSET(struct state1_scia, category),
+     HOFFSET(struct state1_scia, state_id),
+     HOFFSET(struct state1_scia, dur_scan),
+     HOFFSET(struct state1_scia, longest_intg_time),
+     HOFFSET(struct state1_scia, num_clus),
+     HOFFSET(struct state1_scia, num_aux),
+     HOFFSET(struct state1_scia, num_pmd),
+     HOFFSET(struct state1_scia, num_intg),
+     HOFFSET(struct state1_scia, intg_times),
+     HOFFSET(struct state1_scia, num_polar),
+     HOFFSET(struct state1_scia, total_polar),
+     HOFFSET(struct state1_scia, num_dsr),
+     HOFFSET(struct state1_scia, indx),
+     HOFFSET(struct state1_scia, length_dsr),
+     HOFFSET(struct state1_scia, offset),
+     HOFFSET(struct state1_scia, offs_pmd),
+     HOFFSET(struct state1_scia, offs_polV),
+     HOFFSET(struct state1_scia, orbit_phase)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_STATE( struct param_record param, unsigned int nr_state,
-			   const struct state1_scia *state )
+void SCIA_LV1_WR_H5_STATE(unsigned int nr_state,
+			  const struct state1_scia *state)
 {
-     hid_t   ads_id;
+     hid_t   fid, ads_id;
      hid_t   type_id;
      hbool_t compress;
      hsize_t adim;
@@ -140,42 +139,43 @@ void SCIA_LV1_WR_H5_STATE( struct param_record param, unsigned int nr_state,
 /*
  * check number of STATE records
  */
-     if ( nr_state == 0 ) return;
+     if (nr_state == 0) return;
 /*
  * set HDF5 boolean variable for compression
  */
-     if ( param.flag_deflate == PARAM_SET )
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
           compress = TRUE;
      else
           compress = FALSE;
 /*
  * open group /ADS/STATE
  */
-     ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     ads_id = NADC_OPEN_HDF5_Group(fid, "/ADS");
+     if (ads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/ADS");
 /*
  * define user-defined data types of the Table-fields
  */
-     state_type[0] = H5Topen( param.hdf_file_id, "mjd", H5P_DEFAULT );
+     state_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
      adim = MAX_CLUSTER;
-     type_id = H5Topen( param.hdf_file_id, "Clcon", H5P_DEFAULT );
-     state_type[1] = H5Tarray_create( type_id, 1, &adim );
-     state_type[13] = H5Tarray_create( H5T_NATIVE_USHORT, 1, &adim );
-     state_type[14] = H5Tarray_create( H5T_NATIVE_USHORT, 1, &adim );
+     type_id = H5Topen(fid, "Clcon", H5P_DEFAULT);
+     state_type[1] = H5Tarray_create(type_id, 1, &adim);
+     state_type[13] = H5Tarray_create(H5T_NATIVE_USHORT, 1, &adim);
+     state_type[14] = H5Tarray_create(H5T_NATIVE_USHORT, 1, &adim);
 /*
  * create table
  */
-     stat = H5TBmake_table( "state", ads_id, "STATES", NFIELDS, 
+     stat = H5TBmake_table("state", ads_id, "STATES", NFIELDS, 
 			    nr_state, state_size, state_names, state_offs, 
-			    state_type, nr_state, NULL, compress, state );
-     if ( stat < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_WR, "state" );
+			    state_type, nr_state, NULL, compress, state);
+     if (stat < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_WR, "state");
 /*
  * close interface
  */
-     (void) H5Tclose( state_type[0] );
-     (void) H5Tclose( state_type[1] );
-     (void) H5Tclose( type_id );
-     (void) H5Tclose( state_type[13] );
-     (void) H5Tclose( state_type[14] );
-     (void) H5Gclose( ads_id );
+     (void) H5Tclose(state_type[0]);
+     (void) H5Tclose(state_type[1]);
+     (void) H5Tclose(type_id);
+     (void) H5Tclose(state_type[13]);
+     (void) H5Tclose(state_type[14]);
+     (void) H5Gclose(ads_id);
 }

@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -48,60 +48,61 @@
 .IDENTifer  SCIA_OL2_WR_ASCII_SQADS
 .PURPOSE    dump -- in ASCII Format -- the SQADS annotation dataset
 .INPUT/OUTPUT
-  call as   SCIA_OL2_WR_ASCII_SQADS( param, num_dsr, sqads );
+  call as   SCIA_OL2_WR_ASCII_SQADS(num_dsr, sqads);
      input:
-            struct param_record param : struct holding user-defined settings
 	    unsigned int num_dsr      : number of data sets
 	    struct sqads_sci_ol *sqads: pointer to SQADS records
             
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_OL2_WR_ASCII_SQADS( struct param_record param, unsigned int num_dsr,
-			      const struct sqads_sci_ol *sqads )
+void SCIA_OL2_WR_ASCII_SQADS(unsigned int num_dsr,
+			     const struct sqads_sci_ol *sqads)
 {
      register unsigned int nd, nr;
 
      char date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "sqads" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "sqads")) == NULL || IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of SQADS record
  */
-     nadc_write_header( outfl, 0, param.infile,  
-			 "Summary of Quality Flags per State" );
-     for ( nd = 0; nd < num_dsr; nd++ ) {
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, 0, cpntr, "Summary of Quality Flags per State");
+     free(cpntr);
+     for (nd = 0; nd < num_dsr; nd++) {
 	  nr = 1;
-	  (void) MJD_2_ASCII( sqads[nd].mjd.days, sqads[nd].mjd.secnd,
-			      sqads[nd].mjd.musec, date_str );
-	  nadc_write_text( outfl, nr++, "starttime", date_str );
-	  nadc_write_uchar( outfl, nr++, "attached", sqads[nd].flag_mds );
+	  (void) MJD_2_ASCII(sqads[nd].mjd.days, sqads[nd].mjd.secnd,
+			      sqads[nd].mjd.musec, date_str);
+	  nadc_write_text(outfl, nr++, "starttime", date_str);
+	  nadc_write_uchar(outfl, nr++, "attached", sqads[nd].flag_mds);
 	  count[0] = OL2_SQADS_PQF_FLAGS;
-	  nadc_write_arr_uchar( outfl, nr++, "quality", 
-				 1, count, sqads[nd].flag_pqf );
+	  nadc_write_arr_uchar(outfl, nr++, "quality", 
+				 1, count, sqads[nd].flag_pqf);
      }
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer  SCIA_OL2_WR_ASCII_NGEO
 .PURPOSE    dump -- in ASCII Format -- the NADIR GEO annotation dataset
 .INPUT/OUTPUT
-  call as   SCIA_OL2_WR_ASCII_NGEO( param, num_dsr, geo );
+  call as   SCIA_OL2_WR_ASCII_NGEO(num_dsr, geo);
      input:
-            struct param_record param : struct holding user-defined settings
 	    unsigned int num_dsr      : number of data sets
 	    struct ngeo_scia *geo     : pointer to Geolocation (NADIR) records
             
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_OL2_WR_ASCII_NGEO( struct param_record param, unsigned int num_dsr,
-			     const struct ngeo_scia *geo )
+void SCIA_OL2_WR_ASCII_NGEO(unsigned int num_dsr, const struct ngeo_scia *geo)
 {
      register unsigned int nd, ni, nr, ny;
 
@@ -109,72 +110,74 @@ void SCIA_OL2_WR_ASCII_NGEO( struct param_record param, unsigned int num_dsr,
      double rbuff[2 * NUM_CORNERS];
      unsigned int  count[2];
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "ngeo" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "ngeo")) == NULL || IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of NGEO record
  */
-     nadc_write_header( outfl, 0, param.infile,  
-			 "Nadir Geolocation Data set(s)" );
-     for ( nd = 0; nd < num_dsr; nd++ ) {
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, 0, cpntr, "Nadir Geolocation Data set(s)");
+     free(cpntr);
+     for (nd = 0; nd < num_dsr; nd++) {
 	  nr = 0;
-	  (void) MJD_2_ASCII( geo[nd].mjd.days, geo[nd].mjd.secnd,
-			      geo[nd].mjd.musec, date_str );
-	  nadc_write_text( outfl, ++nr, "starttime", date_str );
-	  nadc_write_uchar( outfl, ++nr, "attached", 
-			    geo[nd].flag_mds );
-	  nadc_write_uchar( outfl, ++nr, "pixelType", 
-			    geo[nd].pixel_type );
-	  nadc_write_ushort( outfl, ++nr, "inttime",
-			      geo[nd].intg_time );
+	  (void) MJD_2_ASCII(geo[nd].mjd.days, geo[nd].mjd.secnd,
+			      geo[nd].mjd.musec, date_str);
+	  nadc_write_text(outfl, ++nr, "starttime", date_str);
+	  nadc_write_uchar(outfl, ++nr, "attached", 
+			    geo[nd].flag_mds);
+	  nadc_write_uchar(outfl, ++nr, "pixelType", 
+			    geo[nd].pixel_type);
+	  nadc_write_ushort(outfl, ++nr, "inttime",
+			      geo[nd].intg_time);
 	  count[0] = 3;
-	  nadc_write_arr_float( outfl, ++nr, "solarzen",
-			       1, count, 6, geo[nd].sun_zen_ang );
-	  nadc_write_arr_float( outfl, ++nr, "loszen",
-			       1, count, 6, geo[nd].los_zen_ang );
-	  nadc_write_arr_float( outfl, ++nr, "relazi",
-			       1, count, 6, geo[nd].rel_azi_ang );
-	  nadc_write_float( outfl, ++nr, "height", 8, geo[nd].sat_h );
-	  nadc_write_float( outfl, ++nr, "radius", 8, geo[nd].radius );
+	  nadc_write_arr_float(outfl, ++nr, "solarzen",
+			       1, count, 6, geo[nd].sun_zen_ang);
+	  nadc_write_arr_float(outfl, ++nr, "loszen",
+			       1, count, 6, geo[nd].los_zen_ang);
+	  nadc_write_arr_float(outfl, ++nr, "relazi",
+			       1, count, 6, geo[nd].rel_azi_ang);
+	  nadc_write_float(outfl, ++nr, "height", 8, geo[nd].sat_h);
+	  nadc_write_float(outfl, ++nr, "radius", 8, geo[nd].radius);
 	  count[0] = 2;
 	  count[1] = NUM_CORNERS;
 	  rbuff[0] = geo[nd].subsat.lat / 1e6;
 	  rbuff[1] = geo[nd].subsat.lon / 1e6;
-	  nadc_write_arr_double( outfl, ++nr, "subsat",
-				 1, count, 6, rbuff );
+	  nadc_write_arr_double(outfl, ++nr, "subsat",
+				 1, count, 6, rbuff);
 
-	  for ( ni = ny = 0; ny < count[1]; ny++ ) {
+	  for (ni = ny = 0; ny < count[1]; ny++) {
 	       rbuff[ni++] = geo[nd].corner[ny].lat / 1e6;
 	       rbuff[ni++] = geo[nd].corner[ny].lon / 1e6;
 	  }
-	  nadc_write_arr_double( outfl, ++nr, "corners",
-				 2, count, 6, rbuff );
+	  nadc_write_arr_double(outfl, ++nr, "corners",
+				 2, count, 6, rbuff);
 	  
 	  rbuff[0] = geo[nd].center.lat / 1e6;
 	  rbuff[1] = geo[nd].center.lon / 1e6;
-	  nadc_write_arr_double( outfl, ++nr, "center",
-				 1, count, 6, rbuff );
+	  nadc_write_arr_double(outfl, ++nr, "center",
+				 1, count, 6, rbuff);
      }
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer  SCIA_OL2_WR_ASCII_LGEO
 .PURPOSE    dump -- in ASCII Format -- the LIMB GEO annotation dataset
 .INPUT/OUTPUT
-  call as   SCIA_OL2_WR_ASCII_LGEO( param, num_dsr, geo );
+  call as   SCIA_OL2_WR_ASCII_LGEO(num_dsr, geo);
      input:
-            struct param_record param : struct holding user-defined settings
 	    unsigned int num_dsr      : number of data sets
 	    struct lgeo_scia *geo     : pointer to Geolocation (LIMB) records
             
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_OL2_WR_ASCII_LGEO( struct param_record param, unsigned int num_dsr,
-			     const struct lgeo_scia *geo )
+void SCIA_OL2_WR_ASCII_LGEO(unsigned int num_dsr, const struct lgeo_scia *geo)
 {
      register unsigned int nd, ni, nr, ny;
 
@@ -182,50 +185,54 @@ void SCIA_OL2_WR_ASCII_LGEO( struct param_record param, unsigned int num_dsr,
      double rbuff[2 * 3];
      unsigned int  count[2];
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "lgeo" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "lgeo")) == NULL || IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of LGEO record
  */
-     nadc_write_header( outfl, 0, param.infile,  
-			 "Limb Geolocation Data set(s)" );
-     for ( nd = 0; nd < num_dsr; nd++ ) {
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, 0, cpntr, "Limb Geolocation Data set(s)");
+     free(cpntr);
+     for (nd = 0; nd < num_dsr; nd++) {
 	  nr = 0;
-	  (void) MJD_2_ASCII( geo[nd].mjd.days, geo[nd].mjd.secnd,
-			      geo[nd].mjd.musec, date_str );
-	  nadc_write_text( outfl, ++nr, "starttime", date_str );
-	  nadc_write_uchar( outfl, ++nr, "attached", 
-			     geo[nd].flag_mds );
-	  nadc_write_ushort( outfl, ++nr, "inttime",
-			      geo[nd].intg_time );
+	  (void) MJD_2_ASCII(geo[nd].mjd.days, geo[nd].mjd.secnd,
+			      geo[nd].mjd.musec, date_str);
+	  nadc_write_text(outfl, ++nr, "starttime", date_str);
+	  nadc_write_uchar(outfl, ++nr, "attached", 
+			     geo[nd].flag_mds);
+	  nadc_write_ushort(outfl, ++nr, "inttime",
+			      geo[nd].intg_time);
 	  count[0] = 3;
-	  nadc_write_arr_float( outfl, ++nr, "solarzen",
-				 1, count, 6, geo[nd].sun_zen_ang );
-	  nadc_write_arr_float( outfl, ++nr, "loszen",
-				 1, count, 6, geo[nd].los_zen_ang );
-	  nadc_write_arr_float( outfl, ++nr, "relazi",
-				 1, count, 6, geo[nd].rel_azi_ang );
-	  nadc_write_float( outfl, ++nr, "height", 8, geo[nd].sat_h );
-	  nadc_write_float( outfl, ++nr, "radius", 8, geo[nd].radius );
+	  nadc_write_arr_float(outfl, ++nr, "solarzen",
+				 1, count, 6, geo[nd].sun_zen_ang);
+	  nadc_write_arr_float(outfl, ++nr, "loszen",
+				 1, count, 6, geo[nd].los_zen_ang);
+	  nadc_write_arr_float(outfl, ++nr, "relazi",
+				 1, count, 6, geo[nd].rel_azi_ang);
+	  nadc_write_float(outfl, ++nr, "height", 8, geo[nd].sat_h);
+	  nadc_write_float(outfl, ++nr, "radius", 8, geo[nd].radius);
 	  count[0] = 2;
 	  count[1] = 3;
 	  rbuff[0] = geo[nd].subsat.lat / 1e6;
 	  rbuff[1] = geo[nd].subsat.lon / 1e6;
-	  nadc_write_arr_double( outfl, ++nr, "subsat",
-				 1, count, 6, rbuff );
+	  nadc_write_arr_double(outfl, ++nr, "subsat",
+				 1, count, 6, rbuff);
 
-	  for ( ni = ny = 0; ny < count[1]; ny++ ) {
+	  for (ni = ny = 0; ny < count[1]; ny++) {
 	       rbuff[ni++] = geo[nd].tang[ny].lat / 1e6;
 	       rbuff[ni++] = geo[nd].tang[ny].lon / 1e6;
 	  }
-	  nadc_write_arr_double( outfl, ++nr, "tanggrdpoint",
-				 2, count, 6, rbuff );
+	  nadc_write_arr_double(outfl, ++nr, "tanggrdpoint",
+				 2, count, 6, rbuff);
 	  count[0] = 3;
-	  nadc_write_arr_float( outfl, ++nr, "tangheight", 
-				 1, count, 8, geo[nd].tan_h );
+	  nadc_write_arr_float(outfl, ++nr, "tangheight", 
+				 1, count, 8, geo[nd].tan_h);
      }
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }
 

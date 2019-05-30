@@ -372,80 +372,75 @@ const struct scale_rec atbd_scale[SCIENCE_CHANNELS] = {
 /*
  * prototype declarations of Sciamachy functions 
  */
-extern unsigned int GET_SCIA_MAGIC_ID( const char * )
+extern unsigned int GET_SCIA_MAGIC_ID(const char *)
        /*@globals errno;@*/
        /*@modifies errno@*/;
 
-extern unsigned short GET_SCIA_QUALITY( int, /*@null@*/ /*@out@*/ int *period );
+extern unsigned short GET_SCIA_QUALITY(int, /*@null@*/ /*@out@*/ int *period);
 
-extern unsigned char GET_SCIA_MDS_TYPE( unsigned char stateID );
+extern unsigned char GET_SCIA_MDS_TYPE(unsigned char stateID);
 
-extern void GET_SCIA_ROE_INFO( bool, const double, /*@out@*/ int *, 
-			       /*@out@*/ bool *, /*@out@*/ float * );
-extern double GET_SCIA_ROE_JDAY( unsigned short );
-extern size_t GET_SCIA_ROE_JDAY_ALL( /*@out@*/ double **jday_out )
+extern void GET_SCIA_ROE_INFO(bool, const double, /*@out@*/ int *, 
+			      /*@out@*/ bool *, /*@out@*/ float *);
+extern double GET_SCIA_ROE_JDAY(unsigned short);
+extern size_t GET_SCIA_ROE_JDAY_ALL(/*@out@*/ double **jday_out)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, *jday_out@*/;
 
-extern void SCIA_LV1C_FREE_MDS( int, unsigned int, 
-				/*@only@*/ struct mds1c_scia * );
-extern void SCIA_LV1C_FREE_MDS_PMD( int, /*@only@*/ struct mds1c_pmd * );
-extern void SCIA_LV1C_FREE_MDS_POLV( int, /*@only@*/ struct mds1c_polV * );
+extern void SCIA_LV1C_FREE_MDS(int, unsigned int, 
+			       /*@only@*/ struct mds1c_scia *);
+extern void SCIA_LV1C_FREE_MDS_PMD(int, /*@only@*/ struct mds1c_pmd *);
+extern void SCIA_LV1C_FREE_MDS_POLV(int, /*@only@*/ struct mds1c_polV *);
 
-extern void SCIA_LV1C_CAL( int, unsigned int, unsigned short, 
-			   struct mds1c_scia *mds_out )
+extern void SCIA_LV1C_CAL(int, unsigned int, unsigned short, 
+			   struct mds1c_scia *mds_out)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, mds_out->pixel_val@*/;
 
-extern void SCIA_SET_CALIB( /*@notnull@*/ const char *, 
-                            /*@out@*/ unsigned int * );
-extern void SCIA_GET_CALIB( unsigned int, /*@out@*/ char * );
+extern void scia_set_calib(/*@notnull@*/ const char *);
+extern void scia_get_calib(/*@out@*/ char *);
 
-extern void SCIA_SET_PATCH( /*@notnull@*/ const char *, 
-                            /*@out@*/ unsigned short * );
-extern void SCIA_GET_PATCH( unsigned short, /*@out@*/ char * );
+extern void scia_set_patch(/*@notnull@*/ const char *);
+extern void scia_get_patch(/*@out@*/ char *);
 
-extern void SCIA_SET_PARAM( int, char **, int,
-                             /*@out@*/ struct param_record *param )
+extern void SCIA_SET_PARAM(int, char **, int)
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
-     /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
-extern void SCIA_SHOW_PARAM( int, struct param_record );
+     /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/;
+extern void SCIA_SHOW_PARAM(int);
 
 #if defined _STDIO_H || defined _STDIO_H_
-extern void SCIA_SHOW_VERSION( FILE *stream, const char * )
+extern void SCIA_SHOW_VERSION(FILE *stream, const char *)
      /*@modifies stream@*/;
-extern void SCIA_SHOW_CALIB( FILE *stream )
+extern void scia_show_calib(FILE *stream)
      /*@modifies stream@*/;
-extern void SCIA_SHOW_PATCH( FILE *stream )
+extern void scia_show_patch(FILE *stream)
      /*@modifies stream@*/;
 
-extern unsigned int SCIA_RD_LADS( FILE *fp, unsigned int, 
-				  const struct dsd_envi *,
-				  /*@out@*/ struct lads_scia **lads )
+extern unsigned int SCIA_RD_LADS(FILE *fp, unsigned int, 
+				 const struct dsd_envi *,
+				 /*@out@*/ struct lads_scia **lads)
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *lads@*/;
 #endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
-extern void SCIA_WR_ASCII_LADS( struct param_record, unsigned int, 
-				const struct lads_scia * )
+extern void SCIA_WR_ASCII_LADS(unsigned int, const struct lads_scia *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
 #ifdef _HDF5_H
-extern void SCIA_WR_H5_VERSION( hid_t )
+extern void SCIA_WR_H5_VERSION(void)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern hid_t SCIA_CRE_H5_FILE( int instrument, const struct param_record * )
+extern void SCIA_CRE_H5_FILE(int instrument)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void SCIA_WR_H5_MPH( struct param_record, const struct mph_envi * )
+extern void SCIA_WR_H5_MPH(const struct mph_envi *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern unsigned int SCIA_RD_H5_LADS( struct param_record, struct lads_scia * )
+extern unsigned int SCIA_RD_H5_LADS(struct lads_scia *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void SCIA_WR_H5_LADS( struct param_record, unsigned int,
-			     const struct lads_scia * )
+extern void SCIA_WR_H5_LADS(unsigned int, const struct lads_scia *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 #endif /* _HDF5_H */

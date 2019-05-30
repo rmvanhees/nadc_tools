@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 SFP data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_SFP( param, nr_sfp, sfp );
+  call as    SCIA_LV1_WR_H5_SFP(nr_sfp, sfp);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned int nr_sfp       : number of SFP parameters
 	     struct sfp_scia *sfp      : slit function parameters
 
@@ -53,21 +52,22 @@
 
 #define NFIELDS    4
 
-static const size_t sfp_size = sizeof( struct sfp_scia );
+static const size_t sfp_size = sizeof(struct sfp_scia);
 static const size_t sfp_offs[NFIELDS] = {
-     HOFFSET( struct sfp_scia, type ),
-     HOFFSET( struct sfp_scia, pixel_position ),
-     HOFFSET( struct sfp_scia, fwhm ),
-     HOFFSET( struct sfp_scia, fwhm_gauss )
+     HOFFSET(struct sfp_scia, type),
+     HOFFSET(struct sfp_scia, pixel_position),
+     HOFFSET(struct sfp_scia, fwhm),
+     HOFFSET(struct sfp_scia, fwhm_gauss)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_SFP( struct param_record param, unsigned int nr_sfp,
-			 const struct sfp_scia *sfp )
+void SCIA_LV1_WR_H5_SFP(unsigned int nr_sfp, const struct sfp_scia *sfp)
 {
-     hid_t   gads_id;
-     hbool_t compress;
+     hid_t  gads_id;
 
+     const hid_t   fid = nadc_get_param_hid("hdf_file_id");
+     const hbool_t compress =
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
      const char *sfp_names[NFIELDS] = {
           "type", "pixel_position", "fwhm", "fwhm_gauss"
      };
@@ -87,27 +87,20 @@ void SCIA_LV1_WR_H5_SFP( struct param_record param, unsigned int nr_sfp,
 /*
  * check number of SFP records
  */
-     if ( nr_sfp == 0 ) return;
-/*
- * set HDF5 boolean variable for compression
- */
-     if ( param.flag_deflate == PARAM_SET )
-          compress = TRUE;
-     else
-          compress = FALSE;
+     if (nr_sfp == 0) return;
 /*
  * open/create group /GADS
  */
-     gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
+     gads_id = NADC_OPEN_HDF5_Group(fid, "/GADS");
+     if (gads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/GADS");
 /*
  * create table
  */
-     (void) H5TBmake_table( "sfp", gads_id, "SLIT_FUNCTION", 
-			    NFIELDS, nr_sfp, sfp_size, sfp_names, sfp_offs, 
-			    sfp_type, nr_sfp, NULL, compress, sfp );
+     (void) H5TBmake_table("sfp", gads_id, "SLIT_FUNCTION", 
+			   NFIELDS, nr_sfp, sfp_size, sfp_names, sfp_offs, 
+			   sfp_type, nr_sfp, NULL, compress, sfp);
 /*
  * close interface
  */
-     (void) H5Gclose( gads_id );
+     (void) H5Gclose(gads_id);
 }

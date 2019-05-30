@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Create HDF5 file for SCIA level 1 & 2 products
 .INPUT/OUTPUT
-  call as    SCIA_CRE_H5_FILE( instument, param );
+  call as    SCIA_CRE_H5_FILE(instument);
      input:
             int  instrument           : flag for Instrument & Product
-            struct param_record param : command-line parameters
 
 .RETURNS     nothing: modifies global error status
 .COMMENTS    none
@@ -84,85 +83,87 @@
 .IDENTifer   WRITE_HDF5_HISTORY
 .PURPOSE     Write attribute in group holding user-defined settings
 .INPUT/OUTPUT
-  call as    WRITE_HDF5_HISTORY( file_id, instrument, param )
+  call as    WRITE_HDF5_HISTORY(file_id, instrument)
      input:
             hid_t  file_id            :   HDF5 file ID
             hid_t  instrument         :   flag for Instrument & Product
-	    struct param_record param :   struct holding user-defined settings
 
 .RETURNS     nothing: modifies global error status
 .COMMENTS    none
 -------------------------*/
 static
-void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument, 
-			 const struct param_record param )
+void WRITE_HDF5_HISTORY(hid_t file_id, hid_t instrument)
 {
-     register int nr;
-
-     char    cbuff[MAX_STRING_LENGTH];
+     char    *cpntr, cbuff[MAX_STRING_LENGTH];
+     float   rbuff[2];
      time_t  tp[1];
 
      unsigned int majnum, minnum, relnum;
 /*
  * +++++ create/write attributes in root
  */
-     (void) H5LTset_attribute_string( file_id, "/", "InputFilename", 
-				      param.infile );
-     (void) H5LTset_attribute_string( file_id, "/", "OutputFilename", 
-				      param.hdf5_name );
+     cpntr = nadc_get_param_string("infile");
+     (void) H5LTset_attribute_string(file_id, "/", "InputFilename", cpntr);
+     free(cpntr);
+     cpntr = nadc_get_param_string("outfile");
+     (void) H5LTset_attribute_string(file_id, "/", "OutputFilename", cpntr);
+     free(cpntr);
 /*
  * compression flag     
  */
-     if ( param.flag_deflate == PARAM_SET )
-	  (void) H5LTset_attribute_string( file_id, "/", "Compression", 
-					   "TRUE" );
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
+	  (void) H5LTset_attribute_string(file_id, "/", "Compression", 
+					  "TRUE");
      else
-	  (void) H5LTset_attribute_string( file_id, "/", "Compression", 
-					   "FALSE" );
+	  (void) H5LTset_attribute_string(file_id, "/", "Compression", 
+					  "FALSE");
 /*
  * write program name/version and HDF5 library version
  */
-     (void) H5LTset_attribute_string( file_id, "/", "Processor", 
-				      param.program );
-     SCIA_WR_H5_VERSION( file_id );
-     (void) H5get_libversion( &majnum, &minnum, &relnum );
-     (void) snprintf( cbuff, MAX_STRING_LENGTH, 
-		      "version %-u.%-u release %-u",
-		      majnum, minnum, relnum );
-     (void) H5LTset_attribute_string( file_id, "/", "HDF5", cbuff );
+     cpntr = nadc_get_param_string("program");
+     (void) H5LTset_attribute_string(file_id, "/", "Processor", cpntr);
+     free(cpntr);
+     SCIA_WR_H5_VERSION();
+     (void) H5get_libversion(&majnum, &minnum, &relnum);
+     (void) snprintf(cbuff, MAX_STRING_LENGTH, 
+		     "version %-u.%-u release %-u",
+		     majnum, minnum, relnum);
+     (void) H5LTset_attribute_string(file_id, "/", "HDF5", cbuff);
 /*
  * store time of creation
  */
-     (void) time( tp );
-     (void) strcpy( cbuff, ctime( tp ) );
+     (void) time(tp);
+     (void) strcpy(cbuff, ctime(tp));
      cbuff[strlen(cbuff)-1] = '\0';
-     (void) H5LTset_attribute_string( file_id, "/", "ProcessingDate", cbuff );
+     (void) H5LTset_attribute_string(file_id, "/", "ProcessingDate", cbuff);
 /*
  * ----- General options
  */
 /*
  * geolocation (bounding box)
  */
-     (void) H5LTset_attribute_float( file_id, "/", "Latitude", 
-				     param.geo_lat, 2 );
-     (void) H5LTset_attribute_float( file_id, "/", "Longitude", 
-				     param.geo_lon, 2 );
-     if ( param.flag_geomnmx == PARAM_SET )
-	  (void) H5LTset_attribute_string( file_id, "/", "WithinRegion", 
-					   "TRUE" );
+     nadc_get_param_range("latitude", rbuff);
+     (void) H5LTset_attribute_float(file_id, "/", "Latitude", rbuff, 2);
+     nadc_get_param_range("longitude", rbuff);
+     (void) H5LTset_attribute_float(file_id, "/", "Longitude", rbuff, 2);
+     if (nadc_get_param_uint8("flag_geomnmx") == PARAM_SET)
+	  (void) H5LTset_attribute_string(file_id, "/", "WithinRegion", 
+					  "TRUE");
      else
-	  (void) H5LTset_attribute_string( file_id, "/", "WithinRegion", 
-					   "FALSE" );
+	  (void) H5LTset_attribute_string(file_id, "/", "WithinRegion", 
+					  "FALSE");
 /*
  * time window
  */
-     if ( param.flag_period == PARAM_SET ) {
-	  (void) H5LTset_attribute_string( file_id, "/", "StartDate", 
-					   param.bgn_date );
-	  (void) H5LTset_attribute_string( file_id, "/", "EndDate", 
-					   param.end_date );
+     if (nadc_get_param_uint8("flag_period") == PARAM_SET) {
+	  cpntr = nadc_get_param_string("bgn_date");
+	  (void) H5LTset_attribute_string(file_id, "/", "StartDate", cpntr);
+	  free(cpntr);
+	  cpntr = nadc_get_param_string("bgn_date");
+	  (void) H5LTset_attribute_string(file_id, "/", "EndDate", cpntr);
+	  free(cpntr);
      }
-     switch ( instrument ) {
+     switch (instrument) {
 /*
  *  ----- SCIAMACHY level 0 processor specific options
  */
@@ -170,94 +171,35 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 /*
  * selected measurement data sets
  */
-	  (void) strcpy( cbuff, "" );
-	  if ( param.write_aux == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoAuxiliary", SHORT_STRING_LENGTH );
+	  (void) strcpy(cbuff, "");
+	  if (nadc_get_param_uint8("write_aux") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", SHORT_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoAuxiliary", SHORT_STRING_LENGTH);
 	  }
-	  if ( param.write_det == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoDetector", SHORT_STRING_LENGTH );
+	  if (nadc_get_param_uint8("write_det") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", SHORT_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoDetector", SHORT_STRING_LENGTH);
 	  }
-	  if ( param.write_pmd == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoPMD", SHORT_STRING_LENGTH );
+	  if (nadc_get_param_uint8("write_pmd") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", SHORT_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoPMD", SHORT_STRING_LENGTH);
 	  }
-	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
-	  (void) H5LTset_attribute_string( file_id, "/", 
-					   "MeasurementDataSets", cbuff );
+	  if (strlen(cbuff) == 0) (void) strcpy(cbuff, "ALL");
+	  (void) H5LTset_attribute_string(file_id, "/", 
+					   "MeasurementDataSets", cbuff);
 /*
  * spectral bands
  */
-	  if ( (param.chan_mask & BAND_ALL) != UCHAR_ZERO ) {
-	       (void) strcpy( cbuff, "" );
-	       if ( (param.chan_mask & BAND_ONE) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "1", SHORT_STRING_LENGTH );
-	       }	  
-	       if ( (param.chan_mask & BAND_TWO) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "2", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_THREE) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "3", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_FOUR) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "4", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_FIVE) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "5", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_SIX) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH);
-		    (void) nadc_strlcat( cbuff, "6", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_SEVEN) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "7", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_EIGHT) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "8", SHORT_STRING_LENGTH );
-	       }
-	       if ( strlen( cbuff ) == 0 )
-		    (void) H5LTset_attribute_string( file_id, "/", 
-						     "Bands", "FALSE" );
-	       else
-		    (void) H5LTset_attribute_string( file_id, "/", 
-						     "Bands", cbuff );
-	  } else
-	       (void) H5LTset_attribute_string( file_id, "/", "Bands", "ALL" );
+	  nadc_repr_param_chan(SHORT_STRING_LENGTH, cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "Bands", cbuff);
 /*
  * selected States
  */
-	  if ( param.stateID_nr == PARAM_UNSET ) {
-	       (void) H5LTset_attribute_string( file_id, "/", "StateID", 
-						"ALL" );
-	  } else {
-	       (void) snprintf( cbuff, MAX_STRING_LENGTH, "%-d", 
-				(int) param.stateID[0] );
-	       for ( nr = 1; nr < (int) param.stateID_nr; nr++ ) {
-		    (void) snprintf( cbuff, MAX_STRING_LENGTH, "%s,%-d", 
-				     cbuff, (int) param.stateID[nr] );
-	       }
-	       (void) H5LTset_attribute_string( file_id, "/", "StateID", 
-						cbuff );
-	  }
+	  nadc_repr_param_state(MAX_STRING_LENGTH, cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "States", cbuff);
 	  break;
 /*
  *  ----- SCIAMACHY level 1 processor specific options
@@ -266,201 +208,112 @@ void WRITE_HDF5_HISTORY( hid_t file_id, hid_t instrument,
 /*
  * selected Key DSD's
  */
-	  (void) strcpy( cbuff, "" );
-	  if ( param.write_ads == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 )
-		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoADS", SHORT_STRING_LENGTH );
+	  (void) strcpy(cbuff, "");
+	  if (nadc_get_param_uint8("write_ads") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0)
+		    (void) nadc_strlcat(cbuff, ",", SHORT_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoADS", SHORT_STRING_LENGTH);
 	  }
-	  if ( param.write_gads == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoGADS", SHORT_STRING_LENGTH );
+	  if (nadc_get_param_uint8("write_gads") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", SHORT_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoGADS", SHORT_STRING_LENGTH);
 	  }
-	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
-	  (void) H5LTset_attribute_string( file_id, "/", "KeyDataSets", 
-					   cbuff );
+	  if (strlen(cbuff) == 0) (void) strcpy(cbuff, "ALL");
+	  (void) H5LTset_attribute_string(file_id, "/", "KeyDataSets", 
+					   cbuff);
 /*
  * selected measurement data sets
  */
-	  (void) strcpy( cbuff, "" );
-	  if ( param.write_limb == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoLimb", MAX_STRING_LENGTH );
+	  (void) strcpy(cbuff, "");
+	  if (nadc_get_param_uint8("write_limb") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", MAX_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoLimb", MAX_STRING_LENGTH);
 	  }
-	  if ( param.write_moni == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoMonitoring", MAX_STRING_LENGTH );
+	  if (nadc_get_param_uint8("write_moni") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", MAX_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoMonitoring", MAX_STRING_LENGTH);
 	  }
-	  if ( param.write_nadir == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoNadir", MAX_STRING_LENGTH );
+	  if (nadc_get_param_uint8("write_nadir") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", MAX_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoNadir", MAX_STRING_LENGTH);
 	  }
-	  if ( param.write_occ == PARAM_UNSET ) {
-	       if ( strlen( cbuff ) > 0 ) 
-		    (void) nadc_strlcat( cbuff, ",", MAX_STRING_LENGTH );
-	       (void) nadc_strlcat( cbuff, "NoOcc", MAX_STRING_LENGTH );
+	  if (nadc_get_param_uint8("write_occ") == PARAM_UNSET) {
+	       if (strlen(cbuff) > 0) 
+		    (void) nadc_strlcat(cbuff, ",", MAX_STRING_LENGTH);
+	       (void) nadc_strlcat(cbuff, "NoOcc", MAX_STRING_LENGTH);
 	  }
-	  if ( strlen( cbuff ) == 0 ) (void) strcpy( cbuff, "ALL" );
-	  (void) H5LTset_attribute_string( file_id, "/", 
-					   "MeasurementDataSets", cbuff );
+	  if (strlen(cbuff) == 0) (void) strcpy(cbuff, "ALL");
+	  (void) H5LTset_attribute_string(file_id, "/", 
+					   "MeasurementDataSets", cbuff);
 /*
  * PMD data
  */
-	  if ( param.write_pmd == PARAM_SET )
-	       (void) H5LTset_attribute_string( file_id, "/", "PMD", "TRUE" );
+	  if (nadc_get_param_uint8("write_pmd") == PARAM_SET)
+	       (void) H5LTset_attribute_string(file_id, "/", "PMD", "TRUE");
 	  else
-	       (void) H5LTset_attribute_string( file_id, "/", "PMD", "FALSE" );
+	       (void) H5LTset_attribute_string(file_id, "/", "PMD", "FALSE");
 /*
  * fraction polarisation data
  */
-	  if ( param.write_polV == PARAM_SET )
-	       (void) H5LTset_attribute_string( file_id, "/", "FracPol", 
-						"TRUE" );
+	  if (nadc_get_param_uint8("write_polV") == PARAM_SET)
+	       (void) H5LTset_attribute_string(file_id, "/", "FracPol", 
+						"TRUE");
 	  else
-	       (void) H5LTset_attribute_string( file_id, "/", "FracPol", 
-						"FALSE" );
+	       (void) H5LTset_attribute_string(file_id, "/", "FracPol", 
+						"FALSE");
 /*
  * spectral bands
  */
-	  if ( (param.chan_mask & BAND_ALL) != UCHAR_ZERO ) {
-	       (void) strcpy( cbuff, "" );
-	       if ( (param.chan_mask & BAND_ONE) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "1", SHORT_STRING_LENGTH );
-	       }	  
-	       if ( (param.chan_mask & BAND_TWO) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "2", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_THREE) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "3", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_FOUR) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "4", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_FIVE) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "5", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_SIX) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "6", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_SEVEN) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "7", SHORT_STRING_LENGTH );
-	       }
-	       if ( (param.chan_mask & BAND_EIGHT) != UCHAR_ZERO ) {
-		    if ( strlen( cbuff ) > 0 ) 
-			 (void) nadc_strlcat( cbuff, ",", SHORT_STRING_LENGTH );
-		    (void) nadc_strlcat( cbuff, "8", SHORT_STRING_LENGTH );
-	       }
-	       if ( strlen( cbuff ) == 0 )
-		    (void) H5LTset_attribute_string( file_id, "/", "Bands", 
-						     "FALSE" );
-	       else
-		    (void) H5LTset_attribute_string( file_id, "/", "Bands",
-						     cbuff );
-	  } else
-	       (void) H5LTset_attribute_string( file_id, "/", "Bands", "ALL" );
-/*
- * selected Categories
- */
-	  if ( param.catID_nr == PARAM_UNSET ) {
-	       (void) H5LTset_attribute_string( file_id, "/", "Category", 
-						"ALL" );
-	  } else {
-	       (void) snprintf( cbuff, MAX_STRING_LENGTH, "%-d", 
-				(int) param.catID[0] );
-	       for ( nr = 1; nr < (int) param.catID_nr; nr++ ) {
-		    (void) snprintf( cbuff, MAX_STRING_LENGTH, "%s,%-d", 
-				     cbuff, (int) param.catID[nr] );
-	       }
-	       (void) H5LTset_attribute_string( file_id, "/", "Category", 
-						cbuff );
-	  }
-/*
- * selected States
- */
-	  if ( param.stateID_nr == PARAM_UNSET ) {
-	       (void) H5LTset_attribute_string( file_id, "/", "StateID", 
-						"ALL" );
-	  } else {
-	       (void) snprintf( cbuff, MAX_STRING_LENGTH, "%-d", 
-				(int) param.stateID[0] );
-	       for ( nr = 1; nr < (int) param.stateID_nr; nr++ ) {
-		    (void) snprintf( cbuff, MAX_STRING_LENGTH, "%s,%-d", 
-				     cbuff, (int) param.stateID[nr] );
-	       }
-	       (void) H5LTset_attribute_string( file_id, "/", "StateID", 
-						cbuff );
-	  }
+	  nadc_repr_param_chan(SHORT_STRING_LENGTH, cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "Bands", cbuff);
 /*
  * selected Clusters
  */
-	  if ( param.clusID_nr == PARAM_UNSET ) {
-	       (void) H5LTset_attribute_string( file_id, "/", "Clusters", 
-						"ALL" );
-	  } else {
-	       (void) strcpy( cbuff, "" );
-	       for ( nr = 0; nr < MAX_NUM_STATE; nr++ ) {
-		    if (Get_Bit_LL(param.clus_mask,(unsigned char)nr) == 0ULL)
-			 (void) nadc_strlcat( cbuff, "0", MAX_STRING_LENGTH );
-		    else
-			 (void) nadc_strlcat( cbuff, "1", MAX_STRING_LENGTH );
-	       }
-	       (void) H5LTset_attribute_string( file_id, "/", "Clusters", 
-						cbuff );
-	  }
+	  nadc_repr_param_clus(MAX_STRING_LENGTH, cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "Clusters", cbuff);
+/*
+ * selected Categories
+ */
+	  nadc_repr_param_cat(MAX_STRING_LENGTH, cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "Category", cbuff);
+/*
+ * selected States
+ */
+	  nadc_repr_param_state(MAX_STRING_LENGTH, cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "States", cbuff);
 /*
  * calibration of the spectral band data
  */
-	  if ( param.calib_scia == CALIB_NONE ) {
-	       (void) H5LTset_attribute_string( file_id, "/", "Calibration", 
-						"FALSE" );
-	  } else {
-	       SCIA_GET_CALIB( param.calib_scia, cbuff );
-	       if ( strlen(cbuff) == 0 ) {
-		    (void) H5LTset_attribute_string( file_id, "/", 
-						     "Calibration", "FALSE" );
-	       } else {
-		    (void) H5LTset_attribute_string( file_id, "/", 
-						     "Calibration", cbuff );
-	       }
-	  }
+	  scia_get_calib(cbuff);
+	  (void) H5LTset_attribute_string(file_id, "/", "Calibration", cbuff);
 	  break;
 /*
  *  ----- SCIAMACHY level 2 processor specific options
  */
-	  case SCIA_LEVEL_2:
+     case SCIA_LEVEL_2:
 	  break;
      }
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function(s) +++++++++++++++*/
-hid_t SCIA_CRE_H5_FILE( int instrument, const struct param_record *param )
+void SCIA_CRE_H5_FILE(int instrument)
 {
+     char   *cpntr;
+     hid_t  file_id;
+     
      /* create HDF5-file */
-     hid_t file_id = H5Fcreate( param->hdf5_name, H5F_ACC_TRUNC, 
-				H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param->hdf5_name );
-
+     cpntr = nadc_get_param_string("hdf5_name");
+     
+     file_id = H5Fcreate(cpntr, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (file_id < 0)
+	  NADC_RETURN_ERROR(NADC_ERR_HDF_FILE, cpntr);
+     free(cpntr);
+     (void) nadc_set_param_hid("hdf_file_id", file_id);
+     
      /* write global attributes */
-     WRITE_HDF5_HISTORY( file_id, instrument, *param );
-done:
-     return file_id;
+     WRITE_HDF5_HISTORY(file_id, instrument);
 }

@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Dump Specific Product Header of the level 0 product
 .INPUT/OUTPUT
-  call as   SCIA_LV0_WR_ASCII_SPH( param, sph );
+  call as   SCIA_LV0_WR_ASCII_SPH(sph);
      input: 
-            struct param_record param : struct holding user-defined settings
 	    struct sph0_scia *sph     : pointer to structure with SPH record
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
@@ -55,51 +54,55 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV0_WR_ASCII_SPH( struct param_record param, 
-			    const struct sph0_scia *sph )
+void SCIA_LV0_WR_ASCII_SPH(const struct sph0_scia *sph)
 {
      register unsigned int  nr = 0;
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "sph" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "sph")) == NULL || IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of SPH record
  */
-     nadc_write_header( outfl, nr, param.infile, 
-			 "Specific Product Header of Level 0 Product" );
-     nadc_write_text( outfl, ++nr, "SPH_DESCRIPTOR", sph->descriptor );
-     nadc_write_double( outfl, ++nr, "START_LAT", 6, sph->start_lat );
-     nadc_write_double( outfl, ++nr, "START_LON", 6, sph->start_lon );
-     nadc_write_double( outfl, ++nr, "STOP_LAT", 6, sph->stop_lat );
-     nadc_write_double( outfl, ++nr, "STOP_LON", 6, sph->stop_lon );
-     nadc_write_double( outfl, ++nr, "SAT_TRACK", 6, sph->sat_track );
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, nr, cpntr, 
+			 "Specific Product Header of Level 0 Product");
+     free(cpntr);
+     nadc_write_text(outfl, ++nr, "SPH_DESCRIPTOR", sph->descriptor);
+     nadc_write_double(outfl, ++nr, "START_LAT", 6, sph->start_lat);
+     nadc_write_double(outfl, ++nr, "START_LON", 6, sph->start_lon);
+     nadc_write_double(outfl, ++nr, "STOP_LAT", 6, sph->stop_lat);
+     nadc_write_double(outfl, ++nr, "STOP_LON", 6, sph->stop_lon);
+     nadc_write_double(outfl, ++nr, "SAT_TRACK", 6, sph->sat_track);
      nr++;    /* spare_1 */
-     nadc_write_ushort( outfl, ++nr, "ISP_ERRORS_SIGNIFICANT", 
-			sph->isp_errors );
-     nadc_write_ushort( outfl, ++nr, "MISSING_ISPS_SIGNIFICANT", 
-		       sph->missing_isps );
-     nadc_write_ushort( outfl, ++nr, "ISP_DISCARDED_SIGNIFICANT", 
-		       sph->isp_discard );
-     nadc_write_ushort( outfl, ++nr, "RS_SIGNIFICANT", sph->rs_sign );
+     nadc_write_ushort(outfl, ++nr, "ISP_ERRORS_SIGNIFICANT", 
+			sph->isp_errors);
+     nadc_write_ushort(outfl, ++nr, "MISSING_ISPS_SIGNIFICANT", 
+		       sph->missing_isps);
+     nadc_write_ushort(outfl, ++nr, "ISP_DISCARDED_SIGNIFICANT", 
+		       sph->isp_discard);
+     nadc_write_ushort(outfl, ++nr, "RS_SIGNIFICANT", sph->rs_sign);
      nr++;    /* spare_2 */
-     nadc_write_int( outfl, ++nr, "NUM_ERROR_ISPS", sph->num_error_isps );
-     nadc_write_double( outfl, ++nr, "ERROR_ISPS_THRESH", 8,
-		       sph->error_isps_thres );
-     nadc_write_int( outfl, ++nr, "NUM_MISSING_ISPS", sph->num_miss_isps );
-     nadc_write_double( outfl, ++nr, "MISSING_ISPS_THRESH", 8,
-		       sph->miss_isps_thres );
-     nadc_write_int( outfl, ++nr, "NUM_DISCARDED_ISPS", 
-		       sph->num_discard_isps );
-     nadc_write_double( outfl, ++nr, "DISCARDED_ISPS_THRESH", 8,
-		       sph->discard_isps_thres );
-     nadc_write_int( outfl, ++nr, "NUM_RS_ISPS", sph->num_rs_isps );
-     nadc_write_double( outfl, ++nr, "RS_THRESH", 8,sph->rs_thres );
+     nadc_write_int(outfl, ++nr, "NUM_ERROR_ISPS", sph->num_error_isps);
+     nadc_write_double(outfl, ++nr, "ERROR_ISPS_THRESH", 8,
+		       sph->error_isps_thres);
+     nadc_write_int(outfl, ++nr, "NUM_MISSING_ISPS", sph->num_miss_isps);
+     nadc_write_double(outfl, ++nr, "MISSING_ISPS_THRESH", 8,
+		       sph->miss_isps_thres);
+     nadc_write_int(outfl, ++nr, "NUM_DISCARDED_ISPS", 
+		       sph->num_discard_isps);
+     nadc_write_double(outfl, ++nr, "DISCARDED_ISPS_THRESH", 8,
+		       sph->discard_isps_thres);
+     nadc_write_int(outfl, ++nr, "NUM_RS_ISPS", sph->num_rs_isps);
+     nadc_write_double(outfl, ++nr, "RS_THRESH", 8,sph->rs_thres);
      nr++;    /* spare_3 */
-     nadc_write_text( outfl, ++nr, "TX_TX_POLAR", sph->tx_rx_polar );
-     nadc_write_text( outfl, ++nr, "SWATH", sph->swath );
+     nadc_write_text(outfl, ++nr, "TX_TX_POLAR", sph->tx_rx_polar);
+     nadc_write_text(outfl, ++nr, "SWATH", sph->swath);
      nr++;    /* spare_4 */
 
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }

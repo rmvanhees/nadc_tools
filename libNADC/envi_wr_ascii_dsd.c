@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Dump Data Set Descriptor Records
 .INPUT/OUTPUT
-  call as   ENVI_WR_ASCII_DSD( param, num_dsd, dsd );
+  call as   ENVI_WR_ASCII_DSD(num_dsd, dsd);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned int num_dsd :      number of DSD records
 	     struct dsd_envi *dsd :      structure for the DSD records
 
@@ -55,31 +54,34 @@
 #include <nadc_common.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void ENVI_WR_ASCII_DSD( struct param_record param, 
-			unsigned int num_dsd,
-			const struct dsd_envi *dsd )
+void ENVI_WR_ASCII_DSD(unsigned int num_dsd,
+		       const struct dsd_envi *dsd)
 {
      register unsigned int nd = 0, nr = 0;
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "dsd" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "dsd")) == NULL || IS_ERR_STAT_FATAL)
+          NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of DSD record
  */
-     nadc_write_header( outfl, nr, param.infile, 
-			 "Data Set Descriptor Records" );
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, nr, cpntr, "Data Set Descriptor Records");
+     free(cpntr);
      do {
-	  nadc_write_text( outfl, ++nr, "DS_NAME", dsd->name );
-	  nadc_write_text( outfl, nr, "DS_TYPE", dsd->type );
-	  nadc_write_text( outfl, nr, "FILENAME", dsd->flname );
-	  nadc_write_uint( outfl, nr, "DS_OFFSET", dsd->offset );
-	  nadc_write_uint( outfl, nr, "DS_SIZE", dsd->size );
-	  nadc_write_uint( outfl, nr, "NUM_DSR", dsd->num_dsr );
-	  nadc_write_int( outfl, nr, "DSR_SIZE", dsd->dsr_size );
+	  nadc_write_text(outfl, ++nr, "DS_NAME", dsd->name);
+	  nadc_write_text(outfl, nr, "DS_TYPE", dsd->type);
+	  nadc_write_text(outfl, nr, "FILENAME", dsd->flname);
+	  nadc_write_uint(outfl, nr, "DS_OFFSET", dsd->offset);
+	  nadc_write_uint(outfl, nr, "DS_SIZE", dsd->size);
+	  nadc_write_uint(outfl, nr, "NUM_DSR", dsd->num_dsr);
+	  nadc_write_int(outfl, nr, "DSR_SIZE", dsd->dsr_size);
 	  dsd++;
-     } while ( ++nd < num_dsd );
+     } while (++nd < num_dsd);
 
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }

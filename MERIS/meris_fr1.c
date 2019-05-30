@@ -116,7 +116,7 @@ int main( int argc, char *argv[] )
      if ( mph.tot_size != nadc_file_size( param.infile ) )
           NADC_GOTO_ERROR( NADC_ERR_FATAL, "file size check failed" );
      if ( param.write_ascii == PARAM_SET ) {
-	  ENVI_WR_ASCII_MPH( param, &mph );
+	  ENVI_WR_ASCII_MPH(&mph);
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "MPH" );
      }
@@ -153,7 +153,7 @@ int main( int argc, char *argv[] )
      if ( IS_ERR_STAT_FATAL ) 
 	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DSD" );
      if ( param.write_ascii == PARAM_SET ) {
-	  ENVI_WR_ASCII_DSD( param, num_dsd, dsd );
+	  ENVI_WR_ASCII_DSD(num_dsd, dsd);
 	  if ( IS_ERR_STAT_FATAL )
 	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DSD" );
      }

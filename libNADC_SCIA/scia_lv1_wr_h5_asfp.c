@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 ASFP data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_ASFP( param, nr_asfp, asfp );
+  call as    SCIA_LV1_WR_H5_ASFP(nr_asfp, asfp);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned int nr_asfp      : number of ASFP parameters
 	     struct asfp_scia *asfp    : small aperture slit function 
                                          parameters
@@ -53,21 +52,21 @@
 
 #define NFIELDS    4
 
-static const size_t asfp_size = sizeof( struct asfp_scia );
+static const size_t asfp_size = sizeof(struct asfp_scia);
 static const size_t asfp_offs[NFIELDS] = {
-     HOFFSET( struct asfp_scia, type ),
-     HOFFSET( struct asfp_scia, pixel_position ),
-     HOFFSET( struct asfp_scia, fwhm ),
-     HOFFSET( struct asfp_scia, fwhm_gauss )
+     HOFFSET(struct asfp_scia, type),
+     HOFFSET(struct asfp_scia, pixel_position),
+     HOFFSET(struct asfp_scia, fwhm),
+     HOFFSET(struct asfp_scia, fwhm_gauss)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_ASFP( struct param_record param, unsigned int nr_asfp,
-			  const struct asfp_scia *asfp )
+void SCIA_LV1_WR_H5_ASFP(unsigned int nr_asfp, const struct asfp_scia *asfp)
 {
-     hid_t   gads_id;
+     hid_t   fid, gads_id;
 
-     const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
+     const hbool_t compress = \
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
 
      const char *asfp_names[NFIELDS] = {
           "type", "pixel_position", "fwhm", "fwhm_gauss"
@@ -88,21 +87,22 @@ void SCIA_LV1_WR_H5_ASFP( struct param_record param, unsigned int nr_asfp,
 /*
  * check number of ASFP records
  */
-     if ( nr_asfp == 0 ) return;
+     if (nr_asfp == 0) return;
 /*
  * open/create group /GADS
  */
-     gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     gads_id = NADC_OPEN_HDF5_Group(fid, "/GADS");
+     if (gads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/GADS");
 /*
  * create table
  */
-     (void) H5TBmake_table( "asfp", gads_id, "SMALL_AP_SLIT_FUNCTION", 
+     (void) H5TBmake_table("asfp", gads_id, "SMALL_AP_SLIT_FUNCTION", 
 			    NFIELDS, nr_asfp, asfp_size, asfp_names, 
 			    asfp_offs, asfp_type, nr_asfp, NULL, compress, 
-			    asfp );
+			    asfp);
 /*
  * close interface
  */
-     (void) H5Gclose( gads_id );
+     (void) H5Gclose(gads_id);
 }

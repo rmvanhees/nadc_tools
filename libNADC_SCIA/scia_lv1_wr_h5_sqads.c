@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 SQADS data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_SQADS( param, nr_sqads, sqads );
+  call as    SCIA_LV1_WR_H5_SQADS(nr_sqads, sqads);
 
      input:  
-             struct param_record param  : struct holding user-defined settings
 	     unsigned int nr_sqads      : number of Summary of Quality Flags
 	     struct sqads1_scia *sqads  : Summary of Quality Flags per State
 
@@ -55,28 +54,30 @@
 
 #define NFIELDS    10
 
-static const size_t sqads_size = sizeof( struct sqads1_scia );
+static const size_t sqads_size = sizeof(struct sqads1_scia);
 static const size_t sqads_offs[NFIELDS] = {
-     HOFFSET( struct sqads1_scia, mjd ),
-     HOFFSET( struct sqads1_scia, flag_mds ),
-     HOFFSET( struct sqads1_scia, flag_glint ),
-     HOFFSET( struct sqads1_scia, flag_rainbow ),
-     HOFFSET( struct sqads1_scia, flag_saa_region ),
-     HOFFSET( struct sqads1_scia, missing_readouts ),
-     HOFFSET( struct sqads1_scia, hotpixel ),
-     HOFFSET( struct sqads1_scia, mean_wv_diff ),
-     HOFFSET( struct sqads1_scia, sdev_wv_diff ),
-     HOFFSET( struct sqads1_scia, mean_diff_leak )
+     HOFFSET(struct sqads1_scia, mjd),
+     HOFFSET(struct sqads1_scia, flag_mds),
+     HOFFSET(struct sqads1_scia, flag_glint),
+     HOFFSET(struct sqads1_scia, flag_rainbow),
+     HOFFSET(struct sqads1_scia, flag_saa_region),
+     HOFFSET(struct sqads1_scia, missing_readouts),
+     HOFFSET(struct sqads1_scia, hotpixel),
+     HOFFSET(struct sqads1_scia, mean_wv_diff),
+     HOFFSET(struct sqads1_scia, sdev_wv_diff),
+     HOFFSET(struct sqads1_scia, mean_diff_leak)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_SQADS( struct param_record param, unsigned int nr_sqads,
-			   const struct sqads1_scia *sqads )
+void SCIA_LV1_WR_H5_SQADS(unsigned int nr_sqads,
+			  const struct sqads1_scia *sqads)
 {
      hid_t   ads_id;
-     hbool_t compress;
      hsize_t adim;
 
+     const hid_t fid = nadc_get_param_hid("hdf_file_id");
+     const hbool_t compress =
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
      const char *sqads_names[NFIELDS] = {
           "dsr_time", "attach_flag", "sun_glint_flag", "rainbow_flag",
 	  "saa_region_flag", "num_miss_readouts", "num_hotpixels_perchannel",
@@ -104,44 +105,37 @@ void SCIA_LV1_WR_H5_SQADS( struct param_record param, unsigned int nr_sqads,
 /*
  * check number of SQADS records
  */
-     if ( nr_sqads == 0 ) return;
-/*
- * set HDF5 boolean variable for compression
- */
-     if ( param.flag_deflate == PARAM_SET )
-          compress = TRUE;
-     else
-          compress = FALSE;
+     if (nr_sqads == 0) return;
 /*
  * create group /ADS
  */
-     ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
+     ads_id = NADC_OPEN_HDF5_Group(fid, "/ADS");
+     if (ads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/ADS");
 /*
  * define user-defined data types of the Table-fields
  */
-     sqads_type[0] = H5Topen( param.hdf_file_id, "mjd", H5P_DEFAULT );
+     sqads_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
      adim = ALL_CHANNELS;
-     sqads_type[6] = H5Tarray_create( H5T_NATIVE_USHORT, 1, &adim );
+     sqads_type[6] = H5Tarray_create(H5T_NATIVE_USHORT, 1, &adim);
      adim = SCIENCE_CHANNELS;
-     sqads_type[7] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
+     sqads_type[7] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
      adim = SCIENCE_CHANNELS;
-     sqads_type[8] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
+     sqads_type[8] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
      adim = ALL_CHANNELS;
-     sqads_type[9] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
+     sqads_type[9] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
 /*
  * create table
  */
-     (void) H5TBmake_table( "sqads", ads_id, "SUMMARY_QUALITY", NFIELDS, 
+     (void) H5TBmake_table("sqads", ads_id, "SUMMARY_QUALITY", NFIELDS, 
 			    nr_sqads, sqads_size, sqads_names, sqads_offs, 
-			    sqads_type, nr_sqads, NULL, compress, sqads );
+			    sqads_type, nr_sqads, NULL, compress, sqads);
 /*
  * close interface
  */
-     (void) H5Tclose( sqads_type[0] );
-     (void) H5Tclose( sqads_type[6] );
-     (void) H5Tclose( sqads_type[7] );
-     (void) H5Tclose( sqads_type[8] );
-     (void) H5Tclose( sqads_type[9] );
-     (void) H5Gclose( ads_id );
+     (void) H5Tclose(sqads_type[0]);
+     (void) H5Tclose(sqads_type[6]);
+     (void) H5Tclose(sqads_type[7]);
+     (void) H5Tclose(sqads_type[8]);
+     (void) H5Tclose(sqads_type[9]);
+     (void) H5Gclose(ads_id);
 }

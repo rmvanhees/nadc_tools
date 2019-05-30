@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -42,8 +42,7 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1C_WR_ASCII_CALOPT( const struct param_record param,
-				const struct cal_options *calopt )
+void SCIA_LV1C_WR_ASCII_CALOPT(const struct cal_options *calopt)
 {
      register unsigned int nr = 0;
 
@@ -51,141 +50,145 @@ void SCIA_LV1C_WR_ASCII_CALOPT( const struct param_record param,
 
      unsigned int   count[1];
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "calopt" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "calopt")) == NULL || IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of CAL_OPTIONS record
  */
-     nadc_write_header( outfl, nr, param.infile, 
-			 "Calibration Options GADS to SciaL1C" );
-     nadc_write_text( outfl,++nr, "l1b_product_name", calopt->l1b_prod_name );
-     if ( calopt->geo_filter != SCHAR_ZERO ) {
-	  nadc_write_double( outfl, ++nr, "start_lat", 6, 
-			     calopt->start_lat/1e6 );
-	  nadc_write_double( outfl, ++nr, "start_lon", 6, 
-			     calopt->start_lon/1e6 );
-	  nadc_write_double( outfl, ++nr, "end_lat", 6, calopt->end_lat/1e6 );
-	  nadc_write_double( outfl, ++nr, "end_lon", 6, calopt->end_lon/1e6 );
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, nr, cpntr, "Calibration Options GADS to SciaL1C");
+     free(cpntr);
+     nadc_write_text(outfl,++nr, "l1b_product_name", calopt->l1b_prod_name);
+     if (calopt->geo_filter != SCHAR_ZERO) {
+	  nadc_write_double(outfl, ++nr, "start_lat", 6, 
+			     calopt->start_lat/1e6);
+	  nadc_write_double(outfl, ++nr, "start_lon", 6, 
+			     calopt->start_lon/1e6);
+	  nadc_write_double(outfl, ++nr, "end_lat", 6, calopt->end_lat/1e6);
+	  nadc_write_double(outfl, ++nr, "end_lon", 6, calopt->end_lon/1e6);
      } else
 	  nr += 4;
-     if ( calopt->time_filter != SCHAR_ZERO ) {
-	  (void) MJD_2_ASCII( calopt->start_time.days, 
+     if (calopt->time_filter != SCHAR_ZERO) {
+	  (void) MJD_2_ASCII(calopt->start_time.days, 
 			      calopt->start_time.secnd,
-                              calopt->start_time.musec, date_str );
-          nadc_write_text( outfl, ++nr, "start_time", date_str );
-	  (void) MJD_2_ASCII( calopt->stop_time.days, 
+                              calopt->start_time.musec, date_str);
+          nadc_write_text(outfl, ++nr, "start_time", date_str);
+	  (void) MJD_2_ASCII(calopt->stop_time.days, 
 			      calopt->stop_time.secnd,
-                              calopt->stop_time.musec, date_str );
-          nadc_write_text( outfl, ++nr, "stop_time", date_str );
+                              calopt->stop_time.musec, date_str);
+          nadc_write_text(outfl, ++nr, "stop_time", date_str);
 
      } else
 	  nr += 2;
-     if ( calopt->category_filter != SCHAR_ZERO ) {
+     if (calopt->category_filter != SCHAR_ZERO) {
 	  count[0] = 5;
-          nadc_write_arr_ushort( outfl, ++nr, "category", 
-                                  1, count, calopt->category );
+          nadc_write_arr_ushort(outfl, ++nr, "category", 
+                                  1, count, calopt->category);
      } else
 	  nr += 1;
-     if ( calopt->nadir_mds != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "nadir_mds_flag", "TRUE" );
+     if (calopt->nadir_mds != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "nadir_mds_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "nadir_mds_flag", "FALSE" );
-     if ( calopt->limb_mds != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "limb_mds_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "nadir_mds_flag", "FALSE");
+     if (calopt->limb_mds != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "limb_mds_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "limb_mds_flag", "FALSE" );
-     if ( calopt->occ_mds != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "occ_mds_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "limb_mds_flag", "FALSE");
+     if (calopt->occ_mds != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "occ_mds_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "occ_mds_flag", "FALSE" );
-     if ( calopt->moni_mds != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "moni_mds_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "occ_mds_flag", "FALSE");
+     if (calopt->moni_mds != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "moni_mds_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "moni_mds_flag", "FALSE" );
+	  nadc_write_text(outfl, ++nr, "moni_mds_flag", "FALSE");
 
-     if ( calopt->pmd_mds != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "pmd_mds_flag", "TRUE" );
+     if (calopt->pmd_mds != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "pmd_mds_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "pmd_mds_flag", "FALSE" );
-     if ( calopt->frac_pol_mds != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "frac_pol_mds_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "pmd_mds_flag", "FALSE");
+     if (calopt->frac_pol_mds != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "frac_pol_mds_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "frac_pol_mds_flag", "FALSE" );
-     if ( calopt->slit_function != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "slit_function_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "frac_pol_mds_flag", "FALSE");
+     if (calopt->slit_function != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "slit_function_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "slit_function_gads_flag", "FALSE" );
-     if ( calopt->sun_mean_ref != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "sun_mean_ref_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "slit_function_gads_flag", "FALSE");
+     if (calopt->sun_mean_ref != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "sun_mean_ref_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "sun_mean_ref_gads_flag", "FALSE" );
-     if ( calopt->leakage_current != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "leakage_current_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "sun_mean_ref_gads_flag", "FALSE");
+     if (calopt->leakage_current != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "leakage_current_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "leakage_current_gads_flag", "FALSE");
-     if ( calopt->spectral_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "spectral_cal_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "leakage_current_gads_flag", "FALSE");
+     if (calopt->spectral_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "spectral_cal_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "spectral_cal_gads_flag", "FALSE" );
-     if ( calopt->pol_sens != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "pol_sens_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "spectral_cal_gads_flag", "FALSE");
+     if (calopt->pol_sens != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "pol_sens_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "pol_sens_gads_flag", "FALSE" );
-     if ( calopt->rad_sens != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "rad_sens_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "pol_sens_gads_flag", "FALSE");
+     if (calopt->rad_sens != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "rad_sens_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "rad_sens_gads_flag", "FALSE" );
-     if ( calopt->ppg_etalon != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "ppg_etalon_gads_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "rad_sens_gads_flag", "FALSE");
+     if (calopt->ppg_etalon != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "ppg_etalon_gads_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "ppg_etalon_gads_flag", "FALSE" );
-     nadc_write_ushort( outfl,++nr, "num_nadir_clusters", calopt->num_nadir );
-     nadc_write_ushort( outfl,++nr, "num_limb_clusters", calopt->num_limb );
-     nadc_write_ushort( outfl,++nr, "num_occ_clusters", calopt->num_occ );
-     nadc_write_ushort( outfl,++nr, "num_moni_clusters", calopt->num_moni );
+	  nadc_write_text(outfl, ++nr, "ppg_etalon_gads_flag", "FALSE");
+     nadc_write_ushort(outfl,++nr, "num_nadir_clusters", calopt->num_nadir);
+     nadc_write_ushort(outfl,++nr, "num_limb_clusters", calopt->num_limb);
+     nadc_write_ushort(outfl,++nr, "num_occ_clusters", calopt->num_occ);
+     nadc_write_ushort(outfl,++nr, "num_moni_clusters", calopt->num_moni);
      count[0] = MAX_CLUSTER;
-     nadc_write_arr_schar( outfl, ++nr, "nadir_cluster_flag", 
-			    1, count, calopt->nadir_cluster );
-     nadc_write_arr_schar( outfl, ++nr, "limb_cluster_flag", 
-			    1, count, calopt->limb_cluster );
-     nadc_write_arr_schar( outfl, ++nr, "occ_cluster_flag", 
-			    1, count, calopt->occ_cluster );
-     nadc_write_arr_schar( outfl, ++nr, "moni_cluster_flag", 
-			    1, count, calopt->moni_cluster );
-     if ( calopt->mem_effect_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "mem_effect_cal_flag", "TRUE" );
+     nadc_write_arr_schar(outfl, ++nr, "nadir_cluster_flag", 
+			    1, count, calopt->nadir_cluster);
+     nadc_write_arr_schar(outfl, ++nr, "limb_cluster_flag", 
+			    1, count, calopt->limb_cluster);
+     nadc_write_arr_schar(outfl, ++nr, "occ_cluster_flag", 
+			    1, count, calopt->occ_cluster);
+     nadc_write_arr_schar(outfl, ++nr, "moni_cluster_flag", 
+			    1, count, calopt->moni_cluster);
+     if (calopt->mem_effect_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "mem_effect_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "mem_effect_cal_flag", "FALSE" );
-     if ( calopt->leakage_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "leakage_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "mem_effect_cal_flag", "FALSE");
+     if (calopt->leakage_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "leakage_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "leakage_cal_flag", "FALSE" );
-     if ( calopt->straylight_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "straylight_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "leakage_cal_flag", "FALSE");
+     if (calopt->straylight_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "straylight_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "straylight_cal_flag", "FALSE" );
-     if ( calopt->ppg_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "ppg_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "straylight_cal_flag", "FALSE");
+     if (calopt->ppg_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "ppg_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "ppg_cal_flag", "FALSE" );
-     if ( calopt->etalon_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "etalon_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "ppg_cal_flag", "FALSE");
+     if (calopt->etalon_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "etalon_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "etalon_cal_flag", "FALSE" );
-     if ( calopt->wave_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "spectal_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "etalon_cal_flag", "FALSE");
+     if (calopt->wave_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "spectal_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "spectral_cal_flag", "FALSE" );
-     if ( calopt->polarisation_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "polarisation_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "spectral_cal_flag", "FALSE");
+     if (calopt->polarisation_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "polarisation_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "polarisation_cal_flag", "FALSE" );
-     if ( calopt->radiance_cal != SCHAR_ZERO )
-	  nadc_write_text( outfl, ++nr, "radiance_cal_flag", "TRUE" );
+	  nadc_write_text(outfl, ++nr, "polarisation_cal_flag", "FALSE");
+     if (calopt->radiance_cal != SCHAR_ZERO)
+	  nadc_write_text(outfl, ++nr, "radiance_cal_flag", "TRUE");
      else
-	  nadc_write_text( outfl, ++nr, "radiance_cal_flag", "FALSE" );
+	  nadc_write_text(outfl, ++nr, "radiance_cal_flag", "FALSE");
 
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }

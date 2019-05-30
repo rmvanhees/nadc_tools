@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Dump Geolocation of State
 .INPUT/OUTPUT
-  call as   SCIA_WR_ASCII_LADS( param, num_dsr, lads );
+  call as   SCIA_WR_ASCII_LADS(num_dsr, lads);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned int num_dsr :      number of LADS records
 	     struct lads_scia *lads :    structure for the LADS records
 
@@ -49,39 +48,43 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_WR_ASCII_LADS( struct param_record param, unsigned int num_dsr,
-			 const struct lads_scia *lads )
+void SCIA_WR_ASCII_LADS(unsigned int num_dsr, const struct lads_scia *lads)
 {
      register int nc;
      register unsigned int nd, nr;
 
-     char  date_str[UTC_STRING_LENGTH];
+     char   date_str[UTC_STRING_LENGTH];
      unsigned int  count[2];
      double latlon[2 * NUM_CORNERS];
 
-     FILE  *outfl = CRE_ASCII_File( param.outfile, "lads" );
+     char  *cpntr;
+     FILE  *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-          NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "lads")) == NULL || IS_ERR_STAT_FATAL)
+          NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of LADS record
  */
-     nadc_write_header( outfl, 0, param.infile, "Geolocation of the States" );
-     for ( nd = 0; nd < num_dsr; nd++ ) {
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, 0, cpntr, "Geolocation of the States");
+     free(cpntr);
+     for (nd = 0; nd < num_dsr; nd++) {
 	  nr = 1;
-	  (void) MJD_2_ASCII( lads[nd].mjd.days, lads[nd].mjd.secnd,
-			      lads[nd].mjd.musec, date_str );
-	  nadc_write_text( outfl, nr++, "Date", date_str );
-	  nadc_write_uchar( outfl, nr++, "MDS DSR attached", 
-			    lads[nd].flag_mds );
+	  (void) MJD_2_ASCII(lads[nd].mjd.days, lads[nd].mjd.secnd,
+			      lads[nd].mjd.musec, date_str);
+	  nadc_write_text(outfl, nr++, "Date", date_str);
+	  nadc_write_uchar(outfl, nr++, "MDS DSR attached", 
+			    lads[nd].flag_mds);
 	  count[0] = NUM_CORNERS;
 	  count[1] = 2;
-	  for ( nc = 0; nc < NUM_CORNERS; nc++ ) {
+	  for (nc = 0; nc < NUM_CORNERS; nc++) {
 	       latlon[nc] = lads[nd].corner[nc].lat / 1e6;
 	       latlon[NUM_CORNERS + nc] = lads[nd].corner[nc].lon / 1e6;
 	  }
-	  nadc_write_arr_double( outfl, nr,"Pixel corner coordinates",
-				 2, count, 6, latlon );
+	  nadc_write_arr_double(outfl, nr,"Pixel corner coordinates",
+				 2, count, 6, latlon);
      }
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }

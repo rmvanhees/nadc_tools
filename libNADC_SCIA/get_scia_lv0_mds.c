@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2007 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2007 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -56,7 +56,7 @@
 .IDENTifer   GET_SCIA_LV0_STATE_AUX
 .PURPOSE     read all Auxiliary MDS records of one state
 .INPUT/OUTPUT
-  call as   nrec = GET_SCIA_LV0_STATE_AUX( fd, states, &aux );
+  call as   nrec = GET_SCIA_LV0_STATE_AUX(fd, states, &aux);
      input:
             FILE *fd                   : file pointer
             struct mds0_states *states : structure holding info about MDS 
@@ -67,13 +67,13 @@
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int GET_SCIA_LV0_STATE_AUX( FILE *fd,
+unsigned int GET_SCIA_LV0_STATE_AUX(FILE *fd,
 				     const struct mds0_states *states,
-				     struct mds0_aux **aux_out )
+				     struct mds0_aux **aux_out)
 {
-     if ( states->num_aux == 0u ) return 0u;
+     if (states->num_aux == 0u) return 0u;
 
-     (void) SCIA_LV0_RD_AUX( fd, states->info_aux, states->num_aux, aux_out );
+     (void) SCIA_LV0_RD_AUX(fd, states->info_aux, states->num_aux, aux_out);
 
      return states->num_aux;
 }
@@ -82,9 +82,8 @@ unsigned int GET_SCIA_LV0_STATE_AUX( FILE *fd,
 .IDENTifer   GET_SCIA_LV0_STATE_DET
 .PURPOSE     read all Detector MDS records of one state
 .INPUT/OUTPUT
-  call as   nrec = GET_SCIA_LV0_STATE_DET( chan_mask, fd, states, &det );
+  call as   nrec = GET_SCIA_LV0_STATE_DET(fd, states, &det);
      input:
-            unsigned char chan_mask    : mask to select bands
             FILE *fd                   : file pointer
             struct mds0_states *states : structure holding info about MDS
     output:
@@ -94,14 +93,14 @@ unsigned int GET_SCIA_LV0_STATE_AUX( FILE *fd,
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int GET_SCIA_LV0_STATE_DET( unsigned char chan_mask, FILE *fd,
-				     const struct mds0_states *states,
-				     struct mds0_det **det_out )
+unsigned int GET_SCIA_LV0_STATE_DET(FILE *fd,
+				    const struct mds0_states *states,
+				    struct mds0_det **det_out)
 {
-     if ( states->num_det == 0u ) return 0u;
+     if (states->num_det == 0u) return 0u;
 
-     (void) SCIA_LV0_RD_DET( fd, states->info_det, states->num_det,
-			     chan_mask, det_out );
+     (void) SCIA_LV0_RD_DET(fd, states->info_det, states->num_det, det_out);
+     
      return states->num_det;
 }
 
@@ -109,7 +108,7 @@ unsigned int GET_SCIA_LV0_STATE_DET( unsigned char chan_mask, FILE *fd,
 .IDENTifer   GET_SCIA_LV0_STATE_PMD
 .PURPOSE     read all PMD MDS records of one state
 .INPUT/OUTPUT
-  call as   nrec = GET_SCIA_LV0_STATE_PMD( fd, states, &pmd );
+  call as   nrec = GET_SCIA_LV0_STATE_PMD(fd, states, &pmd);
      input:
             FILE *fd                   : file pointer
             struct mds0_states *states : structure holding info about MDS
@@ -120,13 +119,13 @@ unsigned int GET_SCIA_LV0_STATE_DET( unsigned char chan_mask, FILE *fd,
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned int GET_SCIA_LV0_STATE_PMD( FILE *fd,
-				     const struct mds0_states *states,
-				     struct mds0_pmd **pmd_out )
+unsigned int GET_SCIA_LV0_STATE_PMD(FILE *fd,
+				    const struct mds0_states *states,
+				    struct mds0_pmd **pmd_out)
 {
-     if ( states->num_pmd == 0u ) return 0u;
+     if (states->num_pmd == 0u) return 0u;
 
-     (void) SCIA_LV0_RD_PMD( fd, states->info_pmd, states->num_pmd, pmd_out );
+     (void) SCIA_LV0_RD_PMD(fd, states->info_pmd, states->num_pmd, pmd_out);
 
      return states->num_pmd;
 }

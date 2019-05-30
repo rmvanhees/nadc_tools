@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 SPECTRAL_BASE data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_BASE( param, base );
+  call as    SCIA_LV1_WR_H5_BASE(base);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct base_scia *base    : Spectral Base Parameters
 
 .RETURNS     Nothing
@@ -51,24 +50,24 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_BASE( struct param_record param, 
-			  const struct base_scia *base )
+void SCIA_LV1_WR_H5_BASE(const struct base_scia *base)
 {
-     hid_t   gads_id;
+     hid_t   fid, gads_id;
      hsize_t adim;
 /*
  * open/create group /GADS
  */
-     gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     gads_id = NADC_OPEN_HDF5_Group(fid, "/GADS");
+     if (gads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/GADS");
 /*
  * write datasets
  */
      adim = SCIENCE_PIXELS;
-     (void) H5LTmake_dataset_float( gads_id, "SPECTRAL_BASE", 1, &adim, 
-				    base->wvlen_det_pix );
+     (void) H5LTmake_dataset_float(gads_id, "SPECTRAL_BASE", 1, &adim, 
+				   base->wvlen_det_pix);
 /*
  * close interface
  */
-     (void) H5Gclose( gads_id );
+     (void) H5Gclose(gads_id);
 }

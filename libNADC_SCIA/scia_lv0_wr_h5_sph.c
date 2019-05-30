@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 0 SPH data
 .INPUT/OUTPUT
-  call as    SCIA_LV0_WR_H5_SPH( param, sph );
+  call as    SCIA_LV0_WR_H5_SPH(sph);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct sph0_scia    *sph  : Specific Product Header data
 
 .RETURNS     Nothing
@@ -54,40 +53,39 @@
 
 #define NFIELDS    20
 
-static const size_t sph_size = sizeof( struct sph0_scia );
+static const size_t sph_size = sizeof(struct sph0_scia);
 static const size_t sph_offs[NFIELDS] = {
-     HOFFSET( struct sph0_scia, descriptor ),
-     HOFFSET( struct sph0_scia, start_lat ),
-     HOFFSET( struct sph0_scia, start_lon ),
-     HOFFSET( struct sph0_scia, stop_lat ),
-     HOFFSET( struct sph0_scia, stop_lon ),
-     HOFFSET( struct sph0_scia, sat_track ),
+     HOFFSET(struct sph0_scia, descriptor),
+     HOFFSET(struct sph0_scia, start_lat),
+     HOFFSET(struct sph0_scia, start_lon),
+     HOFFSET(struct sph0_scia, stop_lat),
+     HOFFSET(struct sph0_scia, stop_lon),
+     HOFFSET(struct sph0_scia, sat_track),
 
-     HOFFSET( struct sph0_scia, isp_errors ),
-     HOFFSET( struct sph0_scia, missing_isps ),
-     HOFFSET( struct sph0_scia, isp_discard ),
-     HOFFSET( struct sph0_scia, rs_sign ),
+     HOFFSET(struct sph0_scia, isp_errors),
+     HOFFSET(struct sph0_scia, missing_isps),
+     HOFFSET(struct sph0_scia, isp_discard),
+     HOFFSET(struct sph0_scia, rs_sign),
 
-     HOFFSET( struct sph0_scia, num_error_isps ),
-     HOFFSET( struct sph0_scia, error_isps_thres ),
-     HOFFSET( struct sph0_scia, num_miss_isps ),
-     HOFFSET( struct sph0_scia, miss_isps_thres ),
-     HOFFSET( struct sph0_scia, num_discard_isps ),
-     HOFFSET( struct sph0_scia, discard_isps_thres ),
-     HOFFSET( struct sph0_scia, num_rs_isps ),
-     HOFFSET( struct sph0_scia, rs_thres ),
+     HOFFSET(struct sph0_scia, num_error_isps),
+     HOFFSET(struct sph0_scia, error_isps_thres),
+     HOFFSET(struct sph0_scia, num_miss_isps),
+     HOFFSET(struct sph0_scia, miss_isps_thres),
+     HOFFSET(struct sph0_scia, num_discard_isps),
+     HOFFSET(struct sph0_scia, discard_isps_thres),
+     HOFFSET(struct sph0_scia, num_rs_isps),
+     HOFFSET(struct sph0_scia, rs_thres),
 
-     HOFFSET( struct sph0_scia, tx_rx_polar ),
-     HOFFSET( struct sph0_scia, swath )
+     HOFFSET(struct sph0_scia, tx_rx_polar),
+     HOFFSET(struct sph0_scia, swath)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV0_WR_H5_SPH( struct param_record param, 
-			 const struct sph0_scia *sph )
+void SCIA_LV0_WR_H5_SPH(const struct sph0_scia *sph)
 {
      register unsigned short ni = 0;
 
-     hid_t   sph_type[NFIELDS];
+     hid_t   fid, sph_type[NFIELDS];
 
      const int compress = 0;
      const char *sph_names[NFIELDS] = {
@@ -104,39 +102,40 @@ void SCIA_LV0_WR_H5_SPH( struct param_record param,
 /*
  * define user-defined data types of the Table-fields
  */
-     sph_type[0] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( sph_type[0], (size_t) 29 );
-     sph_type[1] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[2] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[3] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[4] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[5] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[6] = H5Tcopy( H5T_NATIVE_USHORT );
-     sph_type[7] = H5Tcopy( H5T_NATIVE_USHORT );
-     sph_type[8] = H5Tcopy( H5T_NATIVE_USHORT );
-     sph_type[9] = H5Tcopy( H5T_NATIVE_USHORT );
-     sph_type[10] = H5Tcopy( H5T_NATIVE_INT );
-     sph_type[11] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[12] = H5Tcopy( H5T_NATIVE_INT );
-     sph_type[13] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[14] = H5Tcopy( H5T_NATIVE_INT );
-     sph_type[15] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[16] = H5Tcopy( H5T_NATIVE_INT );
-     sph_type[17] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     sph_type[18] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( sph_type[18], (size_t) 6 );
-     sph_type[19] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( sph_type[19], (size_t) 4 );
+     sph_type[0] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(sph_type[0], (size_t) 29);
+     sph_type[1] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[2] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[3] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[4] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[5] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[6] = H5Tcopy(H5T_NATIVE_USHORT);
+     sph_type[7] = H5Tcopy(H5T_NATIVE_USHORT);
+     sph_type[8] = H5Tcopy(H5T_NATIVE_USHORT);
+     sph_type[9] = H5Tcopy(H5T_NATIVE_USHORT);
+     sph_type[10] = H5Tcopy(H5T_NATIVE_INT);
+     sph_type[11] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[12] = H5Tcopy(H5T_NATIVE_INT);
+     sph_type[13] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[14] = H5Tcopy(H5T_NATIVE_INT);
+     sph_type[15] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[16] = H5Tcopy(H5T_NATIVE_INT);
+     sph_type[17] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     sph_type[18] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(sph_type[18], (size_t) 6);
+     sph_type[19] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(sph_type[19], (size_t) 4);
 /*
  * create table
  */
-     (void) H5TBmake_table( "Specific Product Header", param.hdf_file_id, 
+     fid = nadc_get_param_hid("hdf_file_id");
+     (void) H5TBmake_table("Specific Product Header", fid, 
 			    "SPH", NFIELDS, 1, sph_size, sph_names, sph_offs, 
-			    sph_type, 1, NULL, compress, sph );
+			    sph_type, 1, NULL, compress, sph);
 /*
  * close interface
  */
      do {
-	  (void) H5Tclose( sph_type[ni] );
-     } while ( ++ni < NFIELDS );
+	  (void) H5Tclose(sph_type[ni]);
+     } while (++ni < NFIELDS);
 }

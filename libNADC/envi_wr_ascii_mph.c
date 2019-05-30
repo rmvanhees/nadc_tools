@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Dump Main Product Header
 .INPUT/OUTPUT
-  call as   ENVI_WR_ASCII_MPH( param, mph );
+  call as   ENVI_WR_ASCII_MPH(mph);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct mph_envi *mph :      structure for the MPH
 
 .RETURNS     Nothing
@@ -55,59 +54,63 @@
 #include <nadc_common.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void ENVI_WR_ASCII_MPH( struct param_record param, 
-			const struct mph_envi *mph )
+void ENVI_WR_ASCII_MPH(const struct mph_envi *mph)
 {
      register unsigned int  nr = 0;
 
-     FILE *outfl = CRE_ASCII_File( param.outfile, "mph" );
+     char *cpntr;
+     FILE *outfl;
 
-     if ( outfl == NULL || IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_CRE, param.outfile );
+     cpntr = nadc_get_param_string("outfile");
+     if ((outfl = CRE_ASCII_File(cpntr, "mph")) == NULL || IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_CRE, cpntr);
+     free(cpntr);
 /*
  * write ASCII dump of MPH record
  */
-     nadc_write_header( outfl, nr, param.infile, "Main Product Header" );
-     nadc_write_text( outfl, ++nr, "PRODUCT", mph->product );
-     nadc_write_text( outfl, ++nr, "PROC_STAGE", mph->proc_stage );
-     nadc_write_text( outfl, ++nr, "REF_DOC", mph->ref_doc );
+     cpntr = nadc_get_param_string("infile");
+     nadc_write_header(outfl, nr, cpntr, "Main Product Header");
+     free(cpntr);
+     nadc_write_text(outfl, ++nr, "PRODUCT", mph->product);
+     nadc_write_text(outfl, ++nr, "PROC_STAGE", mph->proc_stage);
+     nadc_write_text(outfl, ++nr, "REF_DOC", mph->ref_doc);
      nr++;    /* spare_1 */
-     nadc_write_text( outfl, ++nr, "ACQUISITION_STATION", mph->acquis );
-     nadc_write_text( outfl, ++nr, "PROC_CENTER", mph->proc_center );
-     nadc_write_text( outfl, ++nr, "PROC_TIME", mph->proc_time );
-     nadc_write_text( outfl, ++nr, "SOFTWARE_VER", mph->soft_version );
+     nadc_write_text(outfl, ++nr, "ACQUISITION_STATION", mph->acquis);
+     nadc_write_text(outfl, ++nr, "PROC_CENTER", mph->proc_center);
+     nadc_write_text(outfl, ++nr, "PROC_TIME", mph->proc_time);
+     nadc_write_text(outfl, ++nr, "SOFTWARE_VER", mph->soft_version);
      nr++;    /* spare_2 */
-     nadc_write_text( outfl, ++nr, "SENSING_START", mph->sensing_start );
-     nadc_write_text( outfl, ++nr, "SENSING_STOP", mph->sensing_stop );
+     nadc_write_text(outfl, ++nr, "SENSING_START", mph->sensing_start);
+     nadc_write_text(outfl, ++nr, "SENSING_STOP", mph->sensing_stop);
      nr++;    /* spare_3 */
-     nadc_write_text( outfl, ++nr, "PHASE", mph->phase );
-     nadc_write_short( outfl, ++nr, "CYCLE", mph->cycle );
-     nadc_write_int( outfl, ++nr, "REL_ORBIT", mph->rel_orbit );
-     nadc_write_int( outfl, ++nr, "ABS_ORBIT", mph->abs_orbit );
-     nadc_write_text( outfl, ++nr, "STATE_VECTOR_TIME", mph->state_vector );
-     nadc_write_double( outfl, ++nr, "DELTA_UT1", 3, mph->delta_ut );
-     nadc_write_double( outfl, ++nr, "X_POSITION", 3, mph->x_position );
-     nadc_write_double( outfl, ++nr, "Y_POSITION", 3, mph->y_position );
-     nadc_write_double( outfl, ++nr, "Z_POSITION", 3, mph->z_position );
-     nadc_write_double( outfl, ++nr, "X_VELOCITY", 6, mph->x_velocity );
-     nadc_write_double( outfl, ++nr, "Y_VELOCITY", 6, mph->y_velocity );
-     nadc_write_double( outfl, ++nr, "Z_VELOCITY", 6, mph->z_velocity );
+     nadc_write_text(outfl, ++nr, "PHASE", mph->phase);
+     nadc_write_short(outfl, ++nr, "CYCLE", mph->cycle);
+     nadc_write_int(outfl, ++nr, "REL_ORBIT", mph->rel_orbit);
+     nadc_write_int(outfl, ++nr, "ABS_ORBIT", mph->abs_orbit);
+     nadc_write_text(outfl, ++nr, "STATE_VECTOR_TIME", mph->state_vector);
+     nadc_write_double(outfl, ++nr, "DELTA_UT1", 3, mph->delta_ut);
+     nadc_write_double(outfl, ++nr, "X_POSITION", 3, mph->x_position);
+     nadc_write_double(outfl, ++nr, "Y_POSITION", 3, mph->y_position);
+     nadc_write_double(outfl, ++nr, "Z_POSITION", 3, mph->z_position);
+     nadc_write_double(outfl, ++nr, "X_VELOCITY", 6, mph->x_velocity);
+     nadc_write_double(outfl, ++nr, "Y_VELOCITY", 6, mph->y_velocity);
+     nadc_write_double(outfl, ++nr, "Z_VELOCITY", 6, mph->z_velocity);
      nr++;    /* spare_4 */
-     nadc_write_text( outfl, ++nr, "VECTOR_SOURCE", mph->vector_source );
-     nadc_write_text( outfl, ++nr, "UTC_SBT_TIME", mph->utc_sbt_time );
-     nadc_write_uint( outfl, ++nr, "SAT_BINARY_TIME", mph->sat_binary_time );
-     nadc_write_uint( outfl, ++nr, "CLOCK_STEP", mph->clock_step );
+     nadc_write_text(outfl, ++nr, "VECTOR_SOURCE", mph->vector_source);
+     nadc_write_text(outfl, ++nr, "UTC_SBT_TIME", mph->utc_sbt_time);
+     nadc_write_uint(outfl, ++nr, "SAT_BINARY_TIME", mph->sat_binary_time);
+     nadc_write_uint(outfl, ++nr, "CLOCK_STEP", mph->clock_step);
      nr++;    /* spare_5 */
-     nadc_write_text( outfl, ++nr, "LEAP_UTC", mph->leap_utc );
-     nadc_write_short( outfl, ++nr, "LEAP_SIGN", mph->leap_sign );
-     nadc_write_text( outfl, ++nr, "LEAP_ERR", mph->leap_err );
+     nadc_write_text(outfl, ++nr, "LEAP_UTC", mph->leap_utc);
+     nadc_write_short(outfl, ++nr, "LEAP_SIGN", mph->leap_sign);
+     nadc_write_text(outfl, ++nr, "LEAP_ERR", mph->leap_err);
      nr++;    /* spare_6 */
-     nadc_write_text( outfl, ++nr, "PRODUCT_ERR", mph->product_err );
-     nadc_write_uint( outfl, ++nr, "TOT_SIZE", mph->tot_size );
-     nadc_write_uint( outfl, ++nr, "SPH_SIZE", mph->sph_size );
-     nadc_write_uint( outfl, ++nr, "NUM_DSD", mph->num_dsd );
-     nadc_write_uint( outfl, ++nr, "DSD_SIZE", mph->dsd_size );
-     nadc_write_uint( outfl, ++nr, "NUM_DATA_SETS", mph->num_data_sets );
+     nadc_write_text(outfl, ++nr, "PRODUCT_ERR", mph->product_err);
+     nadc_write_uint(outfl, ++nr, "TOT_SIZE", mph->tot_size);
+     nadc_write_uint(outfl, ++nr, "SPH_SIZE", mph->sph_size);
+     nadc_write_uint(outfl, ++nr, "NUM_DSD", mph->num_dsd);
+     nadc_write_uint(outfl, ++nr, "DSD_SIZE", mph->dsd_size);
+     nadc_write_uint(outfl, ++nr, "NUM_DATA_SETS", mph->num_data_sets);
      nr++;    /* spare_7 */
-     (void) fclose( outfl );
+     (void) fclose(outfl);
 }

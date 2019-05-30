@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2015 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -91,13 +91,13 @@ static struct clusdef_rec clusDef[MAX_NUM_STATE];
 #endif /* _SWAP_TO_LITTLE_ENDIAN */
 
 static inline
-void SET_NO_CLUSTER_CORRECTION( void )
+void SET_NO_CLUSTER_CORRECTION(void)
 {
-     char *env_str = getenv( "NO_CLUSTER_CORRECTION" );
+     char *env_str = getenv("NO_CLUSTER_CORRECTION");
 
-     if (  env_str != NULL && *env_str == '1' ) {
+     if ( env_str != NULL && *env_str == '1') {
 	  ClusterCorrectionFlag = FALSE;
-     } else if ( ! CLUSDEF_DB_EXISTS() ) {
+     } else if (! CLUSDEF_DB_EXISTS()) {
 	  ClusterCorrectionFlag = FALSE;
      } else {
 	  ClusterCorrectionFlag = TRUE;
@@ -109,7 +109,7 @@ void SET_NO_CLUSTER_CORRECTION( void )
 .IDENTifier CHECK_CLUSTERDEF
 .PURPOSE    Check and (if necessary) correct cluster parameters
 .INPUT/OUTPUT
-  call as   stat = CHECK_CLUSTERDEF( ncl, det_src );
+  call as   stat = CHECK_CLUSTERDEF(ncl, det_src);
  in/output:  
 	    struct det_src *data_src  : Detector Source Packets
 
@@ -131,8 +131,8 @@ void SET_NO_CLUSTER_CORRECTION( void )
 #define FMT_MSG_FAIL   "failed correcting cluster (%-hhu,%2hhu,%5hu,%4hu)"
 
 static inline
-unsigned char _CHECK_CLUSTERDEF( unsigned short ncl, 
-				struct det_src *det_src )
+unsigned char _CHECK_CLUSTERDEF(unsigned short ncl, 
+				struct det_src *det_src)
        /*@globals  nadc_stat, nadc_err_stack, numClusDef, clusDef;@*/
        /*@modifies nadc_stat, nadc_err_stack, det_src@*/
 {
@@ -152,19 +152,19 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
      const unsigned short length = (det_src->pixel[ncl].length & mask_length);
 
      /* check for precense of an out-of-bound value due to a bitflip */
-     if ( chanID != det_src->hdr.channel.field.id ) {
+     if (chanID != det_src->hdr.channel.field.id) {
 	  det_src->hdr.channel.field.id &= mask_id;
 	  stat = DET_SRC_MODIFIED_CHANID;
      }
-     if ( clusID != det_src->pixel[ncl].cluster_id ) {
+     if (clusID != det_src->pixel[ncl].cluster_id) {
 	  det_src->pixel[ncl].cluster_id &= mask_id;
 	  stat &= DET_SRC_MODIFIED_CLUSID;
      }
-     if ( start  != det_src->pixel[ncl].start ) {
+     if (start  != det_src->pixel[ncl].start) {
 	  det_src->pixel[ncl].start &= mask_start;
 	  stat &= DET_SRC_MODIFIED_START;
      }
-     if ( length != det_src->pixel[ncl].length ) {
+     if (length != det_src->pixel[ncl].length) {
 	  det_src->pixel[ncl].length &= mask_length;
 	  stat &= DET_SRC_MODIFIED_LENGTH;
      }
@@ -172,77 +172,77 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
      /* check if all fields in header are oke */
      nc = 0;
      do {
-	  if ( clusDef[nc].chanID == chanID 
+	  if (clusDef[nc].chanID == chanID 
 	       && clusDef[nc].clusID == clusID
 	       && clusDef[nc].start == start
-	       && clusDef[nc].length == length ) break;
-     } while( ++nc < numClusDef );
-     if ( nc < numClusDef ) return stat;
+	       && clusDef[nc].length == length) break;
+     } while(++nc < numClusDef);
+     if (nc < numClusDef) return stat;
 
      /* check if 3 fields in header are oke, except "clusID" */
      nc = 0;
      do {
-	  if ( clusDef[nc].chanID == chanID 
+	  if (clusDef[nc].chanID == chanID 
 	       && clusDef[nc].start == start
-	       && clusDef[nc].length == length ) break;
-     } while( ++nc < numClusDef );
-     if ( nc < numClusDef ) {
+	       && clusDef[nc].length == length) break;
+     } while(++nc < numClusDef);
+     if (nc < numClusDef) {
 	  det_src->pixel[ncl].cluster_id = clusDef[nc].clusID;
-	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CLUSID, 
-			   chanID, clusID, start, length, clusDef[nc].clusID );
-	  NADC_ERROR( NADC_ERR_NONE, msg );
+	  (void) snprintf(msg, SHORT_STRING_LENGTH, FMT_MSG_CLUSID, 
+			   chanID, clusID, start, length, clusDef[nc].clusID);
+	  NADC_ERROR(NADC_ERR_NONE, msg);
 	  return DET_SRC_MODIFIED_CLUSID;
      }
 
      /* check if 3 fields in header are oke, except "chanID" */
      nc = 0;
      do {
-	  if ( clusDef[nc].clusID == clusID
+	  if (clusDef[nc].clusID == clusID
 	       && clusDef[nc].start == start
-	       && clusDef[nc].length == length ) break;
-     } while( ++nc < numClusDef );
-     if ( nc < numClusDef ) {
+	       && clusDef[nc].length == length) break;
+     } while(++nc < numClusDef);
+     if (nc < numClusDef) {
 	  det_src->hdr.channel.field.id = clusDef[nc].chanID;
-	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_CHANID, 
-			   chanID, clusID, start, length, clusDef[nc].chanID );
-	  NADC_ERROR( NADC_ERR_NONE, msg );
+	  (void) snprintf(msg, SHORT_STRING_LENGTH, FMT_MSG_CHANID, 
+			   chanID, clusID, start, length, clusDef[nc].chanID);
+	  NADC_ERROR(NADC_ERR_NONE, msg);
 	  return DET_SRC_MODIFIED_CHANID;
      }
 
      /* check if 3 fields in header are oke, except "start" */
      nc = 0;
      do {
-	  if ( clusDef[nc].chanID == chanID 
+	  if (clusDef[nc].chanID == chanID 
 	       && clusDef[nc].clusID == clusID
-	       && clusDef[nc].length == length ) break;
-     } while( ++nc < numClusDef );
-     if ( nc < numClusDef ) {
+	       && clusDef[nc].length == length) break;
+     } while(++nc < numClusDef);
+     if (nc < numClusDef) {
 	  det_src->pixel[ncl].start = clusDef[nc].start;
-	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_START, 
-			   chanID, clusID, start, length, clusDef[nc].start );
-	  NADC_ERROR( NADC_ERR_NONE, msg );
+	  (void) snprintf(msg, SHORT_STRING_LENGTH, FMT_MSG_START, 
+			   chanID, clusID, start, length, clusDef[nc].start);
+	  NADC_ERROR(NADC_ERR_NONE, msg);
 	  return DET_SRC_MODIFIED_START;
      }
 
      /* check if 3 fields in header are oke, except "length" */
      nc = 0;
      do {
-	  if ( clusDef[nc].chanID == chanID 
+	  if (clusDef[nc].chanID == chanID 
 	       && clusDef[nc].clusID == clusID
-	       && clusDef[nc].start == start ) break;
-     } while( ++nc < numClusDef );
-     if ( nc < numClusDef ) {
+	       && clusDef[nc].start == start) break;
+     } while(++nc < numClusDef);
+     if (nc < numClusDef) {
 	  det_src->pixel[ncl].length = clusDef[nc].length;
-	  (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_LENGTH,
-			   chanID, clusID, start, length, clusDef[nc].length );
-	  NADC_ERROR( NADC_ERR_NONE, msg );
+	  (void) snprintf(msg, SHORT_STRING_LENGTH, FMT_MSG_LENGTH,
+			   chanID, clusID, start, length, clusDef[nc].length);
+	  NADC_ERROR(NADC_ERR_NONE, msg);
 	  return DET_SRC_MODIFIED_LENGTH;
      }
 
      /* Oeps, can not correct inconsistent header fields */
-     (void) snprintf( msg, SHORT_STRING_LENGTH, FMT_MSG_FAIL,
-		      chanID, clusID, start, length );
-     NADC_ERROR( NADC_ERR_NONE, msg );
+     (void) snprintf(msg, SHORT_STRING_LENGTH, FMT_MSG_FAIL,
+		      chanID, clusID, start, length);
+     NADC_ERROR(NADC_ERR_NONE, msg);
      return DET_SRC_READ_FAILED;
 }
 
@@ -250,7 +250,7 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 .IDENTifer   SCIA_LV0_RD_MDS_ANNOTATION
 .PURPOSE     read level 0 MDS  annotations
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_MDS_ANNOTATION( cbuff, *isp, *fep_hdr );
+  call as   SCIA_LV0_RD_MDS_ANNOTATION(cbuff, *isp, *fep_hdr);
      input:  
             char *cbuff              : pointer to annotation data
     output:  
@@ -261,38 +261,38 @@ unsigned char _CHECK_CLUSTERDEF( unsigned short ncl,
 .COMMENTS    static function
 -------------------------*/
 static inline
-void SCIA_LV0_RD_MDS_ANNOTATION( const char *cbuff,
+void SCIA_LV0_RD_MDS_ANNOTATION(const char *cbuff,
                                  /*@out@*/ struct mjd_envi *isp,
-				 /*@out@*/ struct fep_hdr  *fep_hdr )
+				 /*@out@*/ struct fep_hdr  *fep_hdr)
        /*@modifies isp, fep_hdr@*/
 {
      register const char *hdr_pntr = cbuff;
 /*
  * read ISP sensing time
  */
-     (void) memcpy( &isp->days, hdr_pntr, ENVI_INT );
+     (void) memcpy(&isp->days, hdr_pntr, ENVI_INT);
      hdr_pntr += ENVI_INT;
-     (void) memcpy( &isp->secnd, hdr_pntr, ENVI_UINT );
+     (void) memcpy(&isp->secnd, hdr_pntr, ENVI_UINT);
      hdr_pntr += ENVI_UINT;
-     (void) memcpy( &isp->musec, hdr_pntr, ENVI_UINT );
+     (void) memcpy(&isp->musec, hdr_pntr, ENVI_UINT);
      hdr_pntr += ENVI_UINT;
 /*
  * read Annotation (FEP)
  */
-     (void) memcpy( &fep_hdr->gsrt.days, hdr_pntr, ENVI_INT );
+     (void) memcpy(&fep_hdr->gsrt.days, hdr_pntr, ENVI_INT);
      hdr_pntr += ENVI_INT;
-     (void) memcpy( &fep_hdr->gsrt.secnd, hdr_pntr, ENVI_UINT );
+     (void) memcpy(&fep_hdr->gsrt.secnd, hdr_pntr, ENVI_UINT);
      hdr_pntr += ENVI_UINT;
-     (void) memcpy( &fep_hdr->gsrt.musec, hdr_pntr, ENVI_UINT );
+     (void) memcpy(&fep_hdr->gsrt.musec, hdr_pntr, ENVI_UINT);
      hdr_pntr += ENVI_UINT;
-     (void) memcpy( &fep_hdr->isp_length, hdr_pntr, ENVI_USHRT );
+     (void) memcpy(&fep_hdr->isp_length, hdr_pntr, ENVI_USHRT);
      hdr_pntr += ENVI_USHRT;
-     (void) memcpy( &fep_hdr->crc_errs, hdr_pntr, ENVI_USHRT );
+     (void) memcpy(&fep_hdr->crc_errs, hdr_pntr, ENVI_USHRT);
      hdr_pntr += ENVI_USHRT;
-     (void) memcpy( &fep_hdr->rs_errs, hdr_pntr, ENVI_USHRT );
+     (void) memcpy(&fep_hdr->rs_errs, hdr_pntr, ENVI_USHRT);
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_ANNOTATION( isp, fep_hdr );
+     Sun2Intel_MDS_ANNOTATION(isp, fep_hdr);
 #endif
 }
 
@@ -300,7 +300,7 @@ void SCIA_LV0_RD_MDS_ANNOTATION( const char *cbuff,
 .IDENTifer   SCIA_LV0_RD_MDS_PACKET_HDR
 .PURPOSE     read level 0 MDS ISP Packet header
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_MDS_PACKET_HDR( cbuff, *packet_hdr );
+  call as   SCIA_LV0_RD_MDS_PACKET_HDR(cbuff, *packet_hdr);
      input:  
             char *cbuff                   : pointer to packet header data
     output:  
@@ -310,22 +310,22 @@ void SCIA_LV0_RD_MDS_ANNOTATION( const char *cbuff,
 .COMMENTS    static function
 -------------------------*/
 static inline
-void SCIA_LV0_RD_MDS_PACKET_HDR( const char *cbuff,
-                                 /*@out@*/ struct packet_hdr *packet_hdr )
+void SCIA_LV0_RD_MDS_PACKET_HDR(const char *cbuff,
+                                 /*@out@*/ struct packet_hdr *packet_hdr)
        /*@modifies packet_hdr@*/
 {
      register const char *cpntr = cbuff;
 /*
  * copy data to output structure
  */
-     (void) memcpy( &packet_hdr->api.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&packet_hdr->api.two_byte, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &packet_hdr->seq_cntrl, cpntr, ENVI_USHRT );
+     (void) memcpy(&packet_hdr->seq_cntrl, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &packet_hdr->length, cpntr, ENVI_USHRT );
+     (void) memcpy(&packet_hdr->length, cpntr, ENVI_USHRT);
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_PACKET_HDR( packet_hdr );
+     Sun2Intel_MDS_PACKET_HDR(packet_hdr);
 #endif
 }
 
@@ -333,7 +333,7 @@ void SCIA_LV0_RD_MDS_PACKET_HDR( const char *cbuff,
 .IDENTifer   SCIA_LV0_RD_MDS_DATA_HDR
 .PURPOSE     read Data Field Header of the Packet Data Field [ISP]
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_MDS_DATA_HDR( cbuff, data_hdr );
+  call as   SCIA_LV0_RD_MDS_DATA_HDR(cbuff, data_hdr);
      input:  
             char *cbuff               : pointer to data header data
     output:  
@@ -345,28 +345,28 @@ void SCIA_LV0_RD_MDS_PACKET_HDR( const char *cbuff,
 	     Detector, Auxiliary and PMD) contains standard information.
 -------------------------*/
 static inline
-void SCIA_LV0_RD_MDS_DATA_HDR(  const char *cbuff,
-                               /*@out@*/ struct data_hdr *data_hdr )
+void SCIA_LV0_RD_MDS_DATA_HDR( const char *cbuff,
+                               /*@out@*/ struct data_hdr *data_hdr)
        /*@modifies *data_hdr@*/
 {
      register const char *cpntr = cbuff;
 /*
  * copy data to output structure
  */
-     (void) memcpy( &data_hdr->length, cpntr, ENVI_USHRT );
+     (void) memcpy(&data_hdr->length, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &data_hdr->category, cpntr, ENVI_UCHAR );
+     (void) memcpy(&data_hdr->category, cpntr, ENVI_UCHAR);
      cpntr += ENVI_UCHAR;
-     (void) memcpy( &data_hdr->state_id, cpntr, ENVI_UCHAR );
+     (void) memcpy(&data_hdr->state_id, cpntr, ENVI_UCHAR);
      cpntr += ENVI_UCHAR;
-     (void) memcpy( &data_hdr->on_board_time, cpntr, ENVI_UINT );
+     (void) memcpy(&data_hdr->on_board_time, cpntr, ENVI_UINT);
      cpntr += ENVI_UINT;
-     (void) memcpy( &data_hdr->rdv.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&data_hdr->rdv.two_byte, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &data_hdr->id.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&data_hdr->id.two_byte, cpntr, ENVI_USHRT);
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_DATA_HDR( data_hdr );
+     Sun2Intel_MDS_DATA_HDR(data_hdr);
 #endif
 }
 
@@ -374,7 +374,7 @@ void SCIA_LV0_RD_MDS_DATA_HDR(  const char *cbuff,
 .IDENTifer   SCIA_LV0_RD_MDS_PMTC_HDR
 .PURPOSE     read PMTC settings from the ISP Data Field Header
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_MDS_PMTC_HDR( cbuff, pmtc_hdr );
+  call as   SCIA_LV0_RD_MDS_PMTC_HDR(cbuff, pmtc_hdr);
      input:  
             char *cbuff               : pointer to PMTC header data
     output:  
@@ -384,26 +384,26 @@ void SCIA_LV0_RD_MDS_DATA_HDR(  const char *cbuff,
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_LV0_RD_MDS_PMTC_HDR( const char *cbuff,
-                               /*@out@*/ struct pmtc_hdr *pmtc_hdr )
+void SCIA_LV0_RD_MDS_PMTC_HDR(const char *cbuff,
+                               /*@out@*/ struct pmtc_hdr *pmtc_hdr)
        /*@modifies *pmtc_hdr@*/
 {
      register const char *cpntr = cbuff;
 /*
  * copy data to output structure
  */
-     (void) memcpy( &pmtc_hdr->pmtc_1.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&pmtc_hdr->pmtc_1.two_byte, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &pmtc_hdr->scanner_mode, cpntr, ENVI_USHRT );
+     (void) memcpy(&pmtc_hdr->scanner_mode, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &pmtc_hdr->az_param.four_byte, cpntr, ENVI_UINT );
+     (void) memcpy(&pmtc_hdr->az_param.four_byte, cpntr, ENVI_UINT);
      cpntr += ENVI_UINT;
-     (void) memcpy( &pmtc_hdr->elv_param.four_byte, cpntr, ENVI_UINT );
+     (void) memcpy(&pmtc_hdr->elv_param.four_byte, cpntr, ENVI_UINT);
      cpntr += ENVI_UINT;
-     (void) memcpy( &pmtc_hdr->factor, cpntr, 6 * ENVI_UCHAR );
+     (void) memcpy(&pmtc_hdr->factor, cpntr, 6 * ENVI_UCHAR);
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_PMTC_HDR( pmtc_hdr );
+     Sun2Intel_MDS_PMTC_HDR(pmtc_hdr);
 #endif
 }
 
@@ -411,7 +411,7 @@ void SCIA_LV0_RD_MDS_PMTC_HDR( const char *cbuff,
 .IDENTifer   SCIA_LV0_RD_PMTC_FRAME
 .PURPOSE     read source data of Auxilirary MDS
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_PMTC_FRAME( cbuff, pmtc_frame );
+  call as   SCIA_LV0_RD_PMTC_FRAME(cbuff, pmtc_frame);
      input:  
             char *cbuff                   : pointer to data of PMTC frame
     output:  
@@ -421,8 +421,8 @@ void SCIA_LV0_RD_MDS_PMTC_HDR( const char *cbuff,
 .COMMENTS    static function
 -------------------------*/
 static inline
-void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
-				 /*@out@*/ struct pmtc_frame *pmtc_frame )
+void SCIA_LV0_RD_MDS_PMTC_FRAME(const char *cbuff,
+				 /*@out@*/ struct pmtc_frame *pmtc_frame)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, *pmtc_frame@*/
 {
@@ -435,60 +435,60 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
 /*
  * initialize output structure to zero
  */
-     (void) memset( pmtc_frame, 0, sizeof( struct pmtc_frame ));
+     (void) memset(pmtc_frame, 0, sizeof(struct pmtc_frame));
 /*
  * copy data to output structure
  */
      do {
-	  (void) memcpy( &pmtc_frame->bcp[nb].sync, cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].sync, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
 
           /* check data integrity */
-	  if ( pmtc_frame->bcp[nb].sync != USHRT_ZERO
-	       && pmtc_frame->bcp[nb].sync != AUX_SYNC ) {
-	       NADC_RETURN_ERROR( NADC_WARN_PDS_RD, 
-				  "incorrect AUX Sync value(s) found" );
+	  if (pmtc_frame->bcp[nb].sync != USHRT_ZERO
+	       && pmtc_frame->bcp[nb].sync != AUX_SYNC) {
+	       NADC_RETURN_ERROR(NADC_WARN_PDS_RD, 
+				  "incorrect AUX Sync value(s) found");
 	  }
-	  (void) memcpy( &pmtc_frame->bcp[nb].bcps, cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].bcps, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &pmtc_frame->bcp[nb].flags.two_byte, 
-			 cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].flags.two_byte, 
+			 cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &ubuff, cpntr, ENVI_UINT );
+	  (void) memcpy(&ubuff, cpntr, ENVI_UINT);
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  ubuff = byte_swap_u32( ubuff );
+	  ubuff = byte_swap_u32(ubuff);
 #endif
 	  pmtc_frame->bcp[nb].azi_encode_cntr = (ubuff >> 4) & 0xFFFFF;
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &ubuff, cpntr, ENVI_UINT );
+	  (void) memcpy(&ubuff, cpntr, ENVI_UINT);
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  ubuff = byte_swap_u32( ubuff );
+	  ubuff = byte_swap_u32(ubuff);
 #endif
 	  pmtc_frame->bcp[nb].ele_encode_cntr = (ubuff >> 4) & 0xFFFFF;
 	  cpntr += ENVI_UINT;
-	  (void) memcpy( &pmtc_frame->bcp[nb].azi_cntr_error, 
-			 cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].azi_cntr_error, 
+			 cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &pmtc_frame->bcp[nb].ele_cntr_error, 
-			 cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].ele_cntr_error, 
+			 cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &pmtc_frame->bcp[nb].azi_scan_error, 
-			 cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].azi_scan_error, 
+			 cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &pmtc_frame->bcp[nb].ele_scan_error, 
-			 cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmtc_frame->bcp[nb].ele_scan_error, 
+			 cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-     } while ( ++nb < NUM_LV0_AUX_BCP );
+     } while (++nb < NUM_LV0_AUX_BCP);
 
-     (void) memcpy( &pmtc_frame->bench_rad.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&pmtc_frame->bench_rad.two_byte, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &pmtc_frame->bench_elv.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&pmtc_frame->bench_elv.two_byte, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
-     (void) memcpy( &pmtc_frame->bench_az.two_byte, cpntr, ENVI_USHRT );
+     (void) memcpy(&pmtc_frame->bench_az.two_byte, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_PMTC_FRAME( pmtc_frame );
+     Sun2Intel_MDS_PMTC_FRAME(pmtc_frame);
 #endif
 }
 
@@ -496,13 +496,12 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
 .IDENTifier   SCIA_LV0_RD_MDS_DET_SRC
 .PURPOSE     read Source Data of Detector Data Packet
 .INPUT/OUTPUT
-  call as   nr_chan = SCIA_LV0_RD_MDS_DET_SRC( cbuff, det_length,
-                                               chan_mask, num_chan, data_src );
+  call as   nr_chan = SCIA_LV0_RD_MDS_DET_SRC(cbuff, det_length,
+                                              num_chan, data_src);
      input:  
             char *cbuff               : 
             size_t det_length         : size of the detector data packet
                                           (in bytes)
-	    unsigned char chan_mask   : mask for channel selection
             unsigned short num_chan   : number of channels
     output:  
             struct det_src *data_src  : Detector Source Packets
@@ -511,10 +510,9 @@ void SCIA_LV0_RD_MDS_PMTC_FRAME( const char *cbuff,
 .COMMENTS    static function
 -------------------------*/
 static
-unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length, 
-					unsigned char chan_mask, 
-					unsigned short num_chan,
-					/*@out@*/ struct det_src *data_src )
+unsigned short SCIA_LV0_RD_MDS_DET_SRC(const char *cbuff, size_t det_length, 
+				       unsigned short num_chan,
+				       /*@out@*/ struct det_src *data_src)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, data_src@*/
 {
@@ -537,41 +535,40 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
  * copy data to output structure
  */
      do { 
-	  (void) memcpy( &data_src->hdr.sync, cpntr, ENVI_USHRT );
+	  (void) memcpy(&data_src->hdr.sync, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
 
           /* check data integrity */
-	  if ( data_src->hdr.sync != CHANNEL_SYNC )
-	       NADC_GOTO_ERROR( NADC_WARN_PDS_RD, 
-				"incorrect Channel Sync value found" );
+	  if (data_src->hdr.sync != CHANNEL_SYNC)
+	       NADC_GOTO_ERROR(NADC_WARN_PDS_RD, 
+				"incorrect Channel Sync value found");
 
-	  (void) memcpy( &data_src->hdr.channel.two_byte, cpntr, ENVI_USHRT );
+	  (void) memcpy(&data_src->hdr.channel.two_byte, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &data_src->hdr.bcps, cpntr, ENVI_USHRT );
+	  (void) memcpy(&data_src->hdr.bcps, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &data_src->hdr.command_vis.four_byte, cpntr, 
-			 ENVI_UINT );
-	  (void) memcpy( &data_src->hdr.command_ir.four_byte, cpntr, 
-			 ENVI_UINT );
+	  (void) memcpy(&data_src->hdr.command_vis.four_byte, cpntr, 
+			 ENVI_UINT);
+	  (void) memcpy(&data_src->hdr.command_ir.four_byte, cpntr, 
+			 ENVI_UINT);
 	  cpntr += ENVI_UINT;
-	  (void) memcpy( &data_src->hdr.ratio_hdr.two_byte, cpntr, ENVI_USHRT );
+	  (void) memcpy(&data_src->hdr.ratio_hdr.two_byte, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &data_src->hdr.bias, cpntr, ENVI_USHRT );
+	  (void) memcpy(&data_src->hdr.bias, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &data_src->hdr.temp, cpntr, ENVI_USHRT );
+	  (void) memcpy(&data_src->hdr.temp, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-	  Sun2Intel_MDS_CHAN_HDR( &data_src->hdr );
+	  Sun2Intel_MDS_CHAN_HDR(&data_src->hdr);
 #endif
 	  numClusters = (unsigned short) data_src->hdr.channel.field.clusters;
-	  Band_Is_Selected = 
-	       SELECTED_CHANNEL( chan_mask, data_src->hdr.channel.field.id );
-	  if ( Band_Is_Selected && numClusters > 0 ) {
+	  Band_Is_Selected = nadc_get_param_chan(data_src->hdr.channel.field.id);
+	  if (Band_Is_Selected && numClusters > 0) {
 	       nr_chan++;
 	       data_src->pixel = (struct chan_src *)
-		    malloc ( numClusters * sizeof( struct chan_src ) );
-	       if ( data_src->pixel == NULL )
-		    NADC_GOTO_ERROR( NADC_ERR_ALLOC, "pixel" );
+		    malloc (numClusters * sizeof(struct chan_src));
+	       if (data_src->pixel == NULL)
+		    NADC_GOTO_ERROR(NADC_ERR_ALLOC, "pixel");
 	  } else {
 	       data_src->pixel = dummy_pixel;
 	  }
@@ -580,106 +577,106 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
  */
 	  n_cl = 0;
 	  do {
-	       (void) memcpy( &data_src->pixel[n_cl].sync, cpntr, 
-			      ENVI_USHRT );
+	       (void) memcpy(&data_src->pixel[n_cl].sync, cpntr, 
+			      ENVI_USHRT);
 	       cpntr += ENVI_USHRT;
 
                /* check data integrity */
-	       if ( data_src->pixel[n_cl].sync != CLUSTER_SYNC ) {
-		    if ( Band_Is_Selected && numClusters > 0 ) {
-			 while ( n_cl > 0 )
-			      free( data_src->pixel[--n_cl].data );
-			 free( data_src->pixel );
+	       if (data_src->pixel[n_cl].sync != CLUSTER_SYNC) {
+		    if (Band_Is_Selected && numClusters > 0) {
+			 while (n_cl > 0)
+			      free(data_src->pixel[--n_cl].data);
+			 free(data_src->pixel);
 			 data_src->hdr.channel.field.clusters = 0;
 		    } else 
 			 data_src->pixel = NULL;
-		    NADC_GOTO_ERROR( NADC_WARN_PDS_RD, 
-				 "corrupted cluster Sync, remainder skipped" );
+		    NADC_GOTO_ERROR(NADC_WARN_PDS_RD, 
+				 "corrupted cluster Sync, remainder skipped");
 	       }
 	       /* cluster block identifier */
-	       (void) memcpy( &data_src->pixel[n_cl].block_nr, cpntr, 
-			      ENVI_USHRT );
+	       (void) memcpy(&data_src->pixel[n_cl].block_nr, cpntr, 
+			      ENVI_USHRT);
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       data_src->pixel[n_cl].block_nr = 
-		    byte_swap_u16( data_src->pixel[n_cl].block_nr );
+		    byte_swap_u16(data_src->pixel[n_cl].block_nr);
 #endif
 	       cpntr += ENVI_USHRT;
 	       /* cluster identifier */
-	       (void) memcpy( &data_src->pixel[n_cl].cluster_id, cpntr,
-			      ENVI_UCHAR );
+	       (void) memcpy(&data_src->pixel[n_cl].cluster_id, cpntr,
+			      ENVI_UCHAR);
 	       cpntr += ENVI_UCHAR;
 	       /* co-adding indicator */
-	       (void) memcpy( &data_src->pixel[n_cl].co_adding, cpntr, 
-			      ENVI_UCHAR );
+	       (void) memcpy(&data_src->pixel[n_cl].co_adding, cpntr, 
+			      ENVI_UCHAR);
 	       cpntr += ENVI_UCHAR;
 	       /* start pixel indicator */
-	       (void) memcpy( &data_src->pixel[n_cl].start, cpntr, ENVI_USHRT );
+	       (void) memcpy(&data_src->pixel[n_cl].start, cpntr, ENVI_USHRT);
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       data_src->pixel[n_cl].start = 
-		    byte_swap_u16( data_src->pixel[n_cl].start );
+		    byte_swap_u16(data_src->pixel[n_cl].start);
 #endif
 	       cpntr += ENVI_USHRT;
 	       /* cluster block length */
-	       (void) memcpy( &data_src->pixel[n_cl].length, cpntr, 
-			      ENVI_USHRT );
+	       (void) memcpy(&data_src->pixel[n_cl].length, cpntr, 
+			      ENVI_USHRT);
 #ifdef _SWAP_TO_LITTLE_ENDIAN
 	       data_src->pixel[n_cl].length = 
-		    byte_swap_u16( data_src->pixel[n_cl].length );
+		    byte_swap_u16(data_src->pixel[n_cl].length);
 #endif
 	       cpntr += ENVI_USHRT;
 
                /* check for corrupted cluster, and try to correct them */
-	       if ( ClusterCorrectionFlag && numClusDef != 0 ) {
-		    unsigned char stat = _CHECK_CLUSTERDEF( n_cl, data_src );
+	       if (ClusterCorrectionFlag && numClusDef != 0) {
+		    unsigned char stat = _CHECK_CLUSTERDEF(n_cl, data_src);
 
-		    if ( stat == DET_SRC_READ_FAILED ) {
-			 if ( Band_Is_Selected && numClusters > 0 ) {
-			      while ( n_cl > 0 )
-				   free( data_src->pixel[--n_cl].data );
-			      free( data_src->pixel );
+		    if (stat == DET_SRC_READ_FAILED) {
+			 if (Band_Is_Selected && numClusters > 0) {
+			      while (n_cl > 0)
+				   free(data_src->pixel[--n_cl].data);
+			      free(data_src->pixel);
 			      data_src->hdr.channel.field.clusters = 0;
 			 }
-			 NADC_GOTO_ERROR( NADC_WARN_PDS_RD,
-				"corrupted cluster block, remainder skipped" );
+			 NADC_GOTO_ERROR(NADC_WARN_PDS_RD,
+				"corrupted cluster block, remainder skipped");
 		    }
 	       }
 	       
                /* determine size of cluster pixel data block */
-	       if ( data_src->pixel[n_cl].co_adding == UCHAR_ONE )
+	       if (data_src->pixel[n_cl].co_adding == UCHAR_ONE)
 		    num_byte = (size_t) 
 			 data_src->pixel[n_cl].length * ENVI_USHRT;
 	       else {
 		    num_byte = (size_t) 
 			 data_src->pixel[n_cl].length * 3 * ENVI_UCHAR;
-		    if ( (data_src->pixel[n_cl].length % 2) == 1 ) 
+		    if ((data_src->pixel[n_cl].length % 2) == 1) 
 			 num_byte += ENVI_UCHAR;
 	       }
                /* pixel data */
-	       if ( Band_Is_Selected ) {
+	       if (Band_Is_Selected) {
 		    data_src->pixel[n_cl].data = 
-			 (unsigned char *) malloc( num_byte );
-		    if ( data_src->pixel[n_cl].data == NULL )
-			 NADC_GOTO_ERROR( NADC_ERR_ALLOC, 
-					  "pixel->data" );
-		    (void) memcpy( data_src->pixel[n_cl].data, 
-				   cpntr, num_byte );
+			 (unsigned char *) malloc(num_byte);
+		    if (data_src->pixel[n_cl].data == NULL)
+			 NADC_GOTO_ERROR(NADC_ERR_ALLOC, 
+					  "pixel->data");
+		    (void) memcpy(data_src->pixel[n_cl].data, 
+				   cpntr, num_byte);
 	       }
 	       cpntr += num_byte;
 	       
-	  } while( ++n_cl < numClusters );
+	  } while(++n_cl < numClusters);
 
-	  if ( Band_Is_Selected ) data_src++;
-     } while ( ++n_ch < num_chan );
+	  if (Band_Is_Selected) data_src++;
+     } while (++n_ch < num_chan);
 /*
  * check number of bytes read
  */
-     if ( (size_t)(cpntr - cbuff) != det_length ) {
+     if ((size_t)(cpntr - cbuff) != det_length) {
 	  char msg[80];
-	  (void) snprintf( msg, 80, 
+	  (void) snprintf(msg, 80, 
 			   "Detector[%-hu] MDS size: %zd instead of %zd", 
 			   numClusters, (size_t)(cpntr - cbuff), 
-			   det_length );
-	  NADC_GOTO_ERROR( NADC_WARN_PDS_RD, msg );
+			   det_length);
+	  NADC_GOTO_ERROR(NADC_WARN_PDS_RD, msg);
      }
 /*
  * release allocated memory
@@ -692,7 +689,7 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 .IDENTifer   SCIA_LV0_RD_PMD_SRC
 .PURPOSE     read source data of PMD MDS
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_PMD_SRC( cbuff, pmd_src );
+  call as   SCIA_LV0_RD_PMD_SRC(cbuff, pmd_src);
      input:  
             char *cbuff             : pointer to data of PMD data packet
     output:  
@@ -702,8 +699,8 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC( const char *cbuff, size_t det_length,
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff, 
-			      /*@out@*/ struct pmd_src *pmd_src )
+void SCIA_LV0_RD_MDS_PMD_SRC(const char *cbuff, 
+			      /*@out@*/ struct pmd_src *pmd_src)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack, *pmd_src@*/
 {
@@ -716,35 +713,35 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
 /*
  * initialize output structure to zero
  */
-     (void) memset( pmd_src, 0, sizeof(struct pmd_src) );
+     (void) memset(pmd_src, 0, sizeof(struct pmd_src));
 /*
  * copy data to output structure
  */
-     (void) memcpy( &pmd_src->temp, cpntr, ENVI_USHRT );
+     (void) memcpy(&pmd_src->temp, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
 
      np = 0;
      do {
-	  (void) memcpy( &pmd_src->packet[np].sync, cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmd_src->packet[np].sync, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
 
           /* check data integrity */
-	  if ( pmd_src->packet[np].sync != USHRT_ZERO
-	       && pmd_src->packet[np].sync != PMD_SYNC ) {
-	       NADC_RETURN_ERROR( NADC_WARN_PDS_RD, 
-				  "incorrect PMD Sync value(s) found" );
+	  if (pmd_src->packet[np].sync != USHRT_ZERO
+	       && pmd_src->packet[np].sync != PMD_SYNC) {
+	       NADC_RETURN_ERROR(NADC_WARN_PDS_RD, 
+				  "incorrect PMD Sync value(s) found");
 	  }
-	  (void) memcpy( pmd_src->packet[np].data, cpntr, nr_byte );
+	  (void) memcpy(pmd_src->packet[np].data, cpntr, nr_byte);
 	  cpntr += nr_byte;
-	  (void) memcpy( &pmd_src->packet[np].bcps, cpntr, ENVI_USHRT );
+	  (void) memcpy(&pmd_src->packet[np].bcps, cpntr, ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-	  (void) memcpy( &pmd_src->packet[np].time.two_byte, cpntr, 
-			   ENVI_USHRT );
+	  (void) memcpy(&pmd_src->packet[np].time.two_byte, cpntr, 
+			   ENVI_USHRT);
 	  cpntr += ENVI_USHRT;
-     } while ( ++np < NUM_LV0_PMD_PACKET );
+     } while (++np < NUM_LV0_PMD_PACKET);
 
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     Sun2Intel_MDS_PMD_SRC( pmd_src );
+     Sun2Intel_MDS_PMD_SRC(pmd_src);
 #endif
 }
 
@@ -752,7 +749,7 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
 .IDENTifer   SCIA_LV0_RD_ONE_AUX
 .PURPOSE     read one SCIAMACHY level 0 Auxiliary MDS
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_ONE_AUX( fd, info, aux );
+  call as   SCIA_LV0_RD_ONE_AUX(fd, info, aux);
      input:  
             FILE   *fd             : (open) stream pointer
 	    struct mds0_info *info : structure holding info about MDS records
@@ -763,8 +760,8 @@ void SCIA_LV0_RD_MDS_PMD_SRC( const char *cbuff,
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
-			  struct mds0_aux *aux )
+void SCIA_LV0_RD_ONE_AUX(FILE *fd, const struct mds0_info *info,
+			  struct mds0_aux *aux)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, aux@*/
 {
@@ -779,65 +776,64 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
 /*
  * rewind/read input data file
  */
-     (void) fseek( fd, (long) info->offset, SEEK_SET );
+     (void) fseek(fd, (long) info->offset, SEEK_SET);
 /*
  * read Auxiliary DSR from file as a character array
  */
-     if ( fread( cbuff, lv0_aux_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_AUX_DSR" );
+     if (fread(cbuff, lv0_aux_dsr_size, 1, fd) != 1)
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "LV0_AUX_DSR");
      cpntr = cbuff;
 /*
  * read Annotation (ISP, FEP)
  */
-     SCIA_LV0_RD_MDS_ANNOTATION( cpntr, &aux->isp, &aux->fep_hdr );
+     SCIA_LV0_RD_MDS_ANNOTATION(cpntr, &aux->isp, &aux->fep_hdr);
      cpntr += LV0_ANNOTATION_LENGTH;
 /*
  * read ISP Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &aux->packet_hdr );
+     SCIA_LV0_RD_MDS_PACKET_HDR(cpntr, &aux->packet_hdr);
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP Data Field Header
  */
-     SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &aux->data_hdr );
+     SCIA_LV0_RD_MDS_DATA_HDR(cpntr, &aux->data_hdr);
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
  * check packet ID, state ID & on-board time
  */
-     if ( info->q.flag.packet_id == 1 )
+     if (info->q.flag.packet_id == 1)
 	  aux->data_hdr.id.field.packet = SCIA_AUX_PACKET;
 
-     if ( info->q.flag.state_id == 1 )
+     if (info->q.flag.state_id == 1)
 	  aux->data_hdr.state_id = info->state_id;
 
-     if ( info->q.flag.on_board_time == 1 )
+     if (info->q.flag.on_board_time == 1)
 	  aux->data_hdr.on_board_time = info->on_board_time;
 /*
  * read PMTC settings
  */
-     SCIA_LV0_RD_MDS_PMTC_HDR( cpntr, &aux->pmtc_hdr );
+     SCIA_LV0_RD_MDS_PMTC_HDR(cpntr, &aux->pmtc_hdr);
      cpntr += LV0_PMTC_HDR_LENGTH;
 /*
  * read ISP Auxiliary data source packet
  */
      nf = 0;
      do {
-	  SCIA_LV0_RD_MDS_PMTC_FRAME( cpntr, &aux->data_src[nf] );
+	  SCIA_LV0_RD_MDS_PMTC_FRAME(cpntr, &aux->data_src[nf]);
 	  cpntr += AUX_DATA_SRC_LENGTH;
-	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
-     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
+	  if (IS_ERR_STAT_FATAL) 
+	       NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "MDS_PMTC_FRAME");
+     } while (++nf < NUM_LV0_AUX_PMTC_FRAME);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_RD_ONE_DET
 .PURPOSE     read one SCIAMACHY level 0 Detector MDS
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_ONE_DET( fd, info, det );
+  call as   SCIA_LV0_RD_ONE_DET(fd, info, det);
      input:  
             FILE   *fd              : (open) stream pointer
 	    struct mds0_info *info  : structure holding info about MDS records
-	    unsigned char chan_mask : mask for channel selection
     output:  
             struct mds0_det *det    : Detector MDS records
 
@@ -845,9 +841,9 @@ void SCIA_LV0_RD_ONE_AUX( FILE *fd, const struct mds0_info *info,
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
-			  const struct mds0_info *info,
-			  struct mds0_det *det )
+void SCIA_LV0_RD_ONE_DET(FILE *fd,
+			 const struct mds0_info *info,
+			 struct mds0_det *det)
        /*@globals  errno, nadc_stat, nadc_err_stack, Use_Extern_Alloc;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, det@*/
 {
@@ -863,102 +859,102 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 /*
  * rewind/read input data file
  */
-     (void) fseek( fd, (long) info->offset, SEEK_SET );
+     (void) fseek(fd, (long) info->offset, SEEK_SET);
 /*
  * read PMD DSR from file as a character array
  */
-     if ( fread( cbuff, lv0_det_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_DET_HDR" );
+     if (fread(cbuff, lv0_det_dsr_size, 1, fd) != 1)
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "LV0_DET_HDR");
      cpntr = cbuff;
 /*
  * read Annotation (ISP, FEP)
  */
-     SCIA_LV0_RD_MDS_ANNOTATION( cpntr, &det->isp, &det->fep_hdr );
+     SCIA_LV0_RD_MDS_ANNOTATION(cpntr, &det->isp, &det->fep_hdr);
      cpntr += LV0_ANNOTATION_LENGTH;
 /*
  * read Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &det->packet_hdr );
+     SCIA_LV0_RD_MDS_PACKET_HDR(cpntr, &det->packet_hdr);
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP Data Field Header
  */
-     SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &det->data_hdr );
+     SCIA_LV0_RD_MDS_DATA_HDR(cpntr, &det->data_hdr);
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
  * check packet ID, state ID & on-board time
  */
-     if ( info->q.flag.packet_id == 1 )
+     if (info->q.flag.packet_id == 1)
 	  det->data_hdr.id.field.packet = SCIA_DET_PACKET;
 
-     if ( info->q.flag.state_id == 1 )
+     if (info->q.flag.state_id == 1)
 	  det->data_hdr.state_id = info->state_id;
 
-     if ( info->q.flag.on_board_time == 1 )
+     if (info->q.flag.on_board_time == 1)
 	  det->data_hdr.on_board_time = info->on_board_time;
 /*
  * read Broadcast counter (MDI)
  */
-     (void) memcpy( &det->bcps, cpntr, ENVI_USHRT );
+     (void) memcpy(&det->bcps, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     det->bcps = byte_swap_u16( det->bcps );
+     det->bcps = byte_swap_u16(det->bcps);
 #endif
 /*
  * read PMTC settings
  */
-     SCIA_LV0_RD_MDS_PMTC_HDR( cpntr, &det->pmtc_hdr );
+     SCIA_LV0_RD_MDS_PMTC_HDR(cpntr, &det->pmtc_hdr);
      cpntr += LV0_PMTC_HDR_LENGTH;
 /*
  * read remaining variables from Data Field Header for the Detector Data Packet
  */
-     (void) memcpy( &det->orbit_vector, cpntr, 8 * ENVI_INT );
+     (void) memcpy(&det->orbit_vector, cpntr, 8 * ENVI_INT);
      cpntr += 8 * ENVI_INT;
-     (void) memcpy( &det->num_chan, cpntr, ENVI_USHRT );
+     (void) memcpy(&det->num_chan, cpntr, ENVI_USHRT);
      cpntr += ENVI_USHRT;
 #ifdef _SWAP_TO_LITTLE_ENDIAN
-     det->orbit_vector[0] = byte_swap_32( det->orbit_vector[0] );
-     det->orbit_vector[1] = byte_swap_32( det->orbit_vector[1] );
-     det->orbit_vector[2] = byte_swap_32( det->orbit_vector[2] );
-     det->orbit_vector[3] = byte_swap_32( det->orbit_vector[3] );
-     det->orbit_vector[4] = byte_swap_32( det->orbit_vector[4] );
-     det->orbit_vector[5] = byte_swap_32( det->orbit_vector[5] );
-     det->orbit_vector[6] = byte_swap_32( det->orbit_vector[6] );
-     det->orbit_vector[7] = byte_swap_32( det->orbit_vector[7] );
-     det->num_chan = byte_swap_u16( det->num_chan );
+     det->orbit_vector[0] = byte_swap_32(det->orbit_vector[0]);
+     det->orbit_vector[1] = byte_swap_32(det->orbit_vector[1]);
+     det->orbit_vector[2] = byte_swap_32(det->orbit_vector[2]);
+     det->orbit_vector[3] = byte_swap_32(det->orbit_vector[3]);
+     det->orbit_vector[4] = byte_swap_32(det->orbit_vector[4]);
+     det->orbit_vector[5] = byte_swap_32(det->orbit_vector[5]);
+     det->orbit_vector[6] = byte_swap_32(det->orbit_vector[6]);
+     det->orbit_vector[7] = byte_swap_32(det->orbit_vector[7]);
+     det->num_chan = byte_swap_u16(det->num_chan);
 #endif
 /*
  * read ISP Detector Data Source Packet
  */
      det_length = (size_t) (det->packet_hdr.length - DET_DATA_HDR_LENGTH + 1);
-     if ( (cdet = (char *) malloc( det_length )) == NULL ) 
-	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "cdet" );
-     if ( fread( cdet, det_length, 1, fd ) != 1 ) {
-	  free( cdet );
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, "cdet" );
+     if ((cdet = (char *) malloc(det_length)) == NULL) 
+	  NADC_RETURN_ERROR(NADC_ERR_ALLOC, "cdet");
+     if (fread(cdet, det_length, 1, fd) != 1) {
+	  free(cdet);
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_RD, "cdet");
      }
-     if ( ! Use_Extern_Alloc ) {
+     if (! Use_Extern_Alloc) {
 	  det->data_src = (struct det_src *) 
-	       malloc( det->num_chan * sizeof( struct det_src ) );
+	       malloc(det->num_chan * sizeof(struct det_src));
      }
-     if ( det->data_src == NULL ) {
-	  free( cdet );
-	  NADC_RETURN_ERROR( NADC_ERR_ALLOC, "det_src" );
+     if (det->data_src == NULL) {
+	  free(cdet);
+	  NADC_RETURN_ERROR(NADC_ERR_ALLOC, "det_src");
      }
-     det->num_chan = SCIA_LV0_RD_MDS_DET_SRC( cdet, det_length, chan_mask, 
-					      det->num_chan, det->data_src );
-     free( cdet );
-     if ( IS_ERR_STAT_WARN ) {
+     det->num_chan = SCIA_LV0_RD_MDS_DET_SRC(cdet, det_length, 
+					     det->num_chan, det->data_src);
+     free(cdet);
+     if (IS_ERR_STAT_WARN) {
 	  char msg[SHORT_STRING_LENGTH];
-	  (void) snprintf( msg, SHORT_STRING_LENGTH,
+	  (void) snprintf(msg, SHORT_STRING_LENGTH,
 			   "Read failed for on_board_time %-u state_id %hhu",
-			   info->on_board_time, info->state_id );
+			   info->on_board_time, info->state_id);
 	  nadc_stat &= ~(NADC_STAT_WARN);
-	  NADC_RETURN_ERROR( NADC_ERR_NONE, msg );
+	  NADC_RETURN_ERROR(NADC_ERR_NONE, msg);
      }
-     if ( IS_ERR_STAT_FATAL ) {
-	  if ( ! Use_Extern_Alloc ) free( det->data_src );
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_DATA_SRC" );
+     if (IS_ERR_STAT_FATAL) {
+	  if (! Use_Extern_Alloc) free(det->data_src);
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "MDS_DATA_SRC");
      }
 }
 
@@ -966,7 +962,7 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 .IDENTifer   SCIA_LV0_RD_ONE_PMD
 .PURPOSE     read one SCIAMACHY level 0 PMD MDS
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_ONE_PMD( fd, info, pmd );
+  call as   SCIA_LV0_RD_ONE_PMD(fd, info, pmd);
      input:  
             FILE   *fd             : (open) stream pointer
 	    struct mds0_info *info : structure holding info about MDS records
@@ -977,8 +973,8 @@ void SCIA_LV0_RD_ONE_DET( FILE *fd, unsigned char chan_mask,
 .COMMENTS    static function
 -------------------------*/
 static
-void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
-			  struct mds0_pmd *pmd )
+void SCIA_LV0_RD_ONE_PMD(FILE *fd, const struct mds0_info *info,
+			  struct mds0_pmd *pmd)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fd, pmd@*/
 {
@@ -991,45 +987,45 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
 /*
  * rewind/read input data file
  */
-     (void) fseek( fd, (long) info->offset, SEEK_SET );
+     (void) fseek(fd, (long) info->offset, SEEK_SET);
 /*
  * read PMD DSR from file as a character array
  */
-     if ( fread( cbuff, lv0_pmd_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_PMD_DSR" );
+     if (fread(cbuff, lv0_pmd_dsr_size, 1, fd) != 1)
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "LV0_PMD_DSR");
      cpntr = cbuff;
 /*
  * read Annotation (ISP, FEP)
  */
-     SCIA_LV0_RD_MDS_ANNOTATION( cpntr, &pmd->isp, &pmd->fep_hdr );
+     SCIA_LV0_RD_MDS_ANNOTATION(cpntr, &pmd->isp, &pmd->fep_hdr);
      cpntr += LV0_ANNOTATION_LENGTH;
 /*
  * read Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &pmd->packet_hdr );
+     SCIA_LV0_RD_MDS_PACKET_HDR(cpntr, &pmd->packet_hdr);
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP Data Field Header
  */
-     SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &pmd->data_hdr );
+     SCIA_LV0_RD_MDS_DATA_HDR(cpntr, &pmd->data_hdr);
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
  * check packet ID, state ID, on-board time
  */
-     if ( info->q.flag.packet_id == 1 )
+     if (info->q.flag.packet_id == 1)
 	  pmd->data_hdr.id.field.packet = SCIA_PMD_PACKET;
 
-     if ( info->q.flag.state_id == 1 )
+     if (info->q.flag.state_id == 1)
 	  pmd->data_hdr.state_id = info->state_id;
 
-     if ( info->q.flag.on_board_time == 1 )
+     if (info->q.flag.on_board_time == 1)
 	  pmd->data_hdr.on_board_time = info->on_board_time;
 /*
  * read ISP PMD data source packet
  */
-     SCIA_LV0_RD_MDS_PMD_SRC( cpntr, &pmd->data_src );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_PMD_SRC" );
+     SCIA_LV0_RD_MDS_PMD_SRC(cpntr, &pmd->data_src);
+     if (IS_ERR_STAT_FATAL) 
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "MDS_PMD_SRC");
 }
 
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
@@ -1037,7 +1033,7 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
 .IDENTifer   SCIA_LV0_RD_AUX
 .PURPOSE     read selected SCIAMACHY level 0 Auxiliary MDS
 .INPUT/OUTPUT
-  call as   nr_aux = SCIA_LV0_RD_AUX( fd, info, num_info, &aux );
+  call as   nr_aux = SCIA_LV0_RD_AUX(fd, info, num_info, &aux);
      input:  
             FILE   *fd             : (open) stream pointer
 	    struct mds0_info *info : structure holding info about MDS records
@@ -1049,45 +1045,45 @@ void SCIA_LV0_RD_ONE_PMD( FILE *fd, const struct mds0_info *info,
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned short SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
+unsigned short SCIA_LV0_RD_AUX(FILE *fd, const struct mds0_info *info,
 				unsigned short num_info, 
-				struct mds0_aux **aux_out )
+				struct mds0_aux **aux_out)
 {
      register unsigned short nr_aux = 0;
 
      struct mds0_aux *aux;
 
-     if ( num_info == 0 ) {
+     if (num_info == 0) {
 	  *aux_out = NULL;
 	  return 0u;
      }
 /*
  * allocate memory to store output records
  */
-     if ( ! Use_Extern_Alloc ) {
+     if (! Use_Extern_Alloc) {
 	  *aux_out = (struct mds0_aux *) 
-	       malloc( num_info * sizeof(struct mds0_aux));
+	       malloc(num_info * sizeof(struct mds0_aux));
      }
-     if ( (aux = *aux_out) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_aux" );
+     if ((aux = *aux_out) == NULL)
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mds0_aux");
 /*
  * read data buffer to MDS structure
  */
      do {
-	  SCIA_LV0_RD_ONE_AUX( fd, info, aux );
-	  if ( IS_ERR_STAT_FATAL ) {
+	  SCIA_LV0_RD_ONE_AUX(fd, info, aux);
+	  if (IS_ERR_STAT_FATAL) {
 	       char msg[32];
 
-	       free( *aux_out );
-	       (void) snprintf( msg, 32, "MDS_AUX[%-u]", nr_aux );
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, msg );
+	       free(*aux_out);
+	       (void) snprintf(msg, 32, "MDS_AUX[%-u]", nr_aux);
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, msg);
 	  }
 /*
  * go to next MDS info data set
  */
 	  info++;
 	  aux++;
-     } while ( ++nr_aux < num_info );
+     } while (++nr_aux < num_info);
  done:
      return nr_aux;
 }
@@ -1096,12 +1092,11 @@ unsigned short SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
 .IDENTifer   SCIA_LV0_RD_DET
 .PURPOSE     read selected SCIAMACHY level 0 Detector MDS
 .INPUT/OUTPUT
-  call as   nr_det = SCIA_LV0_RD_DET( fd, info, num_info, &det );
+  call as   nr_det = SCIA_LV0_RD_DET(fd, info, num_info, &det);
      input:  
             FILE   *fd              : (open) stream pointer
 	    struct mds0_info *info  : structure holding info about MDS records
 	    unsigned int num_info   : number of indices to struct info
-	    unsigned char chan_mask : mask for channel selection
     output:  
             struct mds0_det **det   : Detector MDS records
 
@@ -1109,16 +1104,15 @@ unsigned short SCIA_LV0_RD_AUX( FILE *fd, const struct mds0_info *info,
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned short SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
-				unsigned short num_info, 
-				unsigned char chan_mask,
-				struct mds0_det **det_out )
+unsigned short SCIA_LV0_RD_DET(FILE *fd, const struct mds0_info *info,
+			       unsigned short num_info, 
+			       struct mds0_det **det_out)
 {
      register unsigned short nr_det = 0;
 
      struct mds0_det *det;
 
-     if ( num_info == 0 ) {
+     if (num_info == 0) {
 	  *det_out = NULL;
 	  return 0u;
      }
@@ -1128,49 +1122,49 @@ unsigned short SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
      SET_NO_CLUSTER_CORRECTION();
 
      /* obtain cluster definition */
-     if ( ClusterCorrectionFlag ) {
+     if (ClusterCorrectionFlag) {
 //	  register unsigned short jj;
 	  
 	  struct mph_envi  mph;
 
-          ENVI_RD_MPH( fd, &mph );
-	  numClusDef = CLUSDEF_CLCON( info->state_id, mph.abs_orbit, clusDef );
-//	  (void) fprintf( stderr, " %d %d %d %d\n", mph.abs_orbit,
+          ENVI_RD_MPH(fd, &mph);
+	  numClusDef = CLUSDEF_CLCON(info->state_id, mph.abs_orbit, clusDef);
+//	  (void) fprintf(stderr, " %d %d %d %d\n", mph.abs_orbit,
 //			  (int) info->state_id, (int) ClusterCorrectionFlag,
-//			  (int) numClusDef );
-//	  for ( jj = 0; jj < numClusDef; jj++ ) {
-//	       (void) fprintf( stderr, "%2hhu %2hhu %4hu %4hu\n",
+//			  (int) numClusDef);
+//	  for (jj = 0; jj < numClusDef; jj++) {
+//	       (void) fprintf(stderr, "%2hhu %2hhu %4hu %4hu\n",
 //			       clusDef[jj].chanID, clusDef[jj].clusID,
-//			       clusDef[jj].start, clusDef[jj].length );
+//			       clusDef[jj].start, clusDef[jj].length);
 //	  }
      }
 /*
  * allocate memory to store output records
  */
-     if ( ! Use_Extern_Alloc ) {
+     if (! Use_Extern_Alloc) {
 	  *det_out = (struct mds0_det *) 
-	       malloc( num_info * sizeof(struct mds0_det));
+	       malloc(num_info * sizeof(struct mds0_det));
      }
-     if ( (det = *det_out) == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_det" );
+     if ((det = *det_out) == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mds0_det");
 /*
  * read data buffer to MDS structure
  */
      do {
-	  SCIA_LV0_RD_ONE_DET( fd, chan_mask, info, det );
-	  if ( IS_ERR_STAT_FATAL ) {
+	  SCIA_LV0_RD_ONE_DET(fd, info, det);
+	  if (IS_ERR_STAT_FATAL) {
 	       char msg[32];
 
-	       free( *det_out );
-	       (void) snprintf( msg, 32, "MDS_DET[%-u]", nr_det );
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, msg );
+	       free(*det_out);
+	       (void) snprintf(msg, 32, "MDS_DET[%-u]", nr_det);
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, msg);
 	  }
 /*
  * go to next MDS info data set
  */
 	  info++;
 	  det++;
-     } while ( ++nr_det < num_info );
+     } while (++nr_det < num_info);
  done:
      return nr_det;
 }
@@ -1179,7 +1173,7 @@ unsigned short SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
 .IDENTifer   SCIA_LV0_RD_PMD
 .PURPOSE     read selected SCIAMACHY level 0 PMD MDS
 .INPUT/OUTPUT
-  call as   nr_pmd = SCIA_LV0_RD_PMD( fd, info, num_info, &pmd );
+  call as   nr_pmd = SCIA_LV0_RD_PMD(fd, info, num_info, &pmd);
      input:  
             FILE   *fd             : (open) stream pointer
 	    struct mds0_info *info : structure holding info about MDS records
@@ -1191,45 +1185,45 @@ unsigned short SCIA_LV0_RD_DET( FILE *fd, const struct mds0_info *info,
              error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-unsigned short SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
+unsigned short SCIA_LV0_RD_PMD(FILE *fd, const struct mds0_info *info,
 				unsigned short num_info, 
-				struct mds0_pmd **pmd_out )
+				struct mds0_pmd **pmd_out)
 {
      register unsigned short nr_pmd = 0;
 
      struct mds0_pmd *pmd;
 
-     if ( num_info == 0 ) {
+     if (num_info == 0) {
 	  *pmd_out = NULL;
 	  return 0u;
      }
 /*
  * allocate memory to store output records
  */
-     if ( ! Use_Extern_Alloc ) {
+     if (! Use_Extern_Alloc) {
 	  *pmd_out = (struct mds0_pmd *) 
-	       malloc( num_info * sizeof(struct mds0_pmd));
+	       malloc(num_info * sizeof(struct mds0_pmd));
      }
-     if ( (pmd = *pmd_out) == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds0_pmd" );
+     if ((pmd = *pmd_out) == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mds0_pmd");
 /*
  * read data buffer to MDS structure
  */
      do {
-	  SCIA_LV0_RD_ONE_PMD( fd, info, pmd );
-	  if ( IS_ERR_STAT_FATAL ) {
+	  SCIA_LV0_RD_ONE_PMD(fd, info, pmd);
+	  if (IS_ERR_STAT_FATAL) {
 	       char msg[32];
 
-	       free( *pmd_out );
-	       (void) snprintf( msg, 32, "MDS_PMD[%-u]", nr_pmd );
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, msg );
+	       free(*pmd_out);
+	       (void) snprintf(msg, 32, "MDS_PMD[%-u]", nr_pmd);
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, msg);
 	  }
 /*
  * go to next MDS info data set
  */
 	  info++;
 	  pmd++;
-     } while ( ++nr_pmd < num_info );
+     } while (++nr_pmd < num_info);
  done:
      return nr_pmd;
 }
@@ -1238,7 +1232,7 @@ unsigned short SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 .IDENTifer   SCIA_LV0_FREE_MDS_DET
 .PURPOSE     free memory allocated by SCIA_LV0_RD_DET
 .INPUT/OUTPUT
-  call as   SCIA_LV0_FREE_MDS_DET( num_det, det );
+  call as   SCIA_LV0_FREE_MDS_DET(num_det, det);
      input:  
             unsigned short num_det  : number of Detector MDS
     output:  
@@ -1247,28 +1241,28 @@ unsigned short SCIA_LV0_RD_PMD( FILE *fd, const struct mds0_info *info,
 .RETURNS     error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV0_FREE_MDS_DET( unsigned short num_det, struct mds0_det *det )
+void SCIA_LV0_FREE_MDS_DET(unsigned short num_det, struct mds0_det *det)
 {
      register unsigned short nd = 0;
 
-     if ( num_det == 0 ) return;
+     if (num_det == 0) return;
 
      do {
 	  register unsigned short n_ch, n_cl;
 
-	  for ( n_ch = 0; n_ch < det[nd].num_chan; n_ch++ ) {
+	  for (n_ch = 0; n_ch < det[nd].num_chan; n_ch++) {
 	       unsigned short numClusters = (unsigned short) 
 		    det[nd].data_src[n_ch].hdr.channel.field.clusters;
 
-	       for ( n_cl = 0; n_cl < numClusters; n_cl++ )
-		    free( det[nd].data_src[n_ch].pixel[n_cl].data );
+	       for (n_cl = 0; n_cl < numClusters; n_cl++)
+		    free(det[nd].data_src[n_ch].pixel[n_cl].data);
 
-	       if ( numClusters > 0 ) free( det[nd].data_src[n_ch].pixel );
+	       if (numClusters > 0) free(det[nd].data_src[n_ch].pixel);
 	  }
-	  free( det[nd].data_src );
-     } while( ++nd < num_det );
+	  free(det[nd].data_src);
+     } while(++nd < num_det);
 
-     free( det );
+     free(det);
 }
 
 /*+++++++++++++++++++++++++
@@ -1276,7 +1270,7 @@ void SCIA_LV0_FREE_MDS_DET( unsigned short num_det, struct mds0_det *det )
 .PURPOSE     read SCIAMACHY level 0 Auxiliary MDS as stored in 
              a level 1b product
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_LV1_AUX( fd, aux );
+  call as   SCIA_LV0_RD_LV1_AUX(fd, aux);
      input:  
             FILE   *fd             : (open) stream pointer
     output:  
@@ -1285,7 +1279,7 @@ void SCIA_LV0_FREE_MDS_DET( unsigned short num_det, struct mds0_det *det )
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
+void SCIA_LV0_RD_LV1_AUX(FILE *fd, struct mds1_aux *aux)
 {
      const size_t lv0_aux_dsr_size = LV0_PACKET_HDR_LENGTH 
 	  + LV0_DATA_HDR_LENGTH + LV0_PMTC_HDR_LENGTH
@@ -1298,47 +1292,47 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 /*
  * read Auxiliary DSR from file as a character array
  */
-     if ( fread( cbuff, lv0_aux_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_AUX_DSR" );
+     if (fread(cbuff, lv0_aux_dsr_size, 1, fd) != 1)
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "LV0_AUX_DSR");
      cpntr = cbuff;
 /*
  * read Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &aux->packet_hdr );
+     SCIA_LV0_RD_MDS_PACKET_HDR(cpntr, &aux->packet_hdr);
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP data field header
  */
-     SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &aux->data_hdr );
+     SCIA_LV0_RD_MDS_DATA_HDR(cpntr, &aux->data_hdr);
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
  * check packet ID
  */
-     if ( (int) aux->data_hdr.id.field.packet != SCIA_AUX_PACKET )
-	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
-			     "not an Auxiliary data packet" );
+     if ((int) aux->data_hdr.id.field.packet != SCIA_AUX_PACKET)
+	  NADC_RETURN_ERROR(NADC_ERR_FATAL, 
+			     "not an Auxiliary data packet");
 /*
  * read PMTC settings
  */
-     SCIA_LV0_RD_MDS_PMTC_HDR( cpntr, &aux->pmtc_hdr );
+     SCIA_LV0_RD_MDS_PMTC_HDR(cpntr, &aux->pmtc_hdr);
      cpntr += LV0_PMTC_HDR_LENGTH;
 /*
  * read ISP AUX data source packet
  */
      nf = 0;
      do {
-	  SCIA_LV0_RD_MDS_PMTC_FRAME( cpntr, &aux->data_src[nf] );
+	  SCIA_LV0_RD_MDS_PMTC_FRAME(cpntr, &aux->data_src[nf]);
 	  cpntr += AUX_DATA_SRC_LENGTH;
-	  if ( IS_ERR_STAT_FATAL ) 
-	       NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "MDS_PMTC_FRAME" );
-     } while ( ++nf < NUM_LV0_AUX_PMTC_FRAME );
+	  if (IS_ERR_STAT_FATAL) 
+	       NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "MDS_PMTC_FRAME");
+     } while (++nf < NUM_LV0_AUX_PMTC_FRAME);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_LV0_RD_LV1_PMD
 .PURPOSE     read SCIAMACHY level 0 PMD MDS as stored in a level 1b product
 .INPUT/OUTPUT
-  call as   SCIA_LV0_RD_LV1_PMD( fd, pmd );
+  call as   SCIA_LV0_RD_LV1_PMD(fd, pmd);
      input:  
             FILE   *fd             : (open) stream pointer
     output:  
@@ -1347,7 +1341,7 @@ void SCIA_LV0_RD_LV1_AUX( FILE *fd, struct mds1_aux *aux )
 .RETURNS     nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    none
 -------------------------*/
-void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds1_pmd *pmd )
+void SCIA_LV0_RD_LV1_PMD(FILE *fd, struct mds1_pmd *pmd)
 {
      const size_t lv0_pmd_dsr_size = LV0_PACKET_HDR_LENGTH
 	  + LV0_DATA_HDR_LENGTH + PMD_DATA_SRC_LENGTH;
@@ -1358,26 +1352,26 @@ void SCIA_LV0_RD_LV1_PMD( FILE *fd, struct mds1_pmd *pmd )
 /*
  * read PMD DSR from file as a character array
  */
-     if ( fread( cbuff, lv0_pmd_dsr_size, 1, fd ) != 1 )
-	  NADC_RETURN_ERROR( NADC_ERR_PDS_RD, "LV0_PMD_DSR" );
+     if (fread(cbuff, lv0_pmd_dsr_size, 1, fd) != 1)
+	  NADC_RETURN_ERROR(NADC_ERR_PDS_RD, "LV0_PMD_DSR");
      cpntr = cbuff;
 /*
  * read Packet Header
  */
-     SCIA_LV0_RD_MDS_PACKET_HDR( cpntr, &pmd->packet_hdr);
+     SCIA_LV0_RD_MDS_PACKET_HDR(cpntr, &pmd->packet_hdr);
      cpntr += LV0_PACKET_HDR_LENGTH;
 /*
  * read ISP data field header
  */
-     SCIA_LV0_RD_MDS_DATA_HDR( cpntr, &pmd->data_hdr );
+     SCIA_LV0_RD_MDS_DATA_HDR(cpntr, &pmd->data_hdr);
      cpntr += LV0_DATA_HDR_LENGTH;
 /*
  * check packet ID
  */
-     if ( (int) pmd->data_hdr.id.field.packet != SCIA_PMD_PACKET )
- 	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "not a PMD data packet" );
+     if ((int) pmd->data_hdr.id.field.packet != SCIA_PMD_PACKET)
+ 	  NADC_RETURN_ERROR(NADC_ERR_FATAL, "not a PMD data packet");
 /*
  * read ISP PMD data source packet
  */
-     SCIA_LV0_RD_MDS_PMD_SRC( cpntr, &pmd->data_src );
+     SCIA_LV0_RD_MDS_PMD_SRC(cpntr, &pmd->data_src);
 }

@@ -3424,9 +3424,9 @@ int main(int argc, char *argv[])
      unsigned int num_state;
      unsigned int num;
 
+     char   *cpntr;
      hid_t  fid = 0;
 
-     struct param_record param;
      //struct mph_envi    mph;
      //struct sip_scia    sip;
      //struct sph1_scia   sph;
@@ -3459,28 +3459,30 @@ int main(int argc, char *argv[])
 /*
  * initialization of command-line parameters
  */
-     SCIA_SET_PARAM(argc, argv, SCIA_LEVEL_1, &param);
+     SCIA_SET_PARAM(argc, argv, SCIA_LEVEL_1);
      if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR(NADC_ERR_PARAM, "NADC_INIT_PARAM");
+          NADC_GOTO_ERROR(NADC_ERR_PARAM, "SCIA_SET_PARAM");
 /*
  * check if we have to display version and exit
  */
-     if ( param.flag_version == PARAM_SET ) {
+     if ( nadc_get_param_uint8("flag_version") == PARAM_SET ) {
 	  SCIA_SHOW_VERSION(stdout, "scia_lv1_nc");
 	  exit(EXIT_SUCCESS);
      }
 /*
  * dump command-line parameters
  */
-     if ( param.flag_show == PARAM_SET ) {
-	  SCIA_SHOW_PARAM(SCIA_LEVEL_1, param);
+     if ( nadc_get_param_uint8("flag_show") == PARAM_SET ) {
+	  SCIA_SHOW_PARAM(SCIA_LEVEL_1);
 	  exit(EXIT_SUCCESS);
      }
 /*
  * open input-file
  */
-     fid = H5Fopen(param.infile, H5F_ACC_RDONLY, H5P_DEFAULT);
-     if ( fid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, param.infile);
+     cpntr = nadc_get_param_string("infile");
+     fid = H5Fopen(cpntr, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if ( fid < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, cpntr);
+     free(cpntr);
 /*
  * -------------------------
  * read/write Main Product Header
@@ -3503,7 +3505,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_SQADS(fid, &sqads);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SQADS");
-     SCIA_LV1_WR_ASCII_SQADS(param, num, sqads);
+     SCIA_LV1_WR_ASCII_SQADS(num, sqads);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SQADS" );
 /*
@@ -3514,7 +3516,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_LADS(fid, &lads);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "LADS");
-     SCIA_WR_ASCII_LADS(param, num, lads);
+     SCIA_WR_ASCII_LADS(num, lads);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "LADS" );
 /*
@@ -3529,7 +3531,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_CLCP(fid, &clcp);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "CLCP");
-     SCIA_LV1_WR_ASCII_CLCP(param, &clcp);
+     SCIA_LV1_WR_ASCII_CLCP(&clcp);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "CLCP" );
 /*
@@ -3540,7 +3542,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_VLCP(fid, &vlcp);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "VLCP");
-     SCIA_LV1_WR_ASCII_VLCP(param, num, vlcp);
+     SCIA_LV1_WR_ASCII_VLCP(num, vlcp);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "VLCP" );
      free(vlcp);
@@ -3552,7 +3554,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_PPG(fid, &ppg);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PPG");
-     SCIA_LV1_WR_ASCII_PPG(param, &ppg);
+     SCIA_LV1_WR_ASCII_PPG(&ppg);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "PPG");
 /*
@@ -3564,10 +3566,10 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_SCP(fid, &scpc, &scpv);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SCP");
-     SCIA_LV1_WR_ASCII_BASE(param, &scpc);
+     SCIA_LV1_WR_ASCII_BASE(&scpc);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "BASE" );
-     SCIA_LV1_WR_ASCII_SCP(param, num, scpv);
+     SCIA_LV1_WR_ASCII_SCP(num, scpv);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SCP" );
      free(scpv);
@@ -3580,7 +3582,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_SRS(fid, &srs);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SRS");
-     SCIA_LV1_WR_ASCII_SRS(param, num, srs);
+     SCIA_LV1_WR_ASCII_SRS(num, srs);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SRS");
      free(srs);
@@ -3592,7 +3594,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_PSPN(fid, &pspn);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPN");
-     SCIA_LV1_WR_ASCII_PSPN(param, num, pspn);
+     SCIA_LV1_WR_ASCII_PSPN(num, pspn);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "PSPN");
      free(pspn);
@@ -3604,7 +3606,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_PSPL(fid, &pspl);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPL");
-     SCIA_LV1_WR_ASCII_PSPL(param, num, pspl);
+     SCIA_LV1_WR_ASCII_PSPL(num, pspl);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "PSPL");
      free(pspl);
@@ -3616,7 +3618,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_PSPO(fid, &pspo);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "PSPO");
-     SCIA_LV1_WR_ASCII_PSPO(param, num, pspo);
+     SCIA_LV1_WR_ASCII_PSPO(num, pspo);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "PSPO");
      free(pspo);
@@ -3628,7 +3630,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_RSPN(fid, &rspn);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "RSPN");
-     SCIA_LV1_WR_ASCII_RSPN(param, num, rspn);
+     SCIA_LV1_WR_ASCII_RSPN(num, rspn);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "RSPN");
      free(rspn);
@@ -3640,7 +3642,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_RSPL(fid, &rspl);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "RSPL");
-     SCIA_LV1_WR_ASCII_RSPL(param, num, rspl);
+     SCIA_LV1_WR_ASCII_RSPL(num, rspl);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "RSPL");
      free(rspl);
@@ -3652,7 +3654,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_RSPO(fid, &rspo);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
      	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "RSPO");
-     SCIA_LV1_WR_ASCII_RSPO(param, num, rspo);
+     SCIA_LV1_WR_ASCII_RSPO(num, rspo);
      if ( IS_ERR_STAT_FATAL )
      	  NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "RSPO");
      free(rspo);
@@ -3664,7 +3666,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_EKD(fid, &ekd);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "EKD");
-     SCIA_LV1_WR_ASCII_EKD(param, &ekd);
+     SCIA_LV1_WR_ASCII_EKD(&ekd);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "EKD" );
 /*
@@ -3675,7 +3677,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_SFP(fid, &sfp);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SFP");
-     SCIA_LV1_WR_ASCII_SFP(param, num, sfp);
+     SCIA_LV1_WR_ASCII_SFP(num, sfp);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFP" );
 /*
@@ -3686,7 +3688,7 @@ int main(int argc, char *argv[])
      num = SCIA_LV1_NC_RD_ASFP(fid, &asfp);
      if ( IS_ERR_STAT_FATAL || num ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "ASFP");
-     SCIA_LV1_WR_ASCII_ASFP(param, num, asfp);
+     SCIA_LV1_WR_ASCII_ASFP(num, asfp);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "ASFP" );
 /* -------------------------
@@ -3696,7 +3698,7 @@ int main(int argc, char *argv[])
      num_state = SCIA_LV1_NC_RD_STATE(fid, &state);
      if ( IS_ERR_STAT_FATAL || num_state  ==  0 )
 	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "STATE");
-     SCIA_LV1_WR_ASCII_STATE(param, num_state, state);
+     SCIA_LV1_WR_ASCII_STATE(num_state, state);
      if ( IS_ERR_STAT_FATAL )
 	  NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "STATE" );
      free(state);
@@ -3762,7 +3764,9 @@ int main(int argc, char *argv[])
  * display error messages?
  */
      (void) fprintf(stdout, "any messages?\n");
-     if ( param.flag_silent == PARAM_UNSET ) NADC_Err_Trace(stderr);
+     if ( nadc_get_param_uint8("flag_silent") == PARAM_UNSET )
+	  NADC_Err_Trace(stderr);
+     nadc_free_param_string();
      if ( IS_ERR_STAT_FATAL ) 
 	  return NADC_ERR_FATAL;
      else

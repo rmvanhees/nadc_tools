@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 CLCP data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_CLCP( param, clcp );
+  call as    SCIA_LV1_WR_H5_CLCP(clcp);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct clcp_scia *clcp    : Leakage Current Paramameters (const)
 
 .RETURNS     Nothing
@@ -51,62 +50,62 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_CLCP( struct param_record param, 
-			  const struct clcp_scia *clcp )
+void SCIA_LV1_WR_H5_CLCP(const struct clcp_scia *clcp)
 {
-     hid_t   gads_id;
+     hid_t   fid, gads_id;
      hsize_t adim;
      herr_t  stat;
 
      hid_t   clcp_type[7];
 
-     const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
-
+     const hbool_t compress = \
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
      const char *clcp_names[] = { "fpn", "fpn_error", "lc", "lc_error", 
 				  "pmd_dark", "pmd_dark_error", "mean_noise" };
-     const size_t clcp_size = sizeof( struct clcp_scia );
+     const size_t clcp_size = sizeof(struct clcp_scia);
      const size_t clcp_offs[] = {
-	  HOFFSET( struct clcp_scia, fpn ),
-	  HOFFSET( struct clcp_scia, fpn_error ),
-	  HOFFSET( struct clcp_scia, lc ),
-	  HOFFSET( struct clcp_scia, lc_error ),
-	  HOFFSET( struct clcp_scia, pmd_dark ),
-	  HOFFSET( struct clcp_scia, pmd_dark_error ),
-	  HOFFSET( struct clcp_scia, mean_noise )
+	  HOFFSET(struct clcp_scia, fpn),
+	  HOFFSET(struct clcp_scia, fpn_error),
+	  HOFFSET(struct clcp_scia, lc),
+	  HOFFSET(struct clcp_scia, lc_error),
+	  HOFFSET(struct clcp_scia, pmd_dark),
+	  HOFFSET(struct clcp_scia, pmd_dark_error),
+	  HOFFSET(struct clcp_scia, mean_noise)
      };
 /*
  * create group /GADS
  */
-     gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     gads_id = NADC_OPEN_HDF5_Group(fid, "/GADS");
+     if (gads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/GADS");
 /*
  * write CLCP data sets
  */
      adim = SCIENCE_PIXELS;
-     clcp_type[0] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     clcp_type[1] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     clcp_type[2] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     clcp_type[3] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     clcp_type[6] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
+     clcp_type[0] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     clcp_type[1] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     clcp_type[2] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     clcp_type[3] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     clcp_type[6] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
      adim = 2 * PMD_NUMBER;
-     clcp_type[4] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     clcp_type[5] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
+     clcp_type[4] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     clcp_type[5] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
 
-     stat = H5TBmake_table( "clcp", gads_id, "LEAKAGE_CONSTANT", 
+     stat = H5TBmake_table("clcp", gads_id, "LEAKAGE_CONSTANT", 
                             7, 1, clcp_size, clcp_names,
                             clcp_offs, clcp_type, 1,
-                            NULL, compress, clcp );
-     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "clcp" );
+                            NULL, compress, clcp);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "clcp");
 /*
  * close interface
  */
  done:
-     (void) H5Tclose( clcp_type[0] );
-     (void) H5Tclose( clcp_type[1] );
-     (void) H5Tclose( clcp_type[2] );
-     (void) H5Tclose( clcp_type[3] );
-     (void) H5Tclose( clcp_type[4] );
-     (void) H5Tclose( clcp_type[5] );
-     (void) H5Tclose( clcp_type[6] );
-     (void) H5Gclose( gads_id );
+     (void) H5Tclose(clcp_type[0]);
+     (void) H5Tclose(clcp_type[1]);
+     (void) H5Tclose(clcp_type[2]);
+     (void) H5Tclose(clcp_type[3]);
+     (void) H5Tclose(clcp_type[4]);
+     (void) H5Tclose(clcp_type[5]);
+     (void) H5Tclose(clcp_type[6]);
+     (void) H5Gclose(gads_id);
 }

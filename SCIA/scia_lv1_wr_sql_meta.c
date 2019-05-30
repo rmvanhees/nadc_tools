@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2007 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2007 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     write meta data of Sciamachy Lv1b product to table "meta__1P"
 .INPUT/OUTPUT
-  call as   SCIA_LV1_WR_SQL_META( conn, be_verbose, sciafl, mph, sph );
+  call as   SCIA_LV1_WR_SQL_META(conn, sciafl, mph, sph);
      input:  
              PGconn *conn         :  PostgreSQL connection handle
-	     bool be_verbose      :  be verbose
 	     char  *sciafl        :  name of Sciamachy file
 	     struct mph_envi *mph :  structure for MPH record
 	     struct sph1_scia *sph:  structure for SPH record
@@ -66,9 +65,9 @@
 	/* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl, 
+void SCIA_LV1_WR_SQL_META(PGconn *conn, const char *sciafl, 
 			   const struct mph_envi *mph,
-			   const struct sph1_scia *sph )
+			   const struct sph1_scia *sph)
 {
      PGresult *res;
 
@@ -78,147 +77,149 @@ void SCIA_LV1_WR_SQL_META( PGconn *conn, bool be_verbose, const char *sciafl,
      char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
 
      int          nrow, numChar, meta_id;
+
+     bool  be_verbose = nadc_get_param_uint8("flag_verbose");
 /*
  * check if product is already in database
  */
-     (void) snprintf( sql_query, MAX_STRING_LENGTH, "%s\'%s\'",
-		      "SELECT * FROM meta__1P WHERE name=", mph->product );
-     res = PQexec( conn, sql_query );
-     if ( PQresultStatus( res ) != PGRES_TUPLES_OK ) {
-	  NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
+     (void) snprintf(sql_query, MAX_STRING_LENGTH, "%s\'%s\'",
+		      "SELECT * FROM meta__1P WHERE name=", mph->product);
+     res = PQexec(conn, sql_query);
+     if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+	  NADC_GOTO_ERROR(NADC_ERR_SQL, PQresultErrorMessage(res));
      }
-     if ( (nrow = PQntuples( res )) != 0 ) {
-	  NADC_GOTO_ERROR( NADC_ERR_SQL_TWICE, mph->product );
+     if ((nrow = PQntuples(res)) != 0) {
+	  NADC_GOTO_ERROR(NADC_ERR_SQL_TWICE, mph->product);
      }
-     PQclear( res );
+     PQclear(res);
 /*
  * obtain next value for serial pk_meta
  */
-     res = PQexec( conn,
-                   "SELECT nextval(\'meta__1p_pk_meta_seq\')" );
-     if ( PQresultStatus( res ) != PGRES_TUPLES_OK )
-          NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
-     pntr = PQgetvalue( res, 0, 0 );
-     meta_id = (int) strtol( pntr, (char **) NULL, 10 );
-     PQclear( res );
+     res = PQexec(conn,
+                   "SELECT nextval(\'meta__1p_pk_meta_seq\')");
+     if (PQresultStatus(res) != PGRES_TUPLES_OK)
+          NADC_GOTO_ERROR(NADC_ERR_SQL, PQresultErrorMessage(res));
+     pntr = PQgetvalue(res, 0, 0);
+     meta_id = (int) strtol(pntr, (char **) NULL, 10);
+     PQclear(res);
 /*
  * no error and not yet stored, then proceed
  */     
 /* pk_meta */
-     (void) snprintf( sql_query, SQL_STR_SIZE, 
-		      "INSERT INTO meta__1P VALUES (%d,", meta_id );
+     (void) snprintf(sql_query, SQL_STR_SIZE, 
+		      "INSERT INTO meta__1P VALUES (%d,", meta_id);
 /* name */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), mph->product );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), mph->product);
 /* fileSize */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%u,",
-		      strcpy(cbuff,sql_query), mph->tot_size );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%u,",
+		      strcpy(cbuff,sql_query), mph->tot_size);
 /* receiveDate */
-     NADC_RECEIVEDATE( sciafl, ctemp );
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), ctemp );
+     NADC_RECEIVEDATE(sciafl, ctemp);
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), ctemp);
 /* procStage  */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), mph->proc_stage );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), mph->proc_stage);
 /* procCenter */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), mph->proc_center );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), mph->proc_center);
 /* softVersion */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), mph->soft_version );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), mph->soft_version);
 /* keyDataVersion */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), sph->key_data );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), sph->key_data);
 /* mFactorVersion */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), sph->m_factor );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), sph->m_factor);
 /* spectralCal */
-     nadc_rstrip( str_quality, sph->spec_cal );
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), str_quality );
+     nadc_rstrip(str_quality, sph->spec_cal);
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), str_quality);
 /* saturatedPix */
-     nadc_rstrip( str_quality, sph->saturate );
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), str_quality );
+     nadc_rstrip(str_quality, sph->saturate);
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), str_quality);
 /* deadPixels */
-     nadc_rstrip( str_quality, sph->dead_pixel );
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-		      strcpy(cbuff,sql_query), str_quality );
+     nadc_rstrip(str_quality, sph->dead_pixel);
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s\'%s\',",
+		      strcpy(cbuff,sql_query), str_quality);
 /* dateTimeStart */
-     (void) snprintf( sql_query, SQL_STR_SIZE, 
+     (void) snprintf(sql_query, SQL_STR_SIZE, 
 		      "%sdate_trunc('second', TIMESTAMP \'%s\'),",
-		      strcpy(cbuff,sql_query), sph->start_time );
+		      strcpy(cbuff,sql_query), sph->start_time);
 /* muSecStart */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), sph->start_time+21 );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), sph->start_time+21);
 /* dateTimeStop */
-     (void) snprintf( sql_query, SQL_STR_SIZE, 
+     (void) snprintf(sql_query, SQL_STR_SIZE, 
 		      "%sdate_trunc('second', TIMESTAMP \'%s\'),",
-		      strcpy(cbuff,sql_query), sph->stop_time );
+		      strcpy(cbuff,sql_query), sph->stop_time);
 /* muSecStop */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), sph->stop_time+21 );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), sph->stop_time+21);
 /* absOrbit */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%d,",
-		      strcpy(cbuff,sql_query), mph->abs_orbit );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%d,",
+		      strcpy(cbuff,sql_query), mph->abs_orbit);
 /* relOrbit */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%d,",
-		      strcpy(cbuff,sql_query), mph->rel_orbit );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%d,",
+		      strcpy(cbuff,sql_query), mph->rel_orbit);
 /* numDataSets */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%u,",
-		      strcpy(cbuff,sql_query), mph->num_data_sets );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%u,",
+		      strcpy(cbuff,sql_query), mph->num_data_sets);
 /* LEAKAGE_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* PPG_ETALON_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* SPECTRAL_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* SUN_REF_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* KEY_DATA_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* M_FACTOR_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* INIT_FILE */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%s,",
-		      strcpy(cbuff,sql_query), "NULL" );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%s,",
+		      strcpy(cbuff,sql_query), "NULL");
 /* nadirStates */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
-		      strcpy(cbuff,sql_query), sph->no_nadir );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%hu,",
+		      strcpy(cbuff,sql_query), sph->no_nadir);
 /* limbStates */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
-		      strcpy(cbuff,sql_query), sph->no_limb );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%hu,",
+		      strcpy(cbuff,sql_query), sph->no_limb);
 /* occultStates */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
-		      strcpy(cbuff,sql_query), sph->no_occult );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%hu,",
+		      strcpy(cbuff,sql_query), sph->no_occult);
 /* monitorStates */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
-		      strcpy(cbuff,sql_query), sph->no_monitor );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%hu,",
+		      strcpy(cbuff,sql_query), sph->no_monitor);
 /* noProcStates */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
-		      strcpy(cbuff,sql_query), sph->no_noproc );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%hu,",
+		      strcpy(cbuff,sql_query), sph->no_noproc);
 /* noEntryDMOP */
-     (void) snprintf( sql_query, SQL_STR_SIZE, "%s%d,",
-		      strcpy(cbuff,sql_query), 0 );
+     (void) snprintf(sql_query, SQL_STR_SIZE, "%s%d,",
+		      strcpy(cbuff,sql_query), 0);
 /* delayedBy */
-     numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%s)",
-			 strcpy(cbuff,sql_query), "NULL" );
-     if ( be_verbose )
-	  (void) printf( "%s(): %s [%-d]\n", __func__, sql_query, numChar );
-     if ( numChar >= SQL_STR_SIZE )
-	  NADC_RETURN_ERROR( NADC_ERR_STRLEN, "sql_query" );
+     numChar = snprintf(sql_query, SQL_STR_SIZE, "%s%s)",
+			 strcpy(cbuff,sql_query), "NULL");
+     if (be_verbose)
+	  (void) printf("%s(): %s [%-d]\n", __func__, sql_query, numChar);
+     if (numChar >= SQL_STR_SIZE)
+	  NADC_RETURN_ERROR(NADC_ERR_STRLEN, "sql_query");
 /*
  * do the actual insert
  */
-     res = PQexec( conn, sql_query );
-     if ( PQresultStatus( res ) != PGRES_COMMAND_OK )
-	  NADC_GOTO_ERROR( NADC_ERR_SQL, PQresultErrorMessage(res) );
+     res = PQexec(conn, sql_query);
+     if (PQresultStatus(res) != PGRES_COMMAND_OK)
+	  NADC_GOTO_ERROR(NADC_ERR_SQL, PQresultErrorMessage(res));
  done:
-     PQclear( res );
+     PQclear(res);
 }

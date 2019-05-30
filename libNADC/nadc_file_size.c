@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2007 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2007 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,7 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     obtain files size from operating system
 .INPUT/OUTPUT
-  call as   flsize = nadc_file_size( filename );
+  call as   flsize = nadc_file_size(filename);
      input:  
              char *filename  : name of the file
 
@@ -57,10 +57,10 @@
 				/* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned int nadc_file_size( const char *filename )
+unsigned int nadc_file_size(const char *filename)
 {
      struct stat  flstat;
 
-     (void) stat( filename, &flstat );
+     (void) stat(filename, &flstat);
      return (unsigned int) flstat.st_size;
 }

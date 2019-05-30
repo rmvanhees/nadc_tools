@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,11 +21,10 @@
 .LANGUAGE    ANSI C
 .PURPOSE     obtain state-records of selected MDS records
 .INPUT/OUTPUT
-  call as   nr_mds = SCIA_LV1_SELECT_MDS( source, param, num_dsd, dsd,
-                                          num_state, state, &mds_state );
+  call as   nr_mds = SCIA_LV1_SELECT_MDS(source, num_dsd, dsd,
+                                         num_state, state, &mds_state);
      input: 
             int source                 : data source (Nadir, Limb, ...)
-	    struct param_record param  : struct holding user-defined settings
 	    unsigned int num_dsd       : number of DSD records
 	    struct dsd_envi *dsd       : structure with DSD records
 	    unsigned int num_state     : number of State records
@@ -63,15 +62,12 @@
 #include "selected_channel.inc"
 
 static inline
-int IS_SELECTED_GEO( struct param_record param, 
-		     const struct coord_envi *coord_in )
+int IS_SELECTED_GEO(const struct coord_envi *coord_in)
 {
      register short nc;
 
-     int lat_min = (int) (1e6 * param.geo_lat[0]);
-     int lon_min = (int) (1e6 * param.geo_lon[0]);
-     int lat_max = (int) (1e6 * param.geo_lat[1]);
-     int lon_max = (int) (1e6 * param.geo_lon[1]);
+     int   lat_min, lat_max, lon_min, lon_max;
+     float rbuff[2];
 
      int coord_lat_min = INT_MAX;
      int coord_lon_min = INT_MAX;
@@ -80,25 +76,32 @@ int IS_SELECTED_GEO( struct param_record param,
 
      struct coord_envi coord[NUM_CORNERS];
 
+     nadc_get_param_range("latitude", rbuff);
+     lat_min = (int) (1e6 * rbuff[0]);
+     lat_max = (int) (1e6 * rbuff[1]);
+     nadc_get_param_range("longitude", rbuff);
+     lon_min = (int) (1e6 * rbuff[0]);
+     lon_max = (int) (1e6 * rbuff[1]);
+
      /* copy the coordinates of the Sciamachy pixel/state */
-     (void) memcpy( coord, coord_in, NUM_CORNERS * sizeof(struct coord_envi) );
+     (void) memcpy(coord, coord_in, NUM_CORNERS * sizeof(struct coord_envi));
 /*
  * at least one corner has to be within latitude/longitude range
  */
-     for ( nc = 0; nc < NUM_CORNERS; nc++ ) {
-	  if ( (lat_min <= coord[nc].lat && lat_max >= coord[nc].lat)
-	       && (lon_min <= coord[nc].lon && lon_max >= coord[nc].lon) )
+     for (nc = 0; nc < NUM_CORNERS; nc++) {
+	  if ((lat_min <= coord[nc].lat && lat_max >= coord[nc].lat)
+	       && (lon_min <= coord[nc].lon && lon_max >= coord[nc].lon))
 	       return TRUE;
      }
 
      /* get range of pixel/state coordinates */
-     for ( nc = 0; nc < NUM_CORNERS; nc++ ) {
-	  if ( coord_lat_min > coord[nc].lat ) coord_lat_min = coord[nc].lat;
-	  if ( coord_lat_max < coord[nc].lat ) coord_lat_max = coord[nc].lat;
-	  if ( coord_lon_min > coord[nc].lon ) coord_lon_min = coord[nc].lon;
-	  if ( coord_lon_max < coord[nc].lon ) coord_lon_max = coord[nc].lon;
+     for (nc = 0; nc < NUM_CORNERS; nc++) {
+	  if (coord_lat_min > coord[nc].lat) coord_lat_min = coord[nc].lat;
+	  if (coord_lat_max < coord[nc].lat) coord_lat_max = coord[nc].lat;
+	  if (coord_lon_min > coord[nc].lon) coord_lon_min = coord[nc].lon;
+	  if (coord_lon_max < coord[nc].lon) coord_lon_max = coord[nc].lon;
      }
-     if ( coord_lon_min < 0 && (coord_lon_max - coord_lon_min) > (int)210e6 ) {
+     if (coord_lon_min < 0 && (coord_lon_max - coord_lon_min) > (int)210e6) {
 	  int tmp = coord_lon_min;
 
 	  coord_lon_min = coord_lon_max;
@@ -106,62 +109,54 @@ int IS_SELECTED_GEO( struct param_record param,
      }
 
      /* both latitude coordinates outside region - longitude within */
-     if ( (coord_lat_min < lat_min && coord_lat_max > lat_max)
+     if ((coord_lat_min < lat_min && coord_lat_max > lat_max)
 	  && ((coord_lon_min >= lon_min && coord_lon_min <= lon_max)
-	      || (coord_lon_max >= lon_min && coord_lon_max <= lon_max)) )
+	      || (coord_lon_max >= lon_min && coord_lon_max <= lon_max)))
 	  return TRUE;
      /* both longitude coordinates outside region - latitude within */
-     if ( (coord_lon_min < lon_min && coord_lon_max > lon_max)
+     if ((coord_lon_min < lon_min && coord_lon_max > lon_max)
 	  && ((coord_lat_min >= lat_min && coord_lat_min <= lat_max)
-	      || (coord_lat_max >= lat_min && coord_lat_max <= lat_max)) )
+	      || (coord_lat_max >= lat_min && coord_lat_max <= lat_max)))
 	  return TRUE;
      /* both longitude/latitude coordinates outside region */
-     if ( (coord_lat_min < lat_min && coord_lat_max > lat_max)
-	  && (coord_lon_min < lon_min && coord_lon_max > lon_max) )
+     if ((coord_lat_min < lat_min && coord_lat_max > lat_max)
+	  && (coord_lon_min < lon_min && coord_lon_max > lon_max))
 	  return TRUE;
 
      return FALSE;
 }
 
 static inline
-int IS_SELECTED_CAT( struct param_record param, unsigned short category )
+int IS_SELECTED_CAT(unsigned short category)
 {
-     register unsigned short ns = 0;
-
-     if ( param.catID_nr == PARAM_UNSET ) return TRUE;
-
-     do {
-	  if ( (unsigned short) param.catID[ns] == category ) return TRUE;
-     } while ( ++ns < (unsigned short) param.catID_nr );
+     if (nadc_get_param_cat(category))
+	  return TRUE;
 
      return FALSE;
 }
 
 static inline
-int IS_SELECTED_STATE( struct param_record param, unsigned short state_id )
+int IS_SELECTED_STATE(unsigned short state_id)
 {
-     register unsigned short ns = 0;
-
-     if ( param.stateID_nr == PARAM_UNSET ) return TRUE;
-
-     do {
-	  if ( (unsigned short) param.stateID[ns] == state_id ) return TRUE;
-     } while ( ++ns < (unsigned short) param.stateID_nr );
+     if (nadc_get_param_state(state_id))
+	  return TRUE;
 
      return FALSE;
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-unsigned int SCIA_LV1_SELECT_MDS( int source, 
-				  const struct param_record param,
+unsigned int SCIA_LV1_SELECT_MDS(int source, 
 				  FILE *fp, unsigned int num_dsd, 
 				  const struct dsd_envi *dsd,
-				  struct state1_scia **mds_state )
+				  struct state1_scia **mds_state)
 {
+     register unsigned short nc;
      register unsigned int ni = 0;
      register unsigned int num_not = 0;
      register unsigned int num_select = 0;
 
+     char         *cpntr;
+     bool         found;
      int          mjd2000;
      unsigned int secnd, mu_sec;
      unsigned int num_state;
@@ -184,124 +179,128 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
 /*
  * first check type of selected MDS
  */
-     switch ( source ) {
+     switch (source) {
      case SCIA_NADIR:
-	  if ( param.write_nadir != PARAM_SET ) return 0u;
-	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "NADIR" );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "NADIR" );
-	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
+	  if (nadc_get_param_uint8("write_nadir") != PARAM_SET)
+	       return 0u;
+	  indx_dsd = ENVI_GET_DSD_INDEX(num_dsd, dsd, "NADIR");
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "NADIR");
+	  if (dsd[indx_dsd].num_dsr == 0)
+	       return 0u;
 	  break;
      case SCIA_LIMB:
-	  if ( param.write_limb != PARAM_SET ) return 0u;
-	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "LIMB" );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LIMB" );
-	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
+	  if (nadc_get_param_uint8("write_limb") != PARAM_SET)
+	       return 0u;
+	  indx_dsd = ENVI_GET_DSD_INDEX(num_dsd, dsd, "LIMB");
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "LIMB");
+	  if (dsd[indx_dsd].num_dsr == 0)
+	       return 0u;
 	  break;
      case SCIA_OCCULT:
-	  if ( param.write_occ != PARAM_SET ) return 0u;
-	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "OCCULTATION" );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "OCCULTATION" );
-	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
+	  if (nadc_get_param_uint8("write_occ") != PARAM_SET)
+	       return 0u;
+	  indx_dsd = ENVI_GET_DSD_INDEX(num_dsd, dsd, "OCCULTATION");
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "OCCULTATION");
+	  if (dsd[indx_dsd].num_dsr == 0)
+	       return 0u;
 	  break;
      case SCIA_MONITOR:
-	  if ( param.write_moni != PARAM_SET ) return 0u;
-	  indx_dsd = ENVI_GET_DSD_INDEX( num_dsd, dsd, "MONITORING" );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MONITORING" );
-	  if ( dsd[indx_dsd].num_dsr == 0 ) return 0u;
+	  if (nadc_get_param_uint8("write_moni") != PARAM_SET)
+	       return 0u;
+	  indx_dsd = ENVI_GET_DSD_INDEX(num_dsd, dsd, "MONITORING");
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MONITORING");
+	  if (dsd[indx_dsd].num_dsr == 0)
+	       return 0u;
 	  break;
      default:
-	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "unknown MDS state" );
+	  NADC_GOTO_ERROR(NADC_ERR_FATAL, "unknown MDS state");
      }
 /*
  * initialize begin and end julian date of time window
  */
-     if ( param.flag_period == PARAM_SET ) {
-	  ASCII_2_MJD( param.bgn_date, &mjd2000, &secnd, &mu_sec );
+     if (nadc_get_param_uint8("flag_period") == PARAM_SET) {
+	  cpntr = nadc_get_param_string("bgn_date");
+	  ASCII_2_MJD(cpntr, &mjd2000, &secnd, &mu_sec);
 	  bgn_jdate = mjd2000 + (secnd + mu_sec / 1e6) / SecPerDay;
-	  ASCII_2_MJD( param.end_date, &mjd2000, &secnd, &mu_sec );
+	  free(cpntr);
+	  cpntr = nadc_get_param_string("end_date");
+	  ASCII_2_MJD(cpntr, &mjd2000, &secnd, &mu_sec);
 	  end_jdate = mjd2000 + (secnd + mu_sec / 1e6) / SecPerDay;
+	  free(cpntr);
      }
 /*
  * read State of the Products (ADS)
  */
      Use_Extern_Alloc = FALSE;
-     num_state = SCIA_LV1_RD_STATE( fp, num_dsd, dsd, &state );
+     num_state = SCIA_LV1_RD_STATE(fp, num_dsd, dsd, &state);
      Use_Extern_Alloc = Save_Extern_Alloc;
-     if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "STATE" );
+     if (IS_ERR_STAT_FATAL)
+          NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "STATE");
 /*
  * read Geolocation of States (LADS)
  */
      Use_Extern_Alloc = FALSE;
-     (void) SCIA_RD_LADS( fp, num_dsd, dsd, &lads );
+     (void) SCIA_RD_LADS(fp, num_dsd, dsd, &lads);
      Use_Extern_Alloc = Save_Extern_Alloc;
-     if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "LADS" );
+     if (IS_ERR_STAT_FATAL)
+          NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "LADS");
 /*
  * allocate memory to store indices to selected MDS records
  */
-     indx_state = (unsigned int *) malloc( num_state * sizeof( unsigned int ));
-     if ( indx_state == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "indx_state" );
+     indx_state = (unsigned int *) malloc(num_state * sizeof(unsigned int));
+     if (indx_state == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "indx_state");
 /*
  * go through all state-records
  */
      do {
-	  if ( (int) state[ni].type_mds == source 
-	       && state[ni].flag_mds == MDS_ATTACHED  ) {
+	  if ((int) state[ni].type_mds == source 
+	       && state[ni].flag_mds == MDS_ATTACHED ) {
 
-	       if ( param.flag_period == PARAM_SET ) {
+	       if (nadc_get_param_uint8("flag_period") == PARAM_SET) {
 		    double mjd_date;
 
 		    mjd_date = state[ni].mjd.days 
 			 + (state[ni].mjd.secnd 
 			    + state[ni].mjd.musec / 1e6) / SecPerDay;
-		    if ( mjd_date < bgn_jdate ) goto Not_Selected;
+		    if (mjd_date < bgn_jdate) goto Not_Selected;
 
 		    mjd_date += (state[ni].dur_scan / 16.) / SecPerDay;
-		    if ( mjd_date > end_jdate ) goto Not_Selected;
+		    if (mjd_date > end_jdate) goto Not_Selected;
 	       }
 
-	       if ( ! IS_SELECTED_CAT( param, state[ni].category ) )
+	       if (! IS_SELECTED_CAT(state[ni].category))
 		    goto Not_Selected;
 
-	       if ( ! IS_SELECTED_STATE( param, state[ni].state_id ) )
+	       if (! IS_SELECTED_STATE(state[ni].state_id))
 		    goto Not_Selected;
 
-	       if ( param.clus_mask != ~0ULL ) {
-		    register unsigned short nc = 0;
+	       nc = 0;
+	       found = FALSE;
+	       do {
+		    if (nadc_get_param_clus(nc)) {
+			 found = TRUE;
+			 break;
+		    }
+	       } while (++nc < state[ni].num_clus);
+	       if (! found) goto Not_Selected;
 
-		    register bool found = FALSE;
-		    do {
-			 if ( Get_Bit_LL( param.clus_mask, 
-					  (unsigned char) nc ) != 0ULL ){
-			      found = TRUE;
-			      break;
-			 }
-		    } while ( ++nc < state[ni].num_clus );
-		    if ( ! found ) goto Not_Selected;
-	       }
+	       nc = 0;
+	       found = FALSE;
+	       do {
+		    if (nadc_get_param_chan(state[ni].Clcon[nc].channel)) {
+			 found = TRUE;
+			 break;
+		    }
+	       } while (++nc < state[ni].num_clus);
+	       if (! found) goto Not_Selected;
 
-	       if ( param.chan_mask != BAND_ALL ) {
-		    register unsigned short nc = 0;
-
-		    register bool found = FALSE;
-		    do {
-			 if ( SELECTED_CHANNEL( param.chan_mask,
-						state[ni].Clcon[nc].channel )){
-			      found = TRUE;
-			      break;
-			 }
-		    } while ( ++nc < state[ni].num_clus );
-		    if ( ! found ) goto Not_Selected;
-	       }
-
-	       if ( param.flag_geoloc == PARAM_SET ) {
-		    if ( ! IS_SELECTED_GEO( param, lads[ni].corner ) )
+	       if (nadc_get_param_uint8("flag_geoloc") == PARAM_SET) {
+		    if (! IS_SELECTED_GEO(lads[ni].corner))
 			 goto Not_Selected;
 	       }
 
@@ -309,25 +308,25 @@ unsigned int SCIA_LV1_SELECT_MDS( int source,
 	  Not_Selected:
 	       num_not++;  /* FAKE counter, NOT used! */ 
 	  }
-     } while ( ++ni < num_state );
+     } while (++ni < num_state);
 /*
  * copy selected state-records to output array
  */
-     SCIA_LV1_EXPORT_NUM_STATE( source, (unsigned short) num_select );
-     if ( num_select > 0u ) {
+     SCIA_LV1_EXPORT_NUM_STATE(source, (unsigned short) num_select);
+     if (num_select > 0u) {
 	  *mds_state = (struct state1_scia *) 
-	       malloc( num_select * sizeof( struct state1_scia ));
-	  if ( *mds_state == NULL ) {
+	       malloc(num_select * sizeof(struct state1_scia));
+	  if (*mds_state == NULL) {
 	       num_select = 0u;
-	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mds_state" );
+	       NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mds_state");
 	  }
-	  for ( ni = 0; ni < num_select; ni++ )
-	       (void) memcpy( &(*mds_state)[ni], &state[indx_state[ni]],
-			      sizeof( struct state1_scia ) );
+	  for (ni = 0; ni < num_select; ni++)
+	       (void) memcpy(&(*mds_state)[ni], &state[indx_state[ni]],
+			      sizeof(struct state1_scia));
      }
  done:
-     if ( lads != NULL ) free( lads );
-     if ( state != NULL ) free( state );
-     if ( indx_state != NULL ) free( indx_state );
+     if (lads != NULL) free(lads);
+     if (state != NULL) free(state);
+     if (indx_state != NULL) free(indx_state);
      return num_select;
 }

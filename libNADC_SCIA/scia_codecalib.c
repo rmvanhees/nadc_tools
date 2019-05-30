@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -20,7 +20,7 @@
 .KEYWORDS    calibration option encoding/decoding
 .LANGUAGE    ANSI C
 .PURPOSE     SCIA level 1b calibration parameter coding
-.COMMENTS    Contains SCIA_SET_CALIB, SCIA_GET_CALIB, SCIA_SHOW_CALIB
+.COMMENTS    Contains scia_set_calib, scia_get_calib, scia_repr_calib
 .ENVIRONment None
 .VERSION      2.2   08-Jul-2007	final fix to correctly process options?, RvH
               2.1   29-Mar-2006	fixed nasty bug in NADC_SCIA_CalibMask, RvH
@@ -118,98 +118,111 @@ const struct calib_opt {
 };
 
 static 
-const int NumOptions = (sizeof( calib_opts ) / sizeof( struct calib_opt ));
+const int NumOptions = (sizeof(calib_opts) / sizeof(struct calib_opt));
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_SET_CALIB
 .PURPOSE     extract calibration options from command-line string
 .INPUT/OUTPUT
-   call as:  SCIA_SET_CALIB( calib_str, &calib_mask );
+   call as:  scia_set_calib(calib_str);
      input:
-            char calib_str[] :         string with encoded calibration steps
-   output:
-            unsigned int *calib_mask :   encoded calibration steps
+            char calib_str[]  :      string with encoded calibration steps
 
 .RETURNS     nothing
 .COMMENTS    none
 -------------------------*/
-void SCIA_SET_CALIB( const char calib_str[], unsigned int *calib_mask )
+void scia_set_calib(const char calib_str[])
 {
      register short ns;
      register int   nr = 0;
 
      char *cpntr = NULL;
 
-     *calib_mask = CALIB_NONE;
+     unsigned int calib_mask = CALIB_NONE;
 /*
  * first check the easy declarations
  */
-     if ( strlen( calib_str ) == 0 || strncmp( calib_str, "none", 4 ) == 0 )
+     if (strlen(calib_str) == 0 || strncmp(calib_str, "none", 4) == 0) {
+	  (void) nadc_set_param_uint32("calib_scia", CALIB_NONE);
 	  return;
-
-     if ( strncmp( calib_str, "atbd", 4 ) == 0 
-	  || strncmp( calib_str, "all", 3 ) == 0 ) {
-	  *calib_mask = SCIA_ATBD_CALIB;
+     }
+     if (strncmp(calib_str, "atbd", 4) == 0 
+	  || strncmp(calib_str, "all", 3) == 0) {
+	  (void) nadc_set_param_uint32("calib_scia", SCIA_ATBD_CALIB);
           return;
      }
-     if ( strncmp( calib_str, "sron", 4 ) == 0 ) {
-	  *calib_mask = SCIA_SRON_CALIB;
+     if (strncmp(calib_str, "sron", 4) == 0) {
+	  (void) nadc_set_param_uint32("calib_scia", SCIA_SRON_CALIB);
           return;
      }
 /*
  * loop over all calibration options, make sure we jump over all sub-options
  */
-     while ( nr < NumOptions ) {
-	  if ( (cpntr = strstr( calib_str, calib_opts[nr].key )) != NULL ) {
-	       if ( cpntr[1] == '\0' || cpntr[1] == ',' ) { /* no sub-options */
-		    *calib_mask = ((*calib_mask) | calib_opts[nr].val);
+     while (nr < NumOptions) {
+	  if ((cpntr = strstr(calib_str, calib_opts[nr].key)) != NULL) {
+	       if (cpntr[1] == '\0' || cpntr[1] == ',') { /* no sub-options */
+		    calib_mask = ((calib_mask) | calib_opts[nr].val);
 	       } else {                                  /* check sub-options */
-		    while ( cpntr[1] != '\0' && cpntr[1] != ',' ) {
+		    while (cpntr[1] != '\0' && cpntr[1] != ',') {
 			 ++cpntr;
-			 for ( ns = 0; ns <= calib_opts[nr].nr_sub; ns++ ) {
-			      if ( *cpntr == *calib_opts[nr+ns].key )
-				   *calib_mask = 
-					((*calib_mask) | calib_opts[nr+ns].val);
+			 for (ns = 0; ns <= calib_opts[nr].nr_sub; ns++) {
+			      if (*cpntr == *calib_opts[nr+ns].key)
+				   calib_mask = 
+					((calib_mask) | calib_opts[nr+ns].val);
 			 }
 		    }
-		    if ( ((*calib_mask) & calib_opts[nr].val) == UINT_ZERO )
-			 *calib_mask = ((*calib_mask) | calib_opts[nr].val);
+		    if (((calib_mask) & calib_opts[nr].val) == UINT_ZERO)
+			 calib_mask = ((calib_mask) | calib_opts[nr].val);
 	       }
 	  }
 	  nr += (calib_opts[nr].nr_sub + 1);
      }
+     (void) nadc_set_param_uint32("calib_scia", calib_mask);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   SCIA_GET_CALIB
 .PURPOSE     return string with used calibration options
 .INPUT/OUTPUT
-   call as:  SCIA_GET_CALIB( calib_val, calib_str );
-     input:
-            unsigned int calib_val :   encoded calibration steps
+   call as:  SCIA_GET_CALIB(calib_str);
     output:  
             char calib_str[] :         string with encoded calibration steps
 
 .RETURNS     nothing
 .COMMENTS    none
 -------------------------*/
-void SCIA_GET_CALIB( unsigned int calib_val, char calib_str[] )
+void scia_get_calib(char calib_str[])
 {
      register short ns;
      register int   nr;
 
-     (void) strcpy( calib_str, "" );
-     for ( nr = 0; nr < NumOptions; nr++ ) {
+     unsigned int calib_mask = nadc_get_param_uint32("calib_scia");
+
+     if (calib_mask == CALIB_NONE) {
+	  (void) strcpy(calib_str, "none");
+	  return;
+     }
+     if (calib_mask == SCIA_ATBD_CALIB) {
+	  (void) strcpy(calib_str, "atbd");
+	  return;
+     }
+     if (calib_mask == SCIA_SRON_CALIB) {
+	  (void) strcpy(calib_str, "sron");
+	  return;
+     }
+     
+     (void) strcpy(calib_str, "");
+     for (nr = 0; nr < NumOptions; nr++) {
 	  const short nr_sub = calib_opts[nr].nr_sub;
 
-	  if ( (calib_val & calib_opts[nr].val) != UINT_ZERO ) {
-	       if ( *calib_str != '\0' ) (void) strcat( calib_str, "," );
-	       (void) strcat( calib_str, calib_opts[nr].key );
-	       for ( ns = 0; ns < nr_sub; ns++ ) {
+	  if ((calib_mask & calib_opts[nr].val) != UINT_ZERO) {
+	       if (*calib_str != '\0') (void) strcat(calib_str, ",");
+	       (void) strcat(calib_str, calib_opts[nr].key);
+	       for (ns = 0; ns < nr_sub; ns++) {
 		    ++nr;
-		    if ((calib_val & calib_opts[nr].val) != UINT_ZERO)
-			 (void) strcat( calib_str, calib_opts[nr].key );
+		    if ((calib_mask & calib_opts[nr].val) != UINT_ZERO)
+			 (void) strcat(calib_str, calib_opts[nr].key);
 	       }
 	  } else
 	       nr += nr_sub;
@@ -220,27 +233,27 @@ void SCIA_GET_CALIB( unsigned int calib_val, char calib_str[] )
 .IDENTifer   SCIA_SHOW_CALIB
 .PURPOSE     show all implemented calibration options
 .INPUT/OUTPUT
-  call as:   SCIA_SHOW_CALIB( FILE *stream );
+  call as:   scia_show_calib(FILE *stream);
     input:
             FILE stream :   stream to show available calibration options
 
 .RETURNS     nothing
 .COMMENTS    none
 -------------------------*/
-void SCIA_SHOW_CALIB( FILE *stream )
+void scia_show_calib(FILE *stream)
 {
      register short ns;
      register int   nr;
 
-     for ( nr = 0; nr < NumOptions; nr++ ) {
+     for (nr = 0; nr < NumOptions; nr++) {
 	  const short nr_sub = calib_opts[nr].nr_sub;
 
-	  (void) fprintf( stream, "   %s:\t%s\n", calib_opts[nr].key, 
-			  calib_opts[nr].desc );
-	  for ( ns = 0; ns < nr_sub; ns++ ) {
+	  (void) fprintf(stream, "   %s:\t%s\n", calib_opts[nr].key, 
+			  calib_opts[nr].desc);
+	  for (ns = 0; ns < nr_sub; ns++) {
 	       ++nr;
-	       (void) fprintf( stream, "     %s:\t%s\n", 
-			       calib_opts[nr].key, calib_opts[nr].desc );
+	       (void) fprintf(stream, "     %s:\t%s\n", 
+			      calib_opts[nr].key, calib_opts[nr].desc);
 	  }
      }
 }

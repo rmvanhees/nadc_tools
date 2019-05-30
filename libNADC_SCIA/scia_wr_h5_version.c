@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2003 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2003 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -22,10 +22,7 @@
 .PURPOSE     add version of the software to a HDF5 file
 
 .INPUT/OUTPUT
-  call as   SCIA_WR_H5_VERSION( hdf5_name );
-
-     input:  
-             const char hdf5_name[] : name of the HDF5 output file
+  call as   SCIA_WR_H5_VERSION();
 
 .RETURNS     Nothing
 .COMMENTS    None
@@ -53,17 +50,18 @@
 #include "../VERSION"
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_WR_H5_VERSION( hid_t file_id )
+void SCIA_WR_H5_VERSION(void)
 {
-     char    cbuff[SHORT_STRING_LENGTH];
+     char   cbuff[SHORT_STRING_LENGTH];
+     hid_t  fid = nadc_get_param_hid("hdf_file_id");
 /*
  * write software versions to HDF5 file
  */
-     (void) snprintf( cbuff, SHORT_STRING_LENGTH, "version %-d.%-d.%-d", 
-		      nadc_vers_major, nadc_vers_minor, nadc_vers_release );
-     (void) H5LTset_attribute_string( file_id, "/", "nadc_tools", cbuff );
+     (void) snprintf(cbuff, SHORT_STRING_LENGTH, "version %-d.%-d.%-d", 
+		     nadc_vers_major, nadc_vers_minor, nadc_vers_release);
+     (void) H5LTset_attribute_string(fid, "/", "nadc_tools", cbuff);
      
-     (void) snprintf( cbuff, SHORT_STRING_LENGTH, "version %-d.%-d.%-d",
-                      version_major, version_minor, version_release );
-     (void) H5LTset_attribute_string( file_id, "/", "libnadc_scia", cbuff );
+     (void) snprintf(cbuff, SHORT_STRING_LENGTH, "version %-d.%-d.%-d",
+                      version_major, version_minor, version_release);
+     (void) H5LTset_attribute_string(fid, "/", "libnadc_scia", cbuff);
 }

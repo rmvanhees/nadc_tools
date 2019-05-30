@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2002 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2002 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,9 +21,8 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 2 SQADS data
 .INPUT/OUTPUT
-  call as    SCIA_OL2_WR_H5_SQADS( param, nr_sqads, sqads );
+  call as    SCIA_OL2_WR_H5_SQADS(nr_sqads, sqads);
      input:  
-             struct param_record param  : struct holding user-defined settings
 	     unsigned int nr_sqads      : number of Summary of Quality Flags
 	     struct sqads_sci_ol *sqads : Summary of Quality Flags per State
 
@@ -52,18 +51,18 @@
 
 #define NFIELDS    3
 
-static const size_t sqads_size = sizeof( struct sqads_sci_ol );
+static const size_t sqads_size = sizeof(struct sqads_sci_ol);
 static const size_t sqads_offs[NFIELDS] = {
-     HOFFSET( struct sqads_sci_ol, mjd ),
-     HOFFSET( struct sqads_sci_ol, flag_mds ),
-     HOFFSET( struct sqads_sci_ol, flag_pqf )
+     HOFFSET(struct sqads_sci_ol, mjd),
+     HOFFSET(struct sqads_sci_ol, flag_mds),
+     HOFFSET(struct sqads_sci_ol, flag_pqf)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_OL2_WR_H5_SQADS( struct param_record param, unsigned int nr_sqads,
-			   const struct sqads_sci_ol *sqads )
+void SCIA_OL2_WR_H5_SQADS(unsigned int nr_sqads,
+			  const struct sqads_sci_ol *sqads)
 {
-     hid_t   ads_id;
+     hid_t   fid, ads_id;
      hbool_t compress;
      hsize_t adim;
      hid_t   sqads_type[NFIELDS];
@@ -74,37 +73,38 @@ void SCIA_OL2_WR_H5_SQADS( struct param_record param, unsigned int nr_sqads,
 /*
  * check number of SQADS records
  */
-     if ( nr_sqads == 0 ) return;
+     if (nr_sqads == 0) return;
 /*
  * set HDF5 boolean variable for compression
  */
-     if ( param.flag_deflate == PARAM_SET )
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
           compress = TRUE;
      else
           compress = FALSE;
 /*
  * create group /ADS
  */
-     ads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/ADS" );
-     if ( ads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/ADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     ads_id = NADC_OPEN_HDF5_Group(fid, "/ADS");
+     if (ads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/ADS");
 /*
  * define user-defined data types of the Table-fields
  */
-     sqads_type[0] = H5Topen( param.hdf_file_id, "mjd", H5P_DEFAULT );
-     sqads_type[1] = H5Tcopy( H5T_NATIVE_UCHAR );
+     sqads_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
+     sqads_type[1] = H5Tcopy(H5T_NATIVE_UCHAR);
      adim = OL2_SQADS_PQF_FLAGS;
-     sqads_type[2] = H5Tarray_create( H5T_NATIVE_UCHAR, 1, &adim );
+     sqads_type[2] = H5Tarray_create(H5T_NATIVE_UCHAR, 1, &adim);
 /*
  * create table
  */
-     (void) H5TBmake_table( "Summary Quality ADS", ads_id, "sqads", NFIELDS, 
+     (void) H5TBmake_table("Summary Quality ADS", ads_id, "sqads", NFIELDS, 
 			    nr_sqads, sqads_size, sqads_names, sqads_offs, 
-			    sqads_type, nr_sqads, NULL, compress, sqads );
+			    sqads_type, nr_sqads, NULL, compress, sqads);
 /*
  * close interface
  */
-     (void) H5Tclose( sqads_type[0] );
-     (void) H5Tclose( sqads_type[1] );
-     (void) H5Tclose( sqads_type[2] );
-     (void) H5Gclose( ads_id );
+     (void) H5Tclose(sqads_type[0]);
+     (void) H5Tclose(sqads_type[1]);
+     (void) H5Tclose(sqads_type[2]);
+     (void) H5Gclose(ads_id);
 }

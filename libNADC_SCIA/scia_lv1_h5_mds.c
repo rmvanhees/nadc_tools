@@ -560,17 +560,15 @@ unsigned int SCIA_LV1_RD_H5_MDS(const char *scia_fl,
 .IDENTifer   SCIA_LV1_WR_H5_MDS
 .PURPOSE     write SCIAMACHY level 1 Measurements Data Sets
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_MDS(param, num_mds, mds_1b);
+  call as    SCIA_LV1_WR_H5_MDS(num_mds, mds_1b);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned short  num_mds   : number of MDS
 	     struct mds1_scia  *mds_1b : MDS struct (level 1b)
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_LV1_WR_H5_MDS(const struct param_record param, 
-			unsigned int num_mds, const struct mds1_scia *mds)
+void SCIA_LV1_WR_H5_MDS(unsigned int num_mds, const struct mds1_scia *mds)
 {
      register unsigned short nc;
      register hsize_t        nr, ny;
@@ -594,6 +592,7 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
      hsize_t dims[2];
      hid_t   mds1_type[NFIELD_LV1];
 
+     const hid_t fid = nadc_get_param_hid("hdf_file_id");
      const char *mds1_names[NFIELD_LV1] = {
           "mjd", "quality_flag", "n_aux", "n_pmd", "n_pol", "dsr_length", 
 	  "scale_factor"
@@ -640,14 +639,14 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
 /*
  * set HDF5 boolean variable for compression
  */
-     if (param.flag_deflate == PARAM_SET)
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
           compress = TRUE;
      else
           compress = FALSE;
 /*
  * open/create group /MDS
  */
-     grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, "/MDS");
+     grp_id = NADC_OPEN_HDF5_Group(fid, "/MDS");
      if (grp_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/MDS");
      switch ((int) mds->type_mds) {
      case SCIA_NADIR:
@@ -671,7 +670,7 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
 /*
  * define data types of table-fields
  */
-     mds1_type[0] = H5Topen(param.hdf_file_id, "mjd", H5P_DEFAULT);
+     mds1_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
      mds1_type[1] = H5Tcopy(H5T_NATIVE_CHAR);
      mds1_type[2] = H5Tcopy(H5T_NATIVE_USHORT);
      mds1_type[3] = H5Tcopy(H5T_NATIVE_USHORT);
@@ -747,8 +746,7 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
           (void) memcpy(lv0_hdr+ny, mds[nr].lv0,
 			mds->n_aux * sizeof(struct lv0_hdr));
      }
-     SCIA_WR_H5_L0HDR(param.hdf_file_id, subgrp_id, compress, 
-		      nrpix, lv0_hdr);
+     SCIA_WR_H5_L0HDR(fid, subgrp_id, compress, nrpix, lv0_hdr);
      free(lv0_hdr);
 /*
  * write gelocation records (Nadir/Limb/Monitor)
@@ -763,8 +761,7 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
 	       (void) memcpy(geoN+ny, mds[nr].geoN, 
 			     mds->n_aux * sizeof(struct geoN_scia));
 	  }
-	  SCIA_WR_H5_GEON(param.hdf_file_id, subgrp_id, compress, 
-			  nrpix, geoN);
+	  SCIA_WR_H5_GEON(fid, subgrp_id, compress, nrpix, geoN);
 	  free(geoN);
      } else if ((int) mds->type_mds == SCIA_MONITOR) {
 	  geoC = (struct geoC_scia *)
@@ -775,8 +772,7 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
 	       (void) memcpy(geoC+ny, mds[nr].geoC, 
 			     mds->n_aux * sizeof(struct geoC_scia));
 	  }
-	  SCIA_WR_H5_GEOC(param.hdf_file_id, subgrp_id, compress, 
-			  nrpix, geoC);
+	  SCIA_WR_H5_GEOC(fid, subgrp_id, compress, nrpix, geoC);
 	  free(geoC);
      } else {
 	  geoL = (struct geoL_scia *)
@@ -787,8 +783,7 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
 	       (void) memcpy(geoL+ny, mds[nr].geoL, 
 			     mds->n_aux * sizeof(struct geoL_scia));
 	  }
-	  SCIA_WR_H5_GEOL(param.hdf_file_id, subgrp_id, compress, 
-			  nrpix, geoL);
+	  SCIA_WR_H5_GEOL(fid, subgrp_id, compress, nrpix, geoL);
 	  free(geoL);
      }
 /*
@@ -870,18 +865,15 @@ void SCIA_LV1_WR_H5_MDS(const struct param_record param,
 .IDENTifer   SCIA_LV1C_WR_H5_MDS
 .PURPOSE     write SCIAMACHY level 1c Measurements Data Sets
 .INPUT/OUTPUT
-  call as    SCIA_LV1C_WR_H5_MDS(param, num_mds, mds_1c);
+  call as    SCIA_LV1C_WR_H5_MDS(num_mds, mds_1c);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned short  num_mds   : number of MDS
 	     struct mds1c_scia *mds_1c : MDS struct (level 1c)
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_LV1C_WR_H5_MDS(const struct param_record param, 
-			 unsigned int num_mds, 
-			 const struct mds1c_scia *mds_1c)
+void SCIA_LV1C_WR_H5_MDS(unsigned int num_mds, const struct mds1c_scia *mds_1c)
 {
      register unsigned int nf, nr;
 
@@ -893,6 +885,7 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
      hsize_t dims[3];
      hid_t   mds1c_type[NFIELD_LV1C];
 
+     const hid_t fid = nadc_get_param_hid("hdf_file_id");
      const size_t mds1c_size = sizeof(struct mds1c_scia);
      const size_t mds1c_offs[NFIELD_LV1C] = {
 	  HOFFSET(struct mds1c_scia, mjd),
@@ -916,7 +909,7 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
 /*
  * set HDF5 boolean variable for compression
  */
-     if (param.flag_deflate == PARAM_SET)
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
           compress = TRUE;
      else
           compress = FALSE;
@@ -924,7 +917,7 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
  * open /MDS-group
  */
      if (init) {
-	  grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, "/MDS");
+	  grp_id = NADC_OPEN_HDF5_Group(fid, "/MDS");
 	  if (grp_id < 0) 
 	       NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/MDS");
 	  (void) H5Gclose(grp_id);
@@ -953,7 +946,7 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
      default:
 	  NADC_RETURN_ERROR(NADC_ERR_FATAL, "unknown MDS type");
      }
-     grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, grp_name);
+     grp_id = NADC_OPEN_HDF5_Group(fid, grp_name);
      if (grp_id < 0) 
 	  NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, grp_name);
 /*
@@ -963,7 +956,7 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
 /*
  * define user-defined data types of the Table-fields
  */
-	  mds1c_type[0] = H5Topen(param.hdf_file_id, "mjd", H5P_DEFAULT);
+	  mds1c_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
 	  mds1c_type[1] = H5Tcopy(H5T_NATIVE_SCHAR);
 	  mds1c_type[2] = H5Tcopy(H5T_NATIVE_UCHAR);
 	  mds1c_type[3] = H5Tcopy(H5T_NATIVE_UCHAR);
@@ -1047,20 +1040,20 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
  */
 	  switch ((int) mds_1c->type_mds) {
 	  case SCIA_NADIR:
-	       SCIA_WR_H5_GEON(param.hdf_file_id, subgrp_id, compress, 
+	       SCIA_WR_H5_GEON(fid, subgrp_id, compress,
 			       mds_1c->num_obs, mds_1c->geoN);
 	       if (IS_ERR_STAT_FATAL)
 		    NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "geoN");
 	       break;
 	  case SCIA_OCCULT:
 	  case SCIA_LIMB:
-	       SCIA_WR_H5_GEOL(param.hdf_file_id, subgrp_id, compress, 
+	       SCIA_WR_H5_GEOL(fid, subgrp_id, compress, 
 			       mds_1c->num_obs, mds_1c->geoL);
 	       if (IS_ERR_STAT_FATAL)
 		    NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "geoL");
 	       break;
 	  case SCIA_MONITOR:
-	       SCIA_WR_H5_GEOC(param.hdf_file_id, subgrp_id, compress, 
+	       SCIA_WR_H5_GEOC(fid, subgrp_id, compress, 
 			       mds_1c->num_obs, mds_1c->geoC);
 	       if (IS_ERR_STAT_FATAL)
 		    NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "geoC");
@@ -1080,17 +1073,15 @@ void SCIA_LV1C_WR_H5_MDS(const struct param_record param,
 .IDENTifer   SCIA_LV1C_WR_H5_MDS_PMD
 .PURPOSE     write SCIAMACHY level 1 Measurements Data Sets
 .INPUT/OUTPUT
-  call as    SCIA_LV1C_WR_H5_MDS_PMD(param, pmd);
+  call as    SCIA_LV1C_WR_H5_MDS_PMD(pmd);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned short  num_mds   : number of MDS
              struct mds1c_pmd  *pmd    : PMD MDS struct (level 1c)
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param, 
-			     const struct mds1c_pmd *pmd)
+void SCIA_LV1C_WR_H5_MDS_PMD(const struct mds1c_pmd *pmd)
 {
      register unsigned int nf;
 
@@ -1101,6 +1092,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
      hsize_t dims[3];
      hid_t   mds1c_type[NFIELD_LV1C];
 
+     const hid_t  fid = nadc_get_param_hid("hdf_file_id");
      const size_t mds1c_size = sizeof(struct mds1c_pmd);
      const size_t mds1c_offs[NFIELD_LV1C] = {
 	  HOFFSET(struct mds1c_pmd, mjd),
@@ -1124,7 +1116,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
 /*
  * set HDF5 boolean variable for compression
  */
-     if (param.flag_deflate == PARAM_SET)
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
           compress = TRUE;
      else
           compress = FALSE;
@@ -1132,7 +1124,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
  * open /MDS-group
  */
      if (init) {
-	  grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, "/MDS");
+	  grp_id = NADC_OPEN_HDF5_Group(fid, "/MDS");
 	  if (grp_id < 0) 
 	       NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/MDS");
 	  (void) H5Gclose(grp_id);
@@ -1161,7 +1153,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
      default:
 	  NADC_RETURN_ERROR(NADC_ERR_FATAL, "unknown MDS type");
      }
-     grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, grp_name);
+     grp_id = NADC_OPEN_HDF5_Group(fid, grp_name);
      if (grp_id < 0) 
 	  NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, grp_name);
 /*
@@ -1173,7 +1165,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
 /*
  * define user-defined data types of the Table-fields
  */
-	  mds1c_type[0] = H5Topen(param.hdf_file_id, "mjd", H5P_DEFAULT);
+	  mds1c_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
 	  mds1c_type[1] = H5Tcopy(H5T_NATIVE_SCHAR);
 	  mds1c_type[2] = H5Tcopy(H5T_NATIVE_UCHAR);
 	  mds1c_type[3] = H5Tcopy(H5T_NATIVE_UCHAR);
@@ -1196,7 +1188,7 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
 /*
  * DSR length
  */
-     (void) H5LTset_attribute_uint(param.hdf_file_id, grp_name, "dsr_length", 
+     (void) H5LTset_attribute_uint(fid, grp_name, "dsr_length", 
 				   &pmd->dsr_length, 1);
 /*
  * integrated PMD values
@@ -1210,14 +1202,14 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
      switch ((int) pmd->type_mds) {
      case SCIA_NADIR:
 	  if (H5LTfind_dataset(grp_id, "geoN") == 0) {
-	       SCIA_WR_H5_GEON(param.hdf_file_id, grp_id, compress, 
+	       SCIA_WR_H5_GEON(fid, grp_id, compress, 
 			       pmd->num_geo, pmd->geoN);
 	  }
 	  break;
      case SCIA_OCCULT:
      case SCIA_LIMB:
 	  if (H5LTfind_dataset(grp_id, "geoL") == 0) {
-	       SCIA_WR_H5_GEOL(param.hdf_file_id, grp_id, compress, 
+	       SCIA_WR_H5_GEOL(fid, grp_id, compress, 
 			       pmd->num_geo, pmd->geoL);
 	  }
 	  break;
@@ -1233,17 +1225,15 @@ void SCIA_LV1C_WR_H5_MDS_PMD(const struct param_record param,
 .IDENTifer   SCIA_LV1C_WR_H5_MDS_POLV
 .PURPOSE     write SCIAMACHY level 1 Measurements Data Sets
 .INPUT/OUTPUT
-  call as    SCIA_LV1C_WR_H5_MDS_POLV(param, polV);
+  call as    SCIA_LV1C_WR_H5_MDS_POLV(polV);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     unsigned short  num_mds   : number of MDS
 	     struct mds1c_polV *polV   : fractional polarisation MDS (level 1c)
 
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param, 
-			       const struct mds1c_polV *polV)
+void SCIA_LV1C_WR_H5_MDS_POLV(const struct mds1c_polV *polV)
 {
      register unsigned int nf;
 
@@ -1254,6 +1244,7 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
      hsize_t dims[3];
      hid_t   mds1c_type[NFIELD_LV1C];
 
+     const hid_t  fid = nadc_get_param_hid("hdf_file_id");
      const size_t mds1c_size = sizeof(struct mds1c_pmd);
      const size_t mds1c_offs[NFIELD_LV1C] = {
 	  HOFFSET(struct mds1c_polV, mjd),
@@ -1277,7 +1268,7 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
 /*
  * set HDF5 boolean variable for compression
  */
-     if (param.flag_deflate == PARAM_SET)
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
           compress = TRUE;
      else
           compress = FALSE;
@@ -1285,7 +1276,7 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
  * open /MDS-output
  */
      if (init) {
-	  grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, "/MDS");
+	  grp_id = NADC_OPEN_HDF5_Group(fid, "/MDS");
 	  if (grp_id < 0) 
 	       NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/MDS");
 	  (void) H5Gclose(grp_id);
@@ -1314,7 +1305,7 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
      default:
 	  NADC_RETURN_ERROR(NADC_ERR_FATAL, "unknown MDS type");
      }
-     grp_id = NADC_OPEN_HDF5_Group(param.hdf_file_id, grp_name);
+     grp_id = NADC_OPEN_HDF5_Group(fid, grp_name);
      if (grp_id < 0) 
 	  NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, grp_name);
 /*
@@ -1326,7 +1317,7 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
 /*
  * define user-defined data types of the Table-fields
  */
-	  mds1c_type[0] = H5Topen(param.hdf_file_id, "mjd", H5P_DEFAULT);
+	  mds1c_type[0] = H5Topen(fid, "mjd", H5P_DEFAULT);
 	  mds1c_type[1] = H5Tcopy(H5T_NATIVE_SCHAR);
 	  mds1c_type[2] = H5Tcopy(H5T_NATIVE_UCHAR);
 	  mds1c_type[3] = H5Tcopy(H5T_NATIVE_UCHAR);
@@ -1349,8 +1340,8 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
 /*
  * DSR length
  */
-     (void) H5LTset_attribute_uint(param.hdf_file_id, grp_name, "dsr_length", 
-				    &polV->dsr_length, 1);
+     (void) H5LTset_attribute_uint(fid, grp_name, "dsr_length", 
+				   &polV->dsr_length, 1);
 /*
  * integration times and repetition factors
  */
@@ -1369,14 +1360,14 @@ void SCIA_LV1C_WR_H5_MDS_POLV(const struct param_record param,
      switch ((int) polV->type_mds) {
      case SCIA_NADIR:
 	  if (H5LTfind_dataset(grp_id, "geoN") == 0) {
-	       SCIA_WR_H5_GEON(param.hdf_file_id, grp_id, compress, 
+	       SCIA_WR_H5_GEON(fid, grp_id, compress, 
 			       polV->num_geo, polV->geoN);
 	  }
 	  break;
      case SCIA_OCCULT:
      case SCIA_LIMB:
 	  if (H5LTfind_dataset(grp_id, "geoL") == 0) {
-	       SCIA_WR_H5_GEOL(param.hdf_file_id, grp_id, compress, 
+	       SCIA_WR_H5_GEOL(fid, grp_id, compress, 
 			       polV->num_geo, polV->geoL);
 	  }
 	  break;

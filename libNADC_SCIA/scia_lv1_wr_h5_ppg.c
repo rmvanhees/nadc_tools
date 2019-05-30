@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 1 PPG data
 .INPUT/OUTPUT
-  call as    SCIA_LV1_WR_H5_PPG( param, nr_ppg, ppg );
+  call as    SCIA_LV1_WR_H5_PPG(ppg);
      input:  
-             struct param_record param : struct holding user-defined settings
-	     struct ppg_scia *ppg      : PPG/Etalon parameters
+	     struct ppg_scia *ppg  :     PPG/Etalon parameters
 
 .RETURNS     Nothing
 .COMMENTS    None
@@ -52,55 +51,56 @@
 #include <nadc_scia.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV1_WR_H5_PPG( struct param_record param, 
-			 const struct ppg_scia *ppg )
+void SCIA_LV1_WR_H5_PPG(const struct ppg_scia *ppg)
 {
-     hid_t   gads_id;
+     hid_t   fid, gads_id;
      hsize_t adim;
      herr_t  stat;
 
      hid_t   ppg_type[5];
 
-     const hbool_t compress = (param.flag_deflate == PARAM_SET) ? TRUE : FALSE;
+     const hbool_t compress = \
+	  (nadc_get_param_uint8("flag_deflate") == PARAM_SET) ? TRUE : FALSE;
 
      const char *ppg_names[] = { "ppg_fact", "etalon_fact", "etalon_resid", 
 				 "wls_deg_fact", "bad_pixel" };
-     const size_t ppg_size = sizeof( struct ppg_scia );
+     const size_t ppg_size = sizeof(struct ppg_scia);
      const size_t ppg_offs[] = {
-	  HOFFSET( struct ppg_scia, ppg_fact ),
-	  HOFFSET( struct ppg_scia, etalon_fact ),
-	  HOFFSET( struct ppg_scia, etalon_resid ),
-	  HOFFSET( struct ppg_scia, wls_deg_fact ),
-	  HOFFSET( struct ppg_scia, bad_pixel )
+	  HOFFSET(struct ppg_scia, ppg_fact),
+	  HOFFSET(struct ppg_scia, etalon_fact),
+	  HOFFSET(struct ppg_scia, etalon_resid),
+	  HOFFSET(struct ppg_scia, wls_deg_fact),
+	  HOFFSET(struct ppg_scia, bad_pixel)
      };
 /*
  * open/create group /GADS
  */
-     gads_id = NADC_OPEN_HDF5_Group( param.hdf_file_id, "/GADS" );
-     if ( gads_id < 0 ) NADC_RETURN_ERROR( NADC_ERR_HDF_GRP, "/GADS" );
+     fid = nadc_get_param_hid("hdf_file_id");
+     gads_id = NADC_OPEN_HDF5_Group(fid, "/GADS");
+     if (gads_id < 0) NADC_RETURN_ERROR(NADC_ERR_HDF_GRP, "/GADS");
 /*
  * write PPG data sets
  */
      adim = SCIENCE_PIXELS;
-     ppg_type[0] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppg_type[1] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppg_type[2] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppg_type[3] = H5Tarray_create( H5T_NATIVE_FLOAT, 1, &adim );
-     ppg_type[4] = H5Tarray_create( H5T_NATIVE_UCHAR, 1, &adim );
+     ppg_type[0] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppg_type[1] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppg_type[2] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppg_type[3] = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &adim);
+     ppg_type[4] = H5Tarray_create(H5T_NATIVE_UCHAR, 1, &adim);
 
-     stat = H5TBmake_table( "ppg", gads_id, "PPG_ETALON",
+     stat = H5TBmake_table("ppg", gads_id, "PPG_ETALON",
                             5, 1, ppg_size, ppg_names,
                             ppg_offs, ppg_type, 1,
-                            NULL, compress, ppg );
-     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "ppg" );
+                            NULL, compress, ppg);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "ppg");
 /*
  * close interface
  */
  done:
-     (void) H5Tclose( ppg_type[0] );
-     (void) H5Tclose( ppg_type[1] );
-     (void) H5Tclose( ppg_type[2] );
-     (void) H5Tclose( ppg_type[3] );
-     (void) H5Tclose( ppg_type[4] );
-     (void) H5Gclose( gads_id );
+     (void) H5Tclose(ppg_type[0]);
+     (void) H5Tclose(ppg_type[1]);
+     (void) H5Tclose(ppg_type[2]);
+     (void) H5Tclose(ppg_type[3]);
+     (void) H5Tclose(ppg_type[4]);
+     (void) H5Gclose(gads_id);
 }

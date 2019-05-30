@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2000 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2000 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -22,9 +22,8 @@
 .PURPOSE     write the Main Product Header of a PDS SCIAMACHY file
 
 .INPUT/OUTPUT
-  call as    SCIA_WR_H5_MPH( param, mph );
+  call as    SCIA_WR_H5_MPH(mph);
      input:  
-             struct param_record param : struct holding user-defined settings
 	     struct mph_envi     *mph  : Main Product Header data
 
 .RETURNS     Nothing
@@ -56,51 +55,50 @@
 
 #define NFIELDS    34
 
-static const size_t mph_size = sizeof( struct mph_envi );
+static const size_t mph_size = sizeof(struct mph_envi);
 static const size_t mph_offs[NFIELDS] = {
-     HOFFSET( struct mph_envi, product ),
-     HOFFSET( struct mph_envi, proc_stage ),
-     HOFFSET( struct mph_envi, ref_doc ),
-     HOFFSET( struct mph_envi, acquis ),
-     HOFFSET( struct mph_envi, proc_center ),
-     HOFFSET( struct mph_envi, proc_time ),
-     HOFFSET( struct mph_envi, soft_version ),
-     HOFFSET( struct mph_envi, sensing_start ),
-     HOFFSET( struct mph_envi, sensing_stop ),
-     HOFFSET( struct mph_envi, phase ),
-     HOFFSET( struct mph_envi, cycle ),
-     HOFFSET( struct mph_envi, rel_orbit ),
-     HOFFSET( struct mph_envi, abs_orbit ),
-     HOFFSET( struct mph_envi, state_vector ),
-     HOFFSET( struct mph_envi, delta_ut ),
-     HOFFSET( struct mph_envi, x_position),
-     HOFFSET( struct mph_envi, y_position ),
-     HOFFSET( struct mph_envi, z_position ),
-     HOFFSET( struct mph_envi, x_velocity ),
-     HOFFSET( struct mph_envi, y_velocity ),
-     HOFFSET( struct mph_envi, z_velocity ),
-     HOFFSET( struct mph_envi, vector_source ),
-     HOFFSET( struct mph_envi, utc_sbt_time ),
-     HOFFSET( struct mph_envi, sat_binary_time ),
-     HOFFSET( struct mph_envi, clock_step ),
-     HOFFSET( struct mph_envi, leap_utc ),
-     HOFFSET( struct mph_envi, leap_sign ),
-     HOFFSET( struct mph_envi, leap_err ),
-     HOFFSET( struct mph_envi, product_err ),
-     HOFFSET( struct mph_envi, tot_size ),
-     HOFFSET( struct mph_envi, sph_size ),
-     HOFFSET( struct mph_envi, num_dsd ),
-     HOFFSET( struct mph_envi, dsd_size ),
-     HOFFSET( struct mph_envi, num_data_sets )
+     HOFFSET(struct mph_envi, product),
+     HOFFSET(struct mph_envi, proc_stage),
+     HOFFSET(struct mph_envi, ref_doc),
+     HOFFSET(struct mph_envi, acquis),
+     HOFFSET(struct mph_envi, proc_center),
+     HOFFSET(struct mph_envi, proc_time),
+     HOFFSET(struct mph_envi, soft_version),
+     HOFFSET(struct mph_envi, sensing_start),
+     HOFFSET(struct mph_envi, sensing_stop),
+     HOFFSET(struct mph_envi, phase),
+     HOFFSET(struct mph_envi, cycle),
+     HOFFSET(struct mph_envi, rel_orbit),
+     HOFFSET(struct mph_envi, abs_orbit),
+     HOFFSET(struct mph_envi, state_vector),
+     HOFFSET(struct mph_envi, delta_ut),
+     HOFFSET(struct mph_envi, x_position),
+     HOFFSET(struct mph_envi, y_position),
+     HOFFSET(struct mph_envi, z_position),
+     HOFFSET(struct mph_envi, x_velocity),
+     HOFFSET(struct mph_envi, y_velocity),
+     HOFFSET(struct mph_envi, z_velocity),
+     HOFFSET(struct mph_envi, vector_source),
+     HOFFSET(struct mph_envi, utc_sbt_time),
+     HOFFSET(struct mph_envi, sat_binary_time),
+     HOFFSET(struct mph_envi, clock_step),
+     HOFFSET(struct mph_envi, leap_utc),
+     HOFFSET(struct mph_envi, leap_sign),
+     HOFFSET(struct mph_envi, leap_err),
+     HOFFSET(struct mph_envi, product_err),
+     HOFFSET(struct mph_envi, tot_size),
+     HOFFSET(struct mph_envi, sph_size),
+     HOFFSET(struct mph_envi, num_dsd),
+     HOFFSET(struct mph_envi, dsd_size),
+     HOFFSET(struct mph_envi, num_data_sets)
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_WR_H5_MPH( struct param_record param, 
-		     const struct mph_envi *mph )
+void SCIA_WR_H5_MPH(const struct mph_envi *mph)
 {
      register unsigned short ni = 0;
 
-     hid_t   mph_type[NFIELDS];
+     hid_t   fid, mph_type[NFIELDS];
 
      const int compress = 0;
      const char *mph_names[NFIELDS] = {
@@ -120,77 +118,77 @@ void SCIA_WR_H5_MPH( struct param_record param,
 /*
  * define user-defined data types of the Table-fields
  */
-     mph_type[0] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[0], (size_t) ENVI_FILENAME_SIZE );
-     mph_type[1] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[1], (size_t) 2 );
-     mph_type[2] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[2], (size_t) 24 );
+     mph_type[0] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[0], (size_t) ENVI_FILENAME_SIZE);
+     mph_type[1] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[1], (size_t) 2);
+     mph_type[2] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[2], (size_t) 24);
 
-     mph_type[3] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[3], (size_t) 21 );
-     mph_type[4] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[4], (size_t) 7 );
-     mph_type[5] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[5], (size_t) UTC_STRING_LENGTH );
-     mph_type[6] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[6], (size_t) 15 );
+     mph_type[3] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[3], (size_t) 21);
+     mph_type[4] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[4], (size_t) 7);
+     mph_type[5] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[5], (size_t) UTC_STRING_LENGTH);
+     mph_type[6] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[6], (size_t) 15);
 
-     mph_type[7] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[7], (size_t) UTC_STRING_LENGTH );
-     mph_type[8] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[8], (size_t) UTC_STRING_LENGTH );
+     mph_type[7] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[7], (size_t) UTC_STRING_LENGTH);
+     mph_type[8] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[8], (size_t) UTC_STRING_LENGTH);
 
-     mph_type[9] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[9], (size_t) 2 );
-     mph_type[10] = H5Tcopy( H5T_NATIVE_SHORT );
-     mph_type[11] = H5Tcopy( H5T_NATIVE_INT );
-     mph_type[12] = H5Tcopy( H5T_NATIVE_INT );
-     mph_type[13] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[13], (size_t) UTC_STRING_LENGTH );
-     mph_type[14] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     mph_type[15] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     mph_type[16] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     mph_type[17] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     mph_type[18] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     mph_type[19] = H5Tcopy( H5T_NATIVE_DOUBLE );
-     mph_type[20] = H5Tcopy( H5T_NATIVE_DOUBLE );
+     mph_type[9] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[9], (size_t) 2);
+     mph_type[10] = H5Tcopy(H5T_NATIVE_SHORT);
+     mph_type[11] = H5Tcopy(H5T_NATIVE_INT);
+     mph_type[12] = H5Tcopy(H5T_NATIVE_INT);
+     mph_type[13] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[13], (size_t) UTC_STRING_LENGTH);
+     mph_type[14] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     mph_type[15] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     mph_type[16] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     mph_type[17] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     mph_type[18] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     mph_type[19] = H5Tcopy(H5T_NATIVE_DOUBLE);
+     mph_type[20] = H5Tcopy(H5T_NATIVE_DOUBLE);
 
-     mph_type[21] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[21], (size_t) 3 );
-     mph_type[22] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[22], (size_t) UTC_STRING_LENGTH );
-     mph_type[23] = H5Tcopy( H5T_NATIVE_UINT );
-     mph_type[24] = H5Tcopy( H5T_NATIVE_UINT );
+     mph_type[21] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[21], (size_t) 3);
+     mph_type[22] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[22], (size_t) UTC_STRING_LENGTH);
+     mph_type[23] = H5Tcopy(H5T_NATIVE_UINT);
+     mph_type[24] = H5Tcopy(H5T_NATIVE_UINT);
 
-     mph_type[25] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[25], (size_t) UTC_STRING_LENGTH );
-     mph_type[26] = H5Tcopy( H5T_NATIVE_SHORT );
-     mph_type[27] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[27], (size_t) 2 );
+     mph_type[25] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[25], (size_t) UTC_STRING_LENGTH);
+     mph_type[26] = H5Tcopy(H5T_NATIVE_SHORT);
+     mph_type[27] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[27], (size_t) 2);
 
-     mph_type[28] = H5Tcopy( H5T_C_S1 );
-     (void) H5Tset_size( mph_type[28], (size_t) 2 );
-     mph_type[29] = H5Tcopy( H5T_NATIVE_UINT );
-     mph_type[30] = H5Tcopy( H5T_NATIVE_UINT );
-     mph_type[31] = H5Tcopy( H5T_NATIVE_UINT );
-     mph_type[32] = H5Tcopy( H5T_NATIVE_UINT );
-     mph_type[33] = H5Tcopy( H5T_NATIVE_UINT );
+     mph_type[28] = H5Tcopy(H5T_C_S1);
+     (void) H5Tset_size(mph_type[28], (size_t) 2);
+     mph_type[29] = H5Tcopy(H5T_NATIVE_UINT);
+     mph_type[30] = H5Tcopy(H5T_NATIVE_UINT);
+     mph_type[31] = H5Tcopy(H5T_NATIVE_UINT);
+     mph_type[32] = H5Tcopy(H5T_NATIVE_UINT);
+     mph_type[33] = H5Tcopy(H5T_NATIVE_UINT);
 /*
  * create table
  */
-     (void) H5TBmake_table( "Main Product Header", param.hdf_file_id, "MPH", 
+     fid = nadc_get_param_hid("hdf_file_id");
+     (void) H5TBmake_table("Main Product Header", fid, "MPH", 
 			    NFIELDS, 1, mph_size, mph_names, mph_offs, 
-			    mph_type, 1, NULL, compress, mph );
+			    mph_type, 1, NULL, compress, mph);
 /*
  * create some attributes for quick access
  */
-     (void) H5LTset_attribute_int( param.hdf_file_id, "/", "abs_orbit", 
-				   &mph->abs_orbit, 1 );
+     (void) H5LTset_attribute_int(fid, "/", "abs_orbit", &mph->abs_orbit, 1);
 /*
  * close interface
  */
      do {
-	  (void) H5Tclose( mph_type[ni] );
-     } while ( ++ni < NFIELDS );
+	  (void) H5Tclose(mph_type[ni]);
+     } while (++ni < NFIELDS);
 }

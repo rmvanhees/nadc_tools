@@ -1,4 +1,4 @@
--I/opt/local/EOS/nadc_extern/wheezy/include 
+-I/opt/local/EOS/nadc_extern/stretch/include 
 -I../include 
 -I/usr/include/x86_64-linux-gnu
 -DDATA_DIR="/SCIA/share/nadc_tools"
