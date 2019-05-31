@@ -688,7 +688,6 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 		    }
 	       } else if (strncmp(argv[narg]+2, "cal", 3) == 0) {
 		    /* perform calibration on measurement data (L1b only) */
-		    res = nadc_set_param_uint8("write_lv1c", PARAM_SET);
 		    if ((cpntr = strchr(argv[narg], '=')) == NULL)
 			 scia_set_calib("atbd");
 		    else
@@ -736,7 +735,6 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 	       }
 	       if (strncmp(argv[narg]+1, "show", 4) == 0) {
 		    res = nadc_set_param_uint8("flag_show", PARAM_SET);
-		    res = nadc_set_param_uint8("write_ascii", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "silent", 6) == 0) {
 		    res = nadc_set_param_uint8("flag_silent", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "verbose", 7) == 0) {
@@ -927,6 +925,22 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
      } else
 	  free(cpntr);
 
+#ifdef LAAT_DIT_EVEN_ZIEN
+     (void) fprintf(stderr, "flag_check: %hhu\n",
+		    nadc_get_param_uint8("flag_check"));
+     (void) fprintf(stderr, "write_ascii: %hhu\n",
+		    nadc_get_param_uint8("write_ascii"));
+     (void) fprintf(stderr, "write_pds: %hhu\n",
+		    nadc_get_param_uint8("write_pds"));
+     (void) fprintf(stderr, "write_lv1c: %hhu\n",
+		    nadc_get_param_uint8("write_lv1c"));
+     (void) fprintf(stderr, "write_hdf5: %hhu\n",
+		    nadc_get_param_uint8("write_hdf5"));
+     (void) fprintf(stderr, "write_sql: %hhu\n",
+		    nadc_get_param_uint8("write_sql"));
+     (void) fprintf(stderr, "write_meta: %hhu\n",
+		    nadc_get_param_uint8("write_meta"));
+#endif
      if (nadc_get_param_uint8("write_pds") == PARAM_SET)
 	  res = nadc_set_param_add_ext("outfile", ".child");
 
@@ -977,11 +991,9 @@ void SCIA_SHOW_PARAM(int instrument)
      cpntr = nadc_get_param_string("infile");
      nadc_write_text(outfl, ++nr, "InputFilename", cpntr);
      free(cpntr);
-     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
-	  cpntr = nadc_get_param_string("outfile");
-	  nadc_write_text(outfl, ++nr, "OutputFilename", cpntr);
-	  free(cpntr);
-     }
+     cpntr = nadc_get_param_string("outfile");
+     nadc_write_text(outfl, ++nr, "OutputFilename", cpntr);
+     free(cpntr);
      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
 	  if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
 	       nadc_write_text(outfl, ++nr, "HDF5 compression", "True");
