@@ -134,7 +134,6 @@ check_include_file ( time.h     HAVE_TIME_H    )
 # Set the target names of all the libraries
 #-----------------------------------------------------------------------------
 set (NADC_LIB_TARGET              "nadc")
-set (NADC_GOME_LIB_TARGET         "nadc_gome")
 set (NADC_MERIS_LIB_TARGET        "nadc_meris")
 set (NADC_SCIA_LIB_TARGET         "nadc_scia")
 set (NADC_SCIA_CAL_LIB_TARGET     "nadc_scia_cal")
@@ -144,7 +143,6 @@ set (NADC_IDL_LIB_TARGET          "nadc_idl")
 # Set the true names of all the libraries if customized by external project
 #-----------------------------------------------------------------------------
 set (NADC_LIB_NAME                "lib${NADC_LIB_TARGET}")
-set (NADC_GOME_LIB_NAME           "lib${NADC_GOME_LIB_TARGET}")
 set (NADC_MERIS_LIB_NAME          "lib${NADC_MERIS_LIB_TARGET}")
 set (NADC_SCIA_LIB_NAME           "lib${NADC_SCIA_LIB_TARGET}")
 set (NADC_SCIA_CAL_LIB_NAME       "lib${NADC_SCIA_CAL_LIB_TARGET}")
@@ -208,11 +206,9 @@ include_directories(
 ##
 ## =============================================================================
 add_subdirectory (libNADC)
-add_subdirectory (libNADC_GOME)
 add_subdirectory (libNADC_MERIS)
 add_subdirectory (libNADC_SCIA)
 add_subdirectory (FRESCO)
-add_subdirectory (GOME)
 add_subdirectory (MERIS)
 add_subdirectory (SCIA)
 add_subdirectory (include)

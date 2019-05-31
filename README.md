@@ -1,12 +1,12 @@
 nadc_tools
 ==========
 
-The software package "nadc_tools" contains a number of tools to access the official GOME and Sciamachy level 0, 1b and 2 data products as distributed by DLR and ESRIN and tools to access GOME and Sciamachy level 2 products developed by SRON and KNMI. 
+The software package "nadc_tools" contains a number of tools to access the official Sciamachy level 0, 1b and 2 data products as distributed by DLR and ESRIN and tools to access Sciamachy level 2 products developed by SRON and KNMI. 
 
 ### Purpose and Limitations ###
 The probably most important part of "nadc_tools" are the C-libraries, which contain functions to read Sciamachy data products into memory, dump the data as ASCII output or write the data in PDS or HDF5 format. The software is written in ANSI-C (and even assembler), and coded in such a way that you (an experienced (C-) programmer) can easily understand the code. The data extractors, included in this software package, should give a good example of how to use the libraries.
 
-The software distributed in this package contains libraries, written in ANSI-C (mostly POSIX compliant except for some ISO C99 extensions) and an IDL wrapper library (using _CALL_EXTERNAL_) with IDL functions to read GOME and Sciamachy data.
+The software distributed in this package contains libraries, written in ANSI-C (mostly POSIX compliant except for some ISO C99 extensions) and an IDL wrapper library (using _CALL_EXTERNAL_) with IDL functions to read Sciamachy data.
 The IDL interface requires sharable object libraries. Building shared libraries is easy on the supported platforms, however, do not forget to set the environment variable _LD_LIBRARY_PATH_.
 
 This software package is written and maintained by Richard van Hees (SRON), and distributed under the GNU General Public License (version 2).
@@ -37,7 +37,6 @@ After checking out a working copy, you will be left with the following directory
 
     nadc_tools
     |-- FRESCO
-    |-- GOME
     |-- IMAP
     |-- IMLM
     |-- MERIS
@@ -51,7 +50,6 @@ After checking out a working copy, you will be left with the following directory
     |   `-- StructDefs
     |-- include
     |-- libNADC
-    |-- libNADC_GOME
     |-- libNADC_IDL
     `-- libNADC_SCIA
         |-- CAL

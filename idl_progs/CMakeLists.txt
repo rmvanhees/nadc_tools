@@ -62,21 +62,10 @@ set (IDL_LEVEL0_SRCS
 
 set (IDL_LEVEL1_SRCS
     cmp_scia_cal.pro
-    get_lv1_gome_spec.pro
     get_lv1_mds_data.pro
     get_lv1_mds_state.pro
     get_lv1_mds_time.pro
     get_scia_mds1_wave.pro
-    gome_lv1_free_fcd.pro
-    gome_lv1_pcd_pmd.pro
-    gome_lv1_rd_bdr.pro
-    gome_lv1_rd_fcd.pro
-    gome_lv1_rd_fsr.pro
-    gome_lv1_rd_pcd.pro
-    gome_lv1_rd_smbdr.pro
-    gome_lv1_rd_smcd.pro
-    gome_lv1_rd_sph.pro
-    gome_lv1_smcd_pmd.pro
     scia_hl_lv1_mds.pro
     scia_hl_lv1_pixels.pro
     scia_lv1c_rd_calopt.pro
@@ -159,7 +148,6 @@ set (IDL_SDMF_SRCS
 )
 
 set (NADC_IDL_EXMPL
-    test_gome_lv1.idl
     test_scia_lv0.idl
     test_scia_lv1c.idl
     test_scia_lv1.idl
@@ -186,15 +174,12 @@ set (NADC_IDL_DEFS
     StructDefs/ekd_scia__define.pro
     StructDefs/esigc_scia__define.pro
     StructDefs/esig_scia__define.pro
-    StructDefs/fcd_gome__define.pro
     StructDefs/fep_hdr__define.pro
-    StructDefs/fsr1_gome__define.pro
     StructDefs/gdf_para__define.pro
     StructDefs/geoc_scia__define.pro
     StructDefs/geol_scia__define.pro
     StructDefs/geon_scia__define.pro
     StructDefs/geo_scia__define.pro
-    StructDefs/glr1_gome__define.pro
     StructDefs/lads_scia__define.pro
     StructDefs/lcld_scia__define.pro
     StructDefs/lcpn_scia__define.pro
@@ -216,9 +201,7 @@ set (NADC_IDL_DEFS
     StructDefs/nfit_scia__define.pro
     StructDefs/ngeo_scia__define.pro
     StructDefs/packet_hdr__define.pro
-    StructDefs/pcd_gome__define.pro
     StructDefs/pmd_data__define.pro
-    StructDefs/pmd_gome__define.pro
     StructDefs/pmd_src__define.pro
     StructDefs/pmtc_frame__define.pro
     StructDefs/pmtc_hdr__define.pro
@@ -227,7 +210,6 @@ set (NADC_IDL_DEFS
     StructDefs/ppg_scia__define.pro
     StructDefs/psplo_scia__define.pro
     StructDefs/pspn_scia__define.pro
-    StructDefs/rec_gome__define.pro
     StructDefs/rsigc_scia__define.pro
     StructDefs/rsig_scia__define.pro
     StructDefs/rsplo_scia__define.pro
@@ -247,9 +229,7 @@ set (NADC_IDL_DEFS
     StructDefs/sdmf_trans__define.pro
     StructDefs/sfp_scia__define.pro
     StructDefs/sip_scia__define.pro
-    StructDefs/smcd_gome__define.pro
     StructDefs/sph0_scia__define.pro
-    StructDefs/sph1_gome__define.pro
     StructDefs/sph1_scia__define.pro
     StructDefs/sph2_scia__define.pro
     StructDefs/sph_scia_ol__define.pro

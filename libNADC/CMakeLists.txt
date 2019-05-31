@@ -41,7 +41,6 @@ set (NADC_COMMON_SRCS
     nadc_gettime.c
     nadc_hdf5_api.c 
     nadc_info_screen.c
-    nadc_init_param.c 
     nadc_interpol.c 
     nadc_medfit.c
     nadc_params.c

@@ -30,9 +30,7 @@
 
 #include <idl_export.h>
 
-#if (defined _GOME_COMMON)
-#include <nadc_gome.h>
-#elif (defined _SCIA_CALIB)
+#if (defined _SCIA_CALIB)
 #define _SCIA_LEVEL_1
 #include <nadc_scia_cal.h>
 #else
@@ -43,18 +41,6 @@ extern int IDL_STDCALL OpenFile( int, void ** );
 extern int IDL_STDCALL CloseFile( void );
 extern int IDL_STDCALL Err_Clear( void );
 extern int IDL_STDCALL Err_Trace( int, void ** );
-
-#ifdef _GOME_COMMON
-extern int IDL_STDCALL _GOME_LV1_RD_FSR ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_RD_SPH ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_RD_FCD ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_RD_PCD ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_RD_SMCD ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_PCD_PMD ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_SMCD_PMD ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_RD_BDR ( int, void ** );
-extern int IDL_STDCALL _GOME_LV1_RD_SMBDR ( int, void ** );
-#endif
 
 #ifdef _SCIA_COMMON
 extern unsigned int IDL_STDCALL _NADC_SCIA_CalibMask( int, void ** );

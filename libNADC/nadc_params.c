@@ -62,13 +62,10 @@ static struct param_uint8_rec {
      {"flag_version", PARAM_UNSET},
      {"flag_silent", PARAM_UNSET},
      {"flag_verbose", PARAM_UNSET},
-     {"flag_cloud", PARAM_UNSET},
      {"flag_geoloc", PARAM_UNSET},
      {"flag_geomnmx", PARAM_SET},
      {"flag_period", PARAM_UNSET},
      {"flag_pselect", PARAM_UNSET},
-     {"flag_subset", PARAM_UNSET},
-     {"flag_sunz", PARAM_UNSET},
      {"flag_wave", PARAM_UNSET},
      {"qcheck", PARAM_SET},
      {"write_pds", PARAM_UNSET},
@@ -82,26 +79,19 @@ static struct param_uint8_rec {
      {"write_lv1c", PARAM_UNSET},
      {"write_ads", PARAM_SET},
      {"write_gads", PARAM_SET},
-     {"write_subset", PARAM_UNSET},
-     {"write_blind", PARAM_UNSET},
-     {"write_stray", PARAM_UNSET},
-     {"write_aux0", PARAM_SET},
-     {"write_pmd0", PARAM_SET},
-     {"write_aux", PARAM_SET},
-     {"write_det", PARAM_SET},
-     {"write_pmd", PARAM_SET},
-     {"write_pmd_geo", PARAM_SET},
-     {"write_polV", PARAM_SET},
-     {"write_limb", PARAM_SET},
-     {"write_moni", PARAM_SET},
-     {"write_moon", PARAM_SET},
-     {"write_nadir", PARAM_SET},
-     {"write_occ", PARAM_SET},
-     {"write_sun", PARAM_SET},
-     {"write_bias", PARAM_SET},
-     {"write_cld", PARAM_SET},
-     {"write_doas", PARAM_SET},
-     {"chan_mask", (unsigned char) ~0U}
+     {"write_aux0", PARAM_SET},    // SCIA LV1
+     {"write_pmd0", PARAM_SET},    // SCIA LV1
+     {"write_aux", PARAM_SET},     // SCIA LV0
+     {"write_det", PARAM_SET},     // SCIA LV0
+     {"write_pmd", PARAM_SET},     // SCIA LV0 & LV1
+     {"write_limb", PARAM_SET},    // SCIA LV1
+     {"write_moni", PARAM_SET},    // SCIA LV1
+     {"write_nadir", PARAM_SET},   // SCIA LV1
+     {"write_occ", PARAM_SET},     // SCIA LV1
+     {"write_polV", PARAM_SET},    // SCIA LV1
+     {"write_bias", PARAM_SET},    // SCIA LV2
+     {"write_cld", PARAM_SET},     // SCIA LV2
+     {"write_doas", PARAM_SET}     // SCIA LV2
 };
 
 static struct param_uint16_rec {

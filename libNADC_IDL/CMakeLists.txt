@@ -20,7 +20,6 @@ set (CMAKE_MODULE_LINKER_FLAGS "-Wl,-Bsymbolic")
 
 ## define source-files
 set (NADC_IDL_SRCS
-    gome_lv1_idl.c
     scia_gen_idl.c
     scia_h5_idl.c
     scia_lv0_idl.c
@@ -50,7 +49,6 @@ if (PPF_FOUND)
 
    target_link_libraries (${NADC_IDL_LIB_TARGET}
    		      	 ${NADC_SCIA_CAL_LIB_TARGET}
-		      	 ${NADC_GOME_LIB_TARGET}
 		      	 ${NADC_LIB_TARGET}
 			 ${PPF_LIBRARIES}
 		      	 )
@@ -64,7 +62,6 @@ else ()
 
    target_link_libraries (${NADC_IDL_LIB_TARGET}
    		      	 ${NADC_SCIA_CAL_LIB_TARGET}
-		      	 ${NADC_GOME_LIB_TARGET}
 		      	 ${NADC_LIB_TARGET}
 		      	 )
 endif()

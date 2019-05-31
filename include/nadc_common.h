@@ -170,106 +170,6 @@ enum pds_hdr_type { PDS_Unknown, PDS_Optional, PDS_Spare, PDS_String,
                     PDS_Plain, PDS_Short, PDS_uShort, PDS_Long, PDS_uLong,
                     PDS_Ado06, PDS_Ado46, PDS_Ado73, PDS_Ado18e };
 
-/* structure definitions */
-struct param_record
-{
-     unsigned char flag_infile;                 /* name of input file given */
-     unsigned char flag_outfile;               /* name of output file given */
-
-     unsigned char flag_check;
-     unsigned char flag_show;
-     unsigned char flag_version;
-     unsigned char flag_silent;
-     unsigned char flag_verbose;
-
-     unsigned char flag_cloud;
-     unsigned char flag_geoloc;
-     unsigned char flag_geomnmx;
-     unsigned char flag_period;
-     unsigned char flag_pselect;
-     unsigned char flag_subset;
-     unsigned char flag_sunz;
-     unsigned char flag_wave;
-
-     unsigned char qcheck;
-
-     unsigned char write_pds;
-     unsigned char write_ascii;
-     unsigned char write_hdf5;
-     unsigned char flag_deflate;
-     unsigned char write_meta;
-     unsigned char write_sql;
-     unsigned char flag_sql_remove;
-     unsigned char flag_sql_replace;
-
-     unsigned char write_lv1c;
-
-     unsigned char write_subset;
-     unsigned char write_blind;
-     unsigned char write_stray;
-     unsigned char write_aux0;
-     unsigned char write_pmd0;
-     unsigned char write_aux;
-     unsigned char write_det;
-     unsigned char write_pmd;
-     unsigned char write_pmd_geo;
-     unsigned char write_polV;
-
-     unsigned char write_ads;
-     unsigned char write_gads;
-
-     unsigned char write_limb;
-     unsigned char write_moni;
-     unsigned char write_moon;
-     unsigned char write_nadir;
-     unsigned char write_occ;
-     unsigned char write_sun;
-
-     unsigned char write_bias;
-     unsigned char write_cld;
-     unsigned char write_doas;
-
-     unsigned char catID_nr;   
-     unsigned char stateID_nr;   
-     unsigned char clusID_nr;
-
-     unsigned char chan_mask;
-
-     unsigned short patch_scia;
-     unsigned short calib_earth;
-     unsigned short calib_limb;
-     unsigned short calib_moon;
-     unsigned short calib_sun;
-     unsigned short calib_pmd;
-     unsigned int   calib_scia;
-
-     unsigned long long clus_mask;
-
-     unsigned char  catID[MAX_NUM_STATE];
-     unsigned char  stateID[MAX_NUM_STATE];
-
-     char  bgn_date[DATE_STRING_LENGTH];
-     char  end_date[DATE_STRING_LENGTH];
-
-     char  pselect[MAX_STRING_LENGTH];
-
-     char  program[SHORT_STRING_LENGTH];
-     char  infile[MAX_STRING_LENGTH-3];
-     char  outfile[MAX_STRING_LENGTH];
-     char  hdf5_name[MAX_STRING_LENGTH];
-
-     float cloud[2];
-     float geo_lat[2];
-     float geo_lon[2];
-     float sunz[2];
-     float wave[2];
-#ifdef _HDF5_H
-     hid_t hdf_file_id;
-#else
-     int   hdf_file_id;
-#endif
-};
-
 #define MAX_ADAGUC_INFILES   256
 struct param_adaguc
 {
@@ -544,10 +444,10 @@ extern void UTC_2_DATETIME(unsigned int, unsigned int, /*@out@*/ char *);
 extern void MJD_2_ASCII(int, unsigned int, unsigned int, /*@out@*/ char *);
 extern void MJD_2_DATETIME(int, unsigned int, unsigned int, /*@out@*/char *);
 extern void MJD_2_YMD(int, unsigned int, /*@out@*/ char *);
-extern void GomeJDAY2adaguc(double, /*@out@*/ char *dateTime);
-extern double Adaguc2gomeJDAY(const char *);
 extern void SciaJDAY2adaguc(double, /*@out@*/ char *dateTime);
 extern double Adaguc2sciaJDAY(const char *);
+extern void GomeJDAY2adaguc(double, /*@out@*/ char *dateTime);
+extern double Adaguc2gomeJDAY(const char *);
 
 extern void NADC_AKIMA_SU(int, int, size_t, const void *, const void *, 
 			  /*@out@*/ double *a_coef, /*@out@*/ double *b_coef, 
@@ -611,10 +511,6 @@ extern void NADC_FLIPr(enum nadc_flip, const unsigned int *, float *matrix)
 
 extern void ADAGUC_INIT_PARAM(int, char **, 
 			      /*@out@*/ struct param_adaguc *param)
-     /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
-     /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
-
-extern void NADC_INIT_PARAM(/*@out@*/ struct param_record *param)
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
 

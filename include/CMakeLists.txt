@@ -2,7 +2,6 @@ set (NADC_HDRS
     nadc_common.h
     nadc_error.h
     nadc_fresco.h
-    nadc_gome.h
     nadc_imap.h
     nadc_imlm.h
     nadc_scia_cal.h

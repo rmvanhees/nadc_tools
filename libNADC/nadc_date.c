@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,8 +21,9 @@
 .LANGUAGE    ANSI C
 .COMMENTS    contains ASCII_2_UTC, UTC_2_ASCII, ASCII_2_MJD and MJD_2_ASCII
                       UTC_2_DATETIME, MJD_2_DATETIME, MJD_2_YMD,
-		      MJD_2_Julian and Julian_2_MJD, SciaJDAY2adaguc, 
-		      Adaguc2sciaJDAY, GomeJDAY2adaguc, Adaguc2gomeJDAY
+		      MJD_2_Julian and Julian_2_MJD,
+		      SciaJDAY2adaguc, Adaguc2sciaJDAY
+		      GomeJDAY2adaguc, Adaguc2GomeJDAY
 .ENVIRONment none
 .VERSION      1.8.1 23-Oct-2008	added GomeJDAY2adaguc, Adaguc2gomeJDAY, RvH
               1.8   22-Oct-2008	added SciaJDAY2adaguc, Adaguc2sciaJDAY, RvH
@@ -83,7 +84,7 @@ static const unsigned short Month_Days[MONTHinYEAR] = {
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 static
-unsigned int GET_MONTH_INDX( const char *month_str )
+unsigned int GET_MONTH_INDX(const char *month_str)
 {
      register unsigned short month_idx = 0;
 
@@ -91,15 +92,15 @@ unsigned int GET_MONTH_INDX( const char *month_str )
 /*
  * make sure that the first 3 characters in the input string are in upper-case
  */
-     str_buff[0] = (char) toupper( (int) month_str[0] );
-     str_buff[1] = (char) toupper( (int) month_str[1] );
-     str_buff[2] = (char) toupper( (int) month_str[2] );
+     str_buff[0] = (char) toupper((int) month_str[0]);
+     str_buff[1] = (char) toupper((int) month_str[1]);
+     str_buff[2] = (char) toupper((int) month_str[2]);
      str_buff[3] = '\0';
 /*
  * compare the first 3 characters with the reference array
  */
-     while ( month_idx < MONTHinYEAR 
-	     && strncmp(Month_Names[month_idx], str_buff, 3) != 0 ) 
+     while (month_idx < MONTHinYEAR 
+	     && strncmp(Month_Names[month_idx], str_buff, 3) != 0) 
 	  month_idx++;
 
      return (month_idx + 1);
@@ -110,13 +111,13 @@ unsigned int GET_MONTH_INDX( const char *month_str )
 .IDENTifer   Julian_2_MJD
 .PURPOSE     return the calendar date for given julian date
 .INPUT/OUTPUT
-  call as    Julian_2_MJD( jday, &day, &imon, &iyear );
+  call as    Julian_2_MJD(jday, &day, &imon, &iyear);
 
      input:
             double       jday   :  Julian day number (starts at noon)
     output:
             double       *day   :  number of day of the month.
-            unsigned int *imon  :  number of the month (1 = january, ... )
+            unsigned int *imon  :  number of the month (1 = january, ...)
             unsigned int *iyear :  number of the year
 
 .RETURNS     nothing
@@ -125,15 +126,15 @@ unsigned int GET_MONTH_INDX( const char *month_str )
 	     Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling.
 	     Cambridge University Press, 1988 (second printing).
 -------------------------*/
-void Julian_2_MJD( double jday, 
-		   double *day, unsigned int *imon, unsigned int *iyear )
+void Julian_2_MJD(double jday, 
+		   double *day, unsigned int *imon, unsigned int *iyear)
 {
      int    ja, jalpha, jb, jc, jd, je;
      double frac_day;
 
      jd = (int) (jday += 0.5);
      frac_day = jday - jd;
-     if ( jd >= 2299161 ) {
+     if (jd >= 2299161) {
 	  jalpha = (int) ((jd - 1867216.26)/ 36254.25);
 	  ja = jd + 1 + jalpha - (int) (jalpha / 4);
      } else {
@@ -146,20 +147,20 @@ void Julian_2_MJD( double jday,
      *day = jb - jd - (int) (30.6001 * je) + frac_day;
 
      *imon = (unsigned int) (je - 1u);
-     if ( *imon > MONTHinYEAR ) *imon -= MONTHinYEAR;
+     if (*imon > MONTHinYEAR) *imon -= MONTHinYEAR;
      *iyear = (unsigned int) (jc - 4715U);
-     if ( *imon > 2 ) --(*iyear);
+     if (*imon > 2) --(*iyear);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   MJD_2_Julian
 .PURPOSE     return julian day for given the calendar date
 .INPUT/OUTPUT
-  call as    MJD_2_Julian( day, imon, iyear, &jday );
+  call as    MJD_2_Julian(day, imon, iyear, &jday);
 
      input:
             double       day   :  number of day of the month.
-            unsigned int imon  :  number of the month (1 = january, ... )
+            unsigned int imon  :  number of the month (1 = january, ...)
             unsigned int iyear :  number of the year
     output:
             double       *jday :  Julian day number (starts at noon)
@@ -170,13 +171,13 @@ void Julian_2_MJD( double jday,
 	     Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling.
 	     Cambridge University Press, 1988 (second printing).
 -------------------------*/
-void MJD_2_Julian( double day, unsigned int imon, unsigned int iyear, 
-		   double *jday )
+void MJD_2_Julian(double day, unsigned int imon, unsigned int iyear, 
+		   double *jday)
 {
      int jy, jm;
 
      jy = (int) iyear;
-     if ( imon > 2 ) {
+     if (imon > 2) {
 	  jm = imon + 1;
      } else {
 	  jy--;
@@ -186,7 +187,7 @@ void MJD_2_Julian( double day, unsigned int imon, unsigned int iyear,
 /*
  * test whether to change to Gregorian calendar
  */
-     if ( (jy + jm / 100. + day / 10000.) >= 1582.1015 ) {
+     if ((jy + jm / 100. + day / 10000.) >= 1582.1015) {
 	  int ja = jy / 100;
 	  *jday += (2 - ja + (ja / 4));
      }
@@ -196,7 +197,7 @@ void MJD_2_Julian( double day, unsigned int imon, unsigned int iyear,
 .IDENTifer   ASCII_2_UTC
 .PURPOSE     Converts ASCII time into ESA UTC time 
 .INPUT/OUTPUT
-  call as    ASCII_2_UTC( ASCII_Time, &utc_day, &utc_sec );
+  call as    ASCII_2_UTC(ASCII_Time, &utc_day, &utc_sec);
 
      input:
             char *ASCII_Time      :  given as DD-MMM-YYYY HH:MM:SS.SSS
@@ -207,8 +208,8 @@ void MJD_2_Julian( double day, unsigned int imon, unsigned int iyear,
 .RETURNS     error status
 .COMMENTS    none
 -------------------------*/
-void ASCII_2_UTC( const char ASCII_DateTime[], 
-		  unsigned int *utc_day, unsigned int *utc_msec )
+void ASCII_2_UTC(const char ASCII_DateTime[], 
+		  unsigned int *utc_day, unsigned int *utc_msec)
 {
      char   ASCII_mon[4];                   /* input month (string) */
      char   ASCII_Date[12];                 /* date part of input string */
@@ -226,29 +227,29 @@ void ASCII_2_UTC( const char ASCII_DateTime[],
 /*
  * decomposition of input string into its date and time part
  */
-     (void) nadc_strlcpy( ASCII_Date, ASCII_DateTime, 12 );
-     (void) nadc_strlcpy( ASCII_Time, ASCII_DateTime+12, 13 );
+     (void) nadc_strlcpy(ASCII_Date, ASCII_DateTime, 12);
+     (void) nadc_strlcpy(ASCII_Time, ASCII_DateTime+12, 13);
 /*
  * decomposition of date and time string into numbers into the tm struct
  */
-     (void) sscanf( ASCII_Date, " %2u %*c %3s %*c %4u ", 
-		    &iday, ASCII_mon, &iyear );
-     if ( strlen( ASCII_Time ) < 6 ) {
-	  (void) sscanf( ASCII_Time, " %2u %*c %2u ", &ihour, &imin );
+     (void) sscanf(ASCII_Date, " %2u %*c %3s %*c %4u ", 
+		    &iday, ASCII_mon, &iyear);
+     if (strlen(ASCII_Time) < 6) {
+	  (void) sscanf(ASCII_Time, " %2u %*c %2u ", &ihour, &imin);
 	  sec = 0.;
      } else {
-	  (void) sscanf( ASCII_Time, " %2u %*c %2u %*c %lf ", 
-			 &ihour, &imin, &sec );
+	  (void) sscanf(ASCII_Time, " %2u %*c %2u %*c %lf ", 
+			 &ihour, &imin, &sec);
      }
-     imon = GET_MONTH_INDX( ASCII_mon );
+     imon = GET_MONTH_INDX(ASCII_mon);
      day = iday + (ihour + ((imin + (sec / 60.)) / 60.)) / 24.;
 /*
  * calculate output parameters
  */
-     MJD_2_Julian( day, imon, iyear, &jday );
+     MJD_2_Julian(day, imon, iyear, &jday);
      jday -= (jday_01011950);
      *utc_day = (unsigned int) jday;
-     if ( jday < 0 ) (*utc_day)--;
+     if (jday < 0) (*utc_day)--;
      *utc_msec = (unsigned int) (1000U * SecPerDay * (jday - (*utc_day)));
 }
 
@@ -256,7 +257,7 @@ void ASCII_2_UTC( const char ASCII_DateTime[],
 .IDENTifer   ASCII_2_MJD
 .PURPOSE     Converts ASCII time into SCIAMACHY MJD
 .INPUT/OUTPUT
-  call as    ASCII_2_MJD( ASCII_Time, &mjd2000, &second, &mu_sec );
+  call as    ASCII_2_MJD(ASCII_Time, &mjd2000, &second, &mu_sec);
 
      input:
             char *ASCII_Time      :  given as DD-MMM-YYYY HH:MM:SS.SSSSSS
@@ -268,8 +269,8 @@ void ASCII_2_UTC( const char ASCII_DateTime[],
 .RETURNS     error status
 .COMMENTS    none
 -------------------------*/
-void ASCII_2_MJD( const char ASCII_DateTime[], int *mjd2000, 
-		  unsigned int *second, unsigned int *mu_sec )
+void ASCII_2_MJD(const char ASCII_DateTime[], int *mjd2000, 
+		  unsigned int *second, unsigned int *mu_sec)
 {
      char   ASCII_mon[4];                   /* input month (string) */
      char   ASCII_Date[12];                 /* date part of input string */
@@ -288,30 +289,30 @@ void ASCII_2_MJD( const char ASCII_DateTime[], int *mjd2000,
 /*
  * decomposition of input string into its date and time part
  */
-     (void) nadc_strlcpy( ASCII_Date, ASCII_DateTime, 12 );
-     (void) nadc_strlcpy( ASCII_Time, ASCII_DateTime+12, 16 );
+     (void) nadc_strlcpy(ASCII_Date, ASCII_DateTime, 12);
+     (void) nadc_strlcpy(ASCII_Time, ASCII_DateTime+12, 16);
 /*
  * decomposition of date and time string into numbers into the tm struct
  */
-     (void) sscanf( ASCII_Date, " %2u %*c %3s %*c %4u ", 
-		    &iday, ASCII_mon, &iyear );
-     if ( strlen( ASCII_Time ) < 6 ) {
-	  (void) sscanf( ASCII_Time, " %2u %*c %2u ", &ihour, &imin );
+     (void) sscanf(ASCII_Date, " %2u %*c %3s %*c %4u ", 
+		    &iday, ASCII_mon, &iyear);
+     if (strlen(ASCII_Time) < 6) {
+	  (void) sscanf(ASCII_Time, " %2u %*c %2u ", &ihour, &imin);
 	  sec = 0.;
      } else {
-	  (void) sscanf( ASCII_Time, "%2u %*c %2u %*c %lf", 
-			 &ihour, &imin, &sec );
+	  (void) sscanf(ASCII_Time, "%2u %*c %2u %*c %lf", 
+			 &ihour, &imin, &sec);
      }
-     imon = GET_MONTH_INDX( ASCII_mon );
+     imon = GET_MONTH_INDX(ASCII_mon);
      day = iday + (ihour + ((imin + (sec / 60.)) / 60.)) / 24.;
      frac_sec = sec - floor(sec);
 /*
  * calculate output values
  */
-     MJD_2_Julian( day, imon, iyear, &jday );
+     MJD_2_Julian(day, imon, iyear, &jday);
      jday -= (jday_01012000);
      *mjd2000 = (int) (jday);
-     if ( jday < 0 ) (*mjd2000)--;
+     if (jday < 0) (*mjd2000)--;
      *second = (unsigned int) (SecPerDay * (jday - (*mjd2000)));
      *mu_sec = (unsigned int) (1000000. * frac_sec + 0.5);
 }
@@ -320,7 +321,7 @@ void ASCII_2_MJD( const char ASCII_DateTime[], int *mjd2000,
 .IDENTifer   UTC_2_ASCII
 .PURPOSE     Converts ESA UTC time into a ASCII time
 .INPUT/OUTPUT
-  call as    UTC_2_ASCII( utc_day, utc_msec, ASCII_Time );
+  call as    UTC_2_ASCII(utc_day, utc_msec, ASCII_Time);
 
      input:
             unsigned int utc_day  :  ESA UTC days since 01.01.1950
@@ -331,8 +332,8 @@ void ASCII_2_MJD( const char ASCII_DateTime[], int *mjd2000,
 .RETURNS     nothing
 .COMMENTS    see GOME date specification
 -------------------------*/
-void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec, 
-		  char ASCII_DateTime[] )
+void UTC_2_ASCII(unsigned int utc_day, unsigned int utc_msec, 
+		  char ASCII_DateTime[])
 {
      unsigned int ihour, imin, imon, imsec, isec, iyear;
      double       mday, jday;
@@ -340,7 +341,7 @@ void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec,
  * convert to julian day
  */
      jday = utc_day + jday_01011950;
-     Julian_2_MJD( jday, &mday, &imon, &iyear );
+     Julian_2_MJD(jday, &mday, &imon, &iyear);
 
      isec = (unsigned int) (utc_msec / 1000U);
      imsec = (unsigned int) (utc_msec - 1000 * isec);
@@ -348,17 +349,17 @@ void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec,
      isec -= 3600 * ihour;
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf( ASCII_DateTime, DATE_STRING_LENGTH,
+     (void) snprintf(ASCII_DateTime, DATE_STRING_LENGTH,
 		      "%02d-%3s-%04u %02u:%02u:%02u.%03u", ((int) mday) % 100,
 		      Month_Names[imon-1], iyear % 10000, ihour % 100,
-		      imin % 100, isec % 100, imsec % 1000 );
+		      imin % 100, isec % 100, imsec % 1000);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   MJD_2_ASCII
 .PURPOSE     Converts SCIAMACHY MJD into a ASCII time
 .INPUT/OUTPUT
-  call as    MJD_2_ASCII( mjd2000, second, mu_sec, ASCII_Time );
+  call as    MJD_2_ASCII(mjd2000, second, mu_sec, ASCII_Time);
 
      input:
             signed int mjd2000  :  number of days elapsed since 1.1.2000
@@ -370,8 +371,8 @@ void UTC_2_ASCII( unsigned int utc_day, unsigned int utc_msec,
 .RETURNS     nothing
 .COMMENTS    see SCIAMACHY date specification
 -------------------------*/
-void MJD_2_ASCII( int mjd2000, unsigned int second, unsigned int mu_sec, 
-		  char *ASCII_DateTime )
+void MJD_2_ASCII(int mjd2000, unsigned int second, unsigned int mu_sec, 
+		  char *ASCII_DateTime)
 {
      unsigned int ihour, imin, imon, isec, iyear;
      double       mday, jday;
@@ -379,23 +380,23 @@ void MJD_2_ASCII( int mjd2000, unsigned int second, unsigned int mu_sec,
  * convert to julian day
  */
      jday = mjd2000 + jday_01012000;
-     Julian_2_MJD( jday, &mday, &imon, &iyear );
+     Julian_2_MJD(jday, &mday, &imon, &iyear);
 
      ihour = (unsigned int)(second / 3600);
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf( ASCII_DateTime, UTC_STRING_LENGTH,
+     (void) snprintf(ASCII_DateTime, UTC_STRING_LENGTH,
 		      "%02d-%3s-%04u %02u:%02u:%02u.%06u", ((int) mday) % 100, 
 		      Month_Names[imon-1], iyear % 10000, ihour % 100,
-		      imin % 100, isec % 100, mu_sec % 1000000 );
+		      imin % 100, isec % 100, mu_sec % 1000000);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   UTC_2_DATETIME
 .PURPOSE     Converts ESA UTC time into a MySQL dateTime string
 .INPUT/OUTPUT
-  call as    UTC_2_DATETIME( utc_day, utc_msec, dateTime );
+  call as    UTC_2_DATETIME(utc_day, utc_msec, dateTime);
 
      input:
             unsigned int utc_day  :  ESA UTC days since 01.01.1950
@@ -406,8 +407,8 @@ void MJD_2_ASCII( int mjd2000, unsigned int second, unsigned int mu_sec,
 .RETURNS     nothing
 .COMMENTS    see GOME date specification
 -------------------------*/
-void UTC_2_DATETIME( unsigned int utc_day, unsigned int utc_msec, 
-		     char dateTime[] )
+void UTC_2_DATETIME(unsigned int utc_day, unsigned int utc_msec, 
+		     char dateTime[])
 {
      unsigned int  ihour, imin, imon, imsec, isec, iyear;
      double        mday, jday;
@@ -415,7 +416,7 @@ void UTC_2_DATETIME( unsigned int utc_day, unsigned int utc_msec,
  * convert to julian day
  */
      jday = utc_day + jday_01011950;
-     Julian_2_MJD( jday, &mday, &imon, &iyear );
+     Julian_2_MJD(jday, &mday, &imon, &iyear);
 
      isec = (unsigned int) (utc_msec / 1000U);
      imsec = (unsigned int) (utc_msec - 1000 * isec);
@@ -423,17 +424,17 @@ void UTC_2_DATETIME( unsigned int utc_day, unsigned int utc_msec,
      isec -= 3600 * ihour;
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf( dateTime, DATE_STRING_LENGTH,
+     (void) snprintf(dateTime, DATE_STRING_LENGTH,
 		      "%04u-%02u-%02d %02u:%02u:%02u.%03u", iyear % 10000,
 		      imon % 100, ((int) mday) % 100, ihour % 100,
-		      imin % 100, isec % 100, imsec % 1000 );
+		      imin % 100, isec % 100, imsec % 1000);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   DATETIME_2_JULIAN
 .PURPOSE     Converts MySQL dateTime string to Julian day
 .INPUT/OUTPUT
-  call as    jday = DATETIME_2_MJD( dateTime, muSeconds );
+  call as    jday = DATETIME_2_MJD(dateTime, muSeconds);
 
      input:
             char *dateTime        :  given as YYYY-MM-DD HH:MM:SS
@@ -442,7 +443,7 @@ void UTC_2_DATETIME( unsigned int utc_day, unsigned int utc_msec,
 .RETURNS     Julian day (double)
 .COMMENTS    none
 -------------------------*/
-double DATETIME_2_JULIAN( const char dateTime[], unsigned int muSecond )
+double DATETIME_2_JULIAN(const char dateTime[], unsigned int muSecond)
 {
      char   ASCII_Date[12];                 /* date part of input string */
      char   ASCII_Time[16];                 /* time part of input string */
@@ -452,26 +453,26 @@ double DATETIME_2_JULIAN( const char dateTime[], unsigned int muSecond )
 /*
  * decomposition of input string into its date and time part
  */
-     (void) nadc_strlcpy( ASCII_Date, dateTime, 11 );
-     (void) nadc_strlcpy( ASCII_Time, dateTime+11, 16 );
+     (void) nadc_strlcpy(ASCII_Date, dateTime, 11);
+     (void) nadc_strlcpy(ASCII_Time, dateTime+11, 16);
 /*
  * decomposition of date and time string into numbers into the tm struct
  */
-     (void) sscanf( ASCII_Date, " %4u %*c %2u %*c %2u ", 
-		    &iyear, &imon, &iday );
-     if ( strlen( ASCII_Time ) < 6 ) {
-	  (void) sscanf( ASCII_Time, " %2u %*c %2u ", &ihour, &imin );
+     (void) sscanf(ASCII_Date, " %4u %*c %2u %*c %2u ", 
+		    &iyear, &imon, &iday);
+     if (strlen(ASCII_Time) < 6) {
+	  (void) sscanf(ASCII_Time, " %2u %*c %2u ", &ihour, &imin);
 	  sec = muSecond / 1e6;
      } else {
-	  (void) sscanf( ASCII_Time, "%2u %*c %2u %*c %lf", 
-			 &ihour, &imin, &sec );
+	  (void) sscanf(ASCII_Time, "%2u %*c %2u %*c %lf", 
+			 &ihour, &imin, &sec);
 	  sec += (muSecond / 1e6);
      }
      day = iday + (ihour + (imin + (sec / 60.)) / 60.) / 24.;
 /*
  * calculate output values
  */
-     MJD_2_Julian( day, imon, iyear, &jday );
+     MJD_2_Julian(day, imon, iyear, &jday);
 
      return jday - jday_01012000;
 }
@@ -480,7 +481,7 @@ double DATETIME_2_JULIAN( const char dateTime[], unsigned int muSecond )
 .IDENTifer   MJD_2_DATETIME
 .PURPOSE     Converts SCIAMACHY MJD into a MySQL dateTime string
 .INPUT/OUTPUT
-  call as    MJD_2_DATETIME( mjd2000, second, mu_sec, dateTime );
+  call as    MJD_2_DATETIME(mjd2000, second, mu_sec, dateTime);
 
      input:
             signed int mjd2000  :  number of days elapsed since 1.1.2000
@@ -492,8 +493,8 @@ double DATETIME_2_JULIAN( const char dateTime[], unsigned int muSecond )
 .RETURNS     nothing
 .COMMENTS    see SCIAMACHY date specification
 -------------------------*/
-void MJD_2_DATETIME( int mjd2000, unsigned int second, unsigned int mu_sec, 
-		     char *dateTime )
+void MJD_2_DATETIME(int mjd2000, unsigned int second, unsigned int mu_sec, 
+		     char *dateTime)
 {
      unsigned int ihour, imin, imon, isec, iyear;
      double       mday, jday;
@@ -501,16 +502,16 @@ void MJD_2_DATETIME( int mjd2000, unsigned int second, unsigned int mu_sec,
  * convert to julian day
  */
      jday = mjd2000 + jday_01012000;
-     Julian_2_MJD( jday, &mday, &imon, &iyear );
+     Julian_2_MJD(jday, &mday, &imon, &iyear);
 
      ihour = (unsigned int)(second / 3600);
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf( dateTime, UTC_STRING_LENGTH-1,
+     (void) snprintf(dateTime, UTC_STRING_LENGTH-1,
 		      "%04u-%02u-%02d %02u:%02u:%02u.%06u", iyear % 10000, 
 		      imon % 100, ((int) mday) % 100,
-		      ihour % 100, imin % 100, isec % 100, mu_sec );
+		      ihour % 100, imin % 100, isec % 100, mu_sec);
 }
 
 /*+++++++++++++++++++++++++ KB
@@ -518,7 +519,7 @@ void MJD_2_DATETIME( int mjd2000, unsigned int second, unsigned int mu_sec,
 .PURPOSE     Converts SCIAMACHY MJD into a dateTime string, 
              as used in aux. files
 .INPUT/OUTPUT
-  call as    MJD_2_YMD( mjd2000, second, dateTime );
+  call as    MJD_2_YMD(mjd2000, second, dateTime);
      input:
             signed int mjd2000  :  number of days elapsed since 1.1.2000
             unsigned int second :  seconds elepsed since midnight
@@ -529,7 +530,7 @@ void MJD_2_DATETIME( int mjd2000, unsigned int second, unsigned int mu_sec,
 .RETURNS     nothing
 .COMMENTS    see SCIAMACHY date specification
 -------------------------*/
-void MJD_2_YMD( int mjd2000, unsigned int second, char *dateTime )
+void MJD_2_YMD(int mjd2000, unsigned int second, char *dateTime)
 {
      unsigned int ihour, imin, imon, isec, iyear;
      double       mday, jday;
@@ -537,23 +538,23 @@ void MJD_2_YMD( int mjd2000, unsigned int second, char *dateTime )
  * convert to julian day
  */
      jday = mjd2000 + jday_01012000;
-     Julian_2_MJD( jday, &mday, &imon, &iyear );
+     Julian_2_MJD(jday, &mday, &imon, &iyear);
 
      ihour = (unsigned int)(second / 3600);
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf( dateTime, UTC_STRING_LENGTH-1,
+     (void) snprintf(dateTime, UTC_STRING_LENGTH-1,
 		      "%04u%02u%02d_%02u%02u%02u", iyear % 10000, 
 		      imon % 100, ((int) mday) % 100,
-		      ihour % 100, imin % 100, isec % 100 );
+		      ihour % 100, imin % 100, isec % 100);
 }
 
 /*+++++++++++++++++++++++++ 
 .IDENTifer   SciaJDAY2adaguc
 .PURPOSE     Converts julian (2000) decimal day into a dateTime string 
 .INPUT/OUTPUT
-  call as    SciaJDAY2adaguc( jday, dateTime );
+  call as    SciaJDAY2adaguc(jday, dateTime);
      input:
             double jday         :  decimal days elapsed since 1.1.2000
     output:
@@ -562,13 +563,13 @@ void MJD_2_YMD( int mjd2000, unsigned int second, char *dateTime )
 .RETURNS     nothing
 .COMMENTS    none
 -------------------------*/
-void SciaJDAY2adaguc( double jday, char *dateTime )
+void SciaJDAY2adaguc(double jday, char *dateTime)
 {
      unsigned int imin, ihour, iday, imon, iyear;
      double       day, sec;
 
      jday += jday_01012000;
-     Julian_2_MJD( jday, &day, &imon, &iyear );
+     Julian_2_MJD(jday, &day, &imon, &iyear);
      iday = (unsigned int) day;
      day  -= iday;
      ihour = (unsigned int) (day *= 24);
@@ -577,15 +578,15 @@ void SciaJDAY2adaguc( double jday, char *dateTime )
      day  -= imin;
      sec = (day * 60);
 
-     if ( sec >= 59.5 ) {
+     if (sec >= 59.5) {
 	  sec = 0.;
-	  if ( ++imin == 60 ) {
+	  if (++imin == 60) {
 	       imin = 0;
-	       if ( ++ihour == 24 ) {
+	       if (++ihour == 24) {
 		    ihour = 0;
-		    if ( ++iday > Month_Days[imon-1] ) {
+		    if (++iday > Month_Days[imon-1]) {
 			 iday = 1;
-			 if ( ++imon > MONTHinYEAR ) {
+			 if (++imon > MONTHinYEAR) {
 			      imon = 1;
 			      iyear++;
 			 }
@@ -596,32 +597,32 @@ void SciaJDAY2adaguc( double jday, char *dateTime )
 /*
  * write date time
  */
-     (void) sprintf( dateTime, "%04u%02u%02uT%02u%02u%02.0f",
+     (void) sprintf(dateTime, "%04u%02u%02uT%02u%02u%02.0f",
                      iyear % 10000, imon % 100 , iday % 100,
-		     ihour % 100, imin % 100, sec );
+		     ihour % 100, imin % 100, sec);
 }
 
 /*+++++++++++++++++++++++++ 
 .IDENTifer   Adaguc2sciaJDAY
 .PURPOSE     Converts dateTime string to julian (2000) decimal day
 .INPUT/OUTPUT
-  call as    jday = Adaguc2sciaJDAY2( dateTime );
+  call as    jday = Adaguc2sciaJDAY2(dateTime);
      input:
             char *dateTime   :  dateTime given as yyyyMMddThhmmss
 
 .RETURNS     decimal days elapsed since 1.1.2000 (double)
 .COMMENTS    none
 -------------------------*/
-double Adaguc2sciaJDAY( const char *dateTime )
+double Adaguc2sciaJDAY(const char *dateTime)
 {
      unsigned int isec, imin, ihour, iday, imon, iyear;
      double       day, jday;
 
-     (void) sscanf( dateTime, "%4u%2u%2uT%2u%2u%2u", 
-		    &iyear, &imon, &iday, &ihour, &imin, &isec );
+     (void) sscanf(dateTime, "%4u%2u%2uT%2u%2u%2u", 
+		    &iyear, &imon, &iday, &ihour, &imin, &isec);
 
      day = iday + (ihour + ((imin + (isec / 60.)) / 60.)) / 24.;
-     MJD_2_Julian( day, imon, iyear, &jday );
+     MJD_2_Julian(day, imon, iyear, &jday);
 
      return (jday - jday_01012000);
 }
@@ -630,7 +631,7 @@ double Adaguc2sciaJDAY( const char *dateTime )
 .IDENTifer   GomeJDAY2adaguc
 .PURPOSE     Converts julian (1950) decimal day into a dateTime string 
 .INPUT/OUTPUT
-  call as    GomeJDAY2adaguc( jday, dateTime );
+  call as    GomeJDAY2adaguc(jday, dateTime);
      input:
             double jday         :  decimal days elapsed since 1.1.1950
     output:
@@ -639,13 +640,13 @@ double Adaguc2sciaJDAY( const char *dateTime )
 .RETURNS     nothing
 .COMMENTS    none
 -------------------------*/
-void GomeJDAY2adaguc( double jday, char *dateTime )
+void GomeJDAY2adaguc(double jday, char *dateTime)
 {
      unsigned int imin, ihour, iday, imon, iyear;
      double       day, sec;
 
      jday += jday_01011950;
-     Julian_2_MJD( jday, &day, &imon, &iyear );
+     Julian_2_MJD(jday, &day, &imon, &iyear);
      iday = (unsigned int) day;
      day  -= iday;
      ihour = (unsigned int) (day *= 24);
@@ -654,50 +655,48 @@ void GomeJDAY2adaguc( double jday, char *dateTime )
      day  -= imin;
      sec = (day * 60);
 
-     if ( sec >= 59.5 ) {
-	  sec = 0.;
-	  if ( ++imin == 60 ) {
-	       imin = 0;
-	       if ( ++ihour == 24 ) {
-		    ihour = 0;
-		    if ( ++iday > Month_Days[imon-1] ) {
-			 iday = 1;
-			 if ( ++imon > MONTHinYEAR ) {
-			      imon = 1;
-			      iyear++;
-			 }
-		    }
-	       }
-	  }
+     if (sec >= 59.5) {
+          sec = 0.;
+          if (++imin == 60) {
+               imin = 0;
+               if (++ihour == 24) {
+                    ihour = 0;
+                    if (++iday > Month_Days[imon-1]) {
+                         iday = 1;
+                         if (++imon > MONTHinYEAR) {
+                              imon = 1;
+                              iyear++;
+                         }
+                    }
+               }
+          }
      }
-/*
- * write date time
- */
-     (void) sprintf( dateTime, "%04u%02u%02uT%02u%02u%02.0f",
-                     iyear, imon, iday, ihour, imin, sec );
+     /* write date time */
+     (void) sprintf(dateTime, "%04u%02u%02uT%02u%02u%02.0f",
+		    iyear, imon, iday, ihour, imin, sec);
 }
 
 /*+++++++++++++++++++++++++ 
 .IDENTifer   Adaguc2gomeJDAY
 .PURPOSE     Converts dateTime string to julian (1950) decimal day
 .INPUT/OUTPUT
-  call as    jday = Adaguc2gomeJDAY2( dateTime );
+  call as    jday = Adaguc2gomeJDAY2(dateTime);
      input:
             char *dateTime   :  dateTime given as yyyyMMddThhmmss
 
 .RETURNS     decimal days elapsed since 1.1.1950 (double)
 .COMMENTS    see GOME date specification
 -------------------------*/
-double Adaguc2gomeJDAY( const char *dateTime )
+double Adaguc2gomeJDAY(const char *dateTime)
 {
      unsigned int isec, imin, ihour, iday, imon, iyear;
      double       day, jday;
 
-     (void) sscanf( dateTime, "%4u%2u%2uT%2u%2u%2u", 
-		    &iyear, &imon, &iday, &ihour, &imin, &isec );
+     (void) sscanf(dateTime, "%4u%2u%2uT%2u%2u%2u", 
+		   &iyear, &imon, &iday, &ihour, &imin, &isec);
 
      day = iday + (ihour + ((imin + (isec / 60.)) / 60.)) / 24.;
-     MJD_2_Julian( day, imon, iyear, &jday );
+     MJD_2_Julian(day, imon, iyear, &jday);
 
      return (jday - jday_01011950);
 }
