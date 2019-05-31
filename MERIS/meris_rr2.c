@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2008 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2008 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -60,7 +60,7 @@ bool Use_Extern_Alloc = FALSE;
 /* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/
 {
@@ -68,9 +68,9 @@ int main( int argc, char *argv[] )
 
      unsigned int num_dsd, num_dsr;
 
+     char  *cpntr;
      FILE  *fp = NULL;
 
-     struct param_record     param;
      struct mph_envi         mph;
      struct sph_meris        sph;
      struct dsd_envi         *dsd = NULL;
@@ -88,263 +88,265 @@ int main( int argc, char *argv[] )
 /*
  * initialization of command-line parameters
  */
-     MERIS_SET_PARAM( argc, argv, MERIS_LEVEL_2, &param );
-     if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
+     MERIS_SET_PARAM(argc, argv, MERIS_LEVEL_2);
+     if (IS_ERR_STAT_FATAL) 
+          NADC_GOTO_ERROR(NADC_ERR_PARAM, "MERIS_SET_PARAM");
 /*
  * check if we have to display version and exit
  */
-     if ( param.flag_version == PARAM_SET ) {
-	  MERIS_SHOW_VERSION( stdout, "meris_rr2" );
-	  exit( EXIT_SUCCESS );
+     if (nadc_get_param_uint8("flag_version") == PARAM_SET) {
+	  MERIS_SHOW_VERSION(stdout, "meris_rr2");
+	  exit(EXIT_SUCCESS);
      }
 /*
  * dump command-line parameters
  */
-     if ( param.flag_show == PARAM_SET ) {
-          MERIS_SHOW_PARAM( MERIS_LEVEL_2, param );
-          exit( EXIT_SUCCESS );
+     if (nadc_get_param_uint8("flag_show") == PARAM_SET) {
+          MERIS_SHOW_PARAM(MERIS_LEVEL_2);
+          exit(EXIT_SUCCESS);
      }
 /*
  * open input-file
  */
-     if ( (fp = fopen( param.infile, "r" )) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
+     cpntr = nadc_get_param_string("infile");
+     if ((fp = fopen(cpntr, "r")) == NULL)
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, cpntr);
+     free(cpntr);
 /*
  * create output file
  */
-     if ( param.write_hdf5 == PARAM_SET ) {
-          param.hdf_file_id = MERIS_CRE_H5_FILE( MERIS_LEVEL_2, &param );
-          if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
-          MERIS_WR_H5_VERSION( param.hdf_file_id );
+     if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
+          MERIS_CRE_H5_FILE(MERIS_LEVEL_2);
+          if (IS_ERR_STAT_FATAL)
+               NADC_GOTO_ERROR(NADC_ERR_HDF_CRE, "HDF5 base");
+          MERIS_WR_H5_VERSION();
      }
 /*
  * -------------------------
  * read Main Product Header
  */
-     ENVI_RD_MPH( fp, &mph );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MPH" );
-     if ( param.write_ascii == PARAM_SET ) {
+     ENVI_RD_MPH(fp, &mph);
+     if (IS_ERR_STAT_FATAL) 
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MPH");
+     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
 	  ENVI_WR_ASCII_MPH(&mph);
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "MPH" );
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "MPH");
      }
-/*      if ( param.write_hdf5 == PARAM_SET ) { */
-/* 	  SCIA_WR_H5_MPH( param, &mph ); */
-/* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "MPH" ); */
+/*      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) { */
+/* 	  SCIA_WR_H5_MPH(&mph); */
+/* 	  if (IS_ERR_STAT_FATAL) */
+/* 	       NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "MPH"); */
 /*      } */
 /*
  * -------------------------
  * read Specific Product Header
  */
-     MERIS_RD_SPH( fp, mph, &sph );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
-     if ( param.write_ascii == PARAM_SET ) {
-	  MERIS_WR_ASCII_SPH( param, &sph );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
+     MERIS_RD_SPH(fp, mph, &sph);
+     if (IS_ERR_STAT_FATAL) 
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SPH");
+     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
+	  MERIS_WR_ASCII_SPH(&sph);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SPH");
      }
-/*      if ( param.write_hdf5 == PARAM_SET ) { */
-/* 	  SCIA_OL2_WR_H5_SPH( param, &sph ); */
-/* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SPH" ); */
+/*      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) { */
+/* 	  SCIA_OL2_WR_H5_SPH(&sph); */
+/* 	  if (IS_ERR_STAT_FATAL) */
+/* 	       NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "SPH"); */
 /*      } */
 /*
  * -------------------------
  * read Data Set Descriptor records
  */
      dsd = (struct dsd_envi *)
-	  malloc( (mph.num_dsd-1) * sizeof( struct dsd_envi ) );
-     if ( dsd == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dsd" );
-     num_dsd = ENVI_RD_DSD( fp, mph, dsd );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DSD" );
-     if ( param.write_ascii == PARAM_SET ) {
+	  malloc((mph.num_dsd-1) * sizeof(struct dsd_envi));
+     if (dsd == NULL) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "dsd");
+     num_dsd = ENVI_RD_DSD(fp, mph, dsd);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "DSD");
+     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
 	  ENVI_WR_ASCII_DSD(num_dsd, dsd);
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DSD" );
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "DSD");
      }
 /*
  * -------------------------
  * read/write Summary of Quality Flags
  */
-     num_dsr = MERIS_RR2_RD_SQADS( fp, num_dsd, dsd, &sqads );
-     if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SQADS" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[SQADS] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SQADS( param, num_dsr, sqads ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SQADS" ); */
+     num_dsr = MERIS_RR2_RD_SQADS(fp, num_dsd, dsd, &sqads);
+     if (IS_ERR_STAT_FATAL)
+          NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SQADS");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[SQADS] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SQADS(num_dsr, sqads); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SQADS"); */
 /*           } */
-          free( sqads );
+          free(sqads);
      }
 /*
  * -------------------------
  * read/write Scaling Factors and General Info GADS
  */
-     num_dsr = MERIS_RR2_RD_SFGI( fp, num_dsd, dsd, &sfgi );
-     if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SFGI" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[SFGI] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_SFGI(fp, num_dsd, dsd, &sfgi);
+     if (IS_ERR_STAT_FATAL)
+          NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SFGI");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[SFGI] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
      }
 /*
  * -------------------------
  * read/write Tie point locations and auxiliary data (LADS)
  */
-     num_dsr = MERIS_RD_TIE( fp, num_dsd, dsd, &tie );
-     if ( IS_ERR_STAT_FATAL )
-          NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "TIE" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[TIE] = %-u\n", num_dsr );
-          if ( param.write_ascii == PARAM_SET ) {
-               MERIS_WR_ASCII_TIE( param, num_dsr, tie );
-               if ( IS_ERR_STAT_FATAL )
-                    NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "TIE" );
+     num_dsr = MERIS_RD_TIE(fp, num_dsd, dsd, &tie);
+     if (IS_ERR_STAT_FATAL)
+          NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "TIE");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[TIE] = %-u\n", num_dsr);
+          if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
+               MERIS_WR_ASCII_TIE(num_dsr, tie);
+               if (IS_ERR_STAT_FATAL)
+                    NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "TIE");
           }
-	  free( tie );
+	  free(tie);
      }
 /*
  * -------------------------
  * read/write RR-MDS 1 to 13
  */
-     for ( ni = 1; ni <= 13; ni++ ) {
-	  num_dsr = MERIS_RR2_RD_MDS_13( ni, fp, num_dsd, dsd, &mds_13 );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_13" );
-	  if ( num_dsr > 0 ) {
-	       (void) fprintf( stderr, "num_dsr[MDS(%-d)] = %-u\n", 
-			       ni, num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     for (ni = 1; ni <= 13; ni++) {
+	  num_dsr = MERIS_RR2_RD_MDS_13(ni, fp, num_dsd, dsd, &mds_13);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_13");
+	  if (num_dsr > 0) {
+	       (void) fprintf(stderr, "num_dsr[MDS(%-d)] = %-u\n", 
+			       ni, num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	       free( mds_13 );
+	       free(mds_13);
 	  }
      }
 /*
  * -------------------------
  * read/write RR-MDS 14
  */
-     num_dsr = MERIS_RR2_RD_MDS_14( fp, num_dsd, dsd, &mds_14 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_14" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(14)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_14(fp, num_dsd, dsd, &mds_14);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_14");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(14)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_14 );
+	  free(mds_14);
      }
 /*
  * -------------------------
  * read/write RR-MDS 15
  */
-     num_dsr = MERIS_RR2_RD_MDS_15( fp, num_dsd, dsd, &mds_15 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_15" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(15)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_15(fp, num_dsd, dsd, &mds_15);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_15");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(15)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_15 );
+	  free(mds_15);
      }
 /*
  * -------------------------
  * read/write RR-MDS 16
  */
-     num_dsr = MERIS_RR2_RD_MDS_16( fp, num_dsd, dsd, &mds_16 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_16" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(16)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_16(fp, num_dsd, dsd, &mds_16);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_16");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(16)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_16 );
+	  free(mds_16);
      }
 /*
  * -------------------------
  * read/write RR-MDS 17
  */
-     num_dsr = MERIS_RR2_RD_MDS_17( fp, num_dsd, dsd, &mds_17 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_17" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(17)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_17(fp, num_dsd, dsd, &mds_17);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_17");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(17)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_17 );
+	  free(mds_17);
      }
 /*
  * -------------------------
  * read/write RR-MDS 18
  */
-     num_dsr = MERIS_RR2_RD_MDS_18( fp, num_dsd, dsd, &mds_18 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_18" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(18)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_18(fp, num_dsd, dsd, &mds_18);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_18");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(18)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_18 );
+	  free(mds_18);
      }
 /*
  * -------------------------
  * read/write RR-MDS 19
  */
-     num_dsr = MERIS_RR2_RD_MDS_19( fp, num_dsd, dsd, &mds_19 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_19" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(19)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_19(fp, num_dsd, dsd, &mds_19);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_19");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(19)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_19 );
+	  free(mds_19);
      }
 /*
  * -------------------------
  * read/write RR-MDS 20
  */
-     num_dsr = MERIS_RR2_RD_MDS_20( fp, num_dsd, dsd, &mds_20 );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MDS_20" );
-     if ( num_dsr > 0 ) {
-	  (void) fprintf( stderr, "num_dsr[MDS(20)] = %-u\n", num_dsr );
-/*           if ( param.write_ascii == PARAM_SET ) { */
-/*                MERIS_RR2_WR_ASCII_SFGI( param, num_dsr, sfgi ); */
-/*                if ( IS_ERR_STAT_FATAL ) */
-/*                     NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SFGI" ); */
+     num_dsr = MERIS_RR2_RD_MDS_20(fp, num_dsd, dsd, &mds_20);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MDS_20");
+     if (num_dsr > 0) {
+	  (void) fprintf(stderr, "num_dsr[MDS(20)] = %-u\n", num_dsr);
+/*           if (nadc_get_param_uint8("write_ascii") == PARAM_SET) { */
+/*                MERIS_RR2_WR_ASCII_SFGI(num_dsr, sfgi); */
+/*                if (IS_ERR_STAT_FATAL) */
+/*                     NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SFGI"); */
 /*           } */
-	  free( mds_20 );
+	  free(mds_20);
      }
 /*
  * when an error has occurred we jump to here:
@@ -353,23 +355,29 @@ int main( int argc, char *argv[] )
 /*
  * close input file
  */
-     if ( fp != NULL ) (void) fclose( fp );
+     if (fp != NULL) (void) fclose(fp);
 /*
  * close HDF5 output file
  */
-     if ( param.write_hdf5 == PARAM_SET ) {
-	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
+     if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
+	  hid_t fid = nadc_get_param_hid("hdf_file_id");
+          
+          if (fid >= 0 && H5Fclose(fid) < 0) {
+               cpntr = nadc_get_param_string("outfile");
+               NADC_ERROR(NADC_ERR_HDF_FILE, cpntr);
+               free(cpntr);
+          }
      }
 /*
  * free allocated memory
  */
-     if ( dsd != NULL ) free( dsd );
+     if (dsd != NULL) free(dsd);
 /*
  * display error messages?
  */
-     if ( param.flag_silent == PARAM_UNSET ) NADC_Err_Trace( stderr );
-     if ( IS_ERR_STAT_FATAL ) 
+     if (nadc_get_param_uint8("flag_silent") == PARAM_UNSET)
+	  NADC_Err_Trace(stderr);
+     if (IS_ERR_STAT_FATAL) 
 	  return NADC_ERR_FATAL;
      else
 	  return NADC_ERR_NONE;

@@ -569,8 +569,7 @@ void Do_Not_Extract_MDS(int instrument)
 void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 {
      char   *cpntr;
-     char   name_infile[MAX_STRING_LENGTH];
-     char   name_outfile[MAX_STRING_LENGTH];
+     char   *name_infile;
      char   prog_master[SHORT_STRING_LENGTH];
      int    narg, num, res;
      float  rbuff[4];
@@ -600,33 +599,136 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
      narg = 0;
      while (++narg < argc) {
 	  Check_User_Option(stderr, instrument, prog_master, argv[narg]);
-/*
- * obtain name of input file
- */
-	  if (argv[narg][0] != '-') {
-	       if (nadc_get_param_uint8("flag_infile") == PARAM_UNSET) {
-		    if (strlen(argv[narg]) > MAX_STRING_LENGTH) {
-			 char cbuff[MAX_STRING_LENGTH];
-			 
-			 (void) snprintf(cbuff, MAX_STRING_LENGTH,
-					 "Filename too long (max: %zd)\n",
-					 MAX_STRING_LENGTH);
-			 
-			 NADC_RETURN_ERROR(NADC_ERR_FATAL, cbuff);
+
+	  if (argv[narg][0] == '-' && argv[narg][1] == '-') {
+	       /* command-line options starting with "--" */
+	       if (strncmp(argv[narg]+2, "time", 4) == 0) {
+		    /* perform selection on time-window */
+		    char bgn_date[DATE_STRING_LENGTH],
+			 end_date[DATE_STRING_LENGTH];
+		    
+		    if (nadc_get_param_uint8("flag_period") == PARAM_UNSET) {
+			 res = nadc_set_param_uint8("flag_period", PARAM_SET);
+			 Set_Time_Window(argc, argv, &narg, bgn_date, end_date);
+			 if (IS_ERR_STAT_FATAL)
+			      NADC_RETURN_ERROR(NADC_ERR_PARAM, "period");
+			 res = nadc_set_param_string("bgn_date", bgn_date);
+			 res = nadc_set_param_string("end_date", end_date);
 		    }
-		    res = nadc_set_param_uint8("flag_infile", PARAM_SET);
-		    (void) snprintf(name_infile, MAX_STRING_LENGTH,
-				    "%s", argv[narg]);
-	       } else
-		    NADC_RETURN_ERROR(NADC_ERR_PARAM,
-				      "name of input-file already defined");
-/*
- * process command-line options starting with one "-" (= standalone options)
- */
-	  } else if (argv[narg][0] == '-' && argv[narg][1] != '-') {
+	       } else if (strncmp(argv[narg]+2, "region", 6) == 0) {
+		    /* perform selection on geo-location */
+		    if (nadc_get_param_uint8("flag_geoloc") == PARAM_UNSET
+			&& (cpntr = strchr(argv[narg], '=')) != NULL) {
+			 
+			 (void) NADC_USRINP(FLT32_T, cpntr+1, 4, rbuff, &num);
+			 if (num == 4) {
+			      float lat_range[2] = {
+				   min_t(float, rbuff[0], rbuff[1]),
+				   max_t(float, rbuff[0], rbuff[1])};
+			      float lon_range[2] = {
+				   min_t(float, rbuff[2], rbuff[3]),
+				   max_t(float, rbuff[2], rbuff[3])};
+
+			      res = nadc_set_param_range("latitude", lat_range);
+			      res = nadc_set_param_range("longitude", lon_range);
+			      if (rbuff[2] < rbuff[3])
+				   res = nadc_set_param_uint8(
+					"flag_geomnmx", PARAM_SET);
+			      else
+				   res = nadc_set_param_uint8(
+					"flag_geomnmx", PARAM_UNSET);
+			 } else
+			      NADC_RETURN_ERROR(NADC_ERR_PARAM, argv[narg]);
+
+			 res = nadc_set_param_uint8("flag_geoloc", PARAM_SET);
+		    }
+	       } else if (strncmp(argv[narg]+2, "cat", 3) == 0) {
+		    /* perform selection on measurement category */
+		    unsigned char cat_list[MAX_NUM_CLUS];
+		    
+		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
+			 res = nadc_set_param_cat(cat_list, 0);
+		    } else {
+			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
+					    MAX_NUM_CLUS, cat_list, &num);
+			 res = nadc_set_param_cat(cat_list, num);
+		    }
+	       } else if (strncmp(argv[narg]+2, "state", 5) == 0) {
+		    /* perform selection on measurement state ID(s) */
+		    unsigned char state_list[MAX_NUM_STATE];
+
+		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
+			 res = nadc_set_param_state(state_list, 0);
+		    } else {
+			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
+					    MAX_NUM_STATE, state_list, &num);
+			 res = nadc_set_param_state(state_list, num);
+		    }
+	       } else if (strncmp(argv[narg]+2, "chan", 4) == 0) {
+		    /* perform selection on science channel(s) */
+		    unsigned char chan_list[8];
+		    
+		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
+			 res = nadc_set_param_chan(chan_list, 0);
+		    } else {
+			 (void) NADC_USRINP(UINT8_T, cpntr+1,
+					    8, chan_list, &num);
+			 res = nadc_set_param_chan(chan_list, num);
+		    }
+	       } else if (strncmp(argv[narg]+2, "clus", 4) == 0) {
+		    /* perform selection on cluster ID(s) */
+		    unsigned char clus_list[MAX_NUM_CLUS];
+		    
+		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
+			 res = nadc_set_param_clus(clus_list, 0);
+		    } else {
+			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
+					    MAX_NUM_CLUS, clus_list, &num);
+			 res = nadc_set_param_clus(clus_list, num);
+		    }
+	       } else if (strncmp(argv[narg]+2, "cal", 3) == 0) {
+		    /* perform calibration on measurement data (L1b only) */
+		    res = nadc_set_param_uint8("write_lv1c", PARAM_SET);
+		    if ((cpntr = strchr(argv[narg], '=')) == NULL)
+			 scia_set_calib("atbd");
+		    else
+			 scia_set_calib(cpntr+1);
+
+	       } else if (strncmp(argv[narg]+2, "patch", 5) == 0) {
+		    /* perform patches to calibration key data in L1b product */
+		    if ((cpntr = strchr(argv[narg], '=')) == NULL)
+			 scia_set_patch("all");
+		    else
+			 scia_set_patch(cpntr+1);
+	       }
+
+	       if (strncmp(argv[narg]+2, "output=", 7) == 0) {
+		    char *name_outfile;
+		    
+		    if (strlen(argv[narg]+9) == 0)
+			 NADC_RETURN_ERROR(NADC_ERR_PARAM, argv[narg]);
+
+		    nadc_set_param_string("outfile", argv[narg]+9);
+		    name_outfile = nadc_get_param_string("outfile");
+
+		    /* remove known extensions */
+		    if ((cpntr = strstr(name_outfile, ".h5")) != NULL)
+			 *cpntr = '\0';
+		    if ((cpntr = strstr(name_outfile, ".hdf")) != NULL)
+			 *cpntr = '\0';
+		    if ((cpntr = strstr(name_outfile, ".txt")) != NULL)
+			 *cpntr = '\0';
+		    if ((cpntr = strstr(name_outfile, ".child")) != NULL)
+			 *cpntr = '\0';
+		    nadc_set_param_string("outfile", name_outfile);
+		    free(name_outfile);
+	       }
+	  } else if (argv[narg][0] == '-') {
+	       /* command-line options starting with "-" */
 	       if ((argv[narg][1] == 'h' && argv[narg][2] == '\0')
-		   || strncmp(argv[narg]+1, "help", 4) == 0)
+		   || strncmp(argv[narg]+1, "help", 4) == 0) {
 		    Show_All_Options(stdout, instrument, prog_master);
+	       }
 	       if (argv[narg][1] == 'V' 
 		   || strncmp(argv[narg]+1, "version", 7) == 0) {
 		    res = nadc_set_param_uint8("flag_version", PARAM_SET);
@@ -666,9 +768,8 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 		    res = nadc_set_param_uint8("flag_sql_remove", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "replace", 7) == 0) {
 		    res = nadc_set_param_uint8("flag_sql_replace", PARAM_SET);
-/*
- * selection on all kind of data sets
- */
+
+		    /* selection on all kind of data sets */
 	       } else if (strncmp(argv[narg]+1, "no_gads", 7) == 0) {
 		    res = nadc_set_param_uint8("write_gads", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_ads", 6) == 0) {
@@ -759,126 +860,10 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 	       } else if (strncmp(argv[narg]+1, "no_qcheck", 9) == 0) {
 		    res = nadc_set_param_uint8("qcheck", PARAM_UNSET);
 	       }
-	  } else if (argv[narg][0] == '-' && argv[narg][1] == '-') {
-	       /* perform selection on time-window */
-	       if (strncmp(argv[narg]+2, "time", 4) == 0) {
-		    char bgn_date[DATE_STRING_LENGTH],
-			 end_date[DATE_STRING_LENGTH];
-		    
-		    if (nadc_get_param_uint8("flag_period") == PARAM_UNSET) {
-			 res = nadc_set_param_uint8("flag_period", PARAM_SET);
-			 Set_Time_Window(argc, argv, &narg, bgn_date, end_date);
-			 if (IS_ERR_STAT_FATAL)
-			      NADC_RETURN_ERROR(NADC_ERR_PARAM, "period");
-			 res = nadc_set_param_string("bgn_date", bgn_date);
-			 res = nadc_set_param_string("end_date", end_date);
-		    }
-		    /* perform selection on geo-location */
-	       } else if (strncmp(argv[narg]+2, "region", 6) == 0) {
-		    if (nadc_get_param_uint8("flag_geoloc") == PARAM_UNSET
-			&& (cpntr = strchr(argv[narg], '=')) != NULL) {
-			 
-			 (void) NADC_USRINP(FLT32_T, cpntr+1, 4, rbuff, &num);
-			 if (num == 4) {
-			      float lat_range[2] = {
-				   min_t(float, rbuff[0], rbuff[1]),
-				   max_t(float, rbuff[0], rbuff[1])};
-			      float lon_range[2] = {
-				   min_t(float, rbuff[2], rbuff[3]),
-				   max_t(float, rbuff[2], rbuff[3])};
-
-			      res = nadc_set_param_range("latitude", lat_range);
-			      res = nadc_set_param_range("longitude", lon_range);
-			      if (rbuff[2] < rbuff[3])
-				   res = nadc_set_param_uint8(
-					"flag_geomnmx", PARAM_SET);
-			      else
-				   res = nadc_set_param_uint8(
-					"flag_geomnmx", PARAM_UNSET);
-			 } else
-			      NADC_RETURN_ERROR(NADC_ERR_PARAM, argv[narg]);
-
-			 res = nadc_set_param_uint8("flag_geoloc", PARAM_SET);
-		    }
-		    /* perform selection on measurement category */
-	       } else if (strncmp(argv[narg]+2, "cat", 3) == 0) {
-		    unsigned char cat_list[MAX_NUM_CLUS];
-		    
-		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_cat(cat_list, 0);
-		    } else {
-			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
-					    MAX_NUM_CLUS, cat_list, &num);
-			 res = nadc_set_param_cat(cat_list, num);
-		    }
-		    /* perform selection on measurement state ID(s) */
-	       } else if (strncmp(argv[narg]+2, "state", 5) == 0) {
-		    unsigned char state_list[MAX_NUM_STATE];
-
-		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_state(state_list, 0);
-		    } else {
-			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
-					    MAX_NUM_STATE, state_list, &num);
-			 res = nadc_set_param_state(state_list, num);
-		    }
-		    /* perform selection on science channel(s) */
-	       } else if (strncmp(argv[narg]+2, "chan", 4) == 0) {
-		    unsigned char chan_list[8];
-		    
-		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_chan(chan_list, 0);
-		    } else {
-			 (void) NADC_USRINP(UINT8_T, cpntr+1,
-					    8, chan_list, &num);
-			 res = nadc_set_param_chan(chan_list, num);
-		    }
-		    /* perform selection on cluster ID(s) */
-	       } else if (strncmp(argv[narg]+2, "clus", 4) == 0) {
-		    unsigned char clus_list[MAX_NUM_CLUS];
-		    
-		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_clus(clus_list, 0);
-		    } else {
-			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
-					    MAX_NUM_CLUS, clus_list, &num);
-			 res = nadc_set_param_clus(clus_list, num);
-		    }
-		    /* perform calibration on measurement data (L1b only) */
-	       } else if (strncmp(argv[narg]+2, "cal", 3) == 0) {
-		    res = nadc_set_param_uint8("write_lv1c", PARAM_SET);
-		    if ((cpntr = strchr(argv[narg], '=')) == NULL)
-			 scia_set_calib("atbd");
-		    else
-			 scia_set_calib(cpntr+1);
-
-		    /* perform patches to calibration key data in L1b product */
-	       } else if (strncmp(argv[narg]+2, "patch", 5) == 0) {
-		    if ((cpntr = strchr(argv[narg], '=')) == NULL)
-			 scia_set_patch("all");
-		    else
-			 scia_set_patch(cpntr+1);
-	       }
-
-	       if (strncmp(argv[narg]+2, "output=", 7) == 0) {
-		    if (strlen(argv[narg]+9) == 0)
-			 NADC_RETURN_ERROR(NADC_ERR_PARAM, argv[narg]);
-		    
-		    if (nadc_get_param_uint8("flag_outfile") == PARAM_UNSET) {
-			 res = nadc_set_param_uint8("flag_outfile", PARAM_SET);
-			 (void) snprintf(name_outfile, MAX_STRING_LENGTH, 
-					 "%s", argv[narg]+9);
-			 /* remove known extensions */
-			 if ((cpntr = strstr(name_outfile, ".h5")) != NULL)
-			      *cpntr = '\0';
-			 if ((cpntr = strstr(name_outfile, ".hdf")) != NULL)
-			      *cpntr = '\0';
-			 if ((cpntr = strstr(name_outfile, ".txt")) != NULL)
-			      *cpntr = '\0';
-			 if ((cpntr = strstr(name_outfile, ".child")) != NULL)
-			      *cpntr = '\0';
-		    }
-	       }
+	  } else {
+	       /* name of input file */
+	       nadc_set_param_string("infile", argv[narg]);
+	       name_infile = argv[narg];
 	  }
      }
      if (nadc_get_param_uint8("flag_check") == PARAM_SET) {
@@ -922,60 +907,31 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 		    res = nadc_set_param_uint8("write_hdf5", PARAM_SET);
 	  }
      }
-/*
- * User has to give the name of the input filename
- */
-     if (nadc_get_param_uint8("flag_infile") == PARAM_UNSET) 
+
+     /* User has to give the name of the input filename */
+     if (nadc_get_param_string("infile") == NULL) 
 	  Show_All_Options(stderr, instrument, prog_master);
-/*
- * set input/output filename, if required
- */
-     if (instrument == SCIA_PATCH_1 
-	 || nadc_get_param_uint8("write_ascii") == PARAM_SET
-	 || nadc_get_param_uint8("write_pds") == PARAM_SET) {
-	  if (nadc_get_param_uint8("flag_outfile") == PARAM_UNSET) {
-	       char *pntr = strrchr(name_infile, '/');
-	       
-	       if (pntr != NULL) {
-		    (void) snprintf(name_outfile, MAX_STRING_LENGTH,
-				    "%s", pntr+1);
-	       } else
-		    (void) snprintf(name_outfile, MAX_STRING_LENGTH,
-				    "%s", name_infile);
-	       
-	       if (instrument == SCIA_PATCH_1) 
-		    name_outfile[10] = SCIA_PATCH_ID[0];
+
+     /* make sure that the output filename is defined */
+     if ((cpntr = nadc_get_param_string("outfile")) == NULL) {
+	  if ((cpntr = strrchr(name_infile, '/')) != NULL)
+	       nadc_set_param_string("outfile", cpntr+1);
+	  else
+	       nadc_set_param_string("outfile", name_infile);
+
+	  if (instrument == SCIA_PATCH_1) {
+	       cpntr = nadc_get_param_string("outfile");
+	       cpntr[10] = SCIA_PATCH_ID[0];
+	       nadc_set_param_string("outfile", cpntr);
 	  }
-	  if (nadc_get_param_uint8("write_pds") == PARAM_SET 
-	      && strstr(name_outfile, ".child") == NULL)
-	       (void) strcat(name_outfile, ".child");
-	  
-	  if ((instrument == SCIA_PATCH_1
-	       || nadc_get_param_uint8("write_pds") == PARAM_SET)
-	      && nadc_file_equal(name_infile, name_outfile)) {
-	       NADC_RETURN_ERROR(NADC_ERR_PARAM, 
-				 "input file same as output file");
-	  }
-     }
-     if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
-	  char hdf5_name[MAX_STRING_LENGTH];
-	  
-	  if (nadc_get_param_uint8("flag_outfile") == PARAM_UNSET) {
-	       char *pntr = strrchr(name_infile, '/');
-	       
-	       if (pntr != NULL)
-		    (void) snprintf(hdf5_name, MAX_STRING_LENGTH,
-				    "%s.%s", pntr+1, "h5");
-	       else
-		    (void) snprintf(hdf5_name, MAX_STRING_LENGTH,
-				    "%s.%s", name_infile, "h5");
-	  } else 
-	       (void) snprintf(hdf5_name, MAX_STRING_LENGTH,
-			       "%s.%s", name_outfile, "h5");
-	  res = nadc_set_param_string("hdf5_name", hdf5_name);
-     }
-     res = nadc_set_param_string("infile", name_infile);
-     res = nadc_set_param_string("outfile", name_outfile);
+     } else
+	  free(cpntr);
+
+     if (nadc_get_param_uint8("write_pds") == PARAM_SET)
+	  res = nadc_set_param_add_ext("outfile", ".child");
+
+     if (nadc_get_param_uint8("write_hdf5") == PARAM_SET)
+	  res = nadc_set_param_add_ext("outfile", ".h5");
 }
 
 /*+++++++++++++++++++++++++
@@ -1027,13 +983,10 @@ void SCIA_SHOW_PARAM(int instrument)
 	  free(cpntr);
      }
      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
-	  cpntr = nadc_get_param_string("hdf5_name");
-	  nadc_write_text(outfl, ++nr, "Output filename", cpntr);
-	  free(cpntr);
 	  if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
-	       nadc_write_text(outfl, ++nr, "Compression", "True");
+	       nadc_write_text(outfl, ++nr, "HDF5 compression", "True");
 	  else
-	       nadc_write_text(outfl, ++nr, "Compression", "False");
+	       nadc_write_text(outfl, ++nr, "HDF5 compression", "False");
      }
      if (instrument == SCIA_LEVEL_1) {
 	  if (nadc_get_param_uint8("write_lv1c") == PARAM_SET)

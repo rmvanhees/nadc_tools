@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 1999 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 1999 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,10 +21,9 @@
 .LANGUAGE    ANSI C
 .PURPOSE     Create HDF5 file for MERIS level 1 & 2 products
 .INPUT/OUTPUT
-  call as    MERIS_CRE_H5_FILE( instument, param );
+  call as    MERIS_CRE_H5_FILE(instument);
      input:
             int  instrument           : flag for Instrument & Product
-            struct param_record param : command-line parameters
 
 .RETURNS     nothing: modifies global error status
 .COMMENTS    none
@@ -84,99 +83,98 @@
 .IDENTifer   WRITE_HDF5_HISTORY
 .PURPOSE     Write attribute in group holding user-defined settings
 .INPUT/OUTPUT
-  call as    WRITE_HDF5_HISTORY( file_id, instrument, param )
+  call as    WRITE_HDF5_HISTORY(fid, instrument)
      input:
-            hid_t  file_id            :   HDF5 file ID
-            hid_t  instrument         :   flag for Instrument & Product
-	    struct param_record param :   struct holding user-defined settings
+            hid_t  fid         :   HDF5 file ID
+            hid_t  instrument  :   flag for Instrument & Product
 
 .RETURNS     nothing: modifies global error status
 .COMMENTS    none
 -------------------------*/
 static
-void WRITE_HDF5_HISTORY( hid_t file_id, 
-			 hid_t instrument __attribute ((unused)), 
-			 const struct param_record param )
+void WRITE_HDF5_HISTORY(hid_t fid, 
+			hid_t instrument __attribute ((unused)))
 {
-     char    cbuff[MAX_STRING_LENGTH];
+     char    *cpntr, cbuff[MAX_STRING_LENGTH];
+     float   rbuff[2];
      time_t  tp[1];
 
      unsigned int majnum, minnum, relnum;
 /*
  * +++++ create/write attributes in root
  */
-     (void) H5LTset_attribute_string( file_id, "/", "InputFilename", 
-				      param.infile );
-     (void) H5LTset_attribute_string( file_id, "/", "OutputFilename", 
-				      param.hdf5_name );
+     cpntr = nadc_get_param_string("infile");
+     (void) H5LTset_attribute_string(fid, "/", "InputFilename", cpntr);
+     free(cpntr);
+     cpntr = nadc_get_param_string("outfile");
+     (void) H5LTset_attribute_string(fid, "/", "OutputFilename", cpntr);
+     free(cpntr);
 /*
  * compression flag     
  */
-     if ( param.flag_deflate == PARAM_SET )
-	  (void) H5LTset_attribute_string( file_id, "/", "Compression", 
-					   "TRUE" );
+     if (nadc_get_param_uint8("flag_deflate") == PARAM_SET)
+	  (void) H5LTset_attribute_string(fid, "/", "Compression", "TRUE");
      else
-	  (void) H5LTset_attribute_string( file_id, "/", "Compression", 
-					   "FALSE" );
+	  (void) H5LTset_attribute_string(fid, "/", "Compression", "FALSE");
 /*
  * write program name/version and HDF5 library version
  */
-     (void) H5LTset_attribute_string( file_id, "/", "Processor", 
-				      param.program );
-     MERIS_WR_H5_VERSION( file_id );
-     (void) H5get_libversion( &majnum, &minnum, &relnum );
-     (void) snprintf( cbuff, MAX_STRING_LENGTH, 
+     cpntr = nadc_get_param_string("program");
+     (void) H5LTset_attribute_string(fid, "/", "Processor", cpntr);
+     free(cpntr);
+     MERIS_WR_H5_VERSION();
+     (void) H5get_libversion(&majnum, &minnum, &relnum);
+     (void) snprintf(cbuff, MAX_STRING_LENGTH, 
 		      "version %-u.%-u release %-u",
-		      majnum, minnum, relnum );
-     (void) H5LTset_attribute_string( file_id, "/", "HDF5", cbuff );
+		      majnum, minnum, relnum);
+     (void) H5LTset_attribute_string(fid, "/", "HDF5", cbuff);
 /*
  * store time of creation
  */
-     (void) time( tp );
-     (void) strcpy( cbuff, ctime( tp ) );
+     (void) time(tp);
+     (void) strcpy(cbuff, ctime(tp));
      cbuff[strlen(cbuff)-1] = '\0';
-     (void) H5LTset_attribute_string( file_id, "/", "ProcessingDate", cbuff );
+     (void) H5LTset_attribute_string(fid, "/", "ProcessingDate", cbuff);
 /*
  * ----- General options
  */
 /*
  * geolocation (bounding box)
  */
-     (void) H5LTset_attribute_float( file_id, "/", "Latitude", 
-				     param.geo_lat, 2 );
-     (void) H5LTset_attribute_float( file_id, "/", "Longitude", 
-				     param.geo_lon, 2 );
-     if ( param.flag_geomnmx == PARAM_SET )
-	  (void) H5LTset_attribute_string( file_id, "/", "WithinRegion", 
-					   "TRUE" );
+     nadc_get_param_range("latitude", rbuff);
+     (void) H5LTset_attribute_float(fid, "/", "Latitude", rbuff, 2);
+     nadc_get_param_range("longitude", rbuff);
+     (void) H5LTset_attribute_float(fid, "/", "Longitude", rbuff, 2);
+     if (nadc_get_param_uint8("flag_geomnmx") == PARAM_SET)
+	  (void) H5LTset_attribute_string(fid, "/", "WithinRegion", "TRUE");
      else
-	  (void) H5LTset_attribute_string( file_id, "/", "WithinRegion", 
-					   "FALSE" );
+	  (void) H5LTset_attribute_string(fid, "/", "WithinRegion", "FALSE");
 /*
  * time window
  */
-     if ( param.flag_period == PARAM_SET ) {
-	  (void) H5LTset_attribute_string( file_id, "/", "StartDate", 
-					   param.bgn_date );
-	  (void) H5LTset_attribute_string( file_id, "/", "EndDate", 
-					   param.end_date );
+     if (nadc_get_param_uint8("flag_period") == PARAM_SET) {
+	  cpntr = nadc_get_param_string("bgn_date");
+	  (void) H5LTset_attribute_string(fid, "/", "StartDate", cpntr);
+	  free(cpntr);
+	  cpntr = nadc_get_param_string("end_date");
+	  (void) H5LTset_attribute_string(fid, "/", "EndDate", cpntr);
+	  free(cpntr);
      }
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function(s) +++++++++++++++*/
-hid_t MERIS_CRE_H5_FILE( int instrument, const struct param_record *param )
+void MERIS_CRE_H5_FILE(int instrument)
 {
+     char *cpntr = nadc_get_param_string("outfile");
 /*
  * create HDF5-file
  */
-     hid_t file_id = H5Fcreate( param->hdf5_name, H5F_ACC_TRUNC, 
-				H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param->hdf5_name );
+     hid_t fid = H5Fcreate(cpntr, H5F_ACC_TRUNC,  H5P_DEFAULT, H5P_DEFAULT);
+     if (fid < 0)
+	  NADC_RETURN_ERROR(NADC_ERR_HDF_FILE, cpntr);
+     free(cpntr);
 /*
  * write global attributes
  */
-     WRITE_HDF5_HISTORY( file_id, instrument, *param );
-done:
-     return file_id;
+     WRITE_HDF5_HISTORY(fid, instrument);
 }

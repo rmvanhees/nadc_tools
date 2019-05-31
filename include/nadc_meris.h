@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2008 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2008 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -21,7 +21,8 @@
 .LANGUAGE    ANSI-C
 .PURPOSE     macros and structures for MERIS data modules
 .ENVIRONment none
-.VERSION      1.0   18-Sep-2008 Creation by R.M. van Hees
+.VERSION      2.0   30-May-2019 replaced param_record by function calls, RvH
+              1.0   18-Sep-2008 Creation by R.M. van Hees
 ------------------------------------------------------------*/
 #ifndef  __NADC_MERIS                            /* Avoid redefinitions */
 #define  __NADC_MERIS
@@ -254,99 +255,97 @@ struct mds_rr2_20_meris
 /*
  * prototype declaration of Meris functions
  */
-extern void MERIS_SET_PARAM( int, char **, int,
-                             /*@out@*/ struct param_record *param )
+extern void MERIS_SET_PARAM(int, char **, int)
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
-     /*@modifies errno, stderr, nadc_stat, nadc_err_stack, param@*/;
-extern void MERIS_SHOW_PARAM( int instrument, struct param_record );
+     /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/;
+extern void MERIS_SHOW_PARAM(int);
 
 #if defined _STDIO_H || defined _STDIO_H_
-extern void MERIS_SHOW_VERSION( FILE *stream, const char * )
+extern void MERIS_SHOW_VERSION(FILE *stream, const char *)
      /*@modifies stream@*/;
 
-extern void MERIS_RD_SPH( FILE *fp, const struct mph_envi,
-			  /*@out@*/ struct sph_meris *sph )
+extern void MERIS_RD_SPH(FILE *fp, const struct mph_envi,
+			 /*@out@*/ struct sph_meris *sph)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *sph@*/;
 
-extern unsigned int MERIS_RD_TIE( FILE *, unsigned int, 
-				  const struct dsd_envi *, 
-				  /*@out@*/ struct tie_meris **tie )
+extern unsigned int MERIS_RD_TIE(FILE *, unsigned int, 
+				 const struct dsd_envi *, 
+				 /*@out@*/ struct tie_meris **tie)
        /*@globals  errno;@*/
        /*@modifies errno, fp, tie@*/;
 
-extern unsigned int MERIS_RR2_RD_SQADS( FILE *fp, unsigned int, 
-					const struct dsd_envi *, 
-					/*@out@*/ struct sqads2_meris **sqads )
+extern unsigned int MERIS_RR2_RD_SQADS(FILE *fp, unsigned int, 
+				       const struct dsd_envi *, 
+				       /*@out@*/ struct sqads2_meris **sqads)
        /*@globals  errno;@*/
        /*@modifies errno, fp@*/;
 
-extern unsigned int MERIS_RR2_RD_SFGI( FILE *fp, unsigned int, 
-				       const struct dsd_envi *, 
-				       /*@out@*/ struct sfgi_meris *sfgi )
+extern unsigned int MERIS_RR2_RD_SFGI(FILE *fp, unsigned int, 
+				      const struct dsd_envi *, 
+				      /*@out@*/ struct sfgi_meris *sfgi)
        /*@globals  errno;@*/
        /*@modifies errno, fp, sfgi@*/;
 
-extern unsigned int MERIS_RR2_RD_MDS_13( int, FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_13_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_13(int, FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_13_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_14( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_14_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_14(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_14_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_15( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_15_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_15(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_15_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_16( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_16_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_16(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_16_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_17( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_17_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_17(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_17_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_18( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_18_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_18(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_18_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_19( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_19_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_19(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_19_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
-extern unsigned int MERIS_RR2_RD_MDS_20( FILE *, unsigned int, 
-					 const struct dsd_envi *, /*@out@*/ 
-					 struct mds_rr2_20_meris **mds )
+extern unsigned int MERIS_RR2_RD_MDS_20(FILE *, unsigned int, 
+					const struct dsd_envi *, /*@out@*/ 
+					struct mds_rr2_20_meris **mds)
        /*@globals  errno;@*/
        /*@modifies errno, fp, mds@*/;
 #endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
-extern void MERIS_WR_ASCII_SPH( struct param_record, 
-				const struct sph_meris * )
+extern void MERIS_WR_ASCII_SPH(const struct sph_meris *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
-extern void MERIS_WR_ASCII_TIE( struct param_record, unsigned int,
-				const struct tie_meris * )
+extern void MERIS_WR_ASCII_TIE(unsigned int,
+			       const struct tie_meris *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
 #ifdef _HDF5_H
-extern void MERIS_WR_H5_VERSION( hid_t )
+extern void MERIS_CRE_H5_FILE(int instrument)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern hid_t MERIS_CRE_H5_FILE( int instrument, const struct param_record * )
+extern void MERIS_WR_H5_VERSION(void)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
-extern void MERIS_WR_H5_MPH( struct param_record, const struct mph_envi * )
+extern void MERIS_WR_H5_MPH(const struct mph_envi *)
        /*@globals  nadc_stat, nadc_err_stack;@*/
        /*@modifies nadc_stat, nadc_err_stack@*/;
 #endif /* _HDF5_H */

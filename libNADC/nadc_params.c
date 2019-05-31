@@ -57,8 +57,6 @@ static struct param_uint8_rec {
      const char  *name;
      unsigned char value;
 } params_uint8[] = {
-     {"flag_infile", PARAM_UNSET},
-     {"flag_outfile", PARAM_UNSET},
      {"flag_check", PARAM_UNSET},
      {"flag_show", PARAM_UNSET},
      {"flag_version", PARAM_UNSET},
@@ -151,8 +149,7 @@ static struct param_string_rec {
      {"end_date", NULL},
      {"program", NULL},
      {"infile", NULL},
-     {"outfile", NULL},
-     {"hdf5_name", NULL}
+     {"outfile", NULL}
 };
 
 /*+++++++++++++++++++++++++ Exported Functions +++++++++++++++++++++*/
@@ -265,10 +262,39 @@ int nadc_set_param_string(const char *param_name, const char *str)
 	  if (strcmp(params_string[ii].name, param_name) == 0) {
 	       if (params_string[ii].str != NULL)
 		    free(params_string[ii].str);
-	       params_string[ii].str = (char *) malloc(strlen(str));
+	       params_string[ii].str = (char *) malloc(strlen(str) + 1);
 	       if (params_string[ii].str == NULL)
 		    NADC_GOTO_ERROR(NADC_ERR_ALLOC, "params_string[ii].str");
 	       (void) strcpy(params_string[ii].str, str);
+	       return 0;
+	  }
+     } while (++ii < nkeys);
+     
+     NADC_ERROR(NADC_ERR_FATAL, "unknown parameter name");
+done:
+     return -1;
+}
+
+int nadc_set_param_add_ext(const char *param_name, const char *ext)
+{
+     register size_t ii = 0;
+
+     const size_t nkeys = \
+	  sizeof params_string / sizeof(struct param_string_rec);
+
+     do {
+	  if (strcmp(params_string[ii].name, param_name) == 0) {
+	       size_t length;
+	       
+	       if (params_string[ii].str == NULL)
+		    NADC_GOTO_ERROR(NADC_ERR_FATAL, "parameter not defined");
+
+	       length = strlen(params_string[ii].str) + strlen(ext);
+	       params_string[ii].str = (char *) realloc(
+		    params_string[ii].str, length + 1);
+	       if (params_string[ii].str == NULL)
+		    NADC_GOTO_ERROR(NADC_ERR_ALLOC, "params_string[ii].str");
+	       (void) strcat(params_string[ii].str, ext);
 	       return 0;
 	  }
      } while (++ii < nkeys);
@@ -381,7 +407,7 @@ char * nadc_get_param_string(const char *param_name)
 	       continue;
 
 	  if (params_string[ii].str == NULL)
-	       NADC_GOTO_ERROR(NADC_ERR_FATAL, "parameter uninitialized");
+	       goto done;
 
 	  if ((str = malloc(strlen(params_string[ii].str)+1)) == NULL)
 	       NADC_GOTO_ERROR(NADC_ERR_ALLOC, "str");

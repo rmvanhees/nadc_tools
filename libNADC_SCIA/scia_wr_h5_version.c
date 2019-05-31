@@ -62,6 +62,6 @@ void SCIA_WR_H5_VERSION(void)
      (void) H5LTset_attribute_string(fid, "/", "nadc_tools", cbuff);
      
      (void) snprintf(cbuff, SHORT_STRING_LENGTH, "version %-d.%-d.%-d",
-                      version_major, version_minor, version_release);
+		     version_major, version_minor, version_release);
      (void) H5LTset_attribute_string(fid, "/", "libnadc_scia", cbuff);
 }

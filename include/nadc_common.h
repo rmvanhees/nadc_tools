@@ -478,6 +478,9 @@ extern int nadc_set_param_range(const char *, const float *)
 extern int nadc_set_param_string(const char *, const char *)
       /*@globals  nadc_stat, nadc_err_stack;@*/
       /*@modifies nadc_stat, nadc_err_stack@*/;
+extern int nadc_set_param_add_ext(const char *, const char *)
+      /*@globals  nadc_stat, nadc_err_stack;@*/
+      /*@modifies nadc_stat, nadc_err_stack@*/;
 extern void nadc_free_param_string(void);
 
 extern bool nadc_get_param_chan(int);

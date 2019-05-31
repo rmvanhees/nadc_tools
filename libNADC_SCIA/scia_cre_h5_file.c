@@ -306,7 +306,7 @@ void SCIA_CRE_H5_FILE(int instrument)
      hid_t  file_id;
      
      /* create HDF5-file */
-     cpntr = nadc_get_param_string("hdf5_name");
+     cpntr = nadc_get_param_string("outfile");
      
      file_id = H5Fcreate(cpntr, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
      if (file_id < 0)

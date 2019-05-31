@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
  */
      SCIA_SET_PARAM(argc, argv, SCIA_LEVEL_0);
      if (IS_ERR_STAT_FATAL)
-	  NADC_GOTO_ERROR(NADC_ERR_PARAM, "NADC_INIT_PARAM");
+	  NADC_GOTO_ERROR(NADC_ERR_PARAM, "SCIA_SET_PARAM");
 /*
  * check if we have to display version and exit
  */
@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
 	  hid_t fid = nadc_get_param_hid("hdf_file_id");
 	  
 	  if (fid >= 0 && H5Fclose(fid) < 0) {
-	       cpntr = nadc_get_param_string("hdf5_name");
+	       cpntr = nadc_get_param_string("outfile");
 	       NADC_ERROR(NADC_ERR_HDF_FILE, cpntr);
 	       free(cpntr);
 	  }

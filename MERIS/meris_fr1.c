@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2008 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2008 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -60,102 +60,106 @@ bool Use_Extern_Alloc = FALSE;
 /* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
      /*@globals  errno, stderr, nadc_stat, nadc_err_stack;@*/
      /*@modifies errno, stderr, nadc_stat, nadc_err_stack@*/
 {
      unsigned int num_dsd;
 
+     char  *cpntr;
      FILE  *fp = NULL;
 
-     struct param_record param;
-     struct mph_envi     mph;
-     struct sph_meris    sph;
-     struct dsd_envi     *dsd = NULL;
+     struct mph_envi  mph;
+     struct sph_meris sph;
+     struct dsd_envi  *dsd = NULL;
 /*
  * initialization of command-line parameters
  */
-     MERIS_SET_PARAM( argc, argv, MERIS_LEVEL_1, &param );
-     if ( IS_ERR_STAT_FATAL ) 
-          NADC_GOTO_ERROR( NADC_ERR_PARAM, "" );
+     MERIS_SET_PARAM(argc, argv, MERIS_LEVEL_1);
+     if (IS_ERR_STAT_FATAL) 
+          NADC_GOTO_ERROR(NADC_ERR_PARAM, "MERIS_SET_PARAM");
 /*
  * check if we have to display version and exit
  */
-     if ( param.flag_version == PARAM_SET ) {
-	  MERIS_SHOW_VERSION( stdout, "meris_fr1" );
-	  exit( EXIT_SUCCESS );
+     if (nadc_get_param_uint8("flag_version") == PARAM_SET) {
+	  MERIS_SHOW_VERSION(stdout, "meris_fr1");
+	  exit(EXIT_SUCCESS);
      }
 /*
  * dump command-line parameters
  */
-     if ( param.flag_show == PARAM_SET ) {
-          MERIS_SHOW_PARAM( MERIS_LEVEL_1, param );
-          exit( EXIT_SUCCESS );
+     if (nadc_get_param_uint8("flag_show") == PARAM_SET) {
+          MERIS_SHOW_PARAM(MERIS_LEVEL_1);
+          exit(EXIT_SUCCESS);
      }
 /*
  * open input-file
  */
-     if ( (fp = fopen( param.infile, "r" )) == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, param.infile );
+     cpntr = nadc_get_param_string("infile");
+     if ((fp = fopen(cpntr, "r")) == NULL)
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, cpntr);
+     free(cpntr);
 /*
  * create output file
  */
-     if ( param.write_hdf5 == PARAM_SET ) {
-          param.hdf_file_id = MERIS_CRE_H5_FILE( MERIS_LEVEL_1, &param );
-          if ( IS_ERR_STAT_FATAL )
-               NADC_GOTO_ERROR( NADC_ERR_HDF_CRE, "HDF5 base" );
-          MERIS_WR_H5_VERSION( param.hdf_file_id );
+     if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
+          MERIS_CRE_H5_FILE(MERIS_LEVEL_1);
+          if (IS_ERR_STAT_FATAL)
+               NADC_GOTO_ERROR(NADC_ERR_HDF_CRE, "HDF5 base");
+          MERIS_WR_H5_VERSION();
      }
 /*
  * -------------------------
  * read Main Product Header
  */
-     ENVI_RD_MPH( fp, &mph );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "MPH" );
-     if ( mph.tot_size != nadc_file_size( param.infile ) )
-          NADC_GOTO_ERROR( NADC_ERR_FATAL, "file size check failed" );
-     if ( param.write_ascii == PARAM_SET ) {
+     ENVI_RD_MPH(fp, &mph);
+     if (IS_ERR_STAT_FATAL) 
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "MPH");
+     cpntr = nadc_get_param_string("infile");
+     if (mph.tot_size != nadc_file_size(cpntr))
+          NADC_GOTO_ERROR(NADC_ERR_FATAL, "file size check failed");
+     free(cpntr);
+     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
 	  ENVI_WR_ASCII_MPH(&mph);
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "MPH" );
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "MPH");
      }
-/*      if ( param.write_hdf5 == PARAM_SET ) { */
-/* 	  SCIA_WR_H5_MPH( param, &mph ); */
-/* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "MPH" ); */
+/*      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) { */
+/* 	  SCIA_WR_H5_MPH(&mph); */
+/* 	  if (IS_ERR_STAT_FATAL) */
+/* 	       NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "MPH"); */
 /*      } */
 /*
  * -------------------------
  * read Specific Product Header
  */
-     MERIS_RD_SPH( fp, mph, &sph );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "SPH" );
-     if ( param.write_ascii == PARAM_SET ) {
-	  MERIS_WR_ASCII_SPH( param, &sph );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "SPH" );
+     MERIS_RD_SPH(fp, mph, &sph);
+     if (IS_ERR_STAT_FATAL) 
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "SPH");
+     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
+	  MERIS_WR_ASCII_SPH(&sph);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "SPH");
      }
-/*      if ( param.write_hdf5 == PARAM_SET ) { */
-/* 	  SCIA_OL2_WR_H5_SPH( param, &sph ); */
-/* 	  if ( IS_ERR_STAT_FATAL ) */
-/* 	       NADC_GOTO_ERROR( NADC_ERR_HDF_WR, "SPH" ); */
+/*      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) { */
+/* 	  SCIA_OL2_WR_H5_SPH(&sph); */
+/* 	  if (IS_ERR_STAT_FATAL) */
+/* 	       NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "SPH"); */
 /*      } */
 /*
  * -------------------------
  * read Data Set Descriptor records
  */
      dsd = (struct dsd_envi *)
-	  malloc( (mph.num_dsd-1) * sizeof( struct dsd_envi ) );
-     if ( dsd == NULL ) NADC_GOTO_ERROR( NADC_ERR_ALLOC, "dsd" );
-     num_dsd = ENVI_RD_DSD( fp, mph, dsd );
-     if ( IS_ERR_STAT_FATAL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_PDS_RD, "DSD" );
-     if ( param.write_ascii == PARAM_SET ) {
+	  malloc((mph.num_dsd-1) * sizeof(struct dsd_envi));
+     if (dsd == NULL) NADC_GOTO_ERROR(NADC_ERR_ALLOC, "dsd");
+     num_dsd = ENVI_RD_DSD(fp, mph, dsd);
+     if (IS_ERR_STAT_FATAL) 
+	  NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "DSD");
+     if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
 	  ENVI_WR_ASCII_DSD(num_dsd, dsd);
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_GOTO_ERROR( NADC_ERR_FILE_WR, "DSD" );
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "DSD");
      }
 /*
  * when an error has occurred we jump to here:
@@ -164,23 +168,29 @@ int main( int argc, char *argv[] )
 /*
  * close input file
  */
-     if ( fp != NULL ) (void) fclose( fp );
+     if (fp != NULL) (void) fclose(fp);
 /*
  * close HDF5 output file
  */
-     if ( param.write_hdf5 == PARAM_SET ) {
-	  if ( param.hdf_file_id >= 0 && H5Fclose( param.hdf_file_id ) < 0 )
-	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, param.hdf5_name );
+     if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
+	  hid_t fid = nadc_get_param_hid("hdf_file_id");
+          
+          if (fid >= 0 && H5Fclose(fid) < 0) {
+               cpntr = nadc_get_param_string("outfile");
+               NADC_ERROR(NADC_ERR_HDF_FILE, cpntr);
+               free(cpntr);
+          }
      }
 /*
  * free allocated memory
  */
-     if ( dsd != NULL ) free( dsd );
+     if (dsd != NULL) free(dsd);
 /*
  * display error messages?
  */
-     if ( param.flag_silent == PARAM_UNSET ) NADC_Err_Trace( stderr );
-     if ( IS_ERR_STAT_FATAL ) 
+     if (nadc_get_param_uint8("flag_silent") == PARAM_UNSET)
+	  NADC_Err_Trace(stderr);
+     if (IS_ERR_STAT_FATAL) 
 	  return NADC_ERR_FATAL;
      else
 	  return NADC_ERR_NONE;

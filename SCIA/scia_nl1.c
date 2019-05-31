@@ -1138,7 +1138,7 @@ int main(int argc, char *argv[])
 	  hid_t fid = nadc_get_param_hid("hdf_file_id");
 	  
 	  if (fid >= 0 && H5Fclose(fid) < 0) {
-	       cpntr = nadc_get_param_string("hdf5_name");
+	       cpntr = nadc_get_param_string("outfile");
 	       NADC_ERROR(NADC_ERR_HDF_FILE, cpntr);
 	       free(cpntr);
 	  }
