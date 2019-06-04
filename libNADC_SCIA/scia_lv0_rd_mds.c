@@ -562,7 +562,8 @@ unsigned short SCIA_LV0_RD_MDS_DET_SRC(const char *cbuff, size_t det_length,
 	  Sun2Intel_MDS_CHAN_HDR(&data_src->hdr);
 #endif
 	  numClusters = (unsigned short) data_src->hdr.channel.field.clusters;
-	  Band_Is_Selected = nadc_get_param_chan(data_src->hdr.channel.field.id);
+	  Band_Is_Selected = nadc_get_param_chan(
+	       data_src->hdr.channel.field.id);
 	  if (Band_Is_Selected && numClusters > 0) {
 	       nr_chan++;
 	       data_src->pixel = (struct chan_src *)

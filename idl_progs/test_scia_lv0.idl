@@ -2,8 +2,11 @@
 @setup_nadc.idl
 
 ; open file
-data_dir = '/SCIA/LV0_04/P/'
+data_dir = '/SCIA/LV0_02/2007/P/'
 flname = 'SCI_NL__0PPLRA20070727_125105_000059962060_00153_28263_6248.N1'
+
+data_dir = '/SCIA/LV0_02/2007/P/'
+flname = 'SCI_NL__0PPLRA20070727_143615_000057182060_00154_28264_6265.N1'
 
 SCIA_HL_OPEN, data_dir + flname, dsd, status=status
 IF status NE 0 THEN NADC_ERR_TRACE
@@ -14,17 +17,17 @@ IF status NE 0 THEN NADC_ERR_TRACE
 
 ; read Auxiliary source packets
 PRINT, 'SCIA_LV0_RD_MDS_AUX'
-SCIA_LV0_RD_AUX, info, mds_aux, status=status, state_id=6
+SCIA_LV0_RD_AUX, info, mds_aux, status=status, state_id=1
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; process PMD source packets
 PRINT, 'SCIA_LV0_RD_MDS_PMD'
-SCIA_LV0_RD_PMD, info, mds_pmd, status=status, state_id=6
+SCIA_LV0_RD_PMD, info, mds_pmd, status=status, state_id=1
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; read Detector source packets
 PRINT, 'SCIA_LV0_RD_MDS_DET'
-SCIA_LV0_RD_DET, info, mds_det, status=status, state_id=6
+SCIA_LV0_RD_DET, info, mds_det, status=status, state_id=1, chan=[8]
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ; close file

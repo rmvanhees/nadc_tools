@@ -187,7 +187,7 @@
 ;                Works again for nadc_tools v2.x; removed obsolete keywords
 ;-
 ;---------------------------------------------------------------------------
-FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, chan_mask
+FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, channels
  compile_opt idl2,logical_predicate 
 
  ; obtain Sciamachy cluster definition
@@ -202,7 +202,7 @@ FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, chan_mask
  
  sz_data = 0UL
  FOR ncl = 0, !scia.num_clus-1 DO BEGIN
-    IF (chan_mask AND ISHFT(1B, (!scia.clusDef[ncl].chan_id-1))) EQ 0B THEN $
+    IF WHERE(channels EQ !scia.clusDef[ncl].chan_id) LT 0 THEN $
        CONTINUE
 
     intg = ULONG(!scia.clusDef[ncl].intg)
@@ -215,6 +215,7 @@ FUNCTION _GET_LV0_DET_SIZE, state_id, category, orbit, chan_mask
  RETURN, sz_data
 END
 
+;--------------------------------------------------
 PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
                      state_id=state_id, period=period, channels=channels, $
                      indx_state=indx_state, num_state=num_state, $
@@ -241,25 +242,17 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
 ; release previous allocated MDS data
   SCIA_LV0_FREE_DET, mds_det
 
-  IF N_ELEMENTS( channels ) EQ 0 THEN BEGIN
-     channels = NotSet
-     chan_mask = (NOT 0B)       ; set to select data of all channels
-  ENDIF ELSE IF channels[0] EQ -1 THEN BEGIN
-     channels = NotSet
-     chan_mask = (NOT 0B)       ; set to select data of all channels
+  IF N_ELEMENTS( channels ) EQ 0 THEN BEGIN    ; select data of all channels
+     channels = 1B + bindgen(!nadc.scienceChannels)
+  ENDIF ELSE IF channels[0] EQ -1 THEN BEGIN   ; select data of all channels
+     channels = 1B + bindgen(!nadc.scienceChannels)
   ENDIF ELSE BEGIN
-     chan_mask = 0B
-     IF channels[0] NE 0 THEN BEGIN
-        FOR nb = 0, N_ELEMENTS( channels )-1 DO BEGIN
-           chan_mask = chan_mask + ISHFT( 1B, channels[nb]-1 )
-        ENDFOR
-     ENDIF
+     channels = BYTE(channels)
   ENDELSE
 
 ; select Detector source packets
-  info_det = GET_LV0_MDS_STATE( info_all, $
+  info_det = GET_LV0_MDS_STATE( info_all, period=period, $
                                 category=category, state_id=state_id, $
-                                period=period, channels=channels, $
                                 indx_state=indx_state, num_state=num_state )
   IF num_state LE 0 THEN BEGIN
      MESSAGE, 'No state-records found for given selection criteria', /INFO
@@ -280,7 +273,7 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
   FOR nd = 0L, num_det-1 DO BEGIN
      sz_data += _GET_LV0_DET_SIZE( info_det[nd].state_id, $
                                    info_det[nd].category,$
-                                   mph.abs_orbit, chan_mask )
+                                   mph.abs_orbit, channels )
 
      on_board_time = info_det[nd].on_board_time
      REPEAT BEGIN
@@ -292,8 +285,8 @@ PRO SCIA_LV0_RD_DET, info_all, mds_det, count=count, category=category, $
 
 ; read Detector source packets
   count = call_external( lib_name('libnadc_idl'), '_SCIA_LV0_RD_DET', $
-                         info_det, ULONG(num_det), chan_mask, $
-                         mds_det, data, /CDECL, /UL_VALUE )
+                         N_ELEMENTS(channels), channels, info_det, $
+                         num_det, mds_det, data, /CDECL, /UL_VALUE )
 ; check error status
   IF count NE num_det THEN BEGIN
      status = -1

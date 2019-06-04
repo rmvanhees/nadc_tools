@@ -79,7 +79,6 @@
 	/* NONE */
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
-#include <_gome_check_sql_lv1b_name.inc>
 #include <_scia_check_sql_lv1b_name.inc>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
@@ -118,18 +117,12 @@ int NADC_FRESCO_WR_SQL_META( PGconn *conn, const struct fresco_hdr *hdr )
      meta_id = (int) strtol( pntr, (char **) NULL, 10 );
      PQclear( res );
 /*
- * check presence of SCIA or GOME L1b product in database
+ * check presence of SCIA L1b product in database
  */
      if ( strncmp( hdr->l1b_product, "SCI_NL__1P", 10 ) == 0 ) {
 	  (void) nadc_strlcpy( l1b_product, 
 			       hdr->l1b_product, ENVI_FILENAME_SIZE );
 	  SCIA_CHECK_SQL_LV1B_NAME( conn, l1b_product );
-     } else {
-	  (void) nadc_strlcpy( l1b_product, 
-			       hdr->l1b_product, ERS2_FILENAME_SIZE );
-	  GOME_CHECK_SQL_LV1B_NAME( conn, hdr->l1b_product, 
-				    hdr->validity_start, 
-				    hdr->validity_stop, l1b_product );
      }
 /*
  * obtain orbit number from meta__1P table

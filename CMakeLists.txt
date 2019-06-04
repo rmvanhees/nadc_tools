@@ -217,7 +217,6 @@ add_subdirectory (psql)
 if (NETCDF_FOUND)
    add_subdirectory (IMAP)
    add_subdirectory (IMLM)
-   add_subdirectory (TOGOMI)
    add_subdirectory (TOSOMI)
 endif ()
 ## check for IDL and shared libraries

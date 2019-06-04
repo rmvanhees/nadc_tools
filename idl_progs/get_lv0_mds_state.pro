@@ -60,7 +60,7 @@
 FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
                             category=category, state_id=state_id, $
                             period=period, num_state=num_state, $
-                            indx_state=indx_state, channels=channels
+                            indx_state=indx_state
   compile_opt idl2,logical_predicate,hidden
 
 ; definition of SCIAMACHY related constants
@@ -107,22 +107,7 @@ FUNCTION GET_LV0_MDS_STATE, info_all, mds_type=mds_type, $
      period=[period[0]-epsilon,period[0]+epsilon]
   ENDIF
 
-  IF N_ELEMENTS( channels ) EQ 0 THEN BEGIN
-     channels = NotSet
-     chan_mask = (NOT 0B)       ; set to select data of all channels
-  ENDIF ELSE IF channels[0] EQ -1 THEN BEGIN
-     channels = NotSet
-     chan_mask = (NOT 0B)       ; set to select data of all channels
-  ENDIF ELSE BEGIN
-     chan_mask = 0B
-     IF channels[0] NE 0 THEN BEGIN
-        FOR nb = 0, N_ELEMENTS( channels )-1 DO BEGIN
-           chan_mask = chan_mask + ISHFT( 1B, channels[nb]-1 )
-        ENDFOR
-     ENDIF
-  ENDELSE
-
-; select Detector source packets
+; select on source-packet type
   IF STRCMP( mds_type, 'DET' ) EQ 1 THEN $
      indx = WHERE( info_all.packet_type EQ 1, num_info ) $
   ELSE IF STRCMP( mds_type, 'AUX' ) EQ 1 THEN $
