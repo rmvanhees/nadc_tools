@@ -122,20 +122,20 @@ SCIA_LV1_RD_MDS, dsd, mds, status=status, state_id=6, calib='0,1,2,3,4,N', $
 IF status NE 0 THEN NADC_ERR_TRACE
 
 PRINT, 'Do ATBD calibration'
-SCIA_LV1_RD_MDS, dsd, mds_atbd, status=status, state_id=6, channel=5, $
+SCIA_LV1_RD_MDS, dsd, mds_atbd, status=status, state_id=6, channel=8, $
                  calib='0,1,E'
 IF status NE 0 THEN NADC_ERR_TRACE
 
 PRINT, 'Do SDMF calibration'
 SETENV, 'USE_SDMF_VERSION=3.0'
-SCIA_LV1_RD_MDS, dsd, mds_sdmf, status=status, state_id=6, channel=5, $
-                 calib='0+,1+,E+'
+SCIA_LV1_RD_MDS, dsd, mds_sdmf, status=status, state_id=6, channel=8, $
+                 calib='none'
 IF status NE 0 THEN NADC_ERR_TRACE
 
 ;PRINT, 'Extract data'
-d_1 = get_lv1_mds_data( mds_atbd, -1, errors=err_1 )
-d_2 = get_lv1_mds_data( mds_sdmf, -1, errors=err_2 )
-plot, (d_1 - d_2)[*,2,0], xs=3, ys=3, psym=-4
+d_1 = GET_LV1_MDS_DATA(mds_atbd, -1, channel=8, errors=err_1)
+d_2 = GET_LV1_MDS_DATA(mds_sdmf, -1, channel=8, errors=err_2)
+PLOT, (d_1 - d_2)[*,2,0], xs=3, ys=3, psym=-4
 
 ; close file
 IF SCIA_FCLOSE() NE 0 THEN $
