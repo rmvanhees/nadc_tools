@@ -67,13 +67,6 @@ IF status EQ 0 THEN BEGIN
 ENDIF
 
 NADC_ERR_CLEAR
-SCIA_LV2_RD_SPH, mph, sph, status=status
-IF status EQ 0 THEN BEGIN
-   level = '2N'
-   GOTO, Jump_Close_File
-ENDIF
-
-NADC_ERR_CLEAR
 SCIA_OL2_RD_SPH, mph, sph, status=status
 IF status EQ 0 THEN BEGIN
    level = '2O'

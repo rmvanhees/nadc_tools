@@ -481,7 +481,7 @@ extern unsigned int SCIA_OL2_RD_SQADS(FILE *fp, unsigned int,
 				       /*@out@*/ struct sqads_sci_ol **sqads)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *sqads@*/;
-extern unsigned int SCIA_LV2_RD_STATE(FILE *fp, unsigned int,
+extern unsigned int SCIA_OL2_RD_STATE(FILE *fp, unsigned int,
 				       const struct dsd_envi *,
 				       /*@out@*/ struct state2_scia **state)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
@@ -518,15 +518,6 @@ extern unsigned int SCIA_OL2_RD_LCLD(FILE *fp, unsigned int,
        /*@modifies errno, nadc_stat, nadc_err_stack, fp, *lcld@*/;
 #endif   /* ---- defined _STDIO_H || defined _STDIO_H_ ----- */
 
-extern void SCIA_LV2_WR_ASCII_STATE(unsigned int, const struct state2_scia *)
-       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
-extern void SCIA_OL2_WR_ASCII_SPH(const struct sph_sci_ol  *)
-       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
-extern void SCIA_OL2_WR_ASCII_SQADS(unsigned int, const struct sqads_sci_ol *)
-       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
-       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 extern void SCIA_OL2_WR_ASCII_NGEO(unsigned int, const struct ngeo_scia *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
@@ -547,12 +538,21 @@ extern void SCIA_OL2_WR_ASCII_LFIT(const char mds_name[],
 extern void SCIA_OL2_WR_ASCII_LCLD(unsigned int, const struct lcld_scia *)
        /*@globals  errno, nadc_stat, nadc_err_stack;@*/
        /*@modifies errno, nadc_stat, nadc_err_stack@*/;
+extern void SCIA_OL2_WR_ASCII_SPH(const struct sph_sci_ol  *)
+       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
+       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
+extern void SCIA_OL2_WR_ASCII_SQADS(unsigned int, const struct sqads_sci_ol *)
+       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
+       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
+extern void SCIA_OL2_WR_ASCII_STATE(unsigned int, const struct state2_scia *)
+       /*@globals  errno, nadc_stat, nadc_err_stack;@*/
+       /*@modifies errno, nadc_stat, nadc_err_stack@*/;
 
 #ifdef _HDF5_H
 extern void CRE_SCIA_OL2_H5_STRUCTS(void);
 extern void SCIA_OL2_WR_H5_SPH(const struct sph_sci_ol *);
 extern void SCIA_OL2_WR_H5_SQADS(unsigned int, const struct sqads_sci_ol *);
-extern void SCIA_LV2_WR_H5_STATE(unsigned int, const struct state2_scia *);
+extern void SCIA_OL2_WR_H5_STATE(unsigned int, const struct state2_scia *);
 extern void SCIA_OL2_WR_H5_NGEO(unsigned int, const struct ngeo_scia *);
 extern void SCIA_OL2_WR_H5_LGEO(unsigned int, const struct lgeo_scia *);
 extern void SCIA_OL2_WR_H5_CLD(unsigned int, const struct cld_sci_ol *);

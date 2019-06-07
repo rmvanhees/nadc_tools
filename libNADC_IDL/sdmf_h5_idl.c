@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2009 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2009 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -59,7 +59,7 @@ static const char err_msg[] = "invalid number of function arguments";
 				/* NONE */
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-int IDL_STDCALL _SDMF_RD_PT_CLUSDEF( int argc, void *argv[] )
+int IDL_STDCALL _SDMF_RD_PT_CLUSDEF(int argc, void *argv[])
 {
      IDL_STRING         *dbName;
      struct clusdef_rec *ClusDef;
@@ -70,37 +70,37 @@ int IDL_STDCALL _SDMF_RD_PT_CLUSDEF( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 2 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 2) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dbName   = (IDL_STRING *) argv[0];
      ClusDef  = (struct clusdef_rec *) argv[1];
 
-     fid = H5Fopen( dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbName->s );
+     fid = H5Fopen(dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, dbName->s);
      
-     if ( (data_id = H5Dopen( fid, "ClusDef", H5P_DEFAULT )) < 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_DATA, "ClusDef" );
+     if ((data_id = H5Dopen(fid, "ClusDef", H5P_DEFAULT)) < 0)
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, "ClusDef");
 
-     if ( (type_id = H5Dget_type( data_id )) < 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, "ClusDef" );
+     if ((type_id = H5Dget_type(data_id)) < 0)
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, "ClusDef");
 
-     if ( H5LTread_dataset( fid, "ClusDef", type_id, ClusDef ) < 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "ClusDef" );
+     if (H5LTread_dataset(fid, "ClusDef", type_id, ClusDef) < 0)
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "ClusDef");
 
-     (void) H5Tclose( type_id );
-     (void) H5Dclose( data_id );
-     (void) H5Fclose( fid );
+     (void) H5Tclose(type_id);
+     (void) H5Dclose(data_id);
+     (void) H5Fclose(fid);
      return 1;
  done:
      H5E_BEGIN_TRY {
-	  (void) H5Tclose( type_id );
-	  (void) H5Dclose( data_id );
-	  (void) H5Fclose( fid );
+	  (void) H5Tclose(type_id);
+	  (void) H5Dclose(data_id);
+	  (void) H5Fclose(fid);
      } H5E_END_TRY;
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SDMF_RD_PT_GEO_ATTR( int argc, void *argv[] )
+int IDL_STDCALL _SDMF_RD_PT_GEO_ATTR(int argc, void *argv[])
 {
      IDL_STRING      *dbName;
      unsigned short  state_id;
@@ -111,34 +111,34 @@ int IDL_STDCALL _SDMF_RD_PT_GEO_ATTR( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dbName   = (IDL_STRING *) argv[0];
      state_id = *(unsigned short *) argv[1];
      num_obs  = (unsigned short *) argv[2];
 
-     fid = H5Fopen( dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbName->s );
+     fid = H5Fopen(dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, dbName->s);
 
-     (void) snprintf( grpName, 9, "State_%02hu", state_id );
-     gid = H5Gopen( fid, grpName, H5P_DEFAULT );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, grpName );
+     (void) snprintf(grpName, 9, "State_%02hu", state_id);
+     gid = H5Gopen(fid, grpName, H5P_DEFAULT);
+     if (gid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, grpName);
 
-     if ( H5LTget_attribute_ushort( gid, "pointing", "numObs", num_obs ) < 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_ATTR, "numObs" );
+     if (H5LTget_attribute_ushort(gid, "pointing", "numObs", num_obs) < 0)
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_ATTR, "numObs");
 
-     (void) H5Gclose( gid );
-     (void) H5Fclose( fid );
+     (void) H5Gclose(gid);
+     (void) H5Fclose(fid);
      return 1;
  done:
      H5E_BEGIN_TRY {
-	  (void) H5Gclose( gid );
-	  (void) H5Fclose( fid );
+	  (void) H5Gclose(gid);
+	  (void) H5Fclose(fid);
      } H5E_END_TRY;
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SDMF_RD_PT_CLUS_ATTR( int argc, void *argv[] )
+int IDL_STDCALL _SDMF_RD_PT_CLUS_ATTR(int argc, void *argv[])
 {
      IDL_STRING      *dbName;
      unsigned char   *coaddf;
@@ -151,7 +151,7 @@ int IDL_STDCALL _SDMF_RD_PT_CLUS_ATTR( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 7 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 7) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dbName   = (IDL_STRING *) argv[0];
      state_id = *(unsigned short *) argv[1];
      clus_id  = *(unsigned short *) argv[2];
@@ -160,33 +160,33 @@ int IDL_STDCALL _SDMF_RD_PT_CLUS_ATTR( int argc, void *argv[] )
      num_obs  = (unsigned short *) argv[5];
      pet      = (float *) argv[6];
 
-     fid = H5Fopen( dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbName->s );
+     fid = H5Fopen(dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, dbName->s);
 
-     (void) snprintf( grpName, 9, "State_%02hu", state_id );
-     gid = H5Gopen( fid, grpName, H5P_DEFAULT );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, grpName );
+     (void) snprintf(grpName, 9, "State_%02hu", state_id);
+     gid = H5Gopen(fid, grpName, H5P_DEFAULT);
+     if (gid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, grpName);
 
-     (void) snprintf( clusName, 11, "cluster_%02hu", clus_id );
-     (void) H5LTget_attribute_uchar( gid, clusName, "coaddf", coaddf );
-     (void) H5LTget_attribute_ushort( gid, clusName, "numObs", num_obs );
-     (void) H5LTget_attribute_ushort( gid, clusName,"numPixels", num_pixels );
-     if ( H5LTget_attribute_float( gid, clusName, "PET", pet ) < 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_ATTR, "PET" );
+     (void) snprintf(clusName, 11, "cluster_%02hu", clus_id);
+     (void) H5LTget_attribute_uchar(gid, clusName, "coaddf", coaddf);
+     (void) H5LTget_attribute_ushort(gid, clusName, "numObs", num_obs);
+     (void) H5LTget_attribute_ushort(gid, clusName,"numPixels", num_pixels);
+     if (H5LTget_attribute_float(gid, clusName, "PET", pet) < 0)
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_ATTR, "PET");
 
-     (void) H5Gclose( gid );
-     (void) H5Fclose( fid );
+     (void) H5Gclose(gid);
+     (void) H5Fclose(fid);
      return 1;
  done:
      H5E_BEGIN_TRY {
-	  (void) H5Gclose( gid );
-	  (void) H5Fclose( fid );
+	  (void) H5Gclose(gid);
+	  (void) H5Fclose(fid);
      } H5E_END_TRY;
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SDMF_GET_PT_ORBITINDEX( int argc, void *argv[] )
+int IDL_STDCALL _SDMF_GET_PT_ORBITINDEX(int argc, void *argv[])
 {
      register size_t nr;
 
@@ -201,41 +201,41 @@ int IDL_STDCALL _SDMF_GET_PT_ORBITINDEX( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dbName   = (IDL_STRING *) argv[0];
      state_id = *(unsigned short *) argv[1];
      orbit    = *(int *) argv[2];
      numIndx  = (unsigned int *) argv[3];
      metaIndx = (unsigned int *) argv[4];
 
-     fid = H5Fopen( dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbName->s );
+     fid = H5Fopen(dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, dbName->s);
 
-     (void) snprintf( grpName, 9, "State_%02hu", state_id );
-     gid = H5Gopen( fid, grpName, H5P_DEFAULT );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, grpName );
+     (void) snprintf(grpName, 9, "State_%02hu", state_id);
+     gid = H5Gopen(fid, grpName, H5P_DEFAULT);
+     if (gid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, grpName);
 
      C_numIndx  = (size_t) (*numIndx);
-     C_metaIndx = (size_t *) malloc( C_numIndx * sizeof( size_t ));
-     SDMF_get_pt_orbitIndex( gid, orbit, &C_numIndx, C_metaIndx );
+     C_metaIndx = (size_t *) malloc(C_numIndx * sizeof(size_t));
+     SDMF_get_pt_orbitIndex(gid, orbit, &C_numIndx, C_metaIndx);
      *numIndx = (unsigned int) C_numIndx;
-     for ( nr = 0; nr < C_numIndx; nr++ )
+     for (nr = 0; nr < C_numIndx; nr++)
 	  metaIndx[nr] = (unsigned int) C_metaIndx[nr];
-     free( C_metaIndx );
+     free(C_metaIndx);
 
-     (void) H5Gclose( gid );
-     (void) H5Fclose( fid );
+     (void) H5Gclose(gid);
+     (void) H5Fclose(fid);
      return 1;
  done:
      H5E_BEGIN_TRY {
-	  (void) H5Gclose( gid );
-	  (void) H5Fclose( fid );
+	  (void) H5Gclose(gid);
+	  (void) H5Fclose(fid);
      } H5E_END_TRY;
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SDMF_RD_PT_POINTING( int argc, void *argv[] )
+int IDL_STDCALL _SDMF_RD_PT_POINTING(int argc, void *argv[])
 {
      register size_t nr;
 
@@ -250,44 +250,44 @@ int IDL_STDCALL _SDMF_RD_PT_POINTING( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dbName   = (IDL_STRING *) argv[0];
      state_id = *(unsigned short *) argv[1];
      numIndx  = *(unsigned int *) argv[2];
      metaIndx = (unsigned int *) argv[3];
      pointing = (struct geo_pt_rec *) argv[4];
 
-     if ( numIndx == 0 ) return 0;
+     if (numIndx == 0) return 0;
 
-     fid = H5Fopen( dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbName->s );
+     fid = H5Fopen(dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, dbName->s);
 
-     (void) snprintf( grpName, 9, "State_%02hu", state_id );
-     gid = H5Gopen( fid, grpName, H5P_DEFAULT );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, grpName );
+     (void) snprintf(grpName, 9, "State_%02hu", state_id);
+     gid = H5Gopen(fid, grpName, H5P_DEFAULT);
+     if (gid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, grpName);
 
      C_numIndx  = (size_t) numIndx;
-     C_metaIndx = (size_t *) malloc( C_numIndx * sizeof( size_t ));
-     for ( nr = 0; nr < C_numIndx; nr++ )
+     C_metaIndx = (size_t *) malloc(C_numIndx * sizeof(size_t));
+     for (nr = 0; nr < C_numIndx; nr++)
 	  C_metaIndx[nr] = (size_t) metaIndx[nr];
 
-     SDMF_rd_pt_pointing( gid, &C_numIndx, C_metaIndx, pointing );
+     SDMF_rd_pt_pointing(gid, &C_numIndx, C_metaIndx, pointing);
 
-     free( C_metaIndx );
+     free(C_metaIndx);
 
-     (void) H5Gclose( gid );
-     (void) H5Fclose( fid );
+     (void) H5Gclose(gid);
+     (void) H5Fclose(fid);
      return 1;
  done:
      H5E_BEGIN_TRY {
-	  (void) H5Gclose( gid );
-	  (void) H5Fclose( fid );
+	  (void) H5Gclose(gid);
+	  (void) H5Fclose(fid);
      } H5E_END_TRY;
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SDMF_RD_PT_CLUSTER( int argc, void *argv[] )
+int IDL_STDCALL _SDMF_RD_PT_CLUSTER(int argc, void *argv[])
 {
      register size_t nr;
 
@@ -303,7 +303,7 @@ int IDL_STDCALL _SDMF_RD_PT_CLUSTER( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 7 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 7) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dbName   = (IDL_STRING *) argv[0];
      state_id = *(unsigned short *) argv[1];
      clus_id  = *(unsigned short *) argv[2];
@@ -312,32 +312,32 @@ int IDL_STDCALL _SDMF_RD_PT_CLUSTER( int argc, void *argv[] )
      mtbl      = (struct mtbl_pt_rec *) argv[5];
      pixel_val = (float *) argv[6];
 
-     if ( numIndx == 0 ) return 0;
+     if (numIndx == 0) return 0;
 
-     fid = H5Fopen( dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, dbName->s );
+     fid = H5Fopen(dbName->s, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, dbName->s);
 
-     (void) snprintf( grpName, 9, "State_%02hu", state_id );
-     gid = H5Gopen( fid, grpName, H5P_DEFAULT );
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, grpName );
+     (void) snprintf(grpName, 9, "State_%02hu", state_id);
+     gid = H5Gopen(fid, grpName, H5P_DEFAULT);
+     if (gid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, grpName);
 
      C_numIndx  = (size_t) numIndx;
-     C_metaIndx = (size_t *) malloc( C_numIndx * sizeof( size_t ));
-     for ( nr = 0; nr < C_numIndx; nr++ )
+     C_metaIndx = (size_t *) malloc(C_numIndx * sizeof(size_t));
+     for (nr = 0; nr < C_numIndx; nr++)
 	  C_metaIndx[nr] = (size_t) metaIndx[nr];
 
-     SDMF_rd_pt_metaTable( gid, &C_numIndx, C_metaIndx, &mtbl );
-     SDMF_rd_pt_cluster( gid, clus_id, &C_numIndx, C_metaIndx, pixel_val );
+     SDMF_rd_pt_metaTable(gid, &C_numIndx, C_metaIndx, &mtbl);
+     SDMF_rd_pt_cluster(gid, clus_id, &C_numIndx, C_metaIndx, pixel_val);
 
-     free( C_metaIndx );
+     free(C_metaIndx);
 
-     (void) H5Gclose( gid );
-     (void) H5Fclose( fid );
+     (void) H5Gclose(gid);
+     (void) H5Fclose(fid);
      return 1;
  done:
      H5E_BEGIN_TRY {
-	  (void) H5Gclose( gid );
-	  (void) H5Fclose( fid );
+	  (void) H5Gclose(gid);
+	  (void) H5Fclose(fid);
      } H5E_END_TRY;
      return -1;
 }

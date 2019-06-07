@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -46,7 +46,7 @@
 static const char err_msg[] = "invalid number of function arguments";
 
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
-int IDL_STDCALL _SCIA_WR_H5_MEMCORR( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_WR_H5_MEMCORR(int argc, void *argv[])
 {
      int     dimX, dimY;
      float   *memcorr;
@@ -58,38 +58,38 @@ int IDL_STDCALL _SCIA_WR_H5_MEMCORR( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dimX = *(int *) argv[0];
      dimY = *(int *) argv[1];
      memcorr = (float *) argv[2];
 /*
  * open output HDF5-file
  */
-     file_id = H5Fcreate( mem_file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, mem_file );
+     file_id = H5Fcreate(mem_file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (file_id < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, mem_file);
 /*
  * write datasets
  */
      dims[0] = (hsize_t) dimY;
      dims[1] = (hsize_t) dimX;
-     (void) H5LTmake_dataset_float( file_id, "MemTable", 2, dims, memcorr );
+     (void) H5LTmake_dataset_float(file_id, "MemTable", 2, dims, memcorr);
 /*
  * write attributes
  */
-     (void) H5LTset_attribute_string( file_id, "/", "Author", 
-				      "G. Lichtenberg (SRON)" );
-     (void) H5LTset_attribute_string( file_id, "/", "Reference", 
-				      "SRON-SCIA-PhE-RP-11(issue 2)" );
-     (void) H5LTset_attribute_string( file_id, "/", "History", 
-				      "10/10/2003 - original release" );
+     (void) H5LTset_attribute_string(file_id, "/", "Author", 
+				      "G. Lichtenberg (SRON)");
+     (void) H5LTset_attribute_string(file_id, "/", "Reference", 
+				      "SRON-SCIA-PhE-RP-11(issue 2)");
+     (void) H5LTset_attribute_string(file_id, "/", "History", 
+				      "10/10/2003 - original release");
 
-     return (int) H5Fclose( file_id );
+     return (int) H5Fclose(file_id);
  done:
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_WR_H5_NLCORR(int argc, void *argv[])
 {
      int     dimX, dimY;
      char    *CurveIndex;
@@ -102,7 +102,7 @@ int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 4 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 4) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dimX = *(int *) argv[0];
      dimY = *(int *) argv[1];
      CurveIndex = (char *) argv[2];
@@ -110,39 +110,39 @@ int IDL_STDCALL _SCIA_WR_H5_NLCORR( int argc, void *argv[] )
 /*
  * open output HDF5-file
  */
-     file_id = H5Fcreate( nl_file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, nl_file );
+     file_id = H5Fcreate(nl_file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (file_id < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, nl_file);
 /*
  * write datasets
  */
      dims[0] = SCIENCE_PIXELS;
-     (void) H5LTmake_dataset_char( file_id, "CurveIndex", 
-				   1, dims, CurveIndex );
+     (void) H5LTmake_dataset_char(file_id, "CurveIndex", 
+				   1, dims, CurveIndex);
 
      dims[0] = (hsize_t) dimY;
      dims[1] = (hsize_t) dimX;
-     (void) H5LTmake_dataset_float( file_id, "nLinTable", 2, dims, nlcorr );
+     (void) H5LTmake_dataset_float(file_id, "nLinTable", 2, dims, nlcorr);
 /*
  * write attributes
  */
-     (void) H5LTset_attribute_string( file_id, "/", "Author", 
-				      "Q.L. Kleipool (SRON)" );
-     (void) H5LTset_attribute_string( file_id, "/", "Reference", 
-	       "SRON-SCIA-PhE-RP-13" );
-     (void) H5LTset_attribute_string( file_id, "/", "History", 
-	       "27/10/2003 - original release" );
-     (void) H5LTset_attribute_string( file_id, "/", "History1", 
-	       "04/11/2003 - solved oscillations at small PET" );
-     (void) H5LTset_attribute_string( file_id, "/", "History2", 
-	       "20/01/2004 - Changed format of H5-file, modified scale/offs" );
+     (void) H5LTset_attribute_string(file_id, "/", "Author", 
+				      "Q.L. Kleipool (SRON)");
+     (void) H5LTset_attribute_string(file_id, "/", "Reference", 
+	       "SRON-SCIA-PhE-RP-13");
+     (void) H5LTset_attribute_string(file_id, "/", "History", 
+	       "27/10/2003 - original release");
+     (void) H5LTset_attribute_string(file_id, "/", "History1", 
+	       "04/11/2003 - solved oscillations at small PET");
+     (void) H5LTset_attribute_string(file_id, "/", "History2", 
+	       "20/01/2004 - Changed format of H5-file, modified scale/offs");
 
-     return (int) H5Fclose( file_id );
+     return (int) H5Fclose(file_id);
  done:
      return -1;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++*/
-int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT(int argc, void *argv[])
 {
      int     dimX, dimY;
      float   *grid_out, *grid_in, *strayCorr;
@@ -154,7 +154,7 @@ int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT( int argc, void *argv[] )
 /*
  * check number of parameters
  */
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      dimX = *(int *) argv[0];
      dimY = *(int *) argv[1];
      grid_in  = (float *) argv[2];
@@ -163,29 +163,29 @@ int IDL_STDCALL _SCIA_WR_H5_STRAYLIGHT( int argc, void *argv[] )
 /*
  * open output HDF5-file
  */
-     file_id = H5Fcreate( stray_fl, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-     if ( file_id < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, stray_fl );
+     file_id = H5Fcreate(stray_fl, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (file_id < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, stray_fl);
 /*
  * write datasets
  */
      dims[0] = (hsize_t) dimX;
-     (void) H5LTmake_dataset_float( file_id, "grid_in", 1, dims, grid_in );
+     (void) H5LTmake_dataset_float(file_id, "grid_in", 1, dims, grid_in);
      dims[0] = (hsize_t) dimY;
-     (void) H5LTmake_dataset_float( file_id, "grid_out", 1, dims, grid_out );
+     (void) H5LTmake_dataset_float(file_id, "grid_out", 1, dims, grid_out);
      dims[0] = (hsize_t) dimY;
      dims[1] = (hsize_t) dimX;
-     (void) H5LTmake_dataset_float( file_id, "strayCorr", 2, dims, strayCorr );
+     (void) H5LTmake_dataset_float(file_id, "strayCorr", 2, dims, strayCorr);
 /*
  * write attributes
  */
-     (void) H5LTset_attribute_string( file_id, "/", "Author", 
-				      "R. Snel (SRON)" );
-     (void) H5LTset_attribute_string( file_id, "/", "Reference", 
-	       "SRON-SCIA-PhE-RP-22" );
-     (void) H5LTset_attribute_string( file_id, "/", "History", 
-	       "04/06/2010 - original release ADT V4.1" );
+     (void) H5LTset_attribute_string(file_id, "/", "Author", 
+				      "R. Snel (SRON)");
+     (void) H5LTset_attribute_string(file_id, "/", "Reference", 
+	       "SRON-SCIA-PhE-RP-22");
+     (void) H5LTset_attribute_string(file_id, "/", "History", 
+	       "04/06/2010 - original release ADT V4.1");
 
-     return (int) H5Fclose( file_id );
+     return (int) H5Fclose(file_id);
  done:
      return -1;
 }

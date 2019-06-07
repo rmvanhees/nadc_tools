@@ -303,17 +303,17 @@ int main(int argc, char *argv[])
  * -------------------------
  * read/write States of the Product
  */
-     nr_state = SCIA_LV2_RD_STATE(fp, num_dsd, dsd, &state);
+     nr_state = SCIA_OL2_RD_STATE(fp, num_dsd, dsd, &state);
      if (IS_ERR_STAT_FATAL || nr_state  ==  0)
           NADC_GOTO_ERROR(NADC_ERR_PDS_RD, "STATE");
 
      if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
-	  SCIA_LV2_WR_ASCII_STATE(nr_state, state);
+	  SCIA_OL2_WR_ASCII_STATE(nr_state, state);
 	  if (IS_ERR_STAT_FATAL)
 	       NADC_GOTO_ERROR(NADC_ERR_FILE_WR, "STATE");
      }
      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET) {
-	  SCIA_LV2_WR_H5_STATE(nr_state, state);
+	  SCIA_OL2_WR_H5_STATE(nr_state, state);
 	  if (IS_ERR_STAT_FATAL)
 	       NADC_GOTO_ERROR(NADC_ERR_HDF_WR, "STATE");
      }

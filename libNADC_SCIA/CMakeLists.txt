@@ -110,8 +110,6 @@ set (SCIA_LV1_SRCS
 )
 
 set (SCIA_LV2_SRCS
-    scia_lv2_rd_state.c
-    scia_lv2_wr_state.c
     scia_ol2_pds_sph.c
     scia_ol2_rd_cld.c
     scia_ol2_rd_geo.c
@@ -119,6 +117,7 @@ set (SCIA_LV2_SRCS
     scia_ol2_rd_lfit.c
     scia_ol2_rd_nfit.c
     scia_ol2_rd_sqads.c
+    scia_ol2_rd_state.c
     scia_ol2_wr_ascii_ads.c
     scia_ol2_wr_ascii_mds.c
     scia_ol2_wr_ascii_sph.c
@@ -129,6 +128,7 @@ set (SCIA_LV2_SRCS
     scia_ol2_wr_h5_nfit.c
     scia_ol2_wr_h5_sph.c
     scia_ol2_wr_h5_sqads.c
+    scia_ol2_wr_state.c
 )
 
 set (NADC_SCIA_SRCS

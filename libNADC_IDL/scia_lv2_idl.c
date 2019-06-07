@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -50,349 +50,9 @@ static const char err_msg[] = "invalid number of function arguments";
 
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
 /*
- * first all the NRT Product routines (alphabetically)
- */
-int IDL_STDCALL _SCIA_LV2_RD_BIAS ( int argc, void *argv[] )
-{
-     register int nr;
-
-     int          nr_bias;
-     unsigned int num_dsd;
-     float        *data;
-
-     IDL_STRING *bias_name;
-
-     struct dsd_envi  *dsd;
-     struct bias_scia *C_bias;
-
-     struct IDL_bias_scia
-     {
-	  struct mjd_envi mjd;
-	  signed char    quality;
-	  signed char    dummy;
-	  unsigned short hghtflag;
-	  unsigned short vcdflag;
-	  unsigned short intg_time;
-	  unsigned short numfitp;
-	  unsigned short numsegm;
-	  unsigned short numiter;
-	  unsigned int   dsrlen;
-	  float hght;
-	  float errhght;
-	  float vcd;
-	  float errvcd;
-	  float closure;
-	  float errclosure;
-	  float rms;
-	  float chi2;
-	  float goodness;
-	  float cutoff;
-	  IDL_ULONG  pntr_corrpar;            /* IDL uses 32-bit addresses */
-     } *bias;
-
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     bias_name = (IDL_STRING *) argv[0];
-     num_dsd = *(unsigned int *) argv[1];
-     dsd = (struct dsd_envi *) argv[2];
-     bias = (struct IDL_bias_scia *) argv[3];
-     data = (float *) argv[4];
-
-     Use_Extern_Alloc = FALSE;
-     nr_bias = (int) SCIA_LV2_RD_BIAS( fd_nadc, bias_name[0].s, 
-				       num_dsd, dsd, &C_bias );
-     Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     for ( nr = 0; nr < nr_bias; nr++ ) {
-	  register size_t n_cross = 
-	       (C_bias[nr].numfitp * (C_bias[nr].numfitp-1)) / 2;
-	  (void) memcpy( data, C_bias[nr].corrpar, n_cross  * sizeof(float) );
-	  data += n_cross;
-	  free( C_bias[nr].corrpar );
-
-	  (void) memcpy( &bias[nr].mjd, &C_bias[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
-	  bias[nr].quality = C_bias[nr].quality;
-	  bias[nr].hghtflag = C_bias[nr].hghtflag;
-	  bias[nr].vcdflag = C_bias[nr].vcdflag;
-	  bias[nr].intg_time = C_bias[nr].intg_time;
-	  bias[nr].numfitp = C_bias[nr].numfitp;
-	  bias[nr].numsegm = C_bias[nr].numsegm;
-	  bias[nr].numiter = C_bias[nr].numiter;
-	  bias[nr].dsrlen = C_bias[nr].dsrlen;
-	  bias[nr].hght = C_bias[nr].hght;
-	  bias[nr].errhght = C_bias[nr].errhght;
-	  bias[nr].vcd = C_bias[nr].vcd;
-	  bias[nr].errvcd = C_bias[nr].errvcd;
-	  bias[nr].closure = C_bias[nr].closure;
-	  bias[nr].errclosure = C_bias[nr].errclosure;
-	  bias[nr].rms = C_bias[nr].rms;
-	  bias[nr].chi2 = C_bias[nr].chi2;
-	  bias[nr].goodness = C_bias[nr].goodness;
-	  bias[nr].cutoff = C_bias[nr].cutoff;
-     }
-     free( C_bias );
-
-     return nr_bias;
- done:
-     return -1;
-}
-
-int IDL_STDCALL _SCIA_LV2_RD_CLD ( int argc, void *argv[] )
-{
-     register int nr;
-
-     int          nr_cld;
-     unsigned int num_dsd;
-     float        *data;
-
-     struct dsd_envi *dsd;
-     struct cld_scia *C_cld;
-     struct IDL_cld_scia
-     {
-	  struct mjd_envi mjd;
-	  signed char    quality;
-	  unsigned char  quality_cld;
-	  unsigned short outputflag;
-	  unsigned short intg_time;
-	  unsigned short numpmd;
-	  unsigned int   dsrlen;
-	  float  cloudfrac;
-	  float  toppress;
-	  float  aai;
-	  float  albedo;
-	  IDL_ULONG  pntr_pmdcloudfrac;        /* IDL uses 32-bit addresses */
-     } *cld;
-
-     if ( argc != 4 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     num_dsd = *(unsigned int *) argv[0];
-     dsd = (struct dsd_envi *) argv[1];
-     cld = (struct IDL_cld_scia *) argv[2];
-     data = (float *) argv[3];
-
-     Use_Extern_Alloc = FALSE;
-     nr_cld = (int) SCIA_LV2_RD_CLD( fd_nadc, num_dsd, dsd, &C_cld );
-     Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     for ( nr = 0; nr < nr_cld; nr++ ) {
-	  (void) memcpy( data, C_cld[nr].pmdcloudfrac, 
-			 C_cld[nr].numpmd * sizeof(float) );
-	  data += C_cld[nr].numpmd;
-	  free( C_cld[nr].pmdcloudfrac );
-
-	  (void) memcpy( &cld[nr].mjd, &C_cld[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
-	  cld[nr].quality = C_cld[nr].quality;
-	  cld[nr].quality_cld = C_cld[nr].quality_cld;
-	  cld[nr].outputflag = C_cld[nr].outputflag;
-	  cld[nr].intg_time = C_cld[nr].intg_time;
-	  cld[nr].numpmd = C_cld[nr].numpmd;
-	  cld[nr].dsrlen = C_cld[nr].dsrlen;
-	  cld[nr].cloudfrac = C_cld[nr].cloudfrac;
-	  cld[nr].toppress = C_cld[nr].toppress;
-	  cld[nr].aai = C_cld[nr].aai;
-	  cld[nr].albedo = C_cld[nr].albedo;
-     }
-     free( C_cld );
-
-     return nr_cld;
- done:
-     return -1;
-}
-
-int IDL_STDCALL _SCIA_LV2_RD_DOAS ( int argc, void *argv[] )
-{
-     register int nr;
-
-     int          nr_doas;
-     unsigned int num_dsd;
-     float        *data;
-
-     IDL_STRING *doas_name;
-
-     struct dsd_envi  *dsd;
-     struct doas_scia *C_doas;
-
-     struct IDL_doas_scia
-     {
-	  struct mjd_envi mjd;
-	  signed char    quality;
-	  signed char    dummy;
-	  unsigned short vcdflag;
-	  unsigned short escflag;
-	  unsigned short amfflag;
-	  unsigned short intg_time;
-	  unsigned short numfitp;
-	  unsigned short numiter;
-	  unsigned int   dsrlen;
-	  float vcd;
-	  float errvcd;
-	  float esc;
-	  float erresc;
-	  float rms;
-	  float chi2;
-	  float goodness;
-	  float amfgnd;
-	  float amfcld;
-	  float reflgnd;
-	  float reflcld;
-	  float refl;
-	  IDL_ULONG  pntr_corrpar;            /* IDL uses 32-bit addresses */
-     } *doas;
-
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     doas_name = (IDL_STRING *) argv[0];
-     num_dsd = *(unsigned int *) argv[1];
-     dsd = (struct dsd_envi *) argv[2];
-     doas = (struct IDL_doas_scia *) argv[3];
-     data = (float *) argv[4];
-
-     Use_Extern_Alloc = FALSE;
-     nr_doas = (int) SCIA_LV2_RD_DOAS( fd_nadc, doas_name[0].s, 
-				       num_dsd, dsd, &C_doas );
-     Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     for ( nr = 0; nr < nr_doas; nr++ ) {
-	  register size_t n_cross = 
-	       (C_doas[nr].numfitp * (C_doas[nr].numfitp-1)) / 2;
-	  (void) memcpy( data, C_doas[nr].corrpar, n_cross  * sizeof(float) );
-	  data += n_cross;
-	  free( C_doas[nr].corrpar );
-
-	  (void) memcpy( &doas[nr].mjd, &C_doas[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
-	  doas[nr].quality = C_doas[nr].quality;
-	  doas[nr].vcdflag = C_doas[nr].vcdflag;
-	  doas[nr].escflag = C_doas[nr].escflag;
-	  doas[nr].amfflag = C_doas[nr].amfflag;
-	  doas[nr].intg_time = C_doas[nr].intg_time;
-	  doas[nr].numfitp = C_doas[nr].numfitp;
-	  doas[nr].numiter = C_doas[nr].numiter;
-	  doas[nr].dsrlen = C_doas[nr].dsrlen;
-	  doas[nr].vcd = C_doas[nr].vcd;
-	  doas[nr].errvcd = C_doas[nr].errvcd;
-	  doas[nr].esc = C_doas[nr].esc;
-	  doas[nr].erresc = C_doas[nr].erresc;
-	  doas[nr].rms = C_doas[nr].rms;
-	  doas[nr].chi2 = C_doas[nr].chi2;
-	  doas[nr].goodness = C_doas[nr].goodness;
-	  doas[nr].amfgnd = C_doas[nr].amfgnd;
-	  doas[nr].amfcld = C_doas[nr].amfcld;
-	  doas[nr].reflgnd = C_doas[nr].reflgnd;
-	  doas[nr].reflcld = C_doas[nr].reflcld;
-	  doas[nr].refl = C_doas[nr].refl;
-     }
-     free( C_doas );
-
-     return nr_doas;
- done:
-     return -1;
-}
-
-int IDL_STDCALL _SCIA_LV2_RD_GEO ( int argc, void *argv[] )
-{
-     int          nr_geo;
-     unsigned int num_dsd;
-
-     struct dsd_envi *dsd;
-     struct geo_scia *geo;
-
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     num_dsd = *(unsigned int *) argv[0];
-     dsd = (struct dsd_envi *) argv[1];
-     geo = (struct geo_scia *) argv[2];
-     nr_geo = (int) SCIA_LV2_RD_GEO( fd_nadc, num_dsd, dsd, &geo );
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     return nr_geo;
- done:
-     return -1;
-}
-
-int IDL_STDCALL _SCIA_LV2_RD_SPH ( int argc, void *argv[] )
-{
-     struct mph_envi  mph;
-     struct sph2_scia *sph;
-
-     if ( argc != 2 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     mph = *(struct mph_envi *) argv[0];
-     sph = (struct sph2_scia *) argv[1];
-
-     SCIA_LV2_RD_SPH( fd_nadc, mph, sph );
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     return 1;
- done:
-     return -1;
-}
-
-int IDL_STDCALL _SCIA_LV2_RD_SQADS ( int argc, void *argv[] )
-{
-     int          nr_sqads;
-     unsigned int num_dsd;
-
-     struct dsd_envi  *dsd;
-     struct sqads2_scia *sqads;
-
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     num_dsd = *(unsigned int *) argv[0];
-     dsd   = (struct dsd_envi *) argv[1];
-     sqads = (struct sqads2_scia *) argv[2];
-     nr_sqads = (int) SCIA_LV2_RD_SQADS( fd_nadc, num_dsd, dsd, &sqads );
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     return nr_sqads;
- done:
-     return -1;
-}
-
-int IDL_STDCALL _SCIA_LV2_RD_STATE ( int argc, void *argv[] )
-{
-     int          nr_state;
-     unsigned int num_dsd;
-
-     struct dsd_envi *dsd;
-     struct state2_scia *state;
-
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
-
-     num_dsd = *(unsigned int *) argv[0];
-     dsd = (struct dsd_envi *) argv[1];
-     state = (struct state2_scia *) argv[2];
-     nr_state = (int) SCIA_LV2_RD_STATE( fd_nadc, num_dsd, dsd, &state );
-     if ( IS_ERR_STAT_FATAL ) return -1;
-
-     return nr_state;
- done:
-     return -1;
-}
-
-/*
  * here all the Offline Product routines (alphabetically)
  */
-int IDL_STDCALL _SCIA_OL2_RD_CLD ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_CLD (int argc, void *argv[])
 {
      register int nr;
 
@@ -432,9 +92,9 @@ int IDL_STDCALL _SCIA_OL2_RD_CLD ( int argc, void *argv[] )
 	  IDL_ULONG  pntr_aeropars;            /* IDL uses 32-bit addresses */
      } *cld;
 
-    if ( argc != 4 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+    if (argc != 4) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
@@ -442,18 +102,18 @@ int IDL_STDCALL _SCIA_OL2_RD_CLD ( int argc, void *argv[] )
      data = (float *) argv[3];
 
      Use_Extern_Alloc = FALSE;
-     nr_cld = (int) SCIA_OL2_RD_CLD( fd_nadc, num_dsd, dsd, &C_cld );
+     nr_cld = (int) SCIA_OL2_RD_CLD(fd_nadc, num_dsd, dsd, &C_cld);
      Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     if (IS_ERR_STAT_FATAL) return -1;
 
-     for ( nr = 0; nr < nr_cld; nr++ ) {
-	  (void) memcpy( data, C_cld[nr].aeropars, 
-			 C_cld[nr].numaeropars * sizeof(float) );
+     for (nr = 0; nr < nr_cld; nr++) {
+	  (void) memcpy(data, C_cld[nr].aeropars, 
+			 C_cld[nr].numaeropars * sizeof(float));
 	  data += C_cld[nr].numaeropars;
-	  free( C_cld[nr].aeropars );
+	  free(C_cld[nr].aeropars);
 
-	  (void) memcpy( &cld[nr].mjd, &C_cld[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
+	  (void) memcpy(&cld[nr].mjd, &C_cld[nr].mjd, 
+			 sizeof(struct mjd_envi));
 	  cld[nr].quality = C_cld[nr].quality;
 	  cld[nr].intg_time = C_cld[nr].intg_time;
 	  cld[nr].numpmdpix = C_cld[nr].numpmdpix;
@@ -478,14 +138,14 @@ int IDL_STDCALL _SCIA_OL2_RD_CLD ( int argc, void *argv[] )
 	  cld[nr].aai = C_cld[nr].aai;
 	  cld[nr].aaidiag = C_cld[nr].aaidiag;
      }
-     free( C_cld );
+     free(C_cld);
 
      return nr_cld;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_LGEO ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_LGEO (int argc, void *argv[])
 {
      int          nr_geo;
      unsigned int num_dsd;
@@ -493,22 +153,22 @@ int IDL_STDCALL _SCIA_OL2_RD_LGEO ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct lgeo_scia *geo;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
      geo = (struct lgeo_scia *) argv[2];
-     nr_geo = (int) SCIA_OL2_RD_LGEO( fd_nadc, num_dsd, dsd, &geo );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_geo = (int) SCIA_OL2_RD_LGEO(fd_nadc, num_dsd, dsd, &geo);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_geo;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_NGEO ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_NGEO (int argc, void *argv[])
 {
      int          nr_geo;
      unsigned int num_dsd;
@@ -516,22 +176,22 @@ int IDL_STDCALL _SCIA_OL2_RD_NGEO ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct ngeo_scia *geo;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
      geo = (struct ngeo_scia *) argv[2];
-     nr_geo = (int) SCIA_OL2_RD_NGEO( fd_nadc, num_dsd, dsd, &geo );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_geo = (int) SCIA_OL2_RD_NGEO(fd_nadc, num_dsd, dsd, &geo);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_geo;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_LCLD ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_LCLD (int argc, void *argv[])
 {
      register int    nr;
 
@@ -575,9 +235,9 @@ int IDL_STDCALL _SCIA_OL2_RD_LCLD ( int argc, void *argv[] )
 	  IDL_ULONG pntr_limb_para;            /* IDL uses 32-bit addresses */
      } *lcld;
 
-     if ( argc != 6 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 6) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
@@ -587,32 +247,32 @@ int IDL_STDCALL _SCIA_OL2_RD_LCLD ( int argc, void *argv[] )
      limb_para = (float *) argv[5];
 
      Use_Extern_Alloc = FALSE;
-     nr_lcld = (int) SCIA_OL2_RD_LCLD( fd_nadc, num_dsd, dsd, &C_lcld );
+     nr_lcld = (int) SCIA_OL2_RD_LCLD(fd_nadc, num_dsd, dsd, &C_lcld);
      Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     if (IS_ERR_STAT_FATAL) return -1;
 
-     for ( nr = 0; nr < nr_lcld; nr++ ) {
+     for (nr = 0; nr < nr_lcld; nr++) {
 	  size_t adim = C_lcld[nr].num_tangent_hghts * C_lcld[nr].num_cir;
 
-	  if ( C_lcld[nr].num_tangent_hghts > 0 ) {
-	       (void) memcpy( tangent_hghts, C_lcld[nr].tangent_hghts, 
-			      C_lcld[nr].num_tangent_hghts * sizeof(float) );
+	  if (C_lcld[nr].num_tangent_hghts > 0) {
+	       (void) memcpy(tangent_hghts, C_lcld[nr].tangent_hghts, 
+			      C_lcld[nr].num_tangent_hghts * sizeof(float));
 	       tangent_hghts += C_lcld[nr].num_tangent_hghts;
-	       free( C_lcld[nr].tangent_hghts );
+	       free(C_lcld[nr].tangent_hghts);
 	  }
-	  if ( adim > 0 ) {
-	       (void) memcpy( cir, C_lcld[nr].cir, adim * sizeof(float) );
+	  if (adim > 0) {
+	       (void) memcpy(cir, C_lcld[nr].cir, adim * sizeof(float));
 	       cir += adim;
-	       free( C_lcld[nr].cir );
+	       free(C_lcld[nr].cir);
 	  }
-	  if ( C_lcld[nr].num_limb_para > 0 ) {
-	       (void) memcpy( limb_para, C_lcld[nr].limb_para, 
-			      C_lcld[nr].num_limb_para * sizeof(float) );
+	  if (C_lcld[nr].num_limb_para > 0) {
+	       (void) memcpy(limb_para, C_lcld[nr].limb_para, 
+			      C_lcld[nr].num_limb_para * sizeof(float));
 	       limb_para += C_lcld[nr].num_limb_para;
-	       free( C_lcld[nr].limb_para );
+	       free(C_lcld[nr].limb_para);
 	  }
-	  (void) memcpy( &lcld[nr].mjd, &C_lcld[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
+	  (void) memcpy(&lcld[nr].mjd, &C_lcld[nr].mjd, 
+			 sizeof(struct mjd_envi));
 	  lcld[nr].dsrlen = C_lcld[nr].dsrlen;
 	  lcld[nr].quality = C_lcld[nr].quality;
 	  lcld[nr].diag_cloud_algo = C_lcld[nr].diag_cloud_algo;
@@ -643,14 +303,14 @@ int IDL_STDCALL _SCIA_OL2_RD_LCLD ( int argc, void *argv[] )
 	  lcld[nr].hght_max_value_noctilucent = 
 	       C_lcld[nr].hght_max_value_noctilucent;
      }
-     free( C_lcld );
+     free(C_lcld);
 
      return nr_lcld;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_LFIT ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_LFIT (int argc, void *argv[])
 {
      register int    nr;
      register size_t nr_rec;
@@ -715,9 +375,9 @@ int IDL_STDCALL _SCIA_OL2_RD_LFIT ( int argc, void *argv[] )
 	  IDL_ULONG pntr_statevec;             /* IDL uses 32-bit addresses */
      } *lfit;
 
-     if ( argc != 14 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 14) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      lfit_name = (IDL_STRING *) argv[0];
      num_dsd = *(unsigned int *) argv[1];
@@ -735,69 +395,69 @@ int IDL_STDCALL _SCIA_OL2_RD_LFIT ( int argc, void *argv[] )
      statevec = (struct state_vec *) argv[13];
 
      Use_Extern_Alloc = FALSE;
-     nr_lfit = (int) SCIA_OL2_RD_LFIT( fd_nadc, lfit_name[0].s,
-				       num_dsd, dsd, &C_lfit );
+     nr_lfit = (int) SCIA_OL2_RD_LFIT(fd_nadc, lfit_name[0].s,
+				       num_dsd, dsd, &C_lfit);
      Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     if (IS_ERR_STAT_FATAL) return -1;
 
-     for ( nr = 0; nr < nr_lfit; nr++ ) {
-	  (void) memcpy( tangh, C_lfit[nr].tangh, 
-                         C_lfit[nr].num_rlevel * sizeof(float) );
+     for (nr = 0; nr < nr_lfit; nr++) {
+	  (void) memcpy(tangh, C_lfit[nr].tangh, 
+                         C_lfit[nr].num_rlevel * sizeof(float));
           tangh += C_lfit[nr].num_rlevel;
-          free( C_lfit[nr].tangh );
-	  (void) memcpy( tangp, C_lfit[nr].tangp, 
-                         C_lfit[nr].num_rlevel * sizeof(float) );
+          free(C_lfit[nr].tangh);
+	  (void) memcpy(tangp, C_lfit[nr].tangp, 
+                         C_lfit[nr].num_rlevel * sizeof(float));
           tangp += C_lfit[nr].num_rlevel;
-          free( C_lfit[nr].tangp );
-	  (void) memcpy( tangt, C_lfit[nr].tangt, 
-                         C_lfit[nr].num_rlevel * sizeof(float) );
+          free(C_lfit[nr].tangp);
+	  (void) memcpy(tangt, C_lfit[nr].tangt, 
+                         C_lfit[nr].num_rlevel * sizeof(float));
           tangt += C_lfit[nr].num_rlevel;
-          free( C_lfit[nr].tangt );
-	  if ( C_lfit[nr].cmatrixsize > 0 ) {
-	       (void) memcpy( corrmatrix, C_lfit[nr].corrmatrix, 
-			      C_lfit[nr].cmatrixsize * sizeof(float) );
+          free(C_lfit[nr].tangt);
+	  if (C_lfit[nr].cmatrixsize > 0) {
+	       (void) memcpy(corrmatrix, C_lfit[nr].corrmatrix, 
+			      C_lfit[nr].cmatrixsize * sizeof(float));
 	       corrmatrix += C_lfit[nr].cmatrixsize;
-	       free( C_lfit[nr].corrmatrix );
+	       free(C_lfit[nr].corrmatrix);
 	  }
-	  if ( C_lfit[nr].ressize > 0 ) {
-	       (void) memcpy( residuals, C_lfit[nr].residuals, 
-			      C_lfit[nr].ressize * sizeof(float) );
+	  if (C_lfit[nr].ressize > 0) {
+	       (void) memcpy(residuals, C_lfit[nr].residuals, 
+			      C_lfit[nr].ressize * sizeof(float));
 	       residuals += C_lfit[nr].ressize;
-	       free( C_lfit[nr].residuals );
+	       free(C_lfit[nr].residuals);
 	  }
-	  if ( C_lfit[nr].num_adddiag > 0 ) {
-	       (void) memcpy( adddiag, C_lfit[nr].adddiag, 
-			      C_lfit[nr].num_adddiag * sizeof(float) );
+	  if (C_lfit[nr].num_adddiag > 0) {
+	       (void) memcpy(adddiag, C_lfit[nr].adddiag, 
+			      C_lfit[nr].num_adddiag * sizeof(float));
 	       adddiag += C_lfit[nr].num_adddiag;
-	       free( C_lfit[nr].adddiag );
+	       free(C_lfit[nr].adddiag);
 	  }
 
 	  nr_rec = C_lfit[nr].num_rlevel * C_lfit[nr].num_species;
-	  if ( nr_rec > 0 ) { 
-	       (void) memcpy( mainrec, C_lfit[nr].mainrec,
-			      nr_rec * sizeof( struct layer_rec ));
+	  if (nr_rec > 0) { 
+	       (void) memcpy(mainrec, C_lfit[nr].mainrec,
+			      nr_rec * sizeof(struct layer_rec));
 	       mainrec += nr_rec;
-	       free( C_lfit[nr].mainrec );
+	       free(C_lfit[nr].mainrec);
 	  }
 	  nr_rec = C_lfit[nr].num_rlevel * C_lfit[nr].num_scale;
-	  if ( nr_rec > 0 ) { 
-	       (void) memcpy( scaledrec, C_lfit[nr].scaledrec,
-			      nr_rec * sizeof( struct layer_rec ));
+	  if (nr_rec > 0) { 
+	       (void) memcpy(scaledrec, C_lfit[nr].scaledrec,
+			      nr_rec * sizeof(struct layer_rec));
 	       scaledrec += nr_rec;
-	       free( C_lfit[nr].scaledrec );
+	       free(C_lfit[nr].scaledrec);
 	  }
-	  (void) memcpy( mgrid, C_lfit[nr].mgrid,
-			 C_lfit[nr].num_mlevel * sizeof( struct meas_grid ));
+	  (void) memcpy(mgrid, C_lfit[nr].mgrid,
+			 C_lfit[nr].num_mlevel * sizeof(struct meas_grid));
 	  mgrid += C_lfit[nr].num_mlevel;
-          free( C_lfit[nr].mgrid );
+          free(C_lfit[nr].mgrid);
 
-	  (void) memcpy( statevec, C_lfit[nr].statevec,
-			 C_lfit[nr].stvec_size * sizeof( struct state_vec ));
+	  (void) memcpy(statevec, C_lfit[nr].statevec,
+			 C_lfit[nr].stvec_size * sizeof(struct state_vec));
 	  statevec += C_lfit[nr].stvec_size;
-          free( C_lfit[nr].statevec );
+          free(C_lfit[nr].statevec);
 
-	  (void) memcpy( &lfit[nr].mjd, &C_lfit[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
+	  (void) memcpy(&lfit[nr].mjd, &C_lfit[nr].mjd, 
+			 sizeof(struct mjd_envi));
 	  lfit[nr].quality = C_lfit[nr].quality;
 	  lfit[nr].criteria = C_lfit[nr].criteria;
 	  lfit[nr].method = C_lfit[nr].method;
@@ -823,14 +483,14 @@ int IDL_STDCALL _SCIA_OL2_RD_LFIT ( int argc, void *argv[] )
 	  lfit[nr].chi2 = C_lfit[nr].chi2;
 	  lfit[nr].goodness = C_lfit[nr].goodness;
      }
-     free( C_lfit );
+     free(C_lfit);
 
      return nr_lfit;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_NFIT ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_NFIT (int argc, void *argv[])
 {
      register int    nr;
      register size_t n_cross;
@@ -884,9 +544,9 @@ int IDL_STDCALL _SCIA_OL2_RD_NFIT ( int argc, void *argv[] )
 	  IDL_ULONG  pntr_nlincorrm;           /* IDL uses 32-bit addresses */
      } *nfit;
 
-     if ( argc != 12 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 12) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      nfit_name = (IDL_STRING *) argv[0];
      num_dsd = *(unsigned int *) argv[1];
@@ -902,54 +562,54 @@ int IDL_STDCALL _SCIA_OL2_RD_NFIT ( int argc, void *argv[] )
      nlincorrm = (float *) argv[11];
 
      Use_Extern_Alloc = FALSE;
-     nr_nfit = (int) SCIA_OL2_RD_NFIT( fd_nadc, nfit_name[0].s, 
-				       num_dsd, dsd, &C_nfit );
+     nr_nfit = (int) SCIA_OL2_RD_NFIT(fd_nadc, nfit_name[0].s, 
+				       num_dsd, dsd, &C_nfit);
      Use_Extern_Alloc = TRUE;
-     if ( IS_ERR_STAT_FATAL ) return -1; 
-     for ( nr = 0; nr < nr_nfit; nr++ ) {
-	  (void) memcpy( vcd, C_nfit[nr].vcd, 
-                         C_nfit[nr].numvcd * sizeof(float) );
+     if (IS_ERR_STAT_FATAL) return -1; 
+     for (nr = 0; nr < nr_nfit; nr++) {
+	  (void) memcpy(vcd, C_nfit[nr].vcd, 
+                         C_nfit[nr].numvcd * sizeof(float));
           vcd += C_nfit[nr].numvcd;
-          free( C_nfit[nr].vcd );
-	  (void) memcpy( errvcd, C_nfit[nr].errvcd, 
-                         C_nfit[nr].numvcd * sizeof(float) );
+          free(C_nfit[nr].vcd);
+	  (void) memcpy(errvcd, C_nfit[nr].errvcd, 
+                         C_nfit[nr].numvcd * sizeof(float));
           errvcd += C_nfit[nr].numvcd;
-          free( C_nfit[nr].errvcd );
-	  if ( C_nfit[nr].num_fitp > 0 ) {
-	       (void) memcpy( linpars, C_nfit[nr].linpars, 
-			      C_nfit[nr].num_fitp * sizeof(float) );
+          free(C_nfit[nr].errvcd);
+	  if (C_nfit[nr].num_fitp > 0) {
+	       (void) memcpy(linpars, C_nfit[nr].linpars, 
+			      C_nfit[nr].num_fitp * sizeof(float));
 	       linpars += C_nfit[nr].num_fitp;
-	       free( C_nfit[nr].linpars );
+	       free(C_nfit[nr].linpars);
 
-	       (void) memcpy( errlinpars, C_nfit[nr].errlinpars, 
-			      C_nfit[nr].num_fitp * sizeof(float) );
+	       (void) memcpy(errlinpars, C_nfit[nr].errlinpars, 
+			      C_nfit[nr].num_fitp * sizeof(float));
 	       errlinpars += C_nfit[nr].num_fitp;
-	       free( C_nfit[nr].errlinpars );
+	       free(C_nfit[nr].errlinpars);
 	  }
 	  n_cross = (C_nfit[nr].num_fitp * (C_nfit[nr].num_fitp-1)) / 2;
-	  if ( n_cross > 0 ) {
-	       (void) memcpy( lincorrm, C_nfit[nr].lincorrm, 
-			      n_cross * sizeof(float) );
+	  if (n_cross > 0) {
+	       (void) memcpy(lincorrm, C_nfit[nr].lincorrm, 
+			      n_cross * sizeof(float));
 	       lincorrm += n_cross;
-	       free( C_nfit[nr].lincorrm );
+	       free(C_nfit[nr].lincorrm);
 	  }
-	  (void) memcpy( nlinpars, C_nfit[nr].nlinpars, 
-                         C_nfit[nr].num_nfitp * sizeof(float) );
+	  (void) memcpy(nlinpars, C_nfit[nr].nlinpars, 
+                         C_nfit[nr].num_nfitp * sizeof(float));
           nlinpars += C_nfit[nr].num_nfitp;
-          free( C_nfit[nr].nlinpars );
-	  (void) memcpy( errnlinpars, C_nfit[nr].errnlinpars, 
-                         C_nfit[nr].num_nfitp * sizeof(float) );
+          free(C_nfit[nr].nlinpars);
+	  (void) memcpy(errnlinpars, C_nfit[nr].errnlinpars, 
+                         C_nfit[nr].num_nfitp * sizeof(float));
           errnlinpars += C_nfit[nr].num_nfitp;
-          free( C_nfit[nr].errnlinpars );
+          free(C_nfit[nr].errnlinpars);
 	  n_cross = (C_nfit[nr].num_nfitp * (C_nfit[nr].num_nfitp-1)) / 2;
-	  if ( n_cross > 0 ) {
-	       (void) memcpy( nlincorrm, C_nfit[nr].nlincorrm, 
-			      n_cross * sizeof(float) );
+	  if (n_cross > 0) {
+	       (void) memcpy(nlincorrm, C_nfit[nr].nlincorrm, 
+			      n_cross * sizeof(float));
 	       nlincorrm += n_cross;
-	       free( C_nfit[nr].nlincorrm );
+	       free(C_nfit[nr].nlincorrm);
 	  }
-	  (void) memcpy( &nfit[nr].mjd, &C_nfit[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
+	  (void) memcpy(&nfit[nr].mjd, &C_nfit[nr].mjd, 
+			 sizeof(struct mjd_envi));
 	  nfit[nr].quality = C_nfit[nr].quality;
 	  nfit[nr].intg_time = C_nfit[nr].intg_time;
 	  nfit[nr].numvcd = C_nfit[nr].numvcd;
@@ -971,34 +631,34 @@ int IDL_STDCALL _SCIA_OL2_RD_NFIT ( int argc, void *argv[] )
 	  nfit[nr].erramfcld = C_nfit[nr].erramfcld;
 	  nfit[nr].temperature = C_nfit[nr].temperature;
      }
-     free( C_nfit );
+     free(C_nfit);
 
      return nr_nfit;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_SPH ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_SPH (int argc, void *argv[])
 {
      struct mph_envi  mph;
      struct sph_sci_ol *sph;
 
-     if ( argc != 2 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 2) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      mph = *(struct mph_envi *) argv[0];
      sph = (struct sph_sci_ol *) argv[1];
 
-     SCIA_OL2_RD_SPH( fd_nadc, mph, sph );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     SCIA_OL2_RD_SPH(fd_nadc, mph, sph);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return 1;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_OL2_RD_SQADS ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_OL2_RD_SQADS (int argc, void *argv[])
 {
      int          nr_sqads;
      unsigned int num_dsd;
@@ -1006,17 +666,40 @@ int IDL_STDCALL _SCIA_OL2_RD_SQADS ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct sqads_sci_ol *sqads;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd   = (struct dsd_envi *) argv[1];
      sqads = (struct sqads_sci_ol *) argv[2];
-     nr_sqads = (int) SCIA_OL2_RD_SQADS( fd_nadc, num_dsd, dsd, &sqads );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_sqads = (int) SCIA_OL2_RD_SQADS(fd_nadc, num_dsd, dsd, &sqads);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_sqads;
+ done:
+     return -1;
+}
+
+int IDL_STDCALL _SCIA_OL2_RD_STATE (int argc, void *argv[])
+{
+     int          nr_state;
+     unsigned int num_dsd;
+
+     struct dsd_envi *dsd;
+     struct state2_scia *state;
+
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
+
+     num_dsd = *(unsigned int *) argv[0];
+     dsd = (struct dsd_envi *) argv[1];
+     state = (struct state2_scia *) argv[2];
+     nr_state = (int) SCIA_OL2_RD_STATE(fd_nadc, num_dsd, dsd, &state);
+     if (IS_ERR_STAT_FATAL) return -1;
+
+     return nr_state;
  done:
      return -1;
 }

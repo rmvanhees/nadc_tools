@@ -15,14 +15,14 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA  02111-1307, USA.
 
-.IDENTifer   SCIA_LV2_WR_H5_STATE
+.IDENTifer   SCIA_OL2_WR_H5_STATE
 .AUTHOR      R.M. van Hees
 .KEYWORDS    SCIA level 2 - HDF5
 .LANGUAGE    ANSI C
 .PURPOSE     define and write SCIAMACHY level 2 STATE data
 
 .INPUT/OUTPUT
-  call as    SCIA_LV2_WR_H5_STATE(nr_state, state);
+  call as    SCIA_OL2_WR_H5_STATE(nr_state, state);
      input:  
 	     unsigned int nr_state      : number of Summary of Quality Flags
 	     struct state2_scia *state  : States of the Product
@@ -67,7 +67,7 @@ static const size_t state_offs[NFIELDS] = {
 };
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_LV2_WR_H5_STATE(unsigned int nr_state,
+void SCIA_OL2_WR_H5_STATE(unsigned int nr_state,
 			  const struct state2_scia *state)
 {
      hid_t   ads_id;
@@ -123,10 +123,10 @@ void SCIA_LV2_WR_H5_STATE(unsigned int nr_state,
 }
 
 /*+++++++++++++++++++++++++
-.IDENTifer  SCIA_LV2_WR_ASCII_STATE
+.IDENTifer  SCIA_OL2_WR_ASCII_STATE
 .PURPOSE    dump -- in ASCII Format -- the STATE records
 .INPUT/OUTPUT
-  call as   SCIA_LV2_WR_ASCII_STATE(num_dsr, state);
+  call as   SCIA_OL2_WR_ASCII_STATE(num_dsr, state);
      input:
             unsigned int num_dsr      : number of data sets
             struct state2_scia *state : pointer to STATE records
@@ -134,7 +134,7 @@ void SCIA_LV2_WR_H5_STATE(unsigned int nr_state,
 .RETURNS     Nothing, error status passed by global variable ``nadc_stat''
 .COMMENTS    None
 -------------------------*/
-void SCIA_LV2_WR_ASCII_STATE(unsigned int num_dsr,
+void SCIA_OL2_WR_ASCII_STATE(unsigned int num_dsr,
 			     const struct state2_scia *state)
 {
      register unsigned int nd, nr;

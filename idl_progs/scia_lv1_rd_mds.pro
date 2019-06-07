@@ -282,11 +282,10 @@ PRO SCIA_LV1_RD_ONE_MDS, state, mds, status=status, channels=channels, $
 ; definition of SCIAMACHY related constants
   NotSet = -1
 
-; obtain calibration mask
-  calib_mask = '0'xu
+; set calibration mask
   IF N_ELEMENTS( calibration ) GT 0 THEN BEGIN
-     calib_mask = call_external( lib_name('libnadc_idl'), '_SCIA_SET_CALIB', $
-                                 calibration, /UL_VALUE, /CDECL )
+     stat = call_external( lib_name('libnadc_idl'), '_SCIA_SET_CALIB', $
+                           calibration, /CDECL )
   ENDIF
 
 ; obtain cluster mask
@@ -341,8 +340,8 @@ PRO SCIA_LV1_RD_ONE_MDS, state, mds, status=status, channels=channels, $
 
 ; read MDS data
   num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_RD_MDS', $
-                       state, clus_mask, calib_mask, mds, $
-                       pixel_ids, pixel_wv, pixel_wv_err, pixel_val, $
+                       state, clus_mask, mds, pixel_ids, $
+                       pixel_wv, pixel_wv_err, pixel_val, $
                        pixel_err, geoC, geoL, geoN, /CDECL )
   IF num NE num_mds THEN BEGIN
      MESSAGE, 'Number of expected MDS differs from number found in file: ' $

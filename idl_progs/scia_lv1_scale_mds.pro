@@ -91,7 +91,7 @@
 ;-
 ;---------------------------------------------------------------------------
 FUNCTION SCIA_LV1_SCALE_MDS, dsd, stateID, chanID, status=status, $
-                             calib=calib, stateIndex=stateIndex, $
+                             calibration=calibration, stateIndex=stateIndex, $
                              meta=meta, norm=norm, noPMD=noPMD
   compile_opt idl2,logical_predicate,hidden
 
@@ -115,8 +115,8 @@ FUNCTION SCIA_LV1_SCALE_MDS, dsd, stateID, chanID, status=status, $
 ; check required parameters
   IF N_PARAMS() NE 3 THEN BEGIN
      MESSAGE, ' Usage: data = SCIA_LV1_SCALE_MDS( dsd, stateID, chanID' $
-              + ', meta=meta, calib=calib, stateIndex=stateIndex, norm=norm' $
-              + ', noPMD=noPMD, status=status )', /INFO
+              + ', meta=meta, calibration=calibration, stateIndex=stateIndex' $
+              + ', norm=norm, noPMD=noPMD, status=status )', /INFO
      IF ARG_PRESENT( meta ) THEN meta = -1
      status = -1
      RETURN, -1
@@ -152,11 +152,10 @@ FUNCTION SCIA_LV1_SCALE_MDS, dsd, stateID, chanID, status=status, $
   ENDIF ELSE $
      state = state[index]
 
-; obtain calibration mask
-  calib_mask = '0'xu
-  IF N_ELEMENTS( calib ) GT 0 THEN BEGIN
-     calib_mask = call_external( lib_name('libnadc_idl'), '_SCIA_SET_CALIB', $
-                                 calib, /UL_VALUE, /CDECL )
+; set calibration mask
+  IF N_ELEMENTS( calibration ) GT 0 THEN BEGIN
+     stat = call_external( lib_name('libnadc_idl'), '_SCIA_SET_CALIB', $
+                           calibration, /CDECL )
   ENDIF
 
 ; set up structs for geolocation data
@@ -194,7 +193,7 @@ FUNCTION SCIA_LV1_SCALE_MDS, dsd, stateID, chanID, status=status, $
      data_glr = REPLICATE( {meta_rec}, (dim_Y * dim_Z) )
      num = call_external( lib_name('libnadc_idl'), '_SCIA_LV1_SCALE_MDS', $
                           is_level_1c, pmdScaling, state[ns], clus_mask, $
-                          calib_mask, data, data_glr, /CDECL )
+                          data, data_glr, /CDECL )
      IF num NE (dim_Y * dim_Z) THEN BEGIN
         IF ARG_PRESENT( meta ) THEN meta = -1
         status = -1

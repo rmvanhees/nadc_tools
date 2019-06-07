@@ -104,16 +104,6 @@ set (IDL_LEVEL1_SRCS
 )
 
 set (IDL_LEVEL2_SRCS
-    scia_lv2_free_bias.pro
-    scia_lv2_free_cld.pro
-    scia_lv2_free_doas.pro
-    scia_lv2_rd_bias.pro
-    scia_lv2_rd_cld.pro
-    scia_lv2_rd_doas.pro
-    scia_lv2_rd_geo.pro
-    scia_lv2_rd_sph.pro
-    scia_lv2_rd_sqads.pro
-    scia_lv2_rd_state.pro
     scia_ol2_free_cld.pro
     scia_ol2_free_lfit.pro
     scia_ol2_free_nfit.pro
@@ -125,6 +115,7 @@ set (IDL_LEVEL2_SRCS
     scia_ol2_rd_ngeo.pro
     scia_ol2_rd_sph.pro
     scia_ol2_rd_sqads.pro
+    scia_ol2_rd_state.pro
 )
 
 set (IDL_SDMF_SRCS

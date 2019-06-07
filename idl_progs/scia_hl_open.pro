@@ -89,10 +89,6 @@ PRO SCIA_HL_OPEN, flname, dsd, mph=mph, sph=sph, level=level, status=status
         SCIA_LV1_RD_SPH, mph, sph, status=status
         BREAK
      END
-     '2N': BEGIN
-        SCIA_LV2_RD_SPH, mph, sph, status=status
-        BREAK
-     END
      '2O': BEGIN
         SCIA_OL2_RD_SPH, mph, sph, status=status
         BREAK

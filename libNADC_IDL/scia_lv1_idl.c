@@ -1,5 +1,5 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.COPYRIGHT (c) 2001 - 2013 SRON (R.M.van.Hees@sron.nl)
+.COPYRIGHT (c) 2001 - 2019 SRON (R.M.van.Hees@sron.nl)
 
    This is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License, version 2, as
@@ -53,7 +53,7 @@ extern FILE *fd_nadc;
 static const char err_msg[] = "invalid number of function arguments";
 
 /*+++++++++++++++++++++++++ Main Program or Functions +++++++++++++++*/
-int IDL_STDCALL _SCIA_LV1_RD_ASFP ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_ASFP (int argc, void *argv[])
 {
      int nr_asfp;
 
@@ -62,23 +62,23 @@ int IDL_STDCALL _SCIA_LV1_RD_ASFP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct asfp_scia *asfp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      asfp = (struct asfp_scia *) argv[2];
 
-     nr_asfp = (int) SCIA_LV1_RD_ASFP( fd_nadc, num_dsd, dsd, &asfp );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_asfp = (int) SCIA_LV1_RD_ASFP(fd_nadc, num_dsd, dsd, &asfp);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_asfp;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_AUX (int argc, void *argv[])
 {
      int nr_aux;
 
@@ -87,45 +87,45 @@ int IDL_STDCALL _SCIA_LV1_RD_AUX ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct mds1_aux *aux;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
      aux = (struct mds1_aux *) argv[2];
 
-     nr_aux = (int) SCIA_LV1_RD_AUX( fd_nadc, num_dsd, dsd, &aux );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_aux = (int) SCIA_LV1_RD_AUX(fd_nadc, num_dsd, dsd, &aux);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_aux;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_BASE ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_BASE (int argc, void *argv[])
 {
      unsigned int num_dsd;
 
      struct dsd_envi  *dsd;
      struct base_scia *base;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      base = (struct base_scia *) argv[2];
-     SCIA_LV1_RD_BASE( fd_nadc, num_dsd, dsd, base );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     SCIA_LV1_RD_BASE(fd_nadc, num_dsd, dsd, base);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return 1;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_CLCP ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_CLCP (int argc, void *argv[])
 {
      int nr_clcp;
 
@@ -134,23 +134,23 @@ int IDL_STDCALL _SCIA_LV1_RD_CLCP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct clcp_scia *clcp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      clcp = (struct clcp_scia *) argv[2];
 
-     nr_clcp = (int) SCIA_LV1_RD_CLCP( fd_nadc, num_dsd, dsd, clcp );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_clcp = (int) SCIA_LV1_RD_CLCP(fd_nadc, num_dsd, dsd, clcp);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_clcp;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_DARK ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_DARK (int argc, void *argv[])
 {
      int nr_dark;
 
@@ -159,23 +159,23 @@ int IDL_STDCALL _SCIA_LV1_RD_DARK ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct dark_scia *dark;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      dark = (struct dark_scia *) argv[2];
 
-     nr_dark = (int) SCIA_LV1_RD_DARK( fd_nadc, num_dsd, dsd, &dark );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_dark = (int) SCIA_LV1_RD_DARK(fd_nadc, num_dsd, dsd, &dark);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_dark;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_EKD ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_EKD (int argc, void *argv[])
 {
      int nr_ekd;
 
@@ -184,23 +184,23 @@ int IDL_STDCALL _SCIA_LV1_RD_EKD ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct ekd_scia *ekd;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      ekd = (struct ekd_scia *) argv[2];
 
-     nr_ekd = (int) SCIA_LV1_RD_EKD( fd_nadc, num_dsd, dsd, ekd );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_ekd = (int) SCIA_LV1_RD_EKD(fd_nadc, num_dsd, dsd, ekd);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_ekd;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_LCPN ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_LCPN (int argc, void *argv[])
 {
      int nr_lcpn;
 
@@ -209,23 +209,23 @@ int IDL_STDCALL _SCIA_LV1_RD_LCPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct lcpn_scia *lcpn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      lcpn = (struct lcpn_scia *) argv[2];
 
-     nr_lcpn = (int) SCIA_LV1_RD_LCPN( fd_nadc, num_dsd, dsd, &lcpn );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_lcpn = (int) SCIA_LV1_RD_LCPN(fd_nadc, num_dsd, dsd, &lcpn);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_lcpn;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_PMD (int argc, void *argv[])
 {
      int nr_pmd;
 
@@ -234,23 +234,23 @@ int IDL_STDCALL _SCIA_LV1_RD_PMD ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct mds1_pmd *pmd;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd = (struct dsd_envi *) argv[1];
      pmd = (struct mds1_pmd *) argv[2];
 
-     nr_pmd = (int) SCIA_LV1_RD_PMD( fd_nadc, num_dsd, dsd, &pmd );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_pmd = (int) SCIA_LV1_RD_PMD(fd_nadc, num_dsd, dsd, &pmd);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_pmd;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_PPG ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_PPG (int argc, void *argv[])
 {
      int nr_ppg;
 
@@ -259,23 +259,23 @@ int IDL_STDCALL _SCIA_LV1_RD_PPG ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct ppg_scia *ppg;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      ppg = (struct ppg_scia *) argv[2];
 
-     nr_ppg = (int) SCIA_LV1_RD_PPG( fd_nadc, num_dsd, dsd, ppg );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_ppg = (int) SCIA_LV1_RD_PPG(fd_nadc, num_dsd, dsd, ppg);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_ppg;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_PPGN ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_PPGN (int argc, void *argv[])
 {
 
      int nr_ppgn;
@@ -285,23 +285,23 @@ int IDL_STDCALL _SCIA_LV1_RD_PPGN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct ppgn_scia *ppgn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      ppgn = (struct ppgn_scia *) argv[2];
 
-     nr_ppgn = (int) SCIA_LV1_RD_PPGN( fd_nadc, num_dsd, dsd, &ppgn );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_ppgn = (int) SCIA_LV1_RD_PPGN(fd_nadc, num_dsd, dsd, &ppgn);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_ppgn;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_PSPN ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_PSPN (int argc, void *argv[])
 {
      int nr_pspn;
 
@@ -310,23 +310,23 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct pspn_scia *pspn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      pspn = (struct pspn_scia *) argv[2];
 
-     nr_pspn = (int) SCIA_LV1_RD_PSPN( fd_nadc, num_dsd, dsd, &pspn );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_pspn = (int) SCIA_LV1_RD_PSPN(fd_nadc, num_dsd, dsd, &pspn);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_pspn;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_PSPL ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_PSPL (int argc, void *argv[])
 {
      int nr_pspl;
 
@@ -335,23 +335,23 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPL ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct psplo_scia *pspl;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      pspl = (struct psplo_scia *) argv[2];
 
-     nr_pspl = (int) SCIA_LV1_RD_PSPL( fd_nadc, num_dsd, dsd, &pspl );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_pspl = (int) SCIA_LV1_RD_PSPL(fd_nadc, num_dsd, dsd, &pspl);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_pspl;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_PSPO ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_PSPO (int argc, void *argv[])
 {
      int nr_pspo;
 
@@ -360,23 +360,23 @@ int IDL_STDCALL _SCIA_LV1_RD_PSPO ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct psplo_scia *pspo;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      pspo = (struct psplo_scia *) argv[2];
 
-     nr_pspo = (int) SCIA_LV1_RD_PSPO( fd_nadc, num_dsd, dsd, &pspo );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_pspo = (int) SCIA_LV1_RD_PSPO(fd_nadc, num_dsd, dsd, &pspo);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_pspo;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_RSPN ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_RSPN (int argc, void *argv[])
 {
      int nr_rspn;
 
@@ -385,23 +385,23 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct rspn_scia *rspn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      rspn = (struct rspn_scia *) argv[2];
 
-     nr_rspn = (int) SCIA_LV1_RD_RSPN( fd_nadc, num_dsd, dsd, &rspn );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_rspn = (int) SCIA_LV1_RD_RSPN(fd_nadc, num_dsd, dsd, &rspn);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_rspn;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_RSPL ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_RSPL (int argc, void *argv[])
 {
      int nr_rspl;
 
@@ -410,23 +410,23 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPL ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct rsplo_scia *rspl;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      rspl = (struct rsplo_scia *) argv[2];
 
-     nr_rspl = (int) SCIA_LV1_RD_RSPL( fd_nadc, num_dsd, dsd, &rspl );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_rspl = (int) SCIA_LV1_RD_RSPL(fd_nadc, num_dsd, dsd, &rspl);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_rspl;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_RSPO ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_RSPO (int argc, void *argv[])
 {
      int nr_rspo;
 
@@ -435,23 +435,23 @@ int IDL_STDCALL _SCIA_LV1_RD_RSPO ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct rsplo_scia *rspo;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      rspo = (struct rsplo_scia *) argv[2];
 
-     nr_rspo = (int) SCIA_LV1_RD_RSPO( fd_nadc, num_dsd, dsd, &rspo );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_rspo = (int) SCIA_LV1_RD_RSPO(fd_nadc, num_dsd, dsd, &rspo);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_rspo;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SCP ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SCP (int argc, void *argv[])
 {
      int nr_scp;
 
@@ -460,23 +460,23 @@ int IDL_STDCALL _SCIA_LV1_RD_SCP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct scp_scia *scp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      scp = (struct scp_scia *) argv[2];
 
-     nr_scp = (int) SCIA_LV1_RD_SCP( fd_nadc, num_dsd, dsd, &scp );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_scp = (int) SCIA_LV1_RD_SCP(fd_nadc, num_dsd, dsd, &scp);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_scp;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SCPN ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SCPN (int argc, void *argv[])
 {
      int nr_scpn;
 
@@ -485,23 +485,23 @@ int IDL_STDCALL _SCIA_LV1_RD_SCPN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct scpn_scia *scpn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      scpn = (struct scpn_scia *) argv[2];
 
-     nr_scpn = (int) SCIA_LV1_RD_SCPN( fd_nadc, num_dsd, dsd, &scpn );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_scpn = (int) SCIA_LV1_RD_SCPN(fd_nadc, num_dsd, dsd, &scpn);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_scpn;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SFP ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SFP (int argc, void *argv[])
 {
      int nr_sfp;
 
@@ -510,23 +510,23 @@ int IDL_STDCALL _SCIA_LV1_RD_SFP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct sfp_scia *sfp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      sfp = (struct sfp_scia *) argv[2];
 
-     nr_sfp = (int) SCIA_LV1_RD_SFP( fd_nadc, num_dsd, dsd, &sfp );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_sfp = (int) SCIA_LV1_RD_SFP(fd_nadc, num_dsd, dsd, &sfp);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_sfp;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SIP ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SIP (int argc, void *argv[])
 {
      int nr_sip;
 
@@ -535,43 +535,43 @@ int IDL_STDCALL _SCIA_LV1_RD_SIP ( int argc, void *argv[] )
      struct dsd_envi *dsd;
      struct sip_scia *sip;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      sip = (struct sip_scia *) argv[2];
-     nr_sip = SCIA_LV1_RD_SIP( fd_nadc, num_dsd, dsd, sip );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_sip = SCIA_LV1_RD_SIP(fd_nadc, num_dsd, dsd, sip);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_sip;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SPH ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SPH (int argc, void *argv[])
 {
      struct mph_envi  mph;
      struct sph1_scia *sph;
 
-     if ( argc != 2 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 2) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      mph = *(struct mph_envi *) argv[0];
      sph = (struct sph1_scia *) argv[1];
 
-     if ( IS_ERR_STAT_FATAL ) return -999;
-     SCIA_LV1_RD_SPH( fd_nadc, mph, sph );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     if (IS_ERR_STAT_FATAL) return -999;
+     SCIA_LV1_RD_SPH(fd_nadc, mph, sph);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return 1;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SQADS ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SQADS (int argc, void *argv[])
 {
      int nr_sqads;
 
@@ -580,22 +580,22 @@ int IDL_STDCALL _SCIA_LV1_RD_SQADS ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct sqads1_scia *sqads;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd   = (struct dsd_envi *) argv[1];
      sqads = (struct sqads1_scia *) argv[2];
-     nr_sqads = (int) SCIA_LV1_RD_SQADS( fd_nadc, num_dsd, dsd, &sqads );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_sqads = (int) SCIA_LV1_RD_SQADS(fd_nadc, num_dsd, dsd, &sqads);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_sqads;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SRS ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SRS (int argc, void *argv[])
 {
      int nr_srs;
 
@@ -604,23 +604,23 @@ int IDL_STDCALL _SCIA_LV1_RD_SRS ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct srs_scia *srs;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      srs = (struct srs_scia *) argv[2];
 
-     nr_srs = (int) SCIA_LV1_RD_SRS( fd_nadc, num_dsd, dsd, &srs );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_srs = (int) SCIA_LV1_RD_SRS(fd_nadc, num_dsd, dsd, &srs);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_srs;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_SRSN ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_SRSN (int argc, void *argv[])
 {
      int nr_srsn;
 
@@ -629,23 +629,23 @@ int IDL_STDCALL _SCIA_LV1_RD_SRSN ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct srsn_scia *srsn;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      srsn = (struct srsn_scia *) argv[2];
 
-     nr_srsn = (int) SCIA_LV1_RD_SRSN( fd_nadc, num_dsd, dsd, &srsn );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_srsn = (int) SCIA_LV1_RD_SRSN(fd_nadc, num_dsd, dsd, &srsn);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_srsn;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_STATE ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_STATE (int argc, void *argv[])
 {
      int nr_state;
 
@@ -654,22 +654,22 @@ int IDL_STDCALL _SCIA_LV1_RD_STATE ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct state1_scia *state;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      state = (struct state1_scia *) argv[2];
-     nr_state = (int) SCIA_LV1_RD_STATE( fd_nadc, num_dsd, dsd, &state );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_state = (int) SCIA_LV1_RD_STATE(fd_nadc, num_dsd, dsd, &state);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_state;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_VLCP ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_VLCP (int argc, void *argv[])
 {
      int nr_vlcp;
 
@@ -678,27 +678,27 @@ int IDL_STDCALL _SCIA_LV1_RD_VLCP ( int argc, void *argv[] )
      struct dsd_envi  *dsd;
      struct vlcp_scia *vlcp;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      vlcp = (struct vlcp_scia *) argv[2];
 
-     nr_vlcp = (int) SCIA_LV1_RD_VLCP( fd_nadc, num_dsd, dsd, &vlcp );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_vlcp = (int) SCIA_LV1_RD_VLCP(fd_nadc, num_dsd, dsd, &vlcp);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_vlcp;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_MDS (int argc, void *argv[])
 {
      register int nr;
 
-     char *env_str = getenv( "SCIA_CORR_LOS" );
+     char *env_str = getenv("SCIA_CORR_LOS");
 
      unsigned short     patch_mask = SCIA_PATCH_NONE;
 
@@ -745,70 +745,70 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoN;          /* IDL uses 32-bit addresses */
      } *mds;
 
-     if ( argc != 12 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 11) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      state = *(struct state1_scia *) argv[0];
      clus_mask = *(unsigned long long *) argv[1];
-     calib_mask = *(unsigned int *) argv[2];
-     mds = (struct IDL_mds1c_scia *) argv[3];
-     pixel_ids = (unsigned short *) argv[4];
-     pixel_wv = (float *) argv[5];
-     pixel_wv_err = (float *) argv[6];
-     pixel_val = (float *) argv[7];
-     pixel_err = (float *) argv[8];
-     geoC = (struct geoC_scia *) argv[9];
-     geoL = (struct geoL_scia *) argv[10];
-     geoN = (struct geoN_scia *) argv[11];
+     mds = (struct IDL_mds1c_scia *) argv[2];
+     pixel_ids = (unsigned short *) argv[3];
+     pixel_wv = (float *) argv[4];
+     pixel_wv_err = (float *) argv[5];
+     pixel_val = (float *) argv[6];
+     pixel_err = (float *) argv[7];
+     geoC = (struct geoC_scia *) argv[8];
+     geoL = (struct geoL_scia *) argv[9];
+     geoN = (struct geoN_scia *) argv[10];
 /*
  * read de Measurement Data Sets of one state
  */
      nadc_stat = NADC_STAT_SUCCESS;
-     nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, ~0ULL, &state, &C_mds1b );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_mds1b = (int) SCIA_LV1_RD_MDS(fd_nadc, ~0ULL, &state, &C_mds1b);
+     if (IS_ERR_STAT_FATAL) return -1;
 /*
  * correct the line-of-sight azimuth and zenith angles (geoN)
  */
-     if ( env_str != NULL && strcmp( env_str, "1" ) == 0 )
-	  SCIA_LV1_CORR_LOS( &state, C_mds1b );
+     if (env_str != NULL && strcmp(env_str, "1") == 0)
+	  SCIA_LV1_CORR_LOS(&state, C_mds1b);
 /*
  * set mask to pach the level 1b structures
  */
-     if ( (calib_mask & DO_CORR_VIS_MEM) != UINT_ZERO 
-	  && (calib_mask & DO_SRON_MEM_NLIN) != UINT_ZERO )
+     calib_mask = nadc_get_param_uint32("calib_scia");
+     if ((calib_mask & DO_CORR_VIS_MEM) != UINT_ZERO 
+	  && (calib_mask & DO_SRON_MEM_NLIN) != UINT_ZERO)
 	  patch_mask |= SCIA_PATCH_MEM;
-     if ( (calib_mask & DO_CORR_IR_NLIN) != UINT_ZERO 
-	  && (calib_mask & DO_SRON_MEM_NLIN) != UINT_ZERO )
+     if ((calib_mask & DO_CORR_IR_NLIN) != UINT_ZERO 
+	  && (calib_mask & DO_SRON_MEM_NLIN) != UINT_ZERO)
 	  patch_mask |= SCIA_PATCH_NLIN;
-     if ( (calib_mask & DO_CORR_STRAY) != UINT_ZERO 
-	  && (calib_mask & DO_SRON_STRAY) != UINT_ZERO )
+     if ((calib_mask & DO_CORR_STRAY) != UINT_ZERO 
+	  && (calib_mask & DO_SRON_STRAY) != UINT_ZERO)
 	  patch_mask |= SCIA_PATCH_STRAY;
-     SCIA_LV1_PATCH_MDS( fd_nadc, patch_mask, &state, C_mds1b );
+     SCIA_LV1_PATCH_MDS(fd_nadc, patch_mask, &state, C_mds1b);
 /*
  * copy the data in the level 1b records to level 1c records
  */
      C_mds = (struct mds1c_scia *)
-	  malloc( state.num_clus * sizeof( struct mds1c_scia ));
-     nr_mds = (int) GET_SCIA_LV1C_MDS( clus_mask, &state, C_mds1b, C_mds );
+	  malloc(state.num_clus * sizeof(struct mds1c_scia));
+     nr_mds = (int) GET_SCIA_LV1C_MDS(clus_mask, &state, C_mds1b, C_mds);
 /*
  * calibrate detector read-outs
  */
-     SCIA_LV1_CAL( fd_nadc, calib_mask, &state, C_mds1b, C_mds );
+     SCIA_LV1_CAL(fd_nadc, calib_mask, &state, C_mds1b, C_mds);
 /*
  * release the level 1b C-structures
  */
-     SCIA_LV1_FREE_MDS( (int) state.type_mds, nr_mds1b, C_mds1b );
-     if ( IS_ERR_STAT_FATAL ) {
-	  SCIA_LV1C_FREE_MDS( (int) state.type_mds, nr_mds, C_mds );
+     SCIA_LV1_FREE_MDS((int) state.type_mds, nr_mds1b, C_mds1b);
+     if (IS_ERR_STAT_FATAL) {
+	  SCIA_LV1C_FREE_MDS((int) state.type_mds, nr_mds, C_mds);
 	  return -1;
      }
 /*
  * copy C-structures to IDL-structures
  */
-     for ( nr = 0; nr < nr_mds; nr++ ) {
-	  (void) memcpy( &mds[nr].mjd, &C_mds[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
+     for (nr = 0; nr < nr_mds; nr++) {
+	  (void) memcpy(&mds[nr].mjd, &C_mds[nr].mjd, 
+			 sizeof(struct mjd_envi));
 	  mds[nr].rad_units_flag = C_mds[nr].rad_units_flag;
 	  mds[nr].quality_flag = C_mds[nr].quality_flag;
 	  mds[nr].type_mds = C_mds[nr].type_mds;
@@ -826,34 +826,34 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 	  mds[nr].pet      = C_mds[nr].pet;
 
 	  nr_byte = C_mds[nr].num_pixels * ENVI_USHRT;
-	  (void) memcpy( pixel_ids, C_mds[nr].pixel_ids, nr_byte );
+	  (void) memcpy(pixel_ids, C_mds[nr].pixel_ids, nr_byte);
 	  pixel_ids += C_mds[nr].num_pixels;
 	  nr_byte = C_mds[nr].num_pixels * ENVI_FLOAT;
-	  (void) memcpy( pixel_wv, C_mds[nr].pixel_wv, nr_byte );
+	  (void) memcpy(pixel_wv, C_mds[nr].pixel_wv, nr_byte);
 	  pixel_wv += C_mds[nr].num_pixels;
-	  (void) memcpy( pixel_wv_err, C_mds[nr].pixel_wv_err, nr_byte );
+	  (void) memcpy(pixel_wv_err, C_mds[nr].pixel_wv_err, nr_byte);
 	  pixel_wv_err += C_mds[nr].num_pixels;
 
 	  nr_byte = C_mds[nr].num_obs * C_mds[nr].num_pixels * ENVI_FLOAT;
-	  (void) memcpy( pixel_val, C_mds[nr].pixel_val, nr_byte );
+	  (void) memcpy(pixel_val, C_mds[nr].pixel_val, nr_byte);
 	  pixel_val += (C_mds[nr].num_obs * C_mds[nr].num_pixels);
-	  (void) memcpy( pixel_err, C_mds[nr].pixel_err, nr_byte );
+	  (void) memcpy(pixel_err, C_mds[nr].pixel_err, nr_byte);
 	  pixel_err += (C_mds[nr].num_obs * C_mds[nr].num_pixels);
-	  switch ( (int) state.type_mds ) {
+	  switch ((int) state.type_mds) {
 	  case SCIA_NADIR:
-	       nr_byte = C_mds[nr].num_obs * sizeof( struct geoN_scia );
-	       (void) memcpy( geoN, C_mds[nr].geoN, nr_byte );
+	       nr_byte = C_mds[nr].num_obs * sizeof(struct geoN_scia);
+	       (void) memcpy(geoN, C_mds[nr].geoN, nr_byte);
 	       geoN += C_mds[nr].num_obs;
 	       break;
 	  case SCIA_LIMB:
 	  case SCIA_OCCULT:
-	       nr_byte = C_mds[nr].num_obs * sizeof( struct geoL_scia );
-	       (void) memcpy( geoL, C_mds[nr].geoL, nr_byte );
+	       nr_byte = C_mds[nr].num_obs * sizeof(struct geoL_scia);
+	       (void) memcpy(geoL, C_mds[nr].geoL, nr_byte);
 	       geoL += C_mds[nr].num_obs;
 	       break;
 	  case SCIA_MONITOR:
-	       nr_byte = C_mds[nr].num_obs * sizeof( struct geoC_scia );
-	       (void) memcpy( geoC, C_mds[nr].geoC, nr_byte );
+	       nr_byte = C_mds[nr].num_obs * sizeof(struct geoC_scia);
+	       (void) memcpy(geoC, C_mds[nr].geoC, nr_byte);
 	       geoC += C_mds[nr].num_obs;
 	       break;
 	  }
@@ -861,21 +861,21 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS ( int argc, void *argv[] )
 /*
  * release the level 1c C-structures
  */
-     SCIA_LV1C_FREE_MDS( (int) state.type_mds, nr_mds, C_mds );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     SCIA_LV1C_FREE_MDS((int) state.type_mds, nr_mds, C_mds);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return nr_mds;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD (int argc, void *argv[])
 {
      int    nr_mds = 0;
      int    nr_mds1b;
      size_t nr_byte;
 
-     char *env_str = getenv( "SCIA_CORR_LOS" );
+     char *env_str = getenv("SCIA_CORR_LOS");
 
      struct mds1_scia   *C_mds1b;
 
@@ -905,9 +905,9 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
 
      const unsigned long long clus_mask  = ~0ULL;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      state = *(struct state1_scia *) argv[0];
      mds_pmd = (struct IDL_mds1c_pmd *) argv[1];
@@ -918,31 +918,31 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
  * read de Measurement Data Sets of one state
  */
      nadc_stat = NADC_STAT_SUCCESS;
-     nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, clus_mask, &state, &C_mds1b );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_mds1b = (int) SCIA_LV1_RD_MDS(fd_nadc, clus_mask, &state, &C_mds1b);
+     if (IS_ERR_STAT_FATAL) return -1;
 /*
  * correct the line-of-sight azimuth and zenith angles (geoN)
  */
-     if ( env_str != NULL && strcmp( env_str, "1" ) == 0 )
-	  SCIA_LV1_CORR_LOS( &state, C_mds1b );
+     if (env_str != NULL && strcmp(env_str, "1") == 0)
+	  SCIA_LV1_CORR_LOS(&state, C_mds1b);
 /*
  * copy the data in the level 1b PMD records to level 1c records
  */
-     C_mds_pmd = (struct mds1c_pmd *) malloc( sizeof( struct mds1c_pmd ));
-     nr_mds = (int) GET_SCIA_LV1C_PMD( &state, C_mds1b, C_mds_pmd );
+     C_mds_pmd = (struct mds1c_pmd *) malloc(sizeof(struct mds1c_pmd));
+     nr_mds = (int) GET_SCIA_LV1C_PMD(&state, C_mds1b, C_mds_pmd);
 /*
  * release the level 1b C-structures
  */
-     SCIA_LV1_FREE_MDS( (int) state.type_mds, nr_mds1b, C_mds1b );
-     if ( IS_ERR_STAT_FATAL ) {
-	  SCIA_LV1C_FREE_MDS_PMD( (int) state.type_mds, C_mds_pmd );
+     SCIA_LV1_FREE_MDS((int) state.type_mds, nr_mds1b, C_mds1b);
+     if (IS_ERR_STAT_FATAL) {
+	  SCIA_LV1C_FREE_MDS_PMD((int) state.type_mds, C_mds_pmd);
 	  return -1;
      }
 /*
  * copy C-struct to IDL-struct
  */
-     (void) memcpy( &mds_pmd->mjd, &C_mds_pmd->mjd, 
-		    sizeof( struct mjd_envi ) );
+     (void) memcpy(&mds_pmd->mjd, &C_mds_pmd->mjd, 
+		    sizeof(struct mjd_envi));
      mds_pmd->quality_flag = C_mds_pmd->quality_flag;
      mds_pmd->category = C_mds_pmd->category;
      mds_pmd->state_id = C_mds_pmd->state_id;
@@ -952,33 +952,33 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_PMD ( int argc, void *argv[] )
      mds_pmd->dsr_length = C_mds_pmd->dsr_length;
      mds_pmd->orbit_phase = C_mds_pmd->orbit_phase;
      nr_byte = mds_pmd->num_pmd * ENVI_FLOAT;
-     (void) memcpy( int_pmd, C_mds_pmd->int_pmd, nr_byte );
-     switch ( (int) state.type_mds ) {
+     (void) memcpy(int_pmd, C_mds_pmd->int_pmd, nr_byte);
+     switch ((int) state.type_mds) {
      case SCIA_NADIR:
-	  nr_byte = mds_pmd->num_geo * sizeof( struct geoN_scia );
-	  (void) memcpy( geoN, C_mds_pmd->geoN, nr_byte );
+	  nr_byte = mds_pmd->num_geo * sizeof(struct geoN_scia);
+	  (void) memcpy(geoN, C_mds_pmd->geoN, nr_byte);
 	  break;
      case SCIA_LIMB:
      case SCIA_OCCULT:
-	  nr_byte = mds_pmd->num_geo * sizeof( struct geoL_scia );
-	  (void) memcpy( geoL, C_mds_pmd->geoL, nr_byte );
+	  nr_byte = mds_pmd->num_geo * sizeof(struct geoL_scia);
+	  (void) memcpy(geoL, C_mds_pmd->geoL, nr_byte);
 	  break;
      }
 /*
  * release memory
  */
-     SCIA_LV1C_FREE_MDS_PMD( (int) state.type_mds, C_mds_pmd );
+     SCIA_LV1C_FREE_MDS_PMD((int) state.type_mds, C_mds_pmd);
  done:
      return nr_mds;
 }
 
-int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV (int argc, void *argv[])
 {
      int    nr_mds = 0;
      int    nr_mds1b;
      size_t nr_byte;
 
-     char *env_str = getenv( "SCIA_CORR_LOS" );
+     char *env_str = getenv("SCIA_CORR_LOS");
 
      struct mds1_scia   *C_mds1b;
 
@@ -1011,9 +1011,9 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
 
      const unsigned long long clus_mask  = ~0ULL;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      state = *(struct state1_scia *) argv[0];
      mds_polV = (struct IDL_mds1c_polV *) argv[1];
@@ -1024,31 +1024,31 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
  * read de Measurement Data Sets of one state
  */
      nadc_stat = NADC_STAT_SUCCESS;
-     nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, clus_mask, &state, &C_mds1b );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     nr_mds1b = (int) SCIA_LV1_RD_MDS(fd_nadc, clus_mask, &state, &C_mds1b);
+     if (IS_ERR_STAT_FATAL) return -1;
 /*
  * correct the line-of-sight azimuth and zenith angles (geoN)
  */
-     if ( env_str != NULL && strcmp( env_str, "1" ) == 0 )
-	  SCIA_LV1_CORR_LOS( &state, C_mds1b );
+     if (env_str != NULL && strcmp(env_str, "1") == 0)
+	  SCIA_LV1_CORR_LOS(&state, C_mds1b);
 /*
  * copy the data in the level 1b polV records to level 1c records
  */
-     C_mds_polV = (struct mds1c_polV *) malloc( sizeof( struct mds1c_polV ));
-     nr_mds = (int) GET_SCIA_LV1C_POLV( &state, C_mds1b, C_mds_polV );
+     C_mds_polV = (struct mds1c_polV *) malloc(sizeof(struct mds1c_polV));
+     nr_mds = (int) GET_SCIA_LV1C_POLV(&state, C_mds1b, C_mds_polV);
 /*
  * release the level 1b C-structures
  */
-     SCIA_LV1_FREE_MDS( (int) state.type_mds, nr_mds1b, C_mds1b );
-     if ( IS_ERR_STAT_FATAL ) {
-	  SCIA_LV1C_FREE_MDS_POLV( (int) state.type_mds, C_mds_polV );
+     SCIA_LV1_FREE_MDS((int) state.type_mds, nr_mds1b, C_mds1b);
+     if (IS_ERR_STAT_FATAL) {
+	  SCIA_LV1C_FREE_MDS_POLV((int) state.type_mds, C_mds_polV);
 	  return -1;
      }
 /*
  * copy C-struct to IDL-struct
  */
-     (void) memcpy( &mds_polV->mjd, &C_mds_polV->mjd, 
-		    sizeof( struct mjd_envi ) );
+     (void) memcpy(&mds_polV->mjd, &C_mds_polV->mjd, 
+		    sizeof(struct mjd_envi));
      mds_polV->quality_flag = C_mds_polV->quality_flag;
      mds_polV->category = C_mds_polV->category;
      mds_polV->state_id = C_mds_polV->state_id;
@@ -1059,54 +1059,54 @@ int IDL_STDCALL _SCIA_LV1_RD_MDS_POLV ( int argc, void *argv[] )
      mds_polV->dsr_length = C_mds_polV->dsr_length;
      mds_polV->orbit_phase = C_mds_polV->orbit_phase;
      nr_byte = state.num_intg * ENVI_USHRT;
-     (void) memcpy( mds_polV->intg_times, 
-		    C_mds_polV->intg_times, nr_byte );
-     (void) memcpy( mds_polV->num_polar, 
-		    C_mds_polV->num_polar, nr_byte );
-     nr_byte = mds_polV->total_polV * sizeof( struct polV_scia );
-     (void) memcpy( polV, C_mds_polV->polV, nr_byte );
-     switch ( (int) state.type_mds ) {
+     (void) memcpy(mds_polV->intg_times, 
+		    C_mds_polV->intg_times, nr_byte);
+     (void) memcpy(mds_polV->num_polar, 
+		    C_mds_polV->num_polar, nr_byte);
+     nr_byte = mds_polV->total_polV * sizeof(struct polV_scia);
+     (void) memcpy(polV, C_mds_polV->polV, nr_byte);
+     switch ((int) state.type_mds) {
      case SCIA_NADIR:
-	  nr_byte = mds_polV->num_geo * sizeof( struct geoN_scia );
-	  (void) memcpy( geoN, C_mds_polV->geoN, nr_byte );
+	  nr_byte = mds_polV->num_geo * sizeof(struct geoN_scia);
+	  (void) memcpy(geoN, C_mds_polV->geoN, nr_byte);
 	  break;
      case SCIA_LIMB:
      case SCIA_OCCULT:
-	  nr_byte = mds_polV->num_geo * sizeof( struct geoL_scia );
-	  (void) memcpy( geoL, C_mds_polV->geoL, nr_byte );
+	  nr_byte = mds_polV->num_geo * sizeof(struct geoL_scia);
+	  (void) memcpy(geoL, C_mds_polV->geoL, nr_byte);
 	  break;
      }
 /*
  * release memory
  */
-     SCIA_LV1C_FREE_MDS_POLV( (int) state.type_mds, C_mds_polV );
+     SCIA_LV1C_FREE_MDS_POLV((int) state.type_mds, C_mds_polV);
  done:
      return nr_mds;
 }
 
-int IDL_STDCALL _SCIA_LV1C_RD_CALOPT ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1C_RD_CALOPT (int argc, void *argv[])
 {
      unsigned int num_dsd;
 
      struct dsd_envi    *dsd;
      struct cal_options *calopt;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      num_dsd = *(unsigned int *) argv[0];
      dsd  = (struct dsd_envi *) argv[1];
      calopt = (struct cal_options *) argv[2];
-     SCIA_LV1C_RD_CALOPT( fd_nadc, num_dsd, dsd, calopt );
-     if ( IS_ERR_STAT_FATAL ) return -1;
+     SCIA_LV1C_RD_CALOPT(fd_nadc, num_dsd, dsd, calopt);
+     if (IS_ERR_STAT_FATAL) return -1;
 
      return 1;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1C_RD_MDS (int argc, void *argv[])
 {
      register int nr;
 
@@ -1150,9 +1150,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoC;          /* IDL uses 32-bit addresses */
      } *mds;
 
-     if ( argc != 11 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 11) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      clus_mask = *(unsigned long long *) argv[0];
      state = *(struct state1_scia *) argv[1];
@@ -1168,17 +1168,17 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 /*
  * read de Measurement Data Sets of one state
  */
-     nr_mds = (int) SCIA_LV1C_RD_MDS( fd_nadc, clus_mask, &state, &C_mds );
-     if ( IS_ERR_STAT_FATAL ) {
-	  SCIA_LV1C_FREE_MDS( (int) state.type_mds, nr_mds, C_mds );
+     nr_mds = (int) SCIA_LV1C_RD_MDS(fd_nadc, clus_mask, &state, &C_mds);
+     if (IS_ERR_STAT_FATAL) {
+	  SCIA_LV1C_FREE_MDS((int) state.type_mds, nr_mds, C_mds);
 	  return -1;
      }
 /*
  * copy C-struct to IDL-struct
  */
-     for ( nr = 0; nr < nr_mds; nr++ ) {
-	  (void) memcpy( &mds[nr].mjd, &C_mds[nr].mjd, 
-			 sizeof( struct mjd_envi ) );
+     for (nr = 0; nr < nr_mds; nr++) {
+	  (void) memcpy(&mds[nr].mjd, &C_mds[nr].mjd, 
+			 sizeof(struct mjd_envi));
 	  mds[nr].rad_units_flag = C_mds[nr].rad_units_flag;
 	  mds[nr].quality_flag = C_mds[nr].quality_flag;
 	  mds[nr].type_mds = C_mds[nr].type_mds;
@@ -1195,36 +1195,36 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 	  mds[nr].pet      = C_mds[nr].pet;
 
 	  nr_byte = mds[nr].num_pixels * ENVI_USHRT;
-	  (void) memcpy( pixel_ids, C_mds[nr].pixel_ids, nr_byte );
+	  (void) memcpy(pixel_ids, C_mds[nr].pixel_ids, nr_byte);
 	  pixel_ids += mds[nr].num_pixels;
 
 	  nr_byte = mds[nr].num_pixels * ENVI_FLOAT;
-	  (void) memcpy( pixel_wv, C_mds[nr].pixel_wv, nr_byte );
+	  (void) memcpy(pixel_wv, C_mds[nr].pixel_wv, nr_byte);
 	  pixel_wv += mds[nr].num_pixels;
-	  (void) memcpy( pixel_wv_err, C_mds[nr].pixel_wv_err, nr_byte );
+	  (void) memcpy(pixel_wv_err, C_mds[nr].pixel_wv_err, nr_byte);
 	  pixel_wv_err += mds[nr].num_pixels;
 
 	  nr_byte = mds[nr].num_obs * mds[nr].num_pixels * ENVI_FLOAT;
-	  (void) memcpy( pixel_val, C_mds[nr].pixel_val, nr_byte );
+	  (void) memcpy(pixel_val, C_mds[nr].pixel_val, nr_byte);
 	  pixel_val += (mds[nr].num_obs * mds[nr].num_pixels);
-	  (void) memcpy( pixel_err, C_mds[nr].pixel_err, nr_byte );
+	  (void) memcpy(pixel_err, C_mds[nr].pixel_err, nr_byte);
 	  pixel_err += (mds[nr].num_obs * mds[nr].num_pixels);
 
-	  switch ( (int) state.type_mds ) {
+	  switch ((int) state.type_mds) {
 	  case SCIA_NADIR:
-	       nr_byte = mds[nr].num_obs * sizeof( struct geoN_scia );
-	       (void) memcpy( geoN, C_mds[nr].geoN, nr_byte );
+	       nr_byte = mds[nr].num_obs * sizeof(struct geoN_scia);
+	       (void) memcpy(geoN, C_mds[nr].geoN, nr_byte);
 	       geoN += mds[nr].num_obs;
 	       break;
 	  case SCIA_LIMB:
 	  case SCIA_OCCULT:
-	       nr_byte = mds[nr].num_obs * sizeof( struct geoL_scia );
-	       (void) memcpy( geoL, C_mds[nr].geoL, nr_byte );
+	       nr_byte = mds[nr].num_obs * sizeof(struct geoL_scia);
+	       (void) memcpy(geoL, C_mds[nr].geoL, nr_byte);
 	       geoL += mds[nr].num_obs;
 	       break;
 	  case SCIA_MONITOR:
-	       nr_byte = mds[nr].num_obs * sizeof( struct geoC_scia );
-	       (void) memcpy( geoC, C_mds[nr].geoC, nr_byte );
+	       nr_byte = mds[nr].num_obs * sizeof(struct geoC_scia);
+	       (void) memcpy(geoC, C_mds[nr].geoC, nr_byte);
 	       geoC += mds[nr].num_obs;
 	       break;
 	  }
@@ -1232,14 +1232,14 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS ( int argc, void *argv[] )
 /*
  * release memory
  */
-     SCIA_LV1C_FREE_MDS( (int) state.type_mds, nr_mds, C_mds );
+     SCIA_LV1C_FREE_MDS((int) state.type_mds, nr_mds, C_mds);
 
      return nr_mds;
  done:
      return -1;
 }
 
-int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD (int argc, void *argv[])
 {
      int    nr_mds = 0;
      size_t nr_byte;
@@ -1268,9 +1268,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoL;          /* IDL uses 32-bit addresses */
      } *mds_pmd;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      state = *(struct state1_scia *) argv[0];
      mds_pmd = (struct IDL_mds1c_pmd *) argv[1];
@@ -1280,20 +1280,20 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
 /*
  * read de Measurement Data Sets of one state
  */
-     C_mds_pmd = (struct mds1c_pmd *) malloc( sizeof( struct mds1c_pmd ));
-     if ( C_mds_pmd == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds_pmd" );
-     nr_mds = (int) SCIA_LV1C_RD_MDS_PMD( fd_nadc, &state, &C_mds_pmd );
-     if ( IS_ERR_STAT_FATAL ) {
-	  SCIA_LV1C_FREE_MDS_PMD( (int) state.type_mds, C_mds_pmd );
+     C_mds_pmd = (struct mds1c_pmd *) malloc(sizeof(struct mds1c_pmd));
+     if (C_mds_pmd == NULL)
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "C_mds_pmd");
+     nr_mds = (int) SCIA_LV1C_RD_MDS_PMD(fd_nadc, &state, &C_mds_pmd);
+     if (IS_ERR_STAT_FATAL) {
+	  SCIA_LV1C_FREE_MDS_PMD((int) state.type_mds, C_mds_pmd);
 	  return -1;
      }
-     if ( nr_mds == 0 ) return 0;
+     if (nr_mds == 0) return 0;
 /*
  * copy C-struct to IDL-struct
  */
-     (void) memcpy( &mds_pmd->mjd, &C_mds_pmd->mjd, 
-		    sizeof( struct mjd_envi ) );
+     (void) memcpy(&mds_pmd->mjd, &C_mds_pmd->mjd, 
+		    sizeof(struct mjd_envi));
      mds_pmd->quality_flag = C_mds_pmd->quality_flag;
      mds_pmd->type_mds = C_mds_pmd->type_mds;
      mds_pmd->category = C_mds_pmd->category;
@@ -1304,27 +1304,27 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_PMD ( int argc, void *argv[] )
      mds_pmd->dsr_length = C_mds_pmd->dsr_length;
      mds_pmd->orbit_phase = C_mds_pmd->orbit_phase;
      nr_byte = mds_pmd->num_pmd * ENVI_FLOAT;
-     (void) memcpy( int_pmd, C_mds_pmd->int_pmd, nr_byte );
-     switch ( (int) state.type_mds ) {
+     (void) memcpy(int_pmd, C_mds_pmd->int_pmd, nr_byte);
+     switch ((int) state.type_mds) {
      case SCIA_NADIR:
-	  nr_byte = mds_pmd->num_geo * sizeof( struct geoN_scia );
-	  (void) memcpy( geoN, C_mds_pmd->geoN, nr_byte );
+	  nr_byte = mds_pmd->num_geo * sizeof(struct geoN_scia);
+	  (void) memcpy(geoN, C_mds_pmd->geoN, nr_byte);
 	  break;
      case SCIA_LIMB:
      case SCIA_OCCULT:
-	  nr_byte = mds_pmd->num_geo * sizeof( struct geoL_scia );
-	  (void) memcpy( geoL, C_mds_pmd->geoL, nr_byte );
+	  nr_byte = mds_pmd->num_geo * sizeof(struct geoL_scia);
+	  (void) memcpy(geoL, C_mds_pmd->geoL, nr_byte);
 	  break;
      }
 /*
  * release memory
  */
-     SCIA_LV1C_FREE_MDS_PMD( (int) state.type_mds, C_mds_pmd );
+     SCIA_LV1C_FREE_MDS_PMD((int) state.type_mds, C_mds_pmd);
  done:
      return nr_mds;
 }
 
-int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV (int argc, void *argv[])
 {
      int    nr_mds = 0;
      size_t nr_byte;
@@ -1356,9 +1356,9 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 	  IDL_ULONG        pntr_geoL;          /* IDL uses 32-bit addresses */
      } *mds_polV;
 
-     if ( argc != 5 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 5) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 
      state = *(struct state1_scia *) argv[0];
      mds_polV = (struct IDL_mds1c_polV *) argv[1];
@@ -1368,20 +1368,20 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 /*
  * read de Measurement Data Sets of one state
  */
-     C_mds_polV = (struct mds1c_polV *) malloc( sizeof( struct mds1c_polV ));
-     if ( C_mds_polV == NULL )
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds_polV" );
-     nr_mds = (int) SCIA_LV1C_RD_MDS_POLV( fd_nadc, &state, &C_mds_polV );
-     if ( IS_ERR_STAT_FATAL ) {
-	  SCIA_LV1C_FREE_MDS_POLV( (int) state.type_mds, C_mds_polV );
+     C_mds_polV = (struct mds1c_polV *) malloc(sizeof(struct mds1c_polV));
+     if (C_mds_polV == NULL)
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "C_mds_polV");
+     nr_mds = (int) SCIA_LV1C_RD_MDS_POLV(fd_nadc, &state, &C_mds_polV);
+     if (IS_ERR_STAT_FATAL) {
+	  SCIA_LV1C_FREE_MDS_POLV((int) state.type_mds, C_mds_polV);
 	  return -1;
      }
-     if ( nr_mds == 0 ) return 0;
+     if (nr_mds == 0) return 0;
 /*
  * copy C-struct to IDL-struct
  */
-     (void) memcpy( &mds_polV->mjd, &C_mds_polV->mjd, 
-		    sizeof( struct mjd_envi ) );
+     (void) memcpy(&mds_polV->mjd, &C_mds_polV->mjd, 
+		    sizeof(struct mjd_envi));
      mds_polV->quality_flag = C_mds_polV->quality_flag;
      mds_polV->type_mds = C_mds_polV->type_mds;
      mds_polV->category = C_mds_polV->category;
@@ -1393,27 +1393,27 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
      mds_polV->dsr_length = C_mds_polV->dsr_length;
      mds_polV->orbit_phase = C_mds_polV->orbit_phase;
      nr_byte = state.num_intg * ENVI_USHRT;
-     (void) memcpy( mds_polV->intg_times, 
-		    C_mds_polV->intg_times, nr_byte );
-     (void) memcpy( mds_polV->num_polar, 
-		    C_mds_polV->num_polar, nr_byte );
-     nr_byte = mds_polV->total_polV * sizeof( struct polV_scia );
-     (void) memcpy( polV, C_mds_polV->polV, nr_byte );
-     switch ( (int) state.type_mds ) {
+     (void) memcpy(mds_polV->intg_times, 
+		    C_mds_polV->intg_times, nr_byte);
+     (void) memcpy(mds_polV->num_polar, 
+		    C_mds_polV->num_polar, nr_byte);
+     nr_byte = mds_polV->total_polV * sizeof(struct polV_scia);
+     (void) memcpy(polV, C_mds_polV->polV, nr_byte);
+     switch ((int) state.type_mds) {
      case SCIA_NADIR:
-	  nr_byte = mds_polV->num_geo * sizeof( struct geoN_scia );
-	  (void) memcpy( geoN, C_mds_polV->geoN, nr_byte );
+	  nr_byte = mds_polV->num_geo * sizeof(struct geoN_scia);
+	  (void) memcpy(geoN, C_mds_polV->geoN, nr_byte);
 	  break;
      case SCIA_LIMB:
      case SCIA_OCCULT:
-	  nr_byte = mds_polV->num_geo * sizeof( struct geoL_scia );
-	  (void) memcpy( geoL, C_mds_polV->geoL, nr_byte );
+	  nr_byte = mds_polV->num_geo * sizeof(struct geoL_scia);
+	  (void) memcpy(geoL, C_mds_polV->geoL, nr_byte);
 	  break;
      }
 /*
  * release memory
  */
-     SCIA_LV1C_FREE_MDS_POLV( (int) state.type_mds, C_mds_polV );
+     SCIA_LV1C_FREE_MDS_POLV((int) state.type_mds, C_mds_polV);
  done:
      return nr_mds;
 }
@@ -1421,7 +1421,7 @@ int IDL_STDCALL _SCIA_LV1C_RD_MDS_POLV ( int argc, void *argv[] )
 #define TO_JDAY(mjd) (mjd.days + \
 		      (mjd.secnd + mjd.musec / 1e6) / (60. * 60 * 24))
 
-int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_LV1_SCALE_MDS (int argc, void *argv[])
 {
      register int ni, nr;
 
@@ -1458,9 +1458,9 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
 /*
  * check input parameters
  */
-     if ( argc != 7 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
-     if ( fileno( fd_nadc ) == -1 ) 
-	  NADC_GOTO_ERROR( NADC_ERR_FILE, "No open stream" );
+     if (argc != 6) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
+     if (fileno(fd_nadc) == -1) 
+	  NADC_GOTO_ERROR(NADC_ERR_FILE, "No open stream");
 /*
  * set pointers
  */
@@ -1468,22 +1468,21 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
      pmdScaling = *(bool *) argv[1];
      state = *(struct state1_scia *) argv[2];
      clus_mask = *(unsigned long long *) argv[3];
-     calib_mask = *(unsigned int *) argv[4];
-     sign = (float *) argv[5];
-     switch ( (int) (state.type_mds) ) {
+     sign = (float *) argv[4];
+     switch ((int) (state.type_mds)) {
      case SCIA_NADIR:
 	  sign_geoC = NULL;
 	  sign_geoL = NULL;
-	  sign_geoN = (struct scia_geoN_rec *) argv[6];
+	  sign_geoN = (struct scia_geoN_rec *) argv[5];
 	  break;
      case SCIA_LIMB:
      case SCIA_OCCULT:
 	  sign_geoC = NULL;
-	  sign_geoL = (struct scia_geoL_rec *) argv[6];
+	  sign_geoL = (struct scia_geoL_rec *) argv[5];
 	  sign_geoN = NULL;
 	  break;
      case SCIA_MONITOR:
-	  sign_geoC = (struct scia_geoC_rec *) argv[6];
+	  sign_geoC = (struct scia_geoC_rec *) argv[5];
 	  sign_geoL = NULL;
 	  sign_geoN = NULL;
 	  break;
@@ -1497,84 +1496,85 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
  * read de Measurement Data Sets of one state, 
  * in case of a Lv1c product we also need to read the PMD data
  */
-     if ( is_level_1c ) {
-	  C_pmd1c = (struct mds1c_pmd *) malloc( sizeof( struct mds1c_pmd ));
-	  if ( C_pmd1c == NULL ) 
-	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_pmd1c" );
-	  if ( SCIA_LV1C_RD_MDS_PMD( fd_nadc, &state, &C_pmd1c ) == 0 ) { 
-	       free( C_pmd1c ); 
+     if (is_level_1c) {
+	  C_pmd1c = (struct mds1c_pmd *) malloc(sizeof(struct mds1c_pmd));
+	  if (C_pmd1c == NULL) 
+	       NADC_GOTO_ERROR(NADC_ERR_ALLOC, "C_pmd1c");
+	  if (SCIA_LV1C_RD_MDS_PMD(fd_nadc, &state, &C_pmd1c) == 0) { 
+	       free(C_pmd1c); 
 	       C_pmd1c = NULL; 
 	  }
-	  if ( IS_ERR_STAT_FATAL ) goto done;
+	  if (IS_ERR_STAT_FATAL) goto done;
 
 	  C_mds1c = (struct mds1c_scia *)
-	       malloc( state.num_clus * sizeof( struct mds1c_scia ));
-	  if ( C_mds1c == NULL ) 
-	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds1c" );
-	  nr_mds1c = SCIA_LV1C_RD_MDS( fd_nadc, clus_mask, &state, &C_mds1c );
-	  if ( IS_ERR_STAT_FATAL ) goto done;
+	       malloc(state.num_clus * sizeof(struct mds1c_scia));
+	  if (C_mds1c == NULL) 
+	       NADC_GOTO_ERROR(NADC_ERR_ALLOC, "C_mds1c");
+	  nr_mds1c = SCIA_LV1C_RD_MDS(fd_nadc, clus_mask, &state, &C_mds1c);
+	  if (IS_ERR_STAT_FATAL) goto done;
 /*
  * extract science data from MDS 1c records
  */
-	  dim_Y = (int) SCIA_LV1_SCALE_MDS( pmdScaling, C_mds1c->chan_id, 
-					    &state, NULL, C_pmd1c, C_mds1c, 
-					    &sign );
-	  if ( IS_ERR_STAT_FATAL ) goto done;
+	  dim_Y = (int) SCIA_LV1_SCALE_MDS(pmdScaling, C_mds1c->chan_id, 
+					   &state, NULL, C_pmd1c, C_mds1c, 
+					   &sign);
+	  if (IS_ERR_STAT_FATAL) goto done;
      } else {
-	  nr_mds1b = (int) SCIA_LV1_RD_MDS( fd_nadc, ~0ULL, &state, &C_mds1b );
-	  if ( IS_ERR_STAT_FATAL ) goto done;
+	  nr_mds1b = (int) SCIA_LV1_RD_MDS(fd_nadc, ~0ULL, &state, &C_mds1b);
+	  if (IS_ERR_STAT_FATAL) goto done;
 /*
  * calibrate and copy the data in the level 1b records to level 1c records
  */
+	  calib_mask = nadc_get_param_uint32("calib_scia");
 	  C_mds1c = (struct mds1c_scia *)
-	       malloc( state.num_clus * sizeof( struct mds1c_scia ));
-	  if ( C_mds1c == NULL ) 
-	       NADC_GOTO_ERROR( NADC_ERR_ALLOC, "C_mds1c" );
+	       malloc(state.num_clus * sizeof(struct mds1c_scia));
+	  if (C_mds1c == NULL) 
+	       NADC_GOTO_ERROR(NADC_ERR_ALLOC, "C_mds1c");
 	  nr_mds1c = (int) 
-	       GET_SCIA_LV1C_MDS( clus_mask, &state, C_mds1b, C_mds1c );
-	  if ( IS_ERR_STAT_FATAL ) goto done;
-	  SCIA_LV1_CAL( fd_nadc, calib_mask, &state, C_mds1b, C_mds1c );
-	  if ( IS_ERR_STAT_FATAL ) goto done;
+	       GET_SCIA_LV1C_MDS(clus_mask, &state, C_mds1b, C_mds1c);
+	  if (IS_ERR_STAT_FATAL) goto done;
+	  SCIA_LV1_CAL(fd_nadc, calib_mask, &state, C_mds1b, C_mds1c);
+	  if (IS_ERR_STAT_FATAL) goto done;
 /*
  * extract science data from MDS 1c records
  */
-	  dim_Y = (int) SCIA_LV1_SCALE_MDS( pmdScaling, C_mds1c->chan_id, 
-					    &state, C_mds1b, NULL, C_mds1c, 
-					    &sign );
-	  if ( IS_ERR_STAT_FATAL ) goto done;
+	  dim_Y = (int) SCIA_LV1_SCALE_MDS(pmdScaling, C_mds1c->chan_id, 
+					   &state, C_mds1b, NULL, C_mds1c, 
+					   &sign);
+	  if (IS_ERR_STAT_FATAL) goto done;
      }
 /*
  * collect geolocation data
  */
-     for ( nr = 0; nr < nr_mds1c; nr++ ) {
-	  if ( C_mds1c[nr].num_obs == dim_Y ) {
-	       double jday = TO_JDAY( C_mds1c[nr].mjd );
+     for (nr = 0; nr < nr_mds1c; nr++) {
+	  if (C_mds1c[nr].num_obs == dim_Y) {
+	       double jday = TO_JDAY(C_mds1c[nr].mjd);
 	       double intg = C_mds1c[nr].coaddf * C_mds1c[nr].pet / SecPerDay;
 
-	       switch ( (int) (state.type_mds) ) {
+	       switch ((int) (state.type_mds)) {
 	       case SCIA_NADIR:
-		    for ( ni = 0; ni < dim_Y; ni++ ) {
+		    for (ni = 0; ni < dim_Y; ni++) {
 			 sign_geoN[ni].jday = jday + ni * intg;
-			 (void) memcpy( &sign_geoN[ni].geoN, 
-					&C_mds1c[nr].geoN[ni],
-					sizeof( struct geoN_scia ) );
+			 (void) memcpy(&sign_geoN[ni].geoN, 
+				       &C_mds1c[nr].geoN[ni],
+				       sizeof(struct geoN_scia));
 		    }
 		    break;
 	       case SCIA_LIMB:
 	       case SCIA_OCCULT:
-		    for ( ni = 0; ni < dim_Y; ni++ ) {
+		    for (ni = 0; ni < dim_Y; ni++) {
 			 sign_geoL[ni].jday = jday + ni * intg;
-			 (void) memcpy( &sign_geoL[ni].geoL, 
-					&C_mds1c[nr].geoL[ni],
-					sizeof( struct geoL_scia ) );
+			 (void) memcpy(&sign_geoL[ni].geoL, 
+				       &C_mds1c[nr].geoL[ni],
+				       sizeof(struct geoL_scia));
 		    }
 		    break;
 	       case SCIA_MONITOR:
-		    for ( ni = 0; ni < dim_Y; ni++ ) {
+		    for (ni = 0; ni < dim_Y; ni++) {
 			 sign_geoC[ni].jday = jday + ni * intg;
-			 (void) memcpy( &sign_geoC[ni].geoC, 
-					&C_mds1c[nr].geoC[ni],
-					sizeof( struct geoC_scia ) );
+			 (void) memcpy(&sign_geoC[ni].geoC, 
+				       &C_mds1c[nr].geoC[ni],
+				       sizeof(struct geoC_scia));
 		    }
 		    break;
 	       }
@@ -1585,20 +1585,20 @@ int IDL_STDCALL _SCIA_LV1_SCALE_MDS ( int argc, void *argv[] )
  * release the level 1b and 1c C-structures
  */
  done:
-     if ( C_mds1b != NULL )
-	  SCIA_LV1_FREE_MDS( (int) state.type_mds, nr_mds1b, C_mds1b );
-     if ( C_pmd1c != NULL )
-	  SCIA_LV1C_FREE_MDS_PMD( (int) state.type_mds, C_pmd1c );
-     if ( C_mds1c != NULL )
-	  SCIA_LV1C_FREE_MDS( (int) state.type_mds, nr_mds1c, C_mds1c );
+     if (C_mds1b != NULL)
+	  SCIA_LV1_FREE_MDS((int) state.type_mds, nr_mds1b, C_mds1b);
+     if (C_pmd1c != NULL)
+	  SCIA_LV1C_FREE_MDS_PMD((int) state.type_mds, C_pmd1c);
+     if (C_mds1c != NULL)
+	  SCIA_LV1C_FREE_MDS((int) state.type_mds, nr_mds1c, C_mds1c);
 
-     if ( IS_ERR_STAT_FATAL ) 
+     if (IS_ERR_STAT_FATAL) 
 	  return -1;
      else
 	  return dim_Y;
 }
 
-int IDL_STDCALL _SCIA_RD_MFACTOR( int argc, void *argv[] )
+int IDL_STDCALL _SCIA_RD_MFACTOR(int argc, void *argv[])
 {
      const unsigned int calibFlag = 0U;
 
@@ -1608,22 +1608,22 @@ int IDL_STDCALL _SCIA_RD_MFACTOR( int argc, void *argv[] )
      IDL_STRING   *sensing_start;
      float        *mfactor;
 
-     if ( argc != 3 ) NADC_GOTO_ERROR( NADC_ERR_PARAM, err_msg );
+     if (argc != 3) NADC_GOTO_ERROR(NADC_ERR_PARAM, err_msg);
      mf_str        = (IDL_STRING *) argv[0];
      sensing_start = (IDL_STRING *) argv[1];
      mfactor       = (float *) argv[2];
 
-     if ( strcmp( mf_str[0].s, "M_CAL" ) == 0 )
+     if (strcmp(mf_str[0].s, "M_CAL") == 0)
 	  mftype = M_CAL;
-     else if ( strcmp( mf_str[0].s, "M_DL" ) == 0 )
+     else if (strcmp(mf_str[0].s, "M_DL") == 0)
 	  mftype = M_DL;
-     else if ( strcmp( mf_str[0].s, "M_DN" ) == 0 )
+     else if (strcmp(mf_str[0].s, "M_DN") == 0)
 	  mftype = M_DN;
      else
 	  goto done;
 
-     SCIA_RD_MFACTOR( mftype, sensing_start[0].s, calibFlag, mfactor );
-     if ( IS_ERR_STAT_FATAL ) goto done;
+     SCIA_RD_MFACTOR(mftype, sensing_start[0].s, calibFlag, mfactor);
+     if (IS_ERR_STAT_FATAL) goto done;
 
      return 0;
 done:
