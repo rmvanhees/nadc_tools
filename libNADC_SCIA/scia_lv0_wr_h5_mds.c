@@ -686,13 +686,16 @@ void SCIA_LV0_WR_H5_DET(unsigned short state_index,
      for (nc = 0; nc < numClus; nc++) {
 	  register unsigned short numHDR = 0;
 
-	  char            *data;
+	  char *data;
+	  int res;
 	  unsigned short  *ptr_short;
 	  unsigned int    *ptr_int;
 	  struct det_src  *ptr_data_src = NULL;
 	  struct chan_src *ptr_chan_src = NULL;
 
-	  (void) snprintf(grpName, 11, "cluster_%02u", (nc + 1u));
+	  res = snprintf(grpName, 11, "cluster_%02u", (nc + 1u));
+	  if (res > 11)
+	       NADC_ERROR(NADC_ERR_WARN, "grpName truncated");
 /*
  * allocate memory and intitialize pointers
  */

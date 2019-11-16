@@ -73,26 +73,26 @@ static double  conversion_factor = 1.;
 .COMMENTS    none
 -------------------------*/
 #ifdef __MACH__
-void nadc_set_start_time( void )
+void nadc_set_start_time(void)
 {
-     if ( conversion_factor < 0. ) {
+     if (conversion_factor < 0.) {
 	  mach_timebase_info_data_t timebase;
 
-	  mach_timebase_info( &timebase );
+	  mach_timebase_info(&timebase);
 	  conversion_factor = (double)timebase.numer / (double)timebase.denom;
      }
      t1 = mach_absolute_time();
 }
 #else
-void nadc_set_start_time( void )
+void nadc_set_start_time(void)
 {
-     if ( conversion_factor < 0. ) {
+     if (conversion_factor < 0.) {
         struct timespec res;
 
-        (void) clock_getres( clk_id, &res);
+        (void) clock_getres(clk_id, &res);
         conversion_factor = 1. / (1000. * res.tv_nsec);
      }
-     (void) clock_gettime( clk_id, &t1 );
+     (void) clock_gettime(clk_id, &t1);
 }
 #endif
 
@@ -105,14 +105,14 @@ void nadc_set_start_time( void )
 .COMMENTS    none
 -------------------------*/
 #ifdef __MACH__
-void nadc_set_stop_time( void )
+void nadc_set_stop_time(void)
 {
      t2 = mach_absolute_time();
 }
 #else
-void nadc_set_stop_time( void )
+void nadc_set_stop_time(void)
 {
-     (void) clock_gettime( clk_id, &t2 );
+     (void) clock_gettime(clk_id, &t2);
 }
 #endif
 
@@ -125,13 +125,14 @@ void nadc_set_stop_time( void )
 .COMMENTS    none
 -------------------------*/
 #ifdef __MACH__
-double nadc_get_epoch_time( void )
+double nadc_get_epoch_time(void)
 {
      return (double)(t2 - t1) * conversion_factor;
 }
 
 #else
-double nadc_get_epoch_time( void )
+__attribute__ ((pure))
+double nadc_get_epoch_time(void)
 {
      return (double) (t2.tv_sec - t1.tv_sec)
      + (double) (t2.tv_nsec - t1.tv_nsec) * conversion_factor;

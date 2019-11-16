@@ -21,7 +21,7 @@
 .LANGUAGE    ANSI C
 .PURPOSE     read in m-factors from external database 
 .INPUT/OUTPUT
-  call as    SCIA_RD_MFACTOR( mftype, sensing_start, calibFlag, mfactor );
+  call as    SCIA_RD_MFACTOR(mftype, sensing_start, calibFlag, mfactor);
      input:
             enum mf_type mftype      : which type is requested
 	    char *sensing_start      : taken from MPH
@@ -63,8 +63,8 @@
 /*+++++ Static Variables +++++*/
 enum err_flag {FATAL, WARNING, INFO};
 
-#define SCIA_ERROR( stop_flag, mess, arg ) \
-   scia_err ( stop_flag, __FILE__, __LINE__, mess, arg );
+#define SCIA_ERROR(stop_flag, mess, arg) \
+   scia_err (stop_flag, __FILE__, __LINE__, mess, arg);
 
 typedef enum SCIA_err {
      OK,		/* No error */
@@ -314,15 +314,15 @@ static char SPH_SCI_AX_descriptor[SCI_AX_MAX][28] =
 
 /*+++++++++++++++++++++++++ Static Functions +++++++++++++++++++++++*/
 /* Error message function, used by the macro SCIA_ERROR */
-static void scia_err( enum err_flag err_flag, const char *source_file, 
-		      int line, const char* message, const char* arg )
+static void scia_err(enum err_flag err_flag, const char *source_file, 
+		      int line, const char* message, const char* arg)
 {
      const char *error_type[] = { "ERROR: ", "WARNING: ", " " };
 
-     (void) fprintf( stderr, "%s:%d: %s%s %s\n", source_file, line, 
-		     error_type[err_flag], message, arg );
+     (void) fprintf(stderr, "%s:%d: %s%s %s\n", source_file, line, 
+		     error_type[err_flag], message, arg);
     
-     NADC_RETURN_ERROR( NADC_ERR_FATAL, "Error in external code" );
+     NADC_RETURN_ERROR(NADC_ERR_FATAL, "Error in external code");
 }
 
 /* Reading the main product header MPH */
@@ -333,9 +333,9 @@ static SCIA_err Read_MPH (FILE* unit, MPH *mph)
      char nl[2];
 
      /* Zeros in the complete structure, so all strings have trailing \0 */
-     (void) memset( mph, 0, sizeof(MPH) );
+     (void) memset(mph, 0, sizeof(MPH));
     
-     err = fscanf( unit,
+     err = fscanf(unit,
 		   "PRODUCT=\"%62c\"%1c"
 		   "PROC_STAGE=%1c%1c"
 		   "REF_DOC=\"%23c\"%1c"
@@ -417,27 +417,27 @@ static SCIA_err Read_MPH (FILE* unit, MPH *mph)
 		   mph->num_dsd, nl,
 		   mph->dsd_size, nl,
 		   mph->num_data_sets, nl,
-		   mph->spare_7, nl );
+		   mph->spare_7, nl);
      if (err != 82)
 	  return MPH_ERROR;
      return OK;
 }
 
 /* read SPH */
-static SCIA_err Read_SPH_SCI_AX( FILE* unit, SPH_SCI_AX *sph,  SCI_AX type )
+static SCIA_err Read_SPH_SCI_AX(FILE* unit, SPH_SCI_AX *sph,  SCI_AX type)
 {
      int err;
      char nl[2];
 
      /* Zeros in the complete structure, so all strings have trailing \0 */
-     (void) memset( sph, 0, sizeof(SPH_SCI_AX) );
+     (void) memset(sph, 0, sizeof(SPH_SCI_AX));
 
-     err = fscanf( unit,
+     err = fscanf(unit,
 		   "SPH_DESCRIPTOR=\"%28c\"%1c"
 		   "%51c%1c",
 		   sph->sph_descriptor, nl,
-		   sph->spare, nl );
-     if ( strncmp (SPH_SCI_AX_descriptor[type], sph->sph_descriptor,
+		   sph->spare, nl);
+     if (strncmp (SPH_SCI_AX_descriptor[type], sph->sph_descriptor,
 		   strlen(SPH_SCI_AX_descriptor[type])) != 0)
 	  return SPH_ERROR;	
      if (err != 4)
@@ -446,12 +446,12 @@ static SCIA_err Read_SPH_SCI_AX( FILE* unit, SPH_SCI_AX *sph,  SCI_AX type )
 }
 
 /* Read the Dataset Desc */
-static SCIA_err Read_DSD( FILE* unit, DSD *dsd )
+static SCIA_err Read_DSD(FILE* unit, DSD *dsd)
 {
      int err;
      char nl[2];
 
-     err = fscanf( unit,        
+     err = fscanf(unit,        
 		   "DS_NAME=\"%28c\"%1c"
 		   "DS_TYPE=%1c%1c"
 		   "FILENAME=\"%62c\"%1c"
@@ -470,14 +470,14 @@ static SCIA_err Read_DSD( FILE* unit, DSD *dsd )
 		   dsd->spare, nl);
 /*
   dsd->name[28]='\0';
-  if ( (str_ptr = strpbrk(dsd->name, " ") ) != NULL)
+  if ((str_ptr = strpbrk(dsd->name, " ")) != NULL)
   *str_ptr='\0';
 
   dsd->filename[62]='\0';
-  if ( (str_ptr = strpbrk(dsd->filename, " ") ) != NULL)
+  if ((str_ptr = strpbrk(dsd->filename, " ")) != NULL)
   *str_ptr='\0';
   */
-     if ( err != 16 )
+     if (err != 16)
 	  return DSD_ERROR;
      return OK;
 }
@@ -487,7 +487,7 @@ static SCIA_err Read_DSD( FILE* unit, DSD *dsd )
  *********************************************************************/
 
 /* the more or less generic open routine */
-static SCIA_err open_SCIA_mfactor( char* FILE_name, info_MF1_AX *info )  
+static SCIA_err open_SCIA_mfactor(char* FILE_name, info_MF1_AX *info)  
 {
      int i,err;
      int num_dsd;
@@ -496,9 +496,9 @@ static SCIA_err open_SCIA_mfactor( char* FILE_name, info_MF1_AX *info )
      info->FILE_l2N = fopen(FILE_name, "rb");
     
      if (info->FILE_l2N == NULL) {
-	  (void) fprintf( stderr, 
+	  (void) fprintf(stderr, 
 			  "Input file %s could not be opened! Abort!\n", 
-			  FILE_name );
+			  FILE_name);
 	  return FILE_NOT_FOUND;
      }
      L1B = info->FILE_l2N;
@@ -511,22 +511,22 @@ static SCIA_err open_SCIA_mfactor( char* FILE_name, info_MF1_AX *info )
 
      if (Read_SPH_SCI_AX (L1B, &info->sph, SCI_MF1_AX) != OK)
 	  return SPH_ERROR;
-     for ( err=0,i=0; i < num_dsd-1; i++)
-	  err += Read_DSD ( L1B, &info->dsd[i] );
+     for (err=0,i=0; i < num_dsd-1; i++)
+	  err += Read_DSD (L1B, &info->dsd[i]);
      if (err != 0)
 	  return DSD_ERROR;
      return OK;
 }
 
-static SCIA_err close_SCIA_mfactor( info_MF1_AX *info )
+static SCIA_err close_SCIA_mfactor(info_MF1_AX *info)
 {
      fclose (info->FILE_l2N);
      return OK;
 }
 
 /* Basic routine for reading an m-factor dataset */
-static SCIA_err read_M_Factor( float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
-			       /*@out@*/ info_MF1_AX *info ) 
+static SCIA_err read_M_Factor(float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
+			       /*@out@*/ info_MF1_AX *info) 
 {
      int n, err;
      FILE *unit = info->FILE_l2N;
@@ -535,9 +535,9 @@ static SCIA_err read_M_Factor( float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
      char tmp_string[200];
 
      /* Jump to start of this Mfactor */
-     (void) fseek( unit, info->dsd[mft].offset, SEEK_SET );
+     (void) fseek(unit, info->dsd[mft].offset, SEEK_SET);
 
-     switch( mft ) {
+     switch(mft) {
 	  /* science detectors */
      case SCI_MF1_AX__M_FACTOR_CAL:
      case SCI_MF1_AX__M_FACTOR_DL: 
@@ -545,37 +545,37 @@ static SCIA_err read_M_Factor( float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
      case SCI_MF1_AX__M_FACTOR_NDF:
      case SCI_MF1_AX__M_FACTOR_DS: 
 	  /* search wavelength */
-	  (void) sprintf( id_string, "%s_DIM_1_LIST=", 
-			   DS_NAME_SCI_MF1_AX[mft] );
-	  (void) sprintf( format_str, "%%%zds", strlen( id_string ));
+	  (void) sprintf(id_string, "%s_DIM_1_LIST=", 
+			   DS_NAME_SCI_MF1_AX[mft]);
+	  (void) sprintf(format_str, "%%%zds", strlen(id_string));
 	  do {
-	       err = fscanf( unit, format_str, tmp_string );
+	       err = fscanf(unit, format_str, tmp_string);
 	       if (err != 1)
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
-	  } while( strcmp( id_string,tmp_string ) != 0 );
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
+	  } while(strcmp(id_string,tmp_string) != 0);
 	  /* start of data found */
-	  for ( n = 0; n < SCIENCE_PIXELS; n++) {
-	       err = fscanf( unit, "%f%*c", wl+n );
-	       if ( err != 1 )
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
+	  for (n = 0; n < SCIENCE_PIXELS; n++) {
+	       err = fscanf(unit, "%f%*c", wl+n);
+	       if (err != 1)
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
 	  }
 	  /* search data part  */
-	  (void) sprintf( id_string, "%s=", DS_NAME_SCI_MF1_AX[mft] );
-	  (void) sprintf( format_str, "%%%zds", strlen( id_string ));
+	  (void) sprintf(id_string, "%s=", DS_NAME_SCI_MF1_AX[mft]);
+	  (void) sprintf(format_str, "%%%zds", strlen(id_string));
 	  do {
-	       err = fscanf( unit, format_str, tmp_string );
+	       err = fscanf(unit, format_str, tmp_string);
 	       if (err != 1)
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
-	  } while( strcmp( id_string,tmp_string ) != 0 );
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
+	  } while(strcmp(id_string,tmp_string) != 0);
 	  /* start of data found */
-	  for ( n = 0; n < SCIENCE_PIXELS; n++ ) {
-	       err = fscanf( unit, "%f%*c", mfactor+n );
-	       if ( err != 1 )
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
+	  for (n = 0; n < SCIENCE_PIXELS; n++) {
+	       err = fscanf(unit, "%f%*c", mfactor+n);
+	       if (err != 1)
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
 	  }
 	  break;
 	  /* PMDs 1-6 */
@@ -583,20 +583,20 @@ static SCIA_err read_M_Factor( float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
      case SCI_MF1_AX__M_FACTOR_PN: 
      case SCI_MF1_AX__M_FACTOR_PS: 
 	  /* search data part  */
-	  (void) sprintf( id_string, "%s=", DS_NAME_SCI_MF1_AX[mft] );
-	  (void) sprintf( format_str, "%%%zds", strlen( id_string ));
+	  (void) sprintf(id_string, "%s=", DS_NAME_SCI_MF1_AX[mft]);
+	  (void) sprintf(format_str, "%%%zds", strlen(id_string));
 	  do {
-	       err = fscanf( unit, format_str, tmp_string );
-	       if ( err != 1 )
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
-	    } while( strcmp( id_string,tmp_string ) != 0 );
+	       err = fscanf(unit, format_str, tmp_string);
+	       if (err != 1)
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
+	    } while(strcmp(id_string,tmp_string) != 0);
 	  /* start of data found */
-	  for ( n = 0; n < 6; n++ ) {
+	  for (n = 0; n < 6; n++) {
 	       err = fscanf (unit, "%f%*c", mfactor+n);
-	       if ( err != 1 )
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
+	       if (err != 1)
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
 	  }
 	  break;
 	  /* PMD 7 Q */
@@ -604,23 +604,23 @@ static SCIA_err read_M_Factor( float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
      case SCI_MF1_AX__M_FACTOR_QN: 
      case SCI_MF1_AX__M_FACTOR_QS:  
 	  /* search data part  */
-	  (void) sprintf( id_string, "%s=", DS_NAME_SCI_MF1_AX[mft] );
-	  (void) sprintf( format_str, "%%%zds", strlen( id_string ));
+	  (void) sprintf(id_string, "%s=", DS_NAME_SCI_MF1_AX[mft]);
+	  (void) sprintf(format_str, "%%%zds", strlen(id_string));
 	  do {
-	       err = fscanf( unit, format_str, tmp_string );
-	       if ( err != 1 )
-		    SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-				DS_NAME_SCI_MF1_AX[mft] );
-	  } while( strcmp( id_string,tmp_string ) != 0 );
+	       err = fscanf(unit, format_str, tmp_string);
+	       if (err != 1)
+		    SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+				DS_NAME_SCI_MF1_AX[mft]);
+	  } while(strcmp(id_string,tmp_string) != 0);
 	  /* start of data found */
 	  err = fscanf (unit, "%f%*c", mfactor);
-	  if ( err != 1 )
-	       SCIA_ERROR( FATAL, "Reading error m-factor: ", 
-			   DS_NAME_SCI_MF1_AX[mft] );	   
+	  if (err != 1)
+	       SCIA_ERROR(FATAL, "Reading error m-factor: ", 
+			   DS_NAME_SCI_MF1_AX[mft]);	   
 	  break;
      default:
-	  SCIA_ERROR( FATAL, "Error Writing M-factor: ", 
-		      "Illegal type selected." );
+	  SCIA_ERROR(FATAL, "Error Writing M-factor: ", 
+		      "Illegal type selected.");
      }
      /* That's it! */
      return OK;
@@ -634,10 +634,10 @@ static SCIA_err read_M_Factor( float *wl, float *mfactor, DSD_SCI_MF1_AX mft,
 static SCI_AX cur_aux_type;
 
 /* selector for scandir */
-static int aux_dir_selector( const struct dirent *entry )
+static int aux_dir_selector(const struct dirent *entry)
 {
      if (strncmp (entry->d_name+4, SCI_AX_ID[cur_aux_type], 3) == 0 &&
-	 strncmp (entry->d_name, "SCI_", 4) == 0 )
+	 strncmp (entry->d_name, "SCI_", 4) == 0)
 /* && */
 /* 	entry->d_namlen  d_namlen == 61) */
 	  return 1;
@@ -647,10 +647,10 @@ static int aux_dir_selector( const struct dirent *entry )
 
 /* sorting for scandir */
 #if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) || __clang__
-static int aux_dir_date_sort( const struct dirent **A, 
-			      const struct dirent **B )
+static int aux_dir_date_sort(const struct dirent **A, 
+			      const struct dirent **B)
 #else
-static int aux_dir_date_sort( const void *A, const void *B )
+static int aux_dir_date_sort(const void *A, const void *B)
 #endif
 {
      int cmp;
@@ -673,46 +673,51 @@ static int aux_dir_date_sort( const void *A, const void *B )
 
 /* overall routine */
 static 
-void file_aux( /*@out@*/ char *file_name, const char* dir_name, 
-	       SCI_AX aux_type, const char* start_date )
+void file_aux(/*@out@*/ char *file_name, const char* dir_name, 
+	       SCI_AX aux_type, const char* start_date)
 {
      register int n;
      int n_entries;
+     size_t res;
      struct dirent **entries;
 
      cur_aux_type = aux_type;
      /* read in dir content */
-     n_entries = scandir( dir_name, &entries, aux_dir_selector,
-			  aux_dir_date_sort );
+     n_entries = scandir(dir_name, &entries, aux_dir_selector,
+			  aux_dir_date_sort);
      /* no aux_files found */
-     if ( n_entries <= 0 )
-	  SCIA_ERROR( FATAL, "No auxiliary files found in directory",
-		      dir_name );
+     if (n_entries <= 0)
+	  SCIA_ERROR(FATAL, "No auxiliary files found in directory",
+		      dir_name);
 
      /* search for right position */
-     for ( n = 0; n < n_entries; n++ )
-	  if ( strncmp (start_date, entries[n]->d_name+30, 15) < 0 ) break; 
+     for (n = 0; n < n_entries; n++)
+	  if (strncmp (start_date, entries[n]->d_name+30, 15) < 0) break; 
 
      /* measurement time before first AUX file ...*/
-     if ( n == 0 )
-	  SCIA_ERROR( FATAL, "Auxiliary files begin after this date.", 
-		      start_date );
+     if (n == 0)
+	  SCIA_ERROR(FATAL, "Auxiliary files begin after this date.", 
+		      start_date);
 
      /* not within validity time of found AUX file*/
-     if ( strncmp( start_date, entries[--n]->d_name+46, 15 ) > 0 ) {
+     if (strncmp(start_date, entries[--n]->d_name+46, 15) > 0) {
 	  char msg[2 * MAX_STRING_LENGTH];
 
-	  (void) snprintf( msg, sizeof(msg),
-			   "Auxiliary file %s not within validity time %s.", 
-			   entries[n]->d_name, start_date );
-	  SCIA_ERROR( FATAL, msg, "" );
+	  res = snprintf(msg, sizeof(msg),
+			  "Auxiliary file %s not within validity time %s.", 
+			  entries[n]->d_name, start_date);
+	  if (res > sizeof(msg))
+	       NADC_ERROR(NADC_ERR_WARN, "msg truncated");
+	  SCIA_ERROR(FATAL, msg, "");
      }
      /*  write file_name including path */
-     (void) snprintf (file_name, MAX_STRING_LENGTH, "%s/%s",
-		      dir_name, entries[n]->d_name);
+     res = snprintf (file_name, MAX_STRING_LENGTH, "%s/%s",
+		     dir_name, entries[n]->d_name);
+     if (res > MAX_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "file_name truncated");
      /* free memories */
-     for ( n = 0; n < n_entries; n++ ) free( entries[n] );
-     free( entries );
+     for (n = 0; n < n_entries; n++) free(entries[n]);
+     free(entries);
 }
 
 /*+++++++++++++++++++++++++
@@ -720,7 +725,7 @@ void file_aux( /*@out@*/ char *file_name, const char* dir_name,
 .PURPOSE     read m-factor for science channels from database 
              with auxiliary files.
 .INPUT/OUTPUT
-  call as    Scia_rd_H5_mfactor( mftype, sensing_start, mfactor );
+  call as    Scia_rd_H5_mfactor(mftype, sensing_start, mfactor);
      input:
             enum mf_type mftype   : which type is requested
 	    char* sensing_start   : sensing start time yyyymmdd_hhmmss
@@ -730,8 +735,8 @@ void file_aux( /*@out@*/ char *file_name, const char* dir_name,
 .COMMENTS    none
 -------------------------*/
 static
-void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start, 
-			  /*@out@*/ float *mfactor )
+void Scia_rd_aux_mfactor(enum mf_type mftype, char *sensing_start, 
+			  /*@out@*/ float *mfactor)
 {
      char default_dir[] = "m-factor_07.01";
 
@@ -742,11 +747,12 @@ void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start,
      char mf_dir_name[MAX_STRING_LENGTH];
 
      char *dir_name = default_dir;
-     char *env_dir = getenv( "SCIA_MFACTOR_DIR" );
+     char *env_dir = getenv("SCIA_MFACTOR_DIR");
 
+     size_t res;
      float wl[SCIENCE_PIXELS];
 
-     (void) memset( mfactor, 0, SCIENCE_PIXELS * sizeof(float) );
+     (void) memset(mfactor, 0, SCIENCE_PIXELS * sizeof(float));
 
      switch (mftype) {
      case M_CAL:
@@ -759,54 +765,58 @@ void Scia_rd_aux_mfactor( enum mf_type mftype, char *sensing_start,
 	  dsd = SCI_MF1_AX__M_FACTOR_DN;
 	  break;
      default:
-	  NADC_RETURN_ERROR( NADC_ERR_FATAL, "unknown mftype" );
+	  NADC_RETURN_ERROR(NADC_ERR_FATAL, "unknown mftype");
 	  break;
      }
 
      /* check if Environment variable is set */
-     if ( env_dir ) {
+     if (env_dir) {
 	  dir_name = env_dir;
      } else {    /* search for standard dirs */
 	  DIR *dir;
-	  dir = opendir( default_dir );
-	  if ( dir ) {
-	       closedir( dir );
+	  dir = opendir(default_dir);
+	  if (dir) {
+	       closedir(dir);
 	  } else {
-	       (void) snprintf( mf_dir_name, MAX_STRING_LENGTH, 
-				"%s/%s", DATA_DIR, default_dir );
-	       dir = opendir( mf_dir_name );
-	       if ( dir ) {
+	       res = snprintf(mf_dir_name, MAX_STRING_LENGTH, 
+			      "%s/%s", DATA_DIR, default_dir);
+	       if (res > MAX_STRING_LENGTH)
+		    NADC_ERROR(NADC_ERR_WARN, "mf_dir_name truncated");
+	       dir = opendir(mf_dir_name);
+	       if (dir) {
 		    dir_name = mf_dir_name;
-		    closedir( dir );
+		    closedir(dir);
 	       } else {
 		    char msg[MAX_STRING_LENGTH];
 
-		    (void) snprintf( msg, MAX_STRING_LENGTH,
-				     "can not open m-factor directory: %s", 
-				     mf_dir_name );
-		    NADC_RETURN_ERROR( NADC_ERR_FATAL, msg );
+		    res = snprintf(msg, MAX_STRING_LENGTH,
+				   "can not open m-factor directory: %s", 
+				   mf_dir_name);
+		    if (res > MAX_STRING_LENGTH)
+			 NADC_ERROR(NADC_ERR_WARN, "msg truncated");
+		    NADC_RETURN_ERROR(NADC_ERR_FATAL, msg);
 	       }
 	  }
      }
      /* Here we have a standard directory or an environment value */
-     file_aux( mf_file_name, dir_name, SCI_MF1_AX, sensing_start );
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FATAL, 
-			     "failed to select appropriate m-factor file" );
+     file_aux(mf_file_name, dir_name, SCI_MF1_AX, sensing_start);
+     if (IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FATAL, 
+			     "failed to select appropriate m-factor file");
 
-     if ( open_SCIA_mfactor( mf_file_name, &info ) != OK )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE, mf_file_name );
-     read_M_Factor( wl, mfactor, dsd, &info ) ;
-     if ( IS_ERR_STAT_FATAL )
-	  NADC_RETURN_ERROR( NADC_ERR_FILE_RD, mf_file_name );
-     close_SCIA_mfactor( &info );
+     if (open_SCIA_mfactor(mf_file_name, &info) != OK)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE, mf_file_name);
+     read_M_Factor(wl, mfactor, dsd, &info) ;
+     if (IS_ERR_STAT_FATAL)
+	  NADC_RETURN_ERROR(NADC_ERR_FILE_RD, mf_file_name);
+     close_SCIA_mfactor(&info);
 }
 
 /*+++++++++++++++++++++++++
 .IDENTifer   Scia_rd_H5_mfactor
 .PURPOSE     read m-factor for science channels from H5 database.
 .INPUT/OUTPUT
-  call as    Scia_rd_H5_mfactor( mftype, sensing_start, mfactor );
+  call as    Scia_rd_H5_mfactor(mftype, sensing_start, mfactor);
      input:
             enum mf_type mftype    : which type is requested
 	    char* sensing_start    : sensing start time yyyymmdd_hhmmss
@@ -820,8 +830,8 @@ static const char *mf_type_str[3] = {
 };
 
 static 
-void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
-			 /*@out@*/ float *mfactor )
+void Scia_rd_H5_mfactor(enum mf_type mftype, char *sensing_start,
+			 /*@out@*/ float *mfactor)
 {
      char  mf_file[MAX_STRING_LENGTH];
      char  mf_software_version[MAX_STRING_LENGTH];
@@ -834,19 +844,22 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
 
      int n_days;
      int day;
+     size_t res;
 /*
  * open output HDF5-file
  */
-     (void) strcpy( mf_file, "./m-factor.h5" );
+     (void) strcpy(mf_file, "./m-factor.h5");
      H5E_BEGIN_TRY {
-	  file_id = H5Fopen( mf_file, H5F_ACC_RDONLY, H5P_DEFAULT );
+	  file_id = H5Fopen(mf_file, H5F_ACC_RDONLY, H5P_DEFAULT);
      } H5E_END_TRY;
-     if ( file_id < 0 ) {
-	  (void) snprintf( mf_file, MAX_STRING_LENGTH, 
-			   "%s/m-factor.h5", DATA_DIR );
-	  file_id = H5Fopen( mf_file, H5F_ACC_RDONLY, H5P_DEFAULT );
-	  if ( file_id < 0 )
-	       NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, mf_file );
+     if (file_id < 0) {
+	  res = snprintf(mf_file, MAX_STRING_LENGTH, 
+			 "%s/m-factor.h5", DATA_DIR);
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "mf_file truncated");
+	  file_id = H5Fopen(mf_file, H5F_ACC_RDONLY, H5P_DEFAULT);
+	  if (file_id < 0)
+	       NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, mf_file);
      }
 /*
  * read software version
@@ -855,75 +868,78 @@ void Scia_rd_H5_mfactor( enum mf_type mftype, char *sensing_start,
  /*
   *  read array with validity strings
   */
-     (void) H5LTget_dataset_info( file_id,  "VALIDITY_TIME", 
-				  dims, NULL, NULL );
-     val_time = (char *) malloc( (size_t) dims[0] * sizeof(char));
-     if ( val_time == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "val_time" );
-     (void) H5LTread_dataset_char( file_id, "VALIDITY_TIME", val_time );
+     (void) H5LTget_dataset_info(file_id,  "VALIDITY_TIME", 
+				  dims, NULL, NULL);
+     val_time = (char *) malloc((size_t) dims[0] * sizeof(char));
+     if (val_time == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "val_time");
+     (void) H5LTread_dataset_char(file_id, "VALIDITY_TIME", val_time);
      n_days = (int) dims[0] / 32;
 /*
  *  read array with mfactors
  */
-     (void) H5LTget_dataset_info( file_id,  mf_type_str[mftype], 
-				  dims, NULL, NULL );
-     mf_array = (float *) malloc( (size_t)(dims[0] * dims[1]) * sizeof(float));
-     if ( mf_array == NULL ) 
-	  NADC_GOTO_ERROR( NADC_ERR_ALLOC, "mf_array" );
-     (void) H5LTread_dataset_float( file_id, mf_type_str[mftype], mf_array );
+     (void) H5LTget_dataset_info(file_id,  mf_type_str[mftype], 
+				  dims, NULL, NULL);
+     mf_array = (float *) malloc((size_t)(dims[0] * dims[1]) * sizeof(float));
+     if (mf_array == NULL) 
+	  NADC_GOTO_ERROR(NADC_ERR_ALLOC, "mf_array");
+     (void) H5LTread_dataset_float(file_id, mf_type_str[mftype], mf_array);
 /* 
  * (simple) search for correct data
  * yyyymmdd_hhmmss_yyyymmdd_hhmmss
  * start valid.    end validi.
  */
-     for ( day=n_days-1; day>=0; day-- ) {
-	  if ( strncmp (val_time+32*day, sensing_start, 15) <= 0 ) {
-	       if (strncmp (val_time+32*day+16, sensing_start, 15) > 0 )
+     for (day=n_days-1; day>=0; day--) {
+	  if (strncmp (val_time+32*day, sensing_start, 15) <= 0) {
+	       if (strncmp (val_time+32*day+16, sensing_start, 15) > 0)
 		    break;
 	  }
      }
-     if ( day == -1 )
-	  NADC_GOTO_ERROR( NADC_ERR_FATAL, "No valid m-factor found" );
+     if (day == -1)
+	  NADC_GOTO_ERROR(NADC_ERR_FATAL, "No valid m-factor found");
 /* 
  * copy m-factor  
  */
-     (void) memcpy( mfactor, 
+     (void) memcpy(mfactor, 
 		    mf_array+ SCIENCE_PIXELS * day, 
-		    SCIENCE_PIXELS * sizeof (float) );
+		    SCIENCE_PIXELS * sizeof (float));
      free (mf_array);
      free (val_time);
  done:
-     if ( file_id >= 0 ) (void) H5Fclose( file_id );
+     if (file_id >= 0) (void) H5Fclose(file_id);
 }
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-void SCIA_RD_MFACTOR( enum mf_type mftype, const char *sensing_start,
-		      unsigned int calibFlag, float *mfactor )
+void SCIA_RD_MFACTOR(enum mf_type mftype, const char *sensing_start,
+		      unsigned int calibFlag, float *mfactor)
 {
      char sensing_start_ymd[SHORT_STRING_LENGTH];
 
      int mjd2000;
-     unsigned int second, mu_sec ;
+     unsigned int second, mu_sec;
+     size_t res;
 /* 
  * convert sensing start 
  */
-     ASCII_2_MJD( sensing_start, &mjd2000, &second, &mu_sec );
-     MJD_2_YMD( mjd2000, second, sensing_start_ymd );
+     ASCII_2_MJD(sensing_start, &mjd2000, &second, &mu_sec);
+     MJD_2_YMD(mjd2000, second, sensing_start_ymd);
 
                                         /* read m-factor from auxiliary file */
-     if ( (calibFlag & DO_MFAC_H5_RAD) == UINT_ZERO ) {
-	  Scia_rd_aux_mfactor( mftype, sensing_start_ymd, mfactor );
-	  if ( IS_ERR_STAT_FATAL )
-	       NADC_RETURN_ERROR( NADC_ERR_FATAL, "Scia_rd_aux_mfactor" );
+     if ((calibFlag & DO_MFAC_H5_RAD) == UINT_ZERO) {
+	  Scia_rd_aux_mfactor(mftype, sensing_start_ymd, mfactor);
+	  if (IS_ERR_STAT_FATAL)
+	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "Scia_rd_aux_mfactor");
      } else {                                /* read m-factor from HDF5 file */
 	  char msg[SHORT_STRING_LENGTH];
 
-	  Scia_rd_H5_mfactor( mftype, sensing_start_ymd, mfactor );
-	  if ( IS_ERR_STAT_FATAL )
+	  Scia_rd_H5_mfactor(mftype, sensing_start_ymd, mfactor);
+	  if (IS_ERR_STAT_FATAL)
 	       NADC_RETURN_ERROR(NADC_ERR_FATAL, "Scia_rd_H5_mfactor");
-	  (void) snprintf( msg, SHORT_STRING_LENGTH,
-			   "read m-factors from HDF5 file - %s",
-			  sensing_start_ymd );
-	  NADC_ERROR( NADC_ERR_NONE, msg );
+	  res = snprintf(msg, SHORT_STRING_LENGTH,
+			 "read m-factors from HDF5 file - %s",
+			 sensing_start_ymd);
+	  if (res > SHORT_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "msg truncated");
+	  NADC_ERROR(NADC_ERR_NONE, msg);
      }
 }

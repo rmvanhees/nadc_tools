@@ -22,7 +22,7 @@
 .PURPOSE     extent NADC_USRINP: interpret negative indices relative to 
              maximum index, and '*' as the maximum index
 .INPUT/OUTPUT
-  call as    nr_indx = NADC_USRINDX( str_range, max_indx, indices );
+  call as    nr_indx = NADC_USRINDX(str_range, max_indx, indices);
      input:
             char str_range   :  string holding range specification
 	    int  max_indx    :  maximum index
@@ -51,28 +51,32 @@
 #include <nadc_common.h>
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
-short NADC_USRINDX( const char str_range[], int max_indx, short *indices )
+short NADC_USRINDX(const char str_range[], int max_indx, short *indices)
 {
      register int nr;
 
-     char    *cpntr, cbuff[MAX_STRING_LENGTH];
-     int     num;
-     size_t  nchar;
+     char *cpntr;
+     int num;
 
-     if ( (cpntr = strchr( str_range, '*' )) == NULL ) {
-	  (void) NADC_USRINP( INT16_T, str_range, max_indx, indices, &num );
+     if ((cpntr = strchr(str_range, '*')) == NULL) {
+	  (void) NADC_USRINP(INT16_T, str_range, max_indx, indices, &num);
      } else {
-	  nchar = cpntr - str_range;
-	  (void) nadc_strlcpy( cbuff, str_range, nchar );
-	  (void) sprintf( cbuff, "%s%-d%s", cbuff, max_indx-1, cpntr+1 );
-	  (void) NADC_USRINP( INT16_T, cbuff, max_indx, indices, &num );
+	  size_t nchar = cpntr - str_range;
+	  char cbuff1[MAX_STRING_LENGTH], cbuff2[MAX_STRING_LENGTH];
+	  
+	  (void) nadc_strlcpy(cbuff1, str_range, nchar);
+	  num = snprintf(cbuff2, MAX_STRING_LENGTH,
+			 "%s%-d%s", cbuff1, max_indx-1, cpntr+1);
+	  if (num > (int) MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "cbuff2 truncated");
+	  (void) NADC_USRINP(INT16_T, cbuff2, max_indx, indices, &num);
 
      }
-     for ( nr = 0; nr < num; nr++ ) {
-	  if ( indices[nr] < 0 ) indices[nr] += (short) max_indx;
-	  if ( indices[nr] < 0 || indices[nr] >= (short) max_indx ) {
+     for (nr = 0; nr < num; nr++) {
+	  if (indices[nr] < 0) indices[nr] += (short) max_indx;
+	  if (indices[nr] < 0 || indices[nr] >= (short) max_indx) {
 	       num = nr;
-	       NADC_GOTO_ERROR( NADC_ERR_PARAM, "indices" );
+	       NADC_GOTO_ERROR(NADC_ERR_PARAM, "indices");
 	  }
      }
  done:

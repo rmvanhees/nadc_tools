@@ -246,9 +246,9 @@ void Check_User_Option(FILE *stream, int instrument,
 void MERIS_SET_PARAM(int argc, char *argv[], int instrument)
 {
      char   *cpntr;
-     char   *name_infile;
+     char   *name_infile = NULL;
      char   prog_master[SHORT_STRING_LENGTH];
-     int    narg, res;
+     int    narg;
 /*
  * check number of options
  */
@@ -259,7 +259,7 @@ void MERIS_SET_PARAM(int argc, char *argv[], int instrument)
 /*
  * set name of calling program
  */
-     res = nadc_set_param_string("program", argv[0]);
+     (void) nadc_set_param_string("program", argv[0]);
 /*
  * strip path to program
  */
@@ -305,20 +305,20 @@ void MERIS_SET_PARAM(int argc, char *argv[], int instrument)
 	       }
 	       if (argv[narg][1] == 'V' 
 		    || strncmp(argv[narg]+1, "version", 7) == 0) {
-		    res = nadc_set_param_uint8("flag_version", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_version", PARAM_SET);
 		    return;
 	       }
 	       if (strncmp(argv[narg]+1, "show", 4) == 0) {
-		    res = nadc_set_param_uint8("flag_show", PARAM_SET);
-		    res = nadc_set_param_uint8("write_ascii", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_show", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_ascii", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "silent", 6) == 0) {
-		    res = nadc_set_param_uint8("flag_silent", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_silent", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "verbose", 7) == 0) {
-		    res = nadc_set_param_uint8("flag_verbose", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_verbose", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "check", 5) == 0) {
-		    res = nadc_set_param_uint8("flag_check", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_check", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "ascii", 5) == 0) {
-		    res = nadc_set_param_uint8("write_ascii", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_ascii", PARAM_SET);
 	       }
 	  } else {
 	       /* name of input file */
@@ -340,12 +340,12 @@ void MERIS_SET_PARAM(int argc, char *argv[], int instrument)
      
      /* default is to generate output in HDF5 format */
      if (nadc_get_param_uint8("write_pds") == PARAM_SET) {
-	  res = nadc_set_param_add_ext("outfile", ".child");
+	  (void) nadc_set_param_add_ext("outfile", ".child");
      } else if (nadc_get_param_uint8("write_ascii") == PARAM_SET) {
-	  res = nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
      } else {
-	  res = nadc_set_param_uint8("write_hdf5", PARAM_SET);
-	  res = nadc_set_param_add_ext("outfile", ".h5");
+	  (void) nadc_set_param_uint8("write_hdf5", PARAM_SET);
+	  (void) nadc_set_param_add_ext("outfile", ".h5");
      }
 }
 

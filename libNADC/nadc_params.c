@@ -399,7 +399,7 @@ char * nadc_get_param_string(const char *param_name)
 	  if (params_string[ii].str == NULL)
 	       goto done;
 
-	  if ((str = malloc(strlen(params_string[ii].str)+1)) == NULL)
+	  if ((str = (char *) malloc(strlen(params_string[ii].str)+1)) == NULL)
 	       NADC_GOTO_ERROR(NADC_ERR_ALLOC, "str");
 	  (void) strcpy(str, params_string[ii].str);
 	  return str;
@@ -432,6 +432,7 @@ int nadc_set_param_chan(const unsigned char *chan_list, int length)
      return 0;
 }
 
+__attribute__ ((pure))
 bool nadc_get_param_chan(int id)
 {
      return (Get_Bit_uc(chan_mask, id - 1) == (unsigned char) 1);
@@ -485,6 +486,7 @@ int nadc_set_param_clus(const unsigned char *clus_list, int length)
      return 0;
 }
 
+__attribute__ ((pure))
 bool nadc_get_param_clus(int id)
 {
      return (Get_Bit_LL(clus_mask, id - 1) == 1ULL);
@@ -538,6 +540,7 @@ int nadc_set_param_cat(const unsigned char *cat_list, int length)
      return 0;
 }
 
+__attribute__ ((pure))
 bool nadc_get_param_cat(int id)
 {
      return (Get_Bit_LL(cat_mask, id - 1) == 1ULL);
@@ -845,6 +848,7 @@ int nadc_set_param_state(const unsigned char *state_list, int length)
      return 0;
 }
 
+__attribute__ ((pure))
 bool nadc_get_param_state(int id)
 {
      unsigned char res = 0;

@@ -335,8 +335,9 @@ void ASCII_2_MJD(const char ASCII_DateTime[], int *mjd2000,
 void UTC_2_ASCII(unsigned int utc_day, unsigned int utc_msec, 
 		  char ASCII_DateTime[])
 {
+     int res;
      unsigned int ihour, imin, imon, imsec, isec, iyear;
-     double       mday, jday;
+     double mday, jday;
 /*
  * convert to julian day
  */
@@ -349,10 +350,12 @@ void UTC_2_ASCII(unsigned int utc_day, unsigned int utc_msec,
      isec -= 3600 * ihour;
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf(ASCII_DateTime, DATE_STRING_LENGTH,
-		      "%02d-%3s-%04u %02u:%02u:%02u.%03u", ((int) mday) % 100,
-		      Month_Names[imon-1], iyear % 10000, ihour % 100,
-		      imin % 100, isec % 100, imsec % 1000);
+     res = snprintf(ASCII_DateTime, DATE_STRING_LENGTH,
+		    "%02d-%3s-%04u %02u:%02u:%02u.%03u", ((int) mday) % 100,
+		    Month_Names[imon-1], iyear % 10000, ihour % 100,
+		    imin % 100, isec % 100, imsec % 1000);
+     if (res > DATE_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "ASCII_DateTime truncated");
 }
 
 /*+++++++++++++++++++++++++
@@ -374,8 +377,9 @@ void UTC_2_ASCII(unsigned int utc_day, unsigned int utc_msec,
 void MJD_2_ASCII(int mjd2000, unsigned int second, unsigned int mu_sec, 
 		  char *ASCII_DateTime)
 {
+     int res;
      unsigned int ihour, imin, imon, isec, iyear;
-     double       mday, jday;
+     double mday, jday;
 /*
  * convert to julian day
  */
@@ -386,10 +390,12 @@ void MJD_2_ASCII(int mjd2000, unsigned int second, unsigned int mu_sec,
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf(ASCII_DateTime, UTC_STRING_LENGTH,
-		      "%02d-%3s-%04u %02u:%02u:%02u.%06u", ((int) mday) % 100, 
-		      Month_Names[imon-1], iyear % 10000, ihour % 100,
-		      imin % 100, isec % 100, mu_sec % 1000000);
+     res = snprintf(ASCII_DateTime, UTC_STRING_LENGTH,
+		    "%02d-%3s-%04u %02u:%02u:%02u.%06u", ((int) mday) % 100, 
+		    Month_Names[imon-1], iyear % 10000, ihour % 100,
+		    imin % 100, isec % 100, mu_sec % 1000000);
+     if (res > UTC_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "ASCII_DateTime truncated");
 }
 
 /*+++++++++++++++++++++++++
@@ -410,8 +416,9 @@ void MJD_2_ASCII(int mjd2000, unsigned int second, unsigned int mu_sec,
 void UTC_2_DATETIME(unsigned int utc_day, unsigned int utc_msec, 
 		     char dateTime[])
 {
+     int res;
      unsigned int  ihour, imin, imon, imsec, isec, iyear;
-     double        mday, jday;
+     double mday, jday;
 /*
  * convert to julian day
  */
@@ -424,10 +431,12 @@ void UTC_2_DATETIME(unsigned int utc_day, unsigned int utc_msec,
      isec -= 3600 * ihour;
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf(dateTime, DATE_STRING_LENGTH,
-		      "%04u-%02u-%02d %02u:%02u:%02u.%03u", iyear % 10000,
-		      imon % 100, ((int) mday) % 100, ihour % 100,
-		      imin % 100, isec % 100, imsec % 1000);
+     res = snprintf(dateTime, DATE_STRING_LENGTH,
+		    "%04u-%02u-%02d %02u:%02u:%02u.%03u", iyear % 10000,
+		    imon % 100, ((int) mday) % 100, ihour % 100,
+		    imin % 100, isec % 100, imsec % 1000);
+     if (res > DATE_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 }
 
 /*+++++++++++++++++++++++++
@@ -445,11 +454,11 @@ void UTC_2_DATETIME(unsigned int utc_day, unsigned int utc_msec,
 -------------------------*/
 double DATETIME_2_JULIAN(const char dateTime[], unsigned int muSecond)
 {
-     char   ASCII_Date[12];                 /* date part of input string */
-     char   ASCII_Time[16];                 /* time part of input string */
+     char ASCII_Date[12];                 /* date part of input string */
+     char ASCII_Time[16];                 /* time part of input string */
 
      unsigned int imin, ihour, iday, imon, iyear;
-     double       day, jday, sec;
+     double day, jday, sec;
 /*
  * decomposition of input string into its date and time part
  */
@@ -496,8 +505,9 @@ double DATETIME_2_JULIAN(const char dateTime[], unsigned int muSecond)
 void MJD_2_DATETIME(int mjd2000, unsigned int second, unsigned int mu_sec, 
 		     char *dateTime)
 {
+     int res;
      unsigned int ihour, imin, imon, isec, iyear;
-     double       mday, jday;
+     double mday, jday;
 /*
  * convert to julian day
  */
@@ -508,10 +518,12 @@ void MJD_2_DATETIME(int mjd2000, unsigned int second, unsigned int mu_sec,
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf(dateTime, UTC_STRING_LENGTH-1,
-		      "%04u-%02u-%02d %02u:%02u:%02u.%06u", iyear % 10000, 
-		      imon % 100, ((int) mday) % 100,
-		      ihour % 100, imin % 100, isec % 100, mu_sec);
+     res = snprintf(dateTime, UTC_STRING_LENGTH-1,
+		    "%04u-%02u-%02d %02u:%02u:%02u.%06u", iyear % 10000, 
+		    imon % 100, ((int) mday) % 100,
+		    ihour % 100, imin % 100, isec % 100, mu_sec);
+     if (res > UTC_STRING_LENGTH-1)
+	  NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 }
 
 /*+++++++++++++++++++++++++ KB
@@ -532,8 +544,9 @@ void MJD_2_DATETIME(int mjd2000, unsigned int second, unsigned int mu_sec,
 -------------------------*/
 void MJD_2_YMD(int mjd2000, unsigned int second, char *dateTime)
 {
+     int res;
      unsigned int ihour, imin, imon, isec, iyear;
-     double       mday, jday;
+     double mday, jday;
 /*
  * convert to julian day
  */
@@ -544,10 +557,12 @@ void MJD_2_YMD(int mjd2000, unsigned int second, char *dateTime)
      isec  = (unsigned int) second - (3600 * ihour);
      imin  = isec / 60;
      isec -= 60 * imin;
-     (void) snprintf(dateTime, UTC_STRING_LENGTH-1,
-		      "%04u%02u%02d_%02u%02u%02u", iyear % 10000, 
-		      imon % 100, ((int) mday) % 100,
-		      ihour % 100, imin % 100, isec % 100);
+     res = snprintf(dateTime, UTC_STRING_LENGTH-1,
+		    "%04u%02u%02d_%02u%02u%02u", iyear % 10000, 
+		    imon % 100, ((int) mday) % 100,
+		    ihour % 100, imin % 100, isec % 100);
+     if (res > UTC_STRING_LENGTH-1)
+	  NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 }
 
 /*+++++++++++++++++++++++++ 
@@ -565,8 +580,9 @@ void MJD_2_YMD(int mjd2000, unsigned int second, char *dateTime)
 -------------------------*/
 void SciaJDAY2adaguc(double jday, char *dateTime)
 {
+     int res;
      unsigned int imin, ihour, iday, imon, iyear;
-     double       day, sec;
+     double day, sec;
 
      jday += jday_01012000;
      Julian_2_MJD(jday, &day, &imon, &iyear);
@@ -597,9 +613,11 @@ void SciaJDAY2adaguc(double jday, char *dateTime)
 /*
  * write date time
  */
-     (void) sprintf(dateTime, "%04u%02u%02uT%02u%02u%02.0f",
-                     iyear % 10000, imon % 100 , iday % 100,
-		     ihour % 100, imin % 100, sec);
+     res = snprintf(dateTime, 16, "%04u%02u%02uT%02u%02u%02.0f",
+		    iyear % 10000, imon % 100 , iday % 100,
+		    ihour % 100, imin % 100, sec);
+     if (res > 16)
+	  NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 }
 
 /*+++++++++++++++++++++++++ 
@@ -642,8 +660,9 @@ double Adaguc2sciaJDAY(const char *dateTime)
 -------------------------*/
 void GomeJDAY2adaguc(double jday, char *dateTime)
 {
+     int res;
      unsigned int imin, ihour, iday, imon, iyear;
-     double       day, sec;
+     double day, sec;
 
      jday += jday_01011950;
      Julian_2_MJD(jday, &day, &imon, &iyear);
@@ -672,8 +691,10 @@ void GomeJDAY2adaguc(double jday, char *dateTime)
           }
      }
      /* write date time */
-     (void) sprintf(dateTime, "%04u%02u%02uT%02u%02u%02.0f",
+     res = snprintf(dateTime, 16, "%04u%02u%02uT%02u%02u%02.0f",
 		    iyear, imon, iday, ihour, imin, sec);
+     if (res > 16)
+	  NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 }
 
 /*+++++++++++++++++++++++++ 

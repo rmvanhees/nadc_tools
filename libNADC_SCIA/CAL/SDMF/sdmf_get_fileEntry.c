@@ -66,7 +66,7 @@
 
 /*+++++++++++++++++++++++++ Main Program or Function +++++++++++++++*/
 bool SDMF_get_fileEntry(enum sdmf24_db sdmfDB,
-			 int orbit, char *fileEntry)
+			int orbit, char *fileEntry)
 {
      register long nr = 0;
 
@@ -81,11 +81,12 @@ bool SDMF_get_fileEntry(enum sdmf24_db sdmfDB,
      char sdmfPath[MAX_STRING_LENGTH];
      char sdmfExt[18];
 
+     size_t res;
      long num, total_rec;
-     int  delta = 0;
-     int  fnd_orbit = -1;
-     int  MaxDiffOrbitNumber;
-     int  fnd_quality = 40;
+     int delta = 0;
+     int fnd_orbit = -1;
+     int MaxDiffOrbitNumber;
+     int fnd_quality = 40;
 
      char *env_str = getenv("SDMF24_SELECT");
 
@@ -101,51 +102,65 @@ bool SDMF_get_fileEntry(enum sdmf24_db sdmfDB,
      switch (sdmfDB) {
      case SDMF24_STATE: {
 	  (void) strcpy(sdmfID, "State Dark correction");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
-			   SDMF_PATH("2.4"), "Data");
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+			 SDMF_PATH("2.4"), "Data");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "monitor");
 	  MaxDiffOrbitNumber = 14;
 	  break;
      }
      case SDMF24_FITTED:
 	  (void) strcpy(sdmfID, "Fitted Dark correction");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
 			   SDMF_PATH("2.4"), "DarkCurrent");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "darkcurrent");
 	  MaxDiffOrbitNumber = 14;
 	  break;
      case SDMF24_ORBITAL:
 	  (void) strcpy(sdmfID, "Orbital Dark correction");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
 			   SDMF_PATH("2.4"), "OrbitalVariation/Transmission");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "orbital");
 	  MaxDiffOrbitNumber = 50;
 	  break;
      case SDMF24_BDPM:
 	  (void) strcpy(sdmfID, "Bad Dead Pixel Mask");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
 			   SDMF_PATH("2.4"), "SmoothMask/ASCII");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "mask");
 	  MaxDiffOrbitNumber = 14;
 	  break;
      case SDMF24_PPG:
 	  (void) strcpy(sdmfID, "Pixel to Pixel Gain correction");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
 			   SDMF_PATH("2.4"), "PixelGain");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "pixelgain");
 	  MaxDiffOrbitNumber = 100;
 	  break;
      case SDMF24_WLSTRANS:
 	  (void) strcpy(sdmfID, "WLS Transmission correction");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
 			   SDMF_PATH("2.4"), "Transmission/WLS");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "WLStransmission");
 	  MaxDiffOrbitNumber = 100;
 	  break;
      case SDMF24_TRANS:
 	  (void) strcpy(sdmfID, "Transmission correction");
-	  (void) snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
+	  res = snprintf(sdmfPath, MAX_STRING_LENGTH, "%s/%s",
 			   SDMF_PATH("2.4"), "Transmission/SunESM");
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "sdmfPath truncated");
 	  (void) strcpy(sdmfExt, "transmission");
 	  MaxDiffOrbitNumber = 100;
 	  break;
@@ -163,8 +178,10 @@ bool SDMF_get_fileEntry(enum sdmf24_db sdmfDB,
 /*
  * read database records (first determine number of records in database)
  */
-     (void) snprintf(flname, MAX_STRING_LENGTH, "%s/%s", 
+     res = snprintf(flname, MAX_STRING_LENGTH, "%s/%s", 
 		      SDMF_PATH("2.4"), "MonitorList.dat");
+     if (res > MAX_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "flname truncated");
      if ((fp = fopen(flname, "rb")) == NULL)
           NADC_GOTO_ERROR(NADC_ERR_FILE, flname);
      (void) fseek(fp, 0L, SEEK_END);
@@ -220,8 +237,10 @@ bool SDMF_get_fileEntry(enum sdmf24_db sdmfDB,
 		    && mrec[nr].QualityNumber > fnd_quality) {
 		    fnd_orbit = orbit + delta;
 		    fnd_quality = mrec[nr].QualityNumber;
-		    (void) snprintf(fileEntry, MAX_STRING_LENGTH, "%s/%s.%s",
+		    res = snprintf(fileEntry, MAX_STRING_LENGTH, "%s/%s.%s",
 				     sdmfPath, mrec[nr].FileName, sdmfExt);
+		    if (res > MAX_STRING_LENGTH)
+			 NADC_ERROR(NADC_ERR_WARN, "fileEntry truncated");
 		    if (sdmfDB == SDMF24_FITTED) {
 			 if (fnd_quality >= 70) goto done;
 		    } else
@@ -235,13 +254,17 @@ done:
      if (fnd_orbit > 0) {
 	  char msg[] = "\n\tSDMF(2.4): %s read from file: %s";
 
-          (void) snprintf(str_msg, MAX_STRING_LENGTH, msg, sdmfID, fileEntry);
+          res = snprintf(str_msg, MAX_STRING_LENGTH, msg, sdmfID, fileEntry);
+	  if (res > MAX_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "str_msg truncated");
           NADC_ERROR(NADC_ERR_NONE, str_msg);
           return TRUE;
      } else {
 	  char msg[] = "\n\tSDMF(2.4): %s - no applicable data for orbit %-d";
 
-          (void) snprintf(str_msg, SHORT_STRING_LENGTH, msg, sdmfID, orbit);
+          res = snprintf(str_msg, SHORT_STRING_LENGTH, msg, sdmfID, orbit);
+	  if (res > SHORT_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "str_msg truncated");
           NADC_ERROR(NADC_ERR_NONE, str_msg);
           return FALSE;
      }

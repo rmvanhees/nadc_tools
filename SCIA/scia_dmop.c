@@ -65,11 +65,13 @@ static inline
 double GET_JulianDay( const char *sciaDate, const char *sciaTime )
 {
      char dateTime[UTC_STRING_LENGTH];
-     int  mjd2000;
+     int  res, mjd2000;
      unsigned int seconds, mu_sec;
 
-     (void) snprintf( dateTime, UTC_STRING_LENGTH, 
-		      "%s %s", sciaDate, sciaTime );
+     res = snprintf( dateTime, UTC_STRING_LENGTH, 
+		     "%s %s", sciaDate, sciaTime );
+     if (res > UTC_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
      ASCII_2_MJD( dateTime, &mjd2000, &seconds, &mu_sec );
 
      return (double) mjd2000 + (seconds + (mu_sec / 1e6)) / (24. * 3600);
@@ -80,7 +82,7 @@ void Adjust_JulianDay( const double jday_anx,
 		       char *sciaDate, const char *sciaTime )
 {
      char dateTime[UTC_STRING_LENGTH];
-     int  mjd2000;
+     int  res, mjd2000;
      unsigned int seconds, mu_sec;
 
      double jday = GET_JulianDay( sciaDate, sciaTime );
@@ -88,8 +90,10 @@ void Adjust_JulianDay( const double jday_anx,
      if ( jday < jday_anx-1 || jday > jday_anx+2 ) {
 	  NADC_ERROR( NADC_ERR_NONE, "wrong Julian Day" );
      } else if ( jday < jday_anx ) {
-	  (void) snprintf( dateTime, UTC_STRING_LENGTH, 
-			   "%s %s", sciaDate, sciaTime );
+	  res = snprintf( dateTime, UTC_STRING_LENGTH, 
+			  "%s %s", sciaDate, sciaTime );
+	  if (res > UTC_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 	  ASCII_2_MJD( dateTime, &mjd2000, &seconds, &mu_sec );
 
 	  MJD_2_ASCII( mjd2000+1, seconds, mu_sec, dateTime );
@@ -98,8 +102,10 @@ void Adjust_JulianDay( const double jday_anx,
 
 	  NADC_ERROR( NADC_ERR_NONE, "adjust Julian Day(+1)");
      } else if ( jday > jday_anx+1 ) {
-	  (void) snprintf( dateTime, UTC_STRING_LENGTH, 
-			   "%s %s", sciaDate, sciaTime );
+	  res = snprintf( dateTime, UTC_STRING_LENGTH, 
+			  "%s %s", sciaDate, sciaTime );
+	  if (res > UTC_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "dateTime truncated");
 	  ASCII_2_MJD( dateTime, &mjd2000, &seconds, &mu_sec );
 
 	  MJD_2_ASCII( mjd2000-1, seconds, mu_sec, dateTime );
@@ -144,7 +150,7 @@ unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
      char           keyword[24], keyval[80];
      unsigned char  stateID;
      unsigned short orbit;
-     int            num;
+     int            num, res;
 
      char tl1[] = "xx";
      char tl2[] = "xxxx";
@@ -190,20 +196,26 @@ unsigned int NADC_RD_DMOP( FILE *fp, /*@out@*/ struct dmop_rec **dmop )
 				       stopDate, stopTime );
 	       }
 	       if ( numRec < maxRec && (num == 9 || num == 7) ) {
-		    (void) snprintf( (*dmop)[numRec].timeLine, 8, 
+		    res = snprintf( (*dmop)[numRec].timeLine, 8, 
 				    "%s %s", tl1, tl2 );
+		    if (res > 8)
+			 NADC_ERROR(NADC_ERR_WARN, "timeLine truncated");
 
 		    Adjust_JulianDay( jday_anx, startDate, startTime );
 		    (*dmop)[numRec].muSecStart = (unsigned int) 
 			 strtoul( startTime+9, (char **)NULL, 10 );
-		    (void) snprintf( (*dmop)[numRec].dateTimeStart, 21,
-				     "%s %s", startDate, startTime );
+		    res = snprintf( (*dmop)[numRec].dateTimeStart, 21,
+				    "%s %s", startDate, startTime );
+		    if (res > 21)
+			 NADC_ERROR(NADC_ERR_WARN, "dateTimeStart truncated");
 
 		    Adjust_JulianDay( jday_anx, stopDate, stopTime );
 		    (*dmop)[numRec].muSecStop = (unsigned int) 
 			 strtoul( stopTime+9, (char **)NULL, 10 );
-		    (void) snprintf( (*dmop)[numRec].dateTimeStop, 21,
+		    res = snprintf( (*dmop)[numRec].dateTimeStop, 21,
 				     "%s %s", stopDate, stopTime );
+		    if (res > 21)
+			 NADC_ERROR(NADC_ERR_WARN, "dateTimeStop truncated");
 
 		    if ( strncmp( elapse, "********", 8 ) == 0 ) {
 			 double jday = GET_JulianDay( startDate, startTime );
@@ -302,13 +314,16 @@ void SCIA_DEL_SQL_DMOP( PGconn *conn, unsigned int numRec,
      const size_t SQL_STR_SIZE = 128;
 
      char sql_query[SQL_STR_SIZE];
+     size_t numChar;
 
      PGresult *res_del;
 /*
  * remove entries from table "stateinfo"
  */
-     (void) snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_STATEINFO,
-		      dmop[0].dateTimeStart, dmop[numRec-1].dateTimeStop );
+     numChar = snprintf( sql_query, SQL_STR_SIZE, DELETE_FROM_STATEINFO,
+			 dmop[0].dateTimeStart, dmop[numRec-1].dateTimeStop );
+     if (numChar > SQL_STR_SIZE)
+	  NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /*    (void) fprintf( stderr, "%s\n", sql_query ); */
      res_del = PQexec( conn, sql_query );
      if ( PQresultStatus( res_del ) != PGRES_COMMAND_OK )
@@ -337,9 +352,8 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
 
      register unsigned int nr;
 
-     char     sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
-
-     size_t   numChar;
+     char sql_query[SQL_STR_SIZE], cbuff[SQL_STR_SIZE];
+     size_t numChar;
 
      PGresult *res;
 /*
@@ -356,40 +370,56 @@ void SCIA_WR_SQL_DMOP( PGconn *conn, unsigned int numRec,
      for ( nr = 0; nr < numRec; nr++ ) {
 	  (void) strcpy( sql_query, INSERT_TO_STATEINFO );
 /* dateTimeStart */
-	  (void) snprintf( sql_query, SQL_STR_SIZE,
-			   "%s (\'%s\',", strcpy(cbuff,sql_query), 
-			   dmop[nr].dateTimeStart );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE,
+			      "%s (\'%s\',", strcpy(cbuff,sql_query), 
+			      dmop[nr].dateTimeStart );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* muSecStart */
-	  (void) snprintf( sql_query, SQL_STR_SIZE,
-			   "%s%6u,", strcpy(cbuff,sql_query),
-			   dmop[nr].muSecStart );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE,
+			      "%s%6u,", strcpy(cbuff,sql_query),
+			      dmop[nr].muSecStart );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* dateTimeStop */
-	  (void) snprintf( sql_query, SQL_STR_SIZE,
-			   "%s\'%s\',", strcpy(cbuff,sql_query),
-			   dmop[nr].dateTimeStop );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE,
+			      "%s\'%s\',", strcpy(cbuff,sql_query),
+			      dmop[nr].dateTimeStop );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* muSecStop */
-	  (void) snprintf( sql_query, SQL_STR_SIZE,
-			   "%s%6u,", strcpy(cbuff,sql_query), 
-			   dmop[nr].muSecStop );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE,
+			      "%s%6u,", strcpy(cbuff,sql_query), 
+			      dmop[nr].muSecStop );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* timeLine */
-	  (void) snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
-			   strcpy(cbuff,sql_query), dmop[nr].timeLine );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s\'%s\',",
+			      strcpy(cbuff,sql_query), dmop[nr].timeLine );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* stateID */
-	  (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hhu,",
-			   strcpy(cbuff,sql_query), dmop[nr].stateID );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%hhu,",
+			      strcpy(cbuff,sql_query), dmop[nr].stateID );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* absOrbit */
-	  (void) snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
-			   strcpy(cbuff,sql_query), dmop[nr].absOrbit );
+	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%hu,",
+			      strcpy(cbuff,sql_query), dmop[nr].absOrbit );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* orbitPhase */
-          (void) snprintf( sql_query, SQL_STR_SIZE, "%s %.5f,",
-			   strcpy(cbuff,sql_query), dmop[nr].orbitPhase );
+          numChar = snprintf( sql_query, SQL_STR_SIZE, "%s %.5f,",
+			      strcpy(cbuff,sql_query), dmop[nr].orbitPhase );
+	  if (numChar > SQL_STR_SIZE)
+	       NADC_ERROR(NADC_ERR_WARN, "sql_query truncated");
 /* tile */
 	  numChar = snprintf( sql_query, SQL_STR_SIZE, "%s%s)",
 			      strcpy(cbuff,sql_query), TILE_DEFAULT );
 /* 	  (void) fprintf( stderr, "%s [%-zd]\n", sql_query, numChar ); */
-	  if ( numChar >= SQL_STR_SIZE ) {
+	  if ( numChar > SQL_STR_SIZE ) {
 	       res = PQexec( conn, "ROLLBACK" );
-	       NADC_GOTO_ERROR( NADC_ERR_STRLEN,  "sql_query" );
+	       NADC_GOTO_ERROR( NADC_ERR_STRLEN,  "sql_query truncated" );
 	  }
 /*
  * do the actual insert

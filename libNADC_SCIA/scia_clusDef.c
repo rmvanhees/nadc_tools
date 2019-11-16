@@ -87,7 +87,7 @@ static unsigned short absOrbit_prev = 0;
 .IDENTifer   _SCIA_H5_RD_CLUSDEF
 .PURPOSE     obtain cluster configuration
 .INPUT/OUTPUT
-  call as   stat = _SCIA_H5_RD_CLUSDEF( locID, metaIndex );
+  call as   stat = _SCIA_H5_RD_CLUSDEF(locID, metaIndex);
      input:
              hid_t locID               : hdf5 pointer to group
 	     unsigned short metaIndex  : record to read from HDF5 dataset
@@ -97,7 +97,7 @@ static unsigned short absOrbit_prev = 0;
 .COMMENTS    static function
 -------------------------*/
 static
-herr_t _SCIA_H5_RD_CLUSDEF( hid_t locID, unsigned short metaIndex )
+herr_t _SCIA_H5_RD_CLUSDEF(hid_t locID, unsigned short metaIndex)
        /*@globals  clusDef;@*/
        /*@modifies clusDef@*/
 {
@@ -113,45 +113,45 @@ herr_t _SCIA_H5_RD_CLUSDEF( hid_t locID, unsigned short metaIndex )
      const hsize_t start[] = {metaIndex, 0};
      const hsize_t count[] = {1, MAX_CLUSTER};
 
-     if ( (dataID = H5Dopen( locID, tableName, H5P_DEFAULT )) < 0 )
-	  NADC_GOTO_ERROR( NADC_ERR_HDF_RD, tableName );
+     if ((dataID = H5Dopen(locID, tableName, H5P_DEFAULT)) < 0)
+	  NADC_GOTO_ERROR(NADC_ERR_HDF_RD, tableName);
 
     /* Get the data type ID */
-     if ( (typeID = H5Dget_type( dataID )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_DTYPE, tableName );
+     if ((typeID = H5Dget_type(dataID)) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_DTYPE, tableName);
 
      /* Use the equivalent native datatypes */
-     mem_typeID = H5Tget_native_type( typeID, H5T_DIR_ASCEND );
+     mem_typeID = H5Tget_native_type(typeID, H5T_DIR_ASCEND);
 
      /* Get the dataspace handle */
-     if ( (spaceID = H5Dget_space( dataID )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
+     if ((spaceID = H5Dget_space(dataID)) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_SPACE, tableName);
 
      /* Create a memory dataspace handle */
-     if ( (mem_spaceID = H5Screate_simple( rank, count, NULL )) < 0 )
-          NADC_GOTO_ERROR( NADC_ERR_HDF_SPACE, tableName );
+     if ((mem_spaceID = H5Screate_simple(rank, count, NULL)) < 0)
+          NADC_GOTO_ERROR(NADC_ERR_HDF_SPACE, tableName);
 
      /* Select hyperslap */
-     stat = H5Sselect_hyperslab( spaceID, H5S_SELECT_SET, 
-				 start, NULL, count, NULL );
-     if ( stat < 0 ) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, tableName );
+     stat = H5Sselect_hyperslab(spaceID, H5S_SELECT_SET, 
+				 start, NULL, count, NULL);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_DATA, tableName);
 
-     stat = H5Dread( dataID, mem_typeID, mem_spaceID, spaceID,
-		     H5P_DEFAULT, clusDef );
-     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, tableName );
+     stat = H5Dread(dataID, mem_typeID, mem_spaceID, spaceID,
+		     H5P_DEFAULT, clusDef);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_RD, tableName);
 
-     (void) H5Sclose( mem_spaceID );
-     (void) H5Sclose( spaceID );
-     (void) H5Tclose( mem_typeID );
-     (void) H5Tclose( typeID );
-     (void) H5Dclose( dataID );
+     (void) H5Sclose(mem_spaceID);
+     (void) H5Sclose(spaceID);
+     (void) H5Tclose(mem_typeID);
+     (void) H5Tclose(typeID);
+     (void) H5Dclose(dataID);
      return 0;
 done:
-     if ( mem_spaceID >= 0 ) (void) H5Sclose( mem_spaceID );
-     if ( spaceID >= 0 ) (void) H5Sclose( spaceID );
-     if ( mem_typeID >= 0 ) (void) H5Tclose( mem_typeID );
-     if ( typeID >= 0 ) (void) H5Tclose( typeID );
-     if ( dataID >= 0 ) (void) H5Dclose( dataID );
+     if (mem_spaceID >= 0) (void) H5Sclose(mem_spaceID);
+     if (spaceID >= 0) (void) H5Sclose(spaceID);
+     if (mem_typeID >= 0) (void) H5Tclose(mem_typeID);
+     if (typeID >= 0) (void) H5Tclose(typeID);
+     if (dataID >= 0) (void) H5Dclose(dataID);
      return -1;
 }
 
@@ -159,7 +159,7 @@ done:
 .IDENTifer   _SET_SCIA_CLUSDEF
 .PURPOSE     set global variables for given state and orbit number
 .INPUT/OUTPUT
-  call as   stat = _SET_SCIA_CLUSDEF( stateID, absOrbit );
+  call as   stat = _SET_SCIA_CLUSDEF(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -169,11 +169,11 @@ done:
 .COMMENTS    static function
 -------------------------*/
 static
-int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
+int _SET_SCIA_CLUSDEF(unsigned char stateID, unsigned short absOrbit)
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
        /*@modifies metaTable, stateID_prev, absOrbit_prev@*/
 {
-     const size_t mtbl_size = sizeof( struct scia_mtbl_rec );
+     const size_t mtbl_size = sizeof(struct scia_mtbl_rec);
      const size_t mtbl_offs[NFIELDS_MTBL] = {
 	  HOFFSET(struct scia_mtbl_rec, orbit),
 	  HOFFSET(struct scia_mtbl_rec, num_clus),
@@ -182,14 +182,14 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
 	  HOFFSET(struct scia_mtbl_rec, num_det)
      };
      const size_t mtbl_sizes[NFIELDS_MTBL] = {
-	  sizeof( metaTable.orbit ),
-	  sizeof( metaTable.num_clus ),
-	  sizeof( metaTable.indx_Clcon ),
-	  sizeof( metaTable.duration ),
-	  sizeof( metaTable.num_det )
+	  sizeof(metaTable.orbit),
+	  sizeof(metaTable.num_clus),
+	  sizeof(metaTable.indx_Clcon),
+	  sizeof(metaTable.duration),
+	  sizeof(metaTable.num_det)
      };
 
-     int     res = 0;
+     int     res;
 
      char    grpName[9];
 
@@ -205,45 +205,50 @@ int _SET_SCIA_CLUSDEF( unsigned char stateID, unsigned short absOrbit )
      absOrbit_prev = absOrbit;
 
      /* open output HDF5-file */
-     if ( ! CLUSDEF_DB_EXISTS() ) {
-	  (void) snprintf( msg, SHORT_STRING_LENGTH, 
-			   "can not open file: %s", clusDef_file );
-	  NADC_GOTO_ERROR( NADC_ERR_NONE, msg );
+     if (! CLUSDEF_DB_EXISTS()) {
+	  res = snprintf(msg, SHORT_STRING_LENGTH, 
+			 "can not open file: %s", clusDef_file);
+	  if (res > (int) SHORT_STRING_LENGTH)
+	       NADC_ERROR(NADC_ERR_WARN, "msg truncated");
+	  NADC_GOTO_ERROR(NADC_ERR_NONE, msg);
      }
-     fid = H5Fopen( clusDef_file, H5F_ACC_RDONLY, H5P_DEFAULT );
-     if ( fid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_FILE, clusDef_file );
+     fid = H5Fopen(clusDef_file, H5F_ACC_RDONLY, H5P_DEFAULT);
+     if (fid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_FILE, clusDef_file);
 
      /* open group with data of requested state */
-     (void) snprintf( grpName, 9, "State_%02hhu", stateID );
+     res = snprintf(grpName, 9, "State_%02hhu", stateID);
+     if (res > 9)
+	  NADC_ERROR(NADC_ERR_WARN, "grpName truncated");
      H5E_BEGIN_TRY {
-          gid = H5Gopen( fid, grpName, H5P_DEFAULT );
+          gid = H5Gopen(fid, grpName, H5P_DEFAULT);
      } H5E_END_TRY;
-     if ( gid < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_GRP, grpName );
+     if (gid < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_GRP, grpName);
 
      /* read metaTable record */
-     stat = H5TBread_records( gid, "metaTable", absOrbit, 1,
-			      mtbl_size, mtbl_offs, mtbl_sizes, 
-			      &metaTable );
-     if ( stat < 0 ) NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "metaTable" );
+     stat = H5TBread_records(gid, "metaTable", absOrbit, 1,
+			     mtbl_size, mtbl_offs, mtbl_sizes, 
+			     &metaTable);
+     if (stat < 0) NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "metaTable");
 
      /* read Clcon record */
-     if ( metaTable.duration == 0 ) {
+     if (metaTable.duration == 0) {
 	  res = 1;
      } else {
-	  if ( metaTable.indx_Clcon == 255 ) {
+	  if (metaTable.indx_Clcon == 255) {
 	       res = 2;
 	  } else {
-	       if ( _SCIA_H5_RD_CLUSDEF( gid, metaTable.indx_Clcon ) < 0 )
-		    NADC_GOTO_ERROR( NADC_ERR_HDF_RD, "clusDef" );
+	       res = 0;
+	       if (_SCIA_H5_RD_CLUSDEF(gid, metaTable.indx_Clcon) < 0)
+		    NADC_GOTO_ERROR(NADC_ERR_HDF_RD, "clusDef");
 	  }
      }
 
-     (void) H5Gclose( gid );
-     (void) H5Fclose( fid );
+     (void) H5Gclose(gid);
+     (void) H5Fclose(fid);
      return res;
 done:
-     if ( gid > 0 ) (void) H5Gclose( gid );
-     if ( fid > 0 ) (void) H5Fclose( fid );
+     if (gid > 0) (void) H5Gclose(gid);
+     if (fid > 0) (void) H5Fclose(fid);
      return -1;
 }
 
@@ -257,17 +262,23 @@ done:
 .RETURNS     return TRUE if database exists else FALSE
 .COMMENTS    none
 -------------------------*/
-bool CLUSDEF_DB_EXISTS( void )
+bool CLUSDEF_DB_EXISTS(void)
 {
-     if ( *clusDef_file != '\0' ) return TRUE;
+     size_t res;
+     
+     if (*clusDef_file != '\0') return TRUE;
 
-     (void) snprintf( clusDef_file, MAX_STRING_LENGTH, "./%s", 
-		      name_clusDef_db );
-     if ( nadc_file_exists( clusDef_file ) ) return TRUE;
+     res = snprintf(clusDef_file, MAX_STRING_LENGTH, "./%s", 
+		    name_clusDef_db);
+     if (res > MAX_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "clusDef_file truncated");
+     if (nadc_file_exists(clusDef_file)) return TRUE;
 
-     (void) snprintf( clusDef_file, MAX_STRING_LENGTH, "%s/%s", 
-		      DATA_DIR, name_clusDef_db );
-     if ( nadc_file_exists( clusDef_file ) ) return TRUE;
+     res = snprintf(clusDef_file, MAX_STRING_LENGTH, "%s/%s", 
+		    DATA_DIR, name_clusDef_db);
+     if (res > MAX_STRING_LENGTH)
+	  NADC_ERROR(NADC_ERR_WARN, "clusDef_file truncated");
+     if (nadc_file_exists(clusDef_file)) return TRUE;
 
      return FALSE;
 }
@@ -276,7 +287,7 @@ bool CLUSDEF_DB_EXISTS( void )
 .IDENTifer   CLUSDEF_MTBL_VALID
 .PURPOSE     check if entry in nadc_clusDef database is valid
 .INPUT/OUTPUT
-  call as   stat = CUSDEF_MTBL_VALID( stateID, absOrbit );
+  call as   stat = CUSDEF_MTBL_VALID(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -284,33 +295,41 @@ bool CLUSDEF_DB_EXISTS( void )
 .RETURNS     return TRUE if entry is valid else FALSE
 .COMMENTS    none
 -------------------------*/
-bool CLUSDEF_MTBL_VALID( unsigned char stateID, unsigned short absOrbit )
+bool CLUSDEF_MTBL_VALID(unsigned char stateID, unsigned short absOrbit)
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
      static bool res = TRUE;
 
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
+     size_t num;
+     
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
 	  char msg[SHORT_STRING_LENGTH];
 
-	  const int stat = _SET_SCIA_CLUSDEF( stateID, absOrbit );
+	  const int stat = _SET_SCIA_CLUSDEF(stateID, absOrbit);
 
-	  if ( stat == 2 ) {
-	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
-				"no valid Clcon for orbit/state: %05hu/%02hhu", 
-				absOrbit, stateID );
-	       NADC_ERROR( NADC_ERR_NONE, msg );
+	  if (stat == 2) {
+	       num = snprintf(msg, SHORT_STRING_LENGTH, 
+			      "no valid Clcon for orbit/state: %05hu/%02hhu", 
+			      absOrbit, stateID);
+	       if (num > SHORT_STRING_LENGTH)
+		    NADC_ERROR(NADC_ERR_WARN, "msg truncated");
+	       NADC_ERROR(NADC_ERR_NONE, msg);
 	       res = TRUE;
-	  } else if ( stat == 1 ) {
-	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
-				"empty entry for orbit/state: %05hu/%02hhu", 
-				absOrbit, stateID );
-	       NADC_ERROR( NADC_ERR_NONE, msg );
+	  } else if (stat == 1) {
+	       num = snprintf(msg, SHORT_STRING_LENGTH, 
+			      "empty entry for orbit/state: %05hu/%02hhu", 
+			      absOrbit, stateID);
+	       if (num > SHORT_STRING_LENGTH)
+		    NADC_ERROR(NADC_ERR_WARN, "msg truncated");	       
+	       NADC_ERROR(NADC_ERR_NONE, msg);
 	       res = FALSE;
-	  } else if ( stat < 0 ) {
-	       (void) snprintf( msg, SHORT_STRING_LENGTH, 
-				"failed to read from %s: %05hu/%02hhu", 
-				name_clusDef_db, absOrbit, stateID );
-	       NADC_ERROR( NADC_ERR_FATAL, msg );
+	  } else if (stat < 0) {
+	       num = snprintf(msg, SHORT_STRING_LENGTH, 
+			      "failed to read from %s: %05hu/%02hhu", 
+			      name_clusDef_db, absOrbit, stateID);
+	       if (num > SHORT_STRING_LENGTH)
+		    NADC_ERROR(NADC_ERR_WARN, "msg truncated");
+	       NADC_ERROR(NADC_ERR_FATAL, msg);
 	       res = FALSE;
 	  } else {                 /* successful read */
 	       res = TRUE;
@@ -323,7 +342,7 @@ bool CLUSDEF_MTBL_VALID( unsigned char stateID, unsigned short absOrbit )
 .IDENTifer   CLUSDEF_DSR_SIZE
 .PURPOSE     calculate size of DSR state ID and time in state
 .INPUT/OUTPUT
-  call as   dsr_size = CLUSDEF_DSR_SIZE( stateID, absOrbit, bcps_in_scan );
+  call as   dsr_size = CLUSDEF_DSR_SIZE(stateID, absOrbit, bcps_in_scan);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -334,22 +353,22 @@ bool CLUSDEF_MTBL_VALID( unsigned char stateID, unsigned short absOrbit )
 .RETURNS     size of DSR in bytes (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID, 
+unsigned short CLUSDEF_DSR_SIZE(unsigned char stateID, 
 				 unsigned short absOrbit,
-				 unsigned short bcps_in_scan )
+				 unsigned short bcps_in_scan)
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
      register unsigned char nch = 1;
 
      unsigned short sz = 65;
 
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) != 0 ) {
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) != 0) {
 	       metaTable.num_clus = 0;
 	       return 0;
 	  }
      }
-     if ( metaTable.indx_Clcon == 255 ) return 0;
+     if (metaTable.indx_Clcon == 255) return 0;
 
      do {
 	  register unsigned short ncl = 0;
@@ -358,27 +377,27 @@ unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID,
 	  bool add_hdr = TRUE;
 
 	  do {
-	       if ( clusDef[ncl].pet <= 0.03125f && clusDef[ncl].coaddf > 1 ) 
+	       if (clusDef[ncl].pet <= 0.03125f && clusDef[ncl].coaddf > 1) 
 		    intg = clusDef[ncl].coaddf;
 	       else
 		    intg = clusDef[ncl].intg;
 
-	       if ( clusDef[ncl].readouts != 0 
+	       if (clusDef[ncl].readouts != 0 
 		    && clusDef[ncl].chan_id == nch
-		    && (bcps_in_scan % intg) == 0 ) {
-		    if ( add_hdr ) {
+		    && (bcps_in_scan % intg) == 0) {
+		    if (add_hdr) {
 			 sz += 16;
 			 add_hdr = FALSE;
 		    }
-		    if ( clusDef[ncl].coaddf == 1 ) {
+		    if (clusDef[ncl].coaddf == 1) {
 			 sz += 10 + clusDef[ncl].length * 2;
 		    } else {
 			 sz += 10 + clusDef[ncl].length * 3;
-			 if ( (clusDef[ncl].length % 2) == 1 ) sz += 1;
+			 if ((clusDef[ncl].length % 2) == 1) sz += 1;
 		    }
 	       }
-	  } while ( ++ncl < MAX_CLUSTER );
-     } while ( ++nch <= SCIENCE_CHANNELS );
+	  } while (++ncl < MAX_CLUSTER);
+     } while (++nch <= SCIENCE_CHANNELS);
 
      return sz;
 }
@@ -387,7 +406,7 @@ unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID,
 .IDENTifer   CLUSDEF_INTG_MIN
 .PURPOSE     obtain shortest integration time (1/16 sec)
 .INPUT/OUTPUT
-  call as   intg_min = CLUSDEF_INTG_MIN( stateID, absOrbit );
+  call as   intg_min = CLUSDEF_INTG_MIN(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -395,24 +414,24 @@ unsigned short CLUSDEF_DSR_SIZE( unsigned char stateID,
 .RETURNS     shortest integration time (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_INTG_MIN( unsigned char stateID, 
-				 unsigned short absOrbit )
+unsigned short CLUSDEF_INTG_MIN(unsigned char stateID, 
+				 unsigned short absOrbit)
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
      register unsigned short ncl = 0;
 
      unsigned short intg_min = USHRT_MAX;
 
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) != 0 ) {
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) != 0) {
 	       metaTable.num_clus = 0;
 	       return 0;
 	  }
      }
      do {
-	  if ( clusDef[ncl].readouts > 0  && clusDef[ncl].intg < intg_min )
+	  if (clusDef[ncl].readouts > 0  && clusDef[ncl].intg < intg_min)
 	       intg_min = clusDef[ncl].intg;
-     } while ( ++ncl < MAX_CLUSTER );
+     } while (++ncl < MAX_CLUSTER);
 
      return intg_min;
 }
@@ -421,7 +440,7 @@ unsigned short CLUSDEF_INTG_MIN( unsigned char stateID,
 .IDENTifer   CLUSDEF_DURATION
 .PURPOSE     obtain state duration (BCPS)
 .INPUT/OUTPUT
-  call as   bcps = CUSDEF_DURATION( stateID, absOrbit );
+  call as   bcps = CUSDEF_DURATION(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -429,12 +448,12 @@ unsigned short CLUSDEF_INTG_MIN( unsigned char stateID,
 .RETURNS     state duration (BCPS) (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_DURATION( unsigned char stateID, 
-				 unsigned short absOrbit )
+unsigned short CLUSDEF_DURATION(unsigned char stateID, 
+				 unsigned short absOrbit)
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) < 0) return 0;
      }
      return metaTable.duration;
 }
@@ -443,7 +462,7 @@ unsigned short CLUSDEF_DURATION( unsigned char stateID,
 .IDENTifer   CLUSDEF_NUM_DET
 .PURPOSE     obtain number of detector DSR in state
 .INPUT/OUTPUT
-  call as   num_dsr = CLUSDEF_NUM_DET( stateID, absOrbit );
+  call as   num_dsr = CLUSDEF_NUM_DET(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -451,12 +470,12 @@ unsigned short CLUSDEF_DURATION( unsigned char stateID,
 .RETURNS     number of detector DSR in state (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_NUM_DET( unsigned char stateID, 
-				unsigned short absOrbit )
+unsigned short CLUSDEF_NUM_DET(unsigned char stateID, 
+				unsigned short absOrbit)
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) < 0) return 0;
      }
      return metaTable.num_det;
 }
@@ -465,7 +484,7 @@ unsigned short CLUSDEF_NUM_DET( unsigned char stateID,
 .IDENTifer   CLUSDEF_NUM_AUX
 .PURPOSE     obtain number of auxiliary DSR in state
 .INPUT/OUTPUT
-  call as   num_dsr = CLUSDEF_NUM_AUX( stateID, absOrbit );
+  call as   num_dsr = CLUSDEF_NUM_AUX(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -473,16 +492,16 @@ unsigned short CLUSDEF_NUM_DET( unsigned char stateID,
 .RETURNS     number of auxiliary DSR in state (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_NUM_AUX( unsigned char stateID, 
-				unsigned short absOrbit )
+unsigned short CLUSDEF_NUM_AUX(unsigned char stateID, 
+				unsigned short absOrbit)
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
      unsigned short extra = 0;
      
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) < 0) return 0;
      }
-     if ( (metaTable.duration % (16 * 5)) > 0 ) extra = 1;
+     if ((metaTable.duration % (16 * 5)) > 0) extra = 1;
 
      return (metaTable.duration / (16 * 5) + extra);
 }
@@ -491,7 +510,7 @@ unsigned short CLUSDEF_NUM_AUX( unsigned char stateID,
 .IDENTifer   CLUSDEF_NUM_PMD
 .PURPOSE     obtain number of PMD DSR in state
 .INPUT/OUTPUT
-  call as   num_dsr = CLUSDEF_NUM_PMD( stateID, absOrbit );
+  call as   num_dsr = CLUSDEF_NUM_PMD(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -499,16 +518,16 @@ unsigned short CLUSDEF_NUM_AUX( unsigned char stateID,
 .RETURNS     number of PMD DSR in state (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_NUM_PMD( unsigned char stateID, 
-				unsigned short absOrbit )
+unsigned short CLUSDEF_NUM_PMD(unsigned char stateID, 
+				unsigned short absOrbit)
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
      unsigned short extra = 0;
      
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) < 0) return 0;
      }
-     if ( (metaTable.duration % (16 * 5)) > 0 ) extra = 1;
+     if ((metaTable.duration % (16 * 5)) > 0) extra = 1;
 
      return (metaTable.duration / (16 * 5) + extra);
 }
@@ -517,7 +536,7 @@ unsigned short CLUSDEF_NUM_PMD( unsigned char stateID,
 .IDENTifer   CLUSDEF_NUM_DET
 .PURPOSE     obtain number of DSR in state
 .INPUT/OUTPUT
-  call as   num_dsr = CLUSDEF_NUM_DET( stateID, absOrbit );
+  call as   num_dsr = CLUSDEF_NUM_DET(stateID, absOrbit);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -525,14 +544,14 @@ unsigned short CLUSDEF_NUM_PMD( unsigned char stateID,
 .RETURNS     number of DSR in state (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_NUM_DSR( unsigned char stateID, 
-				unsigned short absOrbit )
+unsigned short CLUSDEF_NUM_DSR(unsigned char stateID, 
+				unsigned short absOrbit)
        /*@globals  metaTable, stateID_prev, absOrbit_prev;@*/
 {
      unsigned num_other;
 
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) < 0 ) return 0;
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) < 0) return 0;
      }
      num_other = metaTable.duration / (16 * 5)
 	  + ((metaTable.duration % (16 * 5)) == 0 ? 0 : 1);
@@ -544,7 +563,7 @@ unsigned short CLUSDEF_NUM_DSR( unsigned char stateID,
 .IDENTifer   CLUSDEF_CLCON
 .PURPOSE     obtain cluster configuration: chan_id, clus_id, start and length
 .INPUT/OUTPUT
-  call as   num_clus = CLUSDEF_CLCON( stateID, absOrbit, clusdef );
+  call as   num_clus = CLUSDEF_CLCON(stateID, absOrbit, clusdef);
      input:
              unsigned char stateID       :  State ID
 	     unsigned short absOrbit     :  orbit number
@@ -554,28 +573,28 @@ unsigned short CLUSDEF_NUM_DSR( unsigned char stateID,
 .RETURNS     number of clusters (unsigned short)
 .COMMENTS    none
 -------------------------*/
-unsigned short CLUSDEF_CLCON( unsigned char stateID, 
+unsigned short CLUSDEF_CLCON(unsigned char stateID, 
 			      unsigned short absOrbit,
-			      struct clusdef_rec *clusdef )
+			      struct clusdef_rec *clusdef)
        /*@globals  metaTable, clusDef, stateID_prev, absOrbit_prev;@*/
 {
      register unsigned short ncl, offs = 0;
      register unsigned char chan_id = 0;
      register unsigned char clus_id = 0;
 
-     if ( stateID != stateID_prev || absOrbit != absOrbit_prev ) {
-	  if ( _SET_SCIA_CLUSDEF( stateID, absOrbit ) != 0 ) {
+     if (stateID != stateID_prev || absOrbit != absOrbit_prev) {
+	  if (_SET_SCIA_CLUSDEF(stateID, absOrbit) != 0) {
 	       metaTable.num_clus = 0;
 	       return 0;
 	  }
      }
-     (void) memset( clusdef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec) );
+     (void) memset(clusdef, 0, MAX_CLUSTER * sizeof(struct clusdef_rec));
 
-     for ( ncl = 0; ncl < metaTable.num_clus; ncl++ ) {
-	  if ( chan_id < clusDef[ncl].chan_id ) {
+     for (ncl = 0; ncl < metaTable.num_clus; ncl++) {
+	  if (chan_id < clusDef[ncl].chan_id) {
 	       chan_id = clusDef[ncl].chan_id;
 	       clus_id = 0;
-	       if ( chan_id == 2 )
+	       if (chan_id == 2)
 		    offs = chan_id * CHANNEL_SIZE;
 	       else
 		    offs = (chan_id - 1) * CHANNEL_SIZE;
@@ -584,7 +603,7 @@ unsigned short CLUSDEF_CLCON( unsigned char stateID,
 	  }
 	  clusdef[ncl].chanID = clusDef[ncl].chan_id;
 	  clusdef[ncl].clusID = clus_id;
-	  if ( chan_id == 2 )
+	  if (chan_id == 2)
 	       clusdef[ncl].start  =
 		    offs - (clusDef[ncl].start + clusDef[ncl].length);
 	  else

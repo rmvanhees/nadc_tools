@@ -526,28 +526,26 @@ void Set_Time_Window(int argc, char *argv[], int *narg,
 static inline
 void Do_Not_Extract_MDS(int instrument)
 {
-     int res;
-     
      switch (instrument) {
      case SCIA_LEVEL_0:
-	  res = nadc_set_param_uint8("write_aux", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_det", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_pmd", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_aux", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_det", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_pmd", PARAM_UNSET);
 	  break;
      case SCIA_LEVEL_1:
-	  res = nadc_set_param_uint8("write_limb", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_moni", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_nadir", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_occ", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_pmd", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_polV", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_limb", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_moni", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_nadir", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_occ", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_pmd", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_polV", PARAM_UNSET);
 	  break;
      case SCIA_LEVEL_2:
-	  res = nadc_set_param_uint8("write_bias", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_doas", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_limb", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_nadir", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_occ", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_bias", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_doas", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_limb", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_nadir", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_occ", PARAM_UNSET);
 	  break;
     }
 }
@@ -569,9 +567,9 @@ void Do_Not_Extract_MDS(int instrument)
 void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 {
      char   *cpntr;
-     char   *name_infile;
+     char   *name_infile = NULL;
      char   prog_master[SHORT_STRING_LENGTH];
-     int    narg, num, res;
+     int    narg, num;
      float  rbuff[4];
 
      bool select_mds = FALSE;
@@ -585,7 +583,7 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 /*
  * set name of calling program
  */
-     res = nadc_set_param_string("program", argv[0]);
+     (void) nadc_set_param_string("program", argv[0]);
 /*
  * strip path to program
  */
@@ -608,12 +606,12 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 			 end_date[DATE_STRING_LENGTH];
 		    
 		    if (nadc_get_param_uint8("flag_period") == PARAM_UNSET) {
-			 res = nadc_set_param_uint8("flag_period", PARAM_SET);
+			 (void) nadc_set_param_uint8("flag_period", PARAM_SET);
 			 Set_Time_Window(argc, argv, &narg, bgn_date, end_date);
 			 if (IS_ERR_STAT_FATAL)
 			      NADC_RETURN_ERROR(NADC_ERR_PARAM, "period");
-			 res = nadc_set_param_string("bgn_date", bgn_date);
-			 res = nadc_set_param_string("end_date", end_date);
+			 (void) nadc_set_param_string("bgn_date", bgn_date);
+			 (void) nadc_set_param_string("end_date", end_date);
 		    }
 	       } else if (strncmp(argv[narg]+2, "region", 6) == 0) {
 		    /* perform selection on geo-location */
@@ -629,62 +627,62 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 				   min_t(float, rbuff[2], rbuff[3]),
 				   max_t(float, rbuff[2], rbuff[3])};
 
-			      res = nadc_set_param_range("latitude", lat_range);
-			      res = nadc_set_param_range("longitude", lon_range);
+			      (void) nadc_set_param_range("latitude", lat_range);
+			      (void) nadc_set_param_range("longitude", lon_range);
 			      if (rbuff[2] < rbuff[3])
-				   res = nadc_set_param_uint8(
+				   (void) nadc_set_param_uint8(
 					"flag_geomnmx", PARAM_SET);
 			      else
-				   res = nadc_set_param_uint8(
+				   (void) nadc_set_param_uint8(
 					"flag_geomnmx", PARAM_UNSET);
 			 } else
 			      NADC_RETURN_ERROR(NADC_ERR_PARAM, argv[narg]);
 
-			 res = nadc_set_param_uint8("flag_geoloc", PARAM_SET);
+			 (void) nadc_set_param_uint8("flag_geoloc", PARAM_SET);
 		    }
 	       } else if (strncmp(argv[narg]+2, "cat", 3) == 0) {
 		    /* perform selection on measurement category */
 		    unsigned char cat_list[MAX_NUM_CLUS];
 		    
 		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_cat(cat_list, 0);
+			 (void) nadc_set_param_cat(cat_list, 0);
 		    } else {
 			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
 					    MAX_NUM_CLUS, cat_list, &num);
-			 res = nadc_set_param_cat(cat_list, num);
+			 (void) nadc_set_param_cat(cat_list, num);
 		    }
 	       } else if (strncmp(argv[narg]+2, "state", 5) == 0) {
 		    /* perform selection on measurement state ID(s) */
 		    unsigned char state_list[MAX_NUM_STATE];
 
 		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_state(state_list, 0);
+			 (void) nadc_set_param_state(state_list, 0);
 		    } else {
 			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
 					    MAX_NUM_STATE, state_list, &num);
-			 res = nadc_set_param_state(state_list, num);
+			 (void) nadc_set_param_state(state_list, num);
 		    }
 	       } else if (strncmp(argv[narg]+2, "chan", 4) == 0) {
 		    /* perform selection on science channel(s) */
 		    unsigned char chan_list[8];
 		    
 		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_chan(chan_list, 0);
+			 (void) nadc_set_param_chan(chan_list, 0);
 		    } else {
 			 (void) NADC_USRINP(UINT8_T, cpntr+1,
 					    8, chan_list, &num);
-			 res = nadc_set_param_chan(chan_list, num);
+			 (void) nadc_set_param_chan(chan_list, num);
 		    }
 	       } else if (strncmp(argv[narg]+2, "clus", 4) == 0) {
 		    /* perform selection on cluster ID(s) */
 		    unsigned char clus_list[MAX_NUM_CLUS];
 		    
 		    if ((cpntr = strchr(argv[narg], '=')) == NULL) {
-			 res = nadc_set_param_clus(clus_list, 0);
+			 (void) nadc_set_param_clus(clus_list, 0);
 		    } else {
 			 (void) NADC_USRINP(UINT8_T, cpntr+1, 
 					    MAX_NUM_CLUS, clus_list, &num);
-			 res = nadc_set_param_clus(clus_list, num);
+			 (void) nadc_set_param_clus(clus_list, num);
 		    }
 	       } else if (strncmp(argv[narg]+2, "cal", 3) == 0) {
 		    /* perform calibration on measurement data (L1b only) */
@@ -730,58 +728,58 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 	       }
 	       if (argv[narg][1] == 'V' 
 		   || strncmp(argv[narg]+1, "version", 7) == 0) {
-		    res = nadc_set_param_uint8("flag_version", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_version", PARAM_SET);
 		    return;                             /* nothing else todo */
 	       }
 	       if (strncmp(argv[narg]+1, "show", 4) == 0) {
-		    res = nadc_set_param_uint8("flag_show", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_show", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "silent", 6) == 0) {
-		    res = nadc_set_param_uint8("flag_silent", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_silent", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "verbose", 7) == 0) {
-		    res = nadc_set_param_uint8("flag_verbose", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_verbose", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "check", 5) == 0) {
-		    res = nadc_set_param_uint8("flag_check", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_check", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "meta", 4) == 0) {
-		    res = nadc_set_param_uint8("write_meta", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_meta", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "pds_1b", 6) == 0) {
-		    res = nadc_set_param_uint8("write_pds", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_pds", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "pds_1c", 6) == 0) {
-		    res = nadc_set_param_uint8("write_pds", PARAM_SET);
-		    res = nadc_set_param_uint8("write_lv1c", PARAM_SET);
-		    res = nadc_set_param_uint8("write_ads", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_pds", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_lv1c", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_ads", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "ascii", 5) == 0) {
-		    res = nadc_set_param_uint8("write_ascii", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_ascii", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "hdf5", 4) == 0) {
-		    res = nadc_set_param_uint8("write_hdf5", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_hdf5", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "compress", 8) == 0) {
-		    res = nadc_set_param_uint8("flag_deflate", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_deflate", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "sql", 3) == 0) {
 #if defined(_WITH_SQL)
-		    res = nadc_set_param_uint8("write_sql", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_sql", PARAM_SET);
 #else
 		    NADC_RETURN_ERROR(NADC_ERR_FATAL, 
 				      "no PostgreSQL support, recompile");
 #endif
 	       } else if (strncmp(argv[narg]+1, "remove", 6) == 0) {
-		    res = nadc_set_param_uint8("flag_sql_remove", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_sql_remove", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "replace", 7) == 0) {
-		    res = nadc_set_param_uint8("flag_sql_replace", PARAM_SET);
+		    (void) nadc_set_param_uint8("flag_sql_replace", PARAM_SET);
 
 		    /* selection on all kind of data sets */
 	       } else if (strncmp(argv[narg]+1, "no_gads", 7) == 0) {
-		    res = nadc_set_param_uint8("write_gads", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_gads", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_ads", 6) == 0) {
-		    res = nadc_set_param_uint8("write_ads", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_ads", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_aux0", 7) == 0) {
-		    res = nadc_set_param_uint8("write_aux0", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_aux0", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_pmd0", 7) == 0) {
-		    res = nadc_set_param_uint8("write_pmd0", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_pmd0", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_aux", 6) == 0) {
-		    res = nadc_set_param_uint8("write_aux", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_aux", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_det", 6) == 0) {
-		    res = nadc_set_param_uint8("write_det", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_det", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_pmd", 6) == 0) {
-		    res = nadc_set_param_uint8("write_pmd", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_pmd", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_mds", 6) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
@@ -792,71 +790,71 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_aux", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_aux", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "det", 3) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_det", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_det", PARAM_SET);
 	       } else if (instrument == SCIA_LEVEL_0
 			  && strncmp(argv[narg]+1, "pmd", 3) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_pmd", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_pmd", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "nadir", 5) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_nadir", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_nadir", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "limb", 4) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_limb", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_limb", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "occ", 3) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_occ", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_occ", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "moni", 4) == 0) {
 		    if (! select_mds) {
 			 select_mds = TRUE;
 			 Do_Not_Extract_MDS(instrument);
 		    }
-		    res = nadc_set_param_uint8("write_moni", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_moni", PARAM_SET);
 	       } else if (strncmp(argv[narg]+1, "no_nadir", 8) == 0) {
 		    if (! select_mds) select_mds = TRUE;
-		    res = nadc_set_param_uint8("write_nadir", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_nadir", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_limb", 7) == 0) {
 		    if (! select_mds) select_mds = TRUE;
-		    res = nadc_set_param_uint8("write_limb", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_limb", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_occ", 6) == 0) {
 		    if (! select_mds) select_mds = TRUE;
-		    res = nadc_set_param_uint8("write_occ", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_occ", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_pmd", 6) == 0) {
-		    res = nadc_set_param_uint8("write_pmd", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_pmd", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_polV", 7) == 0) {
-		    res = nadc_set_param_uint8("write_polV", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_polV", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_cld", 6) == 0) {
-		    res = nadc_set_param_uint8("write_cld", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_cld", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_bias", 7) == 0) {
-		    res = nadc_set_param_uint8("write_bias", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_bias", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_doas", 7) == 0) {
-		    res = nadc_set_param_uint8("write_doas", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_doas", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_moon", 7) == 0) {
-		    res = nadc_set_param_uint8("write_moon", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_moon", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_sun", 6) == 0) {
-		    res = nadc_set_param_uint8("write_sun", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_sun", PARAM_UNSET);
 	       } else if (strncmp(argv[narg]+1, "no_patch", 8) == 0) {
-		    res = nadc_set_param_uint8("patch_scia", SCIA_PATCH_NONE);
+		    (void) nadc_set_param_uint8("patch_scia", SCIA_PATCH_NONE);
 	       } else if (strncmp(argv[narg]+1, "no_qcheck", 9) == 0) {
-		    res = nadc_set_param_uint8("qcheck", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("qcheck", PARAM_UNSET);
 	       }
 	  } else {
 	       /* name of input file */
@@ -865,44 +863,44 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 	  }
      }
      if (nadc_get_param_uint8("flag_check") == PARAM_SET) {
-	  res = nadc_set_param_uint8("write_pds", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_sql", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_ascii", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_pds", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_sql", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_ascii", PARAM_UNSET);
      } else if (nadc_get_param_uint8("write_sql") == PARAM_SET) {
-	  res = nadc_set_param_uint8("write_pds", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_ascii", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_pds", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_ascii", PARAM_UNSET);
 	  if (instrument == SCIA_LEVEL_1) {
-	       res = nadc_set_param_uint8("write_ads", PARAM_UNSET);
-	       res = nadc_set_param_uint8("write_gads", PARAM_UNSET);
-	       res = nadc_set_param_uint8("write_limb", PARAM_UNSET);
-	       res = nadc_set_param_uint8("write_moni", PARAM_UNSET);
-	       res = nadc_set_param_uint8("write_nadir", PARAM_SET);
-	       res = nadc_set_param_uint8("write_occ", PARAM_UNSET);
-	       res = nadc_set_param_uint8("write_lv1c", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_ads", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_gads", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_limb", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_moni", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_nadir", PARAM_SET);
+	       (void) nadc_set_param_uint8("write_occ", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_lv1c", PARAM_UNSET);
 	  }
 	  if (instrument == SCIA_LEVEL_2) {
-	       res = nadc_set_param_uint8("write_ads", PARAM_UNSET);
-	       res = nadc_set_param_uint8("write_gads", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_ads", PARAM_UNSET);
+	       (void) nadc_set_param_uint8("write_gads", PARAM_UNSET);
 	  }
      } else if (nadc_get_param_uint8("write_meta") == PARAM_SET) {
-	  res = nadc_set_param_uint8("write_pds", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_ascii", PARAM_SET);
+	  (void) nadc_set_param_uint8("write_pds", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_hdf5", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_ascii", PARAM_SET);
 	  Do_Not_Extract_MDS(instrument);
-	  res = nadc_set_param_uint8("write_ads", PARAM_UNSET);
-	  res = nadc_set_param_uint8("write_gads", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_ads", PARAM_UNSET);
+	  (void) nadc_set_param_uint8("write_gads", PARAM_UNSET);
      } else {
 	  if (nadc_get_param_uint8("write_pds") == PARAM_UNSET 
 	      && nadc_get_param_uint8("write_hdf5") == PARAM_UNSET 
 	      && nadc_get_param_uint8("write_ascii") == PARAM_UNSET) {
 	       if (instrument == SCIA_LEVEL_1) {
-		    res = nadc_set_param_uint8("write_pds", PARAM_SET);
-		    res = nadc_set_param_uint8("write_lv1c", PARAM_SET);
-		    res = nadc_set_param_uint8("write_ads", PARAM_UNSET);
+		    (void) nadc_set_param_uint8("write_pds", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_lv1c", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_ads", PARAM_UNSET);
 	       } else
-		    res = nadc_set_param_uint8("write_hdf5", PARAM_SET);
+		    (void) nadc_set_param_uint8("write_hdf5", PARAM_SET);
 	  }
      }
 
@@ -942,10 +940,10 @@ void SCIA_SET_PARAM(int argc, char *argv[], int instrument)
 		    nadc_get_param_uint8("write_meta"));
 #endif
      if (nadc_get_param_uint8("write_pds") == PARAM_SET)
-	  res = nadc_set_param_add_ext("outfile", ".child");
+	  (void) nadc_set_param_add_ext("outfile", ".child");
 
      if (nadc_get_param_uint8("write_hdf5") == PARAM_SET)
-	  res = nadc_set_param_add_ext("outfile", ".h5");
+	  (void) nadc_set_param_add_ext("outfile", ".h5");
 }
 
 /*+++++++++++++++++++++++++
